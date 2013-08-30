@@ -3,10 +3,10 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.semagrow.stack</groupId>
-    <artifactId>semagrow-stack</artifactId>
+    <artifactId>semagrow-stack-modules</artifactId>
     <version>1.0.0-rc1</version>
     <packaging>pom</packaging>
-    <name>semagrow-stack</name>
+    <name>semagrow-stack-modules</name>
 
     <!-- REPOSITORIES -->
     <repositories>
