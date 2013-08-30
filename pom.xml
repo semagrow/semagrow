@@ -91,6 +91,12 @@
             <url>file:///home/turnguard/public_html/maven/semagrow-stack/${project.version}</url>
         </site>        
     </distributionManagement>
+    
+<scm>
+    <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>    
+    <url>https://github.com/semagrow/semagrow-stack-modules</url>
+</scm>
+    
     <build>
         <plugins>
             <plugin>
