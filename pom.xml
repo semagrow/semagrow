@@ -20,9 +20,9 @@
             <url>http://download.java.net/maven/2</url>
         </repository>        
         <repository>
-            <id>punkt</id>
-            <name>Punkt Repository</name>
-            <url>https://mvn.semantic-web.at</url>
+            <id>swc-semagrow</id>
+            <name>SWC SemaGrow Repository</name>
+            <url>https://semagrow.semantic-web.at/mvn</url>
             <snapshots>
                 <updatePolicy>always</updatePolicy>
                 <enabled>true</enabled>
@@ -31,10 +31,6 @@
         <repository>
             <id>maven.tinyjee.org</id>
             <url>http://maven.tinyjee.org</url>
-        </repository>
-        <repository>
-            <id>Aduna Maven</id>
-            <url>http://repo.aduna-software.org/maven2/releases/</url>
         </repository>
     </repositories>
     
@@ -83,6 +79,28 @@
             <version>3.8.1</version>
             <scope>test</scope>
         </dependency>
+        
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>openrdf-sesame</artifactId>
+            <version>2.6.9</version>
+            <classifier>onejar</classifier>        
+        </dependency>        
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>1.7.5</version>            
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.5</version>            
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.14</version>            
+        </dependency>        
     </dependencies>
     
     <distributionManagement>        
@@ -92,10 +110,10 @@
         </site>        
     </distributionManagement>
     
-<scm>
-    <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>    
-    <url>https://github.com/semagrow/semagrow-stack-modules</url>
-</scm>
+    <scm>
+        <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>    
+        <url>https://github.com/semagrow/semagrow-stack-modules</url>
+    </scm>
     
     <build>
         <plugins>
