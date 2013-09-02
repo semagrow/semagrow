@@ -7,6 +7,7 @@
     <version>1.0.0-rc1</version>
     <packaging>pom</packaging>
     <name>semagrow-stack-modules</name>
+    <url>http://semagrow.eu</url>
 
     <properties>           
         <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>
@@ -120,114 +121,83 @@
         
     <profiles>
         <profile>
+            <build>
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-site-plugin</artifactId>
+                            <version>3.3</version>
+                        </plugin>                                
+                    </plugins>
+                </pluginManagement>
+            </build>
             <id>documentation</id>
-            <reporting>       
+            <reporting>                       
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-site-plugin</artifactId>
-                        <version>3.0-beta-3</version>
+                        <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
-                            <reportPlugins>
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-project-info-reports-plugin</artifactId>
-                                    <version>2.2</version>
-                                    <reports>
-                                        <report>index</report>
-                                        <report>project-team</report>
-                                        <report>license</report>
-                                        <report>mailing-list</report>
-                                        <report>dependencies</report>
-                                        <report>dependency-convergence</report>
-                                        <report>plugin-management</report>
-                                        <report>cim</report>
-                                        <report>issue-tracking</report>
-                                        <report>scm</report>
-                                        <report>summary</report>
-                                    </reports>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-surefire-report-plugin</artifactId>
-                                    <version>2.6</version>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-javadoc-plugin</artifactId>
-                                    <version>2.7</version>
-                                </plugin>     
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-checkstyle-plugin</artifactId>
-                                    <version>2.9.1</version>
-                                    <configuration>
-                                        <configLocation>poolparty_checkstyle.xml</configLocation>
-                                    </configuration>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.codehaus.mojo</groupId>
-                                    <artifactId>jdepend-maven-plugin</artifactId>
-                                    <version>2.0-beta-2</version>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.codehaus.mojo</groupId>
-                                    <artifactId>cobertura-maven-plugin</artifactId>
-                                    <version>2.4</version>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.codehaus.mojo</groupId>
-                                    <artifactId>taglist-maven-plugin</artifactId>
-                                    <version>2.4</version>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-jxr-plugin</artifactId>
-                                    <version>2.1</version>
-                                </plugin>
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-pmd-plugin</artifactId>
-                                    <version>2.5</version>
-                                    <configuration>
-                                        <linkXref>true</linkXref>
-                                        <minimumTokens>100</minimumTokens>
-                                        <minimumPriority>3</minimumPriority>          
-                                        <targetJdk>1.6</targetJdk>
-                                    </configuration>
-                                </plugin>
-                                
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-javadoc-plugin</artifactId>
-                                    <version>2.8</version>
-                                </plugin>
-
-                                <!-- JXR -->
-
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-jxr-plugin</artifactId>
-                                    <version>2.1</version>
-                                </plugin>
-
-                                <!-- SUREFIRE -->
-                                <plugin>
-                                    <groupId>org.apache.maven.plugins</groupId>
-                                    <artifactId>maven-surefire-report-plugin</artifactId>
-                                    <version>2.0</version>
-                                    <configuration>
-                                    </configuration>
-                                </plugin>                                
-                            </reportPlugins>
+                            <links>
+                                <link>http://commons.apache.org/lang/api</link>
+                                <link>http://java.sun.com/j2se/1.5.0/docs/api</link>
+                                <link>http://this-one-will-not-work</link>
+                            </links>
                         </configuration>
-                    </plugin>           
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jxr-plugin</artifactId>
+                        <version>2.1</version>
+                    </plugin>
+
+                    <!-- SUREFIRE -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-report-plugin</artifactId>
+                        <version>2.0</version>
+                        <configuration>
+                        </configuration>
+                    </plugin>                     
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>2.4</version>
+                        <reportSets>
+                            <reportSet>
+                                <reports>
+                                    <report>index</report>
+                                    <report>summary</report>
+                                    <report>project-team</report>
+                                    <report>mailing-list</report>
+                                    <report>license</report>
+                                    <report>scm</report>
+                                    <report>issue-tracking</report>
+                                    <report>dependencies</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
+                    </plugin>                                                                              
                 </plugins>
             </reporting>
         </profile>
     </profiles>    
     
-             
+    <build>                        
+        <plugins>                                 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <source>1.5</source>
+                    <target>1.5</target>                   
+                </configuration>
+            </plugin>                      
+        </plugins>        
+    </build>
+                 
     <modules>
         <module>semagrow-stack-modules-vocabulary</module>
         <module>semagrow-stack-modules-commons</module>
