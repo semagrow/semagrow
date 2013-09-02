@@ -1,5 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>eu.semagrow.stack</groupId>
@@ -8,70 +8,85 @@
     <packaging>pom</packaging>
     <name>semagrow-stack-modules</name>
 
+    <properties>           
+        <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>
+        <distribution.mvn>/var/www/mvn</distribution.mvn>
+    </properties>
+        
+    <organization>
+        <name>SemaGrow - FP7</name>
+        <url>http://www.semagrow.eu</url>
+    </organization>
+    
+    <licenses>
+        <license>            
+            <name>Apache 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+        </license>
+    </licenses>
+    
+    <developers>
+        <developer>
+            <id>turnguard</id>
+            <name>Jürgen Jakobitsch</name>
+            <url>http://www.turnguard.com/turnguard</url>
+        </developer>
+        <developer>
+            <id>cmader</id>
+            <name>Christian Mader</name>
+            <url>http://company.semantic-web.at/person/christian_mader</url>
+        </developer>        
+    </developers>
+    
+    <mailingLists>
+        <mailingList>            
+            <name>public-semagrow</name>
+            <subscribe>subscribe@semagrow_list@googlegroups.com</subscribe>
+            <unsubscribe>unsubscribe@semagrow_list@googlegroups.com</unsubscribe>
+            <post>semagrow_list@googlegroups.com</post>
+        </mailingList>
+    </mailingLists>
+      
     <!-- REPOSITORIES -->
     <repositories>
         <repository>
-            <id>maven-central</id>
-            <url>http://repo1.maven.org/maven2</url>
-        </repository>
-        <repository>
-            <id>java.net2</id>
-            <name>Repository hosting the jee6 artifacts</name>
-            <url>http://download.java.net/maven/2</url>
-        </repository>        
-        <repository>
             <id>swc-semagrow</id>
             <name>SWC SemaGrow Repository</name>
-            <url>https://semagrow.semantic-web.at/mvn</url>
+            <url>http://semagrow.semantic-web.at/mvn/</url>          
             <snapshots>
                 <updatePolicy>always</updatePolicy>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>        
+        </repository>         
         <repository>
-            <id>maven.tinyjee.org</id>
-            <url>http://maven.tinyjee.org</url>
-        </repository>
+            <id>maven-central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>        
     </repositories>
     
-    <licenses>
-        <license>
-            <name>SemaGrow Licence</name>
-            <url>http://poolparty.punkt.at/prizing</url>
-            <comments>An OpenSource licence</comments>
-        </license>
-    </licenses>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven.tinyjee.org</id>
+            <url>http://maven.tinyjee.org</url>
+        </pluginRepository>
+    </pluginRepositories>
+              
+    <scm>
+        <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>    
+        <url>https://github.com/semagrow/semagrow-stack-modules</url>
+    </scm>
     
-    <organization>
-        <name>Semantic Web Company</name>
-        <url>http://www.semantic-web.at</url>
-    </organization>
-    
-    <developers>
-        <developer>
-            <id>jj</id>
-            <name>Jürgen</name>
-            <email>jakobitschj@punkt.at</email>
-            <url>http://www.turnguard.com</url>
-            <organization>Semantic Web Company</organization>
-            <organizationUrl>http://www.semantic-web.at</organizationUrl>
-            <roles>                
-                <role>developer</role>                
-            </roles>
-            <timezone>-6</timezone>
-            <properties>
-                <picUrl>http://profile.ak.fbcdn.net/hprofile-ak-snc4/hs346.snc4/41471_590459378_7633_n.jpg</picUrl>
-            </properties>
-        </developer>
-    </developers>
-        
-    <mailingLists>
-        <mailingList>
-            <name>SemaGrow List</name>            
-            <post>semagrow_list@googlegroups.com></post>
-        </mailingList>
-    </mailingLists>
-        
+    <distributionManagement>
+        <site>
+            <id>online-documentation</id>
+            <url>file://${distribution.site}</url>
+        </site>
+        <repository>
+            <id>online-mvn-repository</id>
+            <url>file://${distribution.mvn}</url>
+        </repository>
+    </distributionManagement>
+                
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
@@ -102,18 +117,8 @@
             <version>1.2.14</version>            
         </dependency>        
     </dependencies>
-    
-    <distributionManagement>        
-        <site>
-            <id>mysite</id>
-            <url>file:///home/turnguard/public_html/maven/semagrow-stack/${project.version}</url>
-        </site>        
-    </distributionManagement>
-    
-    <scm>
-        <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>    
-        <url>https://github.com/semagrow/semagrow-stack-modules</url>
-    </scm>
+        
+  
     
     <build>
         <plugins>
@@ -196,4 +201,9 @@
         </plugins>
     </build>  
              
+  <modules>
+    <module>semagrow-stack-modules-vocabulary</module>
+    <module>semagrow-stack-modules-commons</module>
+    <module>semagrow-stack-modules-utils</module>
+  </modules>
 </project>
