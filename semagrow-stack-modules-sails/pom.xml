@@ -7,9 +7,12 @@
     <artifactId>semagrow-stack-modules</artifactId>
     <version>1.0.0-rc1</version>
   </parent>
-  <groupId>eu.semagrow.stack.modules</groupId>
-  <artifactId>semagrow-stack-modules-vocabulary</artifactId>
+  <groupId>eu.semagrow.stack.modules.sails</groupId>
+  <artifactId>semagrow-stack-modules-sails</artifactId>
   <version>1.0.0-rc1</version>
-  <name>semagrow-stack-modules-vocabulary</name>
-    
+  <name>semagrow-stack-modules-sails</name>
+  <packaging>pom</packaging>
+  <modules>
+    <module>semagrow-stack-modules-sails-powder</module>
+  </modules>
 </project>

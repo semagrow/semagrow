@@ -3,11 +3,11 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
   <parent>
-    <groupId>eu.semagrow.stack</groupId>
+    <groupId>eu.semagrow.stack.modules</groupId>
     <artifactId>semagrow-stack-modules</artifactId>
     <version>1.0.0-rc1</version>
   </parent>
-  <groupId>eu.semagrow</groupId>
+  <groupId>eu.semagrow.stack.modules</groupId>
   <artifactId>semagrow-stack-modules-utils</artifactId>
   <version>1.0.0-rc1</version>
   <name>semagrow-stack-modules-utils</name>
