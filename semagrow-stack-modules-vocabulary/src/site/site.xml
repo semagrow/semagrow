@@ -8,7 +8,7 @@
   <body>
     <menu ref="parent"/>
     <menu ref="modules"/>
-    <menu name="semagrow-stack-modules-sails">
+    <menu name="semagrow-stack-modules-vocabulary">
       <item name="Introduction" href="index.html"/>
       <item name="Building" href="building.html"/>
     </menu>

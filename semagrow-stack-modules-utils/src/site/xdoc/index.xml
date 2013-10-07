@@ -2,13 +2,13 @@
 <document>
     <properties>
         <author>Jürgen Jakobitsch</author>
-        <title>semagrow-stack-modules-sails-powder - Introduction</title>
+        <title>semagrow-stack-modules-utils - Introduction</title>
     </properties>
     <meta name="keyword" content="semagrow"/>
     <body>
         <section name="Introduction">
             <p>
-                Welcome 2 the semagrow-stack-modules-sails-powder.
+                Welcome 2 the semagrow-stack-modules-utils.
             </p>
         </section>
     </body>

@@ -6,8 +6,9 @@
     <name>SemaGrow</name>
   </bannerLeft>
   <body>
+    <menu ref="parent"/>
     <menu ref="modules"/>
-    <menu name="SemaGrow-Stack-Modules-Sails-Powder">
+    <menu name="semagrow-stack-modules-sails-powder">
       <item name="Introduction" href="index.html"/>
       <item name="Building" href="building.html"/>
     </menu>
