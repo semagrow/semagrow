@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <author>Jürgen Jakobitsch</author>
+        <title>SemaGrow-Stack-Modules - Creating a module</title>
+    </properties>
+    <meta name="keyword" content="semagrow, build"/>
+    <body>
+        <section name="Building">
+            <p>
+                This page contains information on how to create a module for the semagrow stack.
+            </p>
+            <p>
+                <ol>
+                    <li>Notes</li>
+                    <li>Prerequisits</li>
+                    <li>Creating a single-module SemaGrow Stack Module</li>
+                    <li>Creating a multi-module SemaGrow Stack Module</li>
+                </ol>
+            </p>
+        </section>
+        <section name="Notes">
+            <ul>
+                <li>The following build instructions and customizations are for development only.</li>
+                <li>The maven archetypes described below are only valid as submodules of the semagrow-stack-modules</li>
+            </ul>
+        </section>
+        <section name="Prerequisits">
+            Before creating a SemaGrow Stack Module you should clone
+            <a href="https://github.com/semagrow/semagrow-stack-modules">https://github.com/semagrow/semagrow-stack-modules</a>.
+<source>
+    cd /path/to/semagrow/workspace
+    git clone https://github.com/semagrow/semagrow-stack-modules
+    cd semagrow-stack-modules
+</source>
+        </section>
+        <section name="Creating a single-module SemaGrow Stack Module">
+            A single-module SemaGrow Stack Module is defined as not having maven submodules
+            the parent of which has "pom" as a packaging value.<br/>
+            To create a top-level SemaGrow Stack Module, cd into the directory where you cloned
+            semagrow-stack-modules (= ${semagrow-stack-modules-root}) and issue the following command
+<source>
+    mvn archetype:generate -DarchetypeCatalog=http://semagrow.semantic-web.at/mvn/
+</source>
+            You are presented with two options, choose 1 (semagrow-module) end hit enter.<br/>
+            You are now prompted for an artifactId. Enter a string along the lines
+            semagrow-stack-modules-${module-short-name} describing the module, i.e.
+            semagrow-stack-modules-regexutils.
+            Confirm all settings in the next step.
+            cd into semagrow-stack-modules-${module-short-name}.
+        </section>
+        <section name="Creating a multi-module SemaGrow Stack Module">
+            A multi-module SemaGrow Stack Module is defined as having maven submodules
+            the parent of which has "pom" as a packaging value.<br/>
+            To create a top-level multi-module SemaGrow Stack Module, cd into the directory where you cloned
+            semagrow-stack-modules (= ${semagrow-stack-modules-root}) and issue the following command
+<source>
+    mvn archetype:generate -DarchetypeCatalog=http://semagrow.semantic-web.at/mvn/
+</source>
+            You are presented with two options, choose 2 (semagrow-multimodule-module) end hit enter.<br/>
+            You are now prompted for an artifactId. Enter a string along the lines
+            semagrow-stack-modules-${module-short-name} describing the module, i.e.
+            semagrow-stack-modules-utils.
+            Confirm all settings in the next step.
+            cd into semagrow-stack-modules-${module-short-name}.
+            You now can create single-module SemaGrow Stack Modules (see above) or create another
+            multimodule SemaGrow Stack Module
+        </section>
+    </body>
+</document>

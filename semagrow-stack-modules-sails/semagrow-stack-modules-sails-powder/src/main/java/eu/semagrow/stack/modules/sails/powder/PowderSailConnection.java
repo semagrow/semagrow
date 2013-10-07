@@ -14,6 +14,7 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UpdateExpr;
 import org.openrdf.query.algebra.evaluation.TripleSource;
+import org.openrdf.sail.Sail;
 import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 
@@ -23,80 +24,84 @@ import org.openrdf.sail.SailException;
  */
 public class PowderSailConnection implements SailConnection, TripleSource {
 
+    private final PowderSail powderSail;
+
+    public PowderSailConnection(PowderSail powderSail) {
+        this.powderSail = powderSail;
+    }
+            
     public boolean isOpen() throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return true;
     }
 
-    public void close() throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void close() throws SailException {        
     }
 
     public CloseableIteration<? extends BindingSet, QueryEvaluationException> evaluate(TupleExpr te, Dataset dtst, BindingSet bs, boolean bln) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
-    public void executeUpdate(UpdateExpr ue, Dataset dtst, BindingSet bs, boolean bln) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void executeUpdate(UpdateExpr ue, Dataset dtst, BindingSet bs, boolean bln) throws SailException {        
     }
 
     public CloseableIteration<? extends Resource, SailException> getContextIDs() throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     public CloseableIteration<? extends Statement, SailException> getStatements(Resource rsrc, URI uri, Value value, boolean bln, Resource... rsrcs) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     public long size(Resource... rsrcs) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return 1L;
     }
 
     public void commit() throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public void rollback() throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public void addStatement(Resource rsrc, URI uri, Value value, Resource... rsrcs) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public void removeStatements(Resource rsrc, URI uri, Value value, Resource... rsrcs) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public void clear(Resource... rsrcs) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public CloseableIteration<? extends Namespace, SailException> getNamespaces() throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     public String getNamespace(String string) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     public void setNamespace(String string, String string1) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public void removeNamespace(String string) throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public void clearNamespaces() throws SailException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        
     }
 
     public CloseableIteration<? extends Statement, QueryEvaluationException> getStatements(Resource rsrc, URI uri, Value value, Resource... rsrcs) throws QueryEvaluationException {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return null;
     }
 
     public ValueFactory getValueFactory() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return this.powderSail.getValueFactory();
     }
 
 }

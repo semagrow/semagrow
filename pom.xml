@@ -9,23 +9,23 @@
     <name>semagrow-stack-modules</name>
     <url>http://semagrow.eu</url>
 
-    <properties>           
+    <properties>
         <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>
         <distribution.mvn>/var/www/mvn</distribution.mvn>
     </properties>
-        
+
     <organization>
         <name>SemaGrow - FP7</name>
         <url>http://www.semagrow.eu</url>
     </organization>
-    
+
     <licenses>
-        <license>            
+        <license>
             <name>Apache 2.0</name>
             <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
         </license>
     </licenses>
-    
+
     <developers>
         <developer>
             <id>turnguard</id>
@@ -36,47 +36,47 @@
             <id>cmader</id>
             <name>Christian Mader</name>
             <url>http://company.semantic-web.at/person/christian_mader</url>
-        </developer>        
+        </developer>
     </developers>
-    
+
     <mailingLists>
-        <mailingList>            
+        <mailingList>
             <name>public-semagrow</name>
             <subscribe>subscribe@semagrow_list@googlegroups.com</subscribe>
             <unsubscribe>unsubscribe@semagrow_list@googlegroups.com</unsubscribe>
             <post>semagrow_list@googlegroups.com</post>
         </mailingList>
     </mailingLists>
-      
+
     <!-- REPOSITORIES -->
     <repositories>
         <repository>
             <id>swc-semagrow</id>
             <name>SWC SemaGrow Repository</name>
-            <url>http://semagrow.semantic-web.at/mvn/</url>          
+            <url>http://semagrow.semantic-web.at/mvn/</url>
             <snapshots>
                 <updatePolicy>always</updatePolicy>
                 <enabled>true</enabled>
             </snapshots>
-        </repository>         
+        </repository>
         <repository>
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2</url>
-        </repository>        
+        </repository>
     </repositories>
-    
+
     <pluginRepositories>
         <pluginRepository>
             <id>maven.tinyjee.org</id>
             <url>http://maven.tinyjee.org</url>
         </pluginRepository>
     </pluginRepositories>
-              
+
     <scm>
-        <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>    
+        <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>
         <url>https://github.com/semagrow/semagrow-stack-modules</url>
     </scm>
-    
+
     <distributionManagement>
         <site>
             <id>online-documentation</id>
@@ -87,38 +87,38 @@
             <url>file://${distribution.mvn}</url>
         </repository>
     </distributionManagement>
-                
+
     <dependencies>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>3.8.1</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
-        
+
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>openrdf-sesame</artifactId>
             <version>2.6.9</version>
-            <classifier>onejar</classifier>        
-        </dependency>        
+            <classifier>onejar</classifier>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>            
+            <version>1.7.5</version>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.5</version>            
+            <version>1.7.5</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
-            <version>1.2.14</version>            
-        </dependency>        
+            <version>1.2.14</version>
+        </dependency>
     </dependencies>
-        
+
     <profiles>
         <profile>
             <build>
@@ -128,17 +128,17 @@
                             <groupId>org.apache.maven.plugins</groupId>
                             <artifactId>maven-site-plugin</artifactId>
                             <version>3.3</version>
-                        </plugin>                                
+                        </plugin>
                     </plugins>
                 </pluginManagement>
             </build>
-            <id>documentation</id>
-            <reporting>                       
+            <id>semagrow-stack-modules-documentation</id>
+            <reporting>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>                            
+                        <configuration>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -154,7 +154,7 @@
                         <version>2.0</version>
                         <configuration>
                         </configuration>
-                    </plugin>                     
+                    </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-project-info-reports-plugin</artifactId>
@@ -173,26 +173,26 @@
                                 </reports>
                             </reportSet>
                         </reportSets>
-                    </plugin>                                                                              
+                    </plugin>
                 </plugins>
             </reporting>
         </profile>
-    </profiles>    
-    
-    <build>                        
-        <plugins>                                 
+    </profiles>
+
+    <build>
+        <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.0.2</version>
                 <configuration>
                     <source>1.5</source>
-                    <target>1.5</target>                   
+                    <target>1.5</target>
                 </configuration>
-            </plugin>                      
-        </plugins>        
+            </plugin>
+        </plugins>
     </build>
-                 
+
     <modules>
         <module>semagrow-stack-modules-vocabulary</module>
         <module>semagrow-stack-modules-commons</module>

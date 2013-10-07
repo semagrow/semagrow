@@ -12,4 +12,12 @@
   <version>1.0.0-rc1</version>
   <name>semagrow-stack-modules-sails-powder</name>
 
+
+  <dependencies>
+      <dependency>
+          <groupId>eu.semagrow.stack.modules</groupId>
+          <artifactId>semagrow-stack-modules-vocabulary</artifactId>
+          <version>1.0.0-rc1</version>
+      </dependency>
+  </dependencies>
 </project>
