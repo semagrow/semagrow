@@ -6,6 +6,8 @@ package eu.semagrow.stack.modules.utils;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+
+import org.openrdf.model.Resource;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Var;
 
@@ -26,23 +28,23 @@ public class ResourceSelector {
 	}
 	
 	
-	public ProcessedStatement processStatement() {
+	public ProcessedStatement processStatement() throws URISyntaxException {
 		ProcessedStatement processedStatement = new ProcessedStatement();
 		
 		Var subject = statementPattern.getSubjectVar();
 		Var predicate = statementPattern.getPredicateVar();
 		Var object = statementPattern.getObjectVar();
 		
-		if (subject.hasValue()) {
-			URI uri = extractURI(subject.getValue().toString());
+		if (subject.hasValue() && (subject.getValue() instanceof Resource)) {
+			URI uri = new URI(subject.getValue().toString());
 			processedStatement.setSubject(uri);
 		}
-		if (predicate.hasValue()) {
-			URI uri = extractURI(predicate.getValue().toString());
+		if (predicate.hasValue() && (predicate.getValue() instanceof Resource)) {
+			URI uri = new URI(predicate.getValue().toString());
 			processedStatement.setPredicate(uri);
 		}
-		if (object.hasValue()) {
-			URI uri = extractURI(object.getValue().toString());
+		if (object.hasValue() && (object.getValue() instanceof Resource)) {
+			URI uri = new URI(object.getValue().toString());
 			processedStatement.setObject(uri);
 		}
 		
@@ -159,16 +161,6 @@ public class ResourceSelector {
 		}
 		return found;
 	}
-	
-	
-	private URI extractURI(String value) {
-		try {
-			URI uri = new URI(value);
-			return uri;
-		} catch (URISyntaxException e) {
-			return null;
-		}
-	}
-	
+		
 
 }
