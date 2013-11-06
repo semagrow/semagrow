@@ -14,17 +14,20 @@ public class SesameStoreAnswer {
 	private URI endpoint;
 	private int vol;
 	private int var;
+	private int proximity;
 	
 	/**
 	 * @param endpoint
 	 * @param vol
 	 * @param var
+	 * @param proximity
 	 */
-	public SesameStoreAnswer(URI endpoint, int vol, int var) {
+	public SesameStoreAnswer(URI endpoint, int vol, int var, int proximity) {
 		super();
 		this.endpoint = endpoint;
 		this.vol = vol;
 		this.var = var;
+		this.proximity = proximity;
 	}
 
 	/**
@@ -47,6 +50,15 @@ public class SesameStoreAnswer {
 	public int getVar() {
 		return var;
 	}
+
+	/**
+	 * @return the proximity
+	 */
+	public int getProximity() {
+		return proximity;
+	}
+	
+	
 	
 
 }

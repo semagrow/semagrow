@@ -127,10 +127,9 @@ public class ResourceSelector {
 					} else {
 						var = second_var;
 					}
-					SesameStoreAnswer sesameStoreAnswer = new SesameStoreAnswer(first_endpoint, first_vol, var);
+					SesameStoreAnswer sesameStoreAnswer = new SesameStoreAnswer(first_endpoint, first_vol, var, element_first.getProximity());
 					final_list.add(sesameStoreAnswer);
 				}
-				
 			}
 		}
 		while (keep_only_min(final_list));
@@ -156,7 +155,6 @@ public class ResourceSelector {
 					found = true;
 					return found;
 				}
-				
 			}
 		}
 		return found;

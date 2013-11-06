@@ -37,6 +37,10 @@
             <name>Christian Mader</name>
             <url>http://company.semantic-web.at/person/christian_mader</url>
         </developer>
+        <developer>
+            <id>gmouchakis</id>
+            <name>Giannis Mouchakis</name>
+        </developer>
     </developers>
 
     <mailingLists>
