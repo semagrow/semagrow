@@ -101,7 +101,7 @@ public class ResourceSelector {
 			return findDuplicates(subject_results, predicate_results);
 		} else if ( subject_results.isEmpty() && !object_results.isEmpty() && !predicate_results.isEmpty()) {
 			return findDuplicates(object_results, predicate_results);
-		} else {
+		} else {//none is empty
 			ArrayList<SesameStoreAnswer> temp_list = findDuplicates(subject_results, object_results);
 			ArrayList<SesameStoreAnswer> final_list = findDuplicates(temp_list, predicate_results);
 			return final_list;
@@ -114,28 +114,30 @@ public class ResourceSelector {
 		for (SesameStoreAnswer element_first : first_list) {
 			URI first_endpoint = element_first.getEndpoint();
 			int first_vol = element_first.getVol();
-			int first_var = element_first.getVar();
-			
+			int first_var = element_first.getVar();			
 			for (SesameStoreAnswer element_second : second_list) {
 				URI second_endpoint = element_second.getEndpoint();
 				int second_vol = element_second.getVol();
 				int second_var = element_second.getVar();
-				if (first_endpoint.equals(second_endpoint) && first_vol == second_vol) {
+				if (first_endpoint.equals(second_endpoint)) {
+					int vol;
 					int var;
-					if (first_var<=second_var) {
+					if (first_vol<=second_vol) {
+						vol = first_vol;
 						var = first_var;
 					} else {
+						vol = second_vol;
 						var = second_var;
 					}
-					SesameStoreAnswer sesameStoreAnswer = new SesameStoreAnswer(first_endpoint, first_vol, var, element_first.getProximity());
+					SesameStoreAnswer sesameStoreAnswer = new SesameStoreAnswer(first_endpoint, vol, var, element_first.getProximity());//TODO:check proximity to use
 					final_list.add(sesameStoreAnswer);
 				}
 			}
 		}
-		while (keep_only_min(final_list));
+		//while (keep_only_min(final_list));
 		return final_list;
 	}
-	
+/*	
 	private boolean keep_only_min(ArrayList<SesameStoreAnswer> list) {
 		boolean found = false;
 		for (SesameStoreAnswer element_first : list) {
@@ -159,6 +161,6 @@ public class ResourceSelector {
 		}
 		return found;
 	}
-		
+*/		
 
 }
