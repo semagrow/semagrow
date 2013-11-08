@@ -148,13 +148,21 @@ public class ResourceSelector {
 				if (first_endpoint.equals(second_endpoint)) {
 					int vol;
 					int var;
-					if (first_vol<=second_vol) {
+					if (first_vol == second_vol) {
+						vol = first_vol;
+						if (first_var >= second_var) {
+							var = first_var;
+						} else {
+							var = second_var;
+						}
+					} else if (first_vol < second_vol) {
 						vol = first_vol;
 						var = first_var;
 					} else {
 						vol = second_vol;
 						var = second_var;
 					}
+					
 					SelectedResource selectedResource = new SelectedResource(first_endpoint, vol, var);
 					
 					URI subject;
