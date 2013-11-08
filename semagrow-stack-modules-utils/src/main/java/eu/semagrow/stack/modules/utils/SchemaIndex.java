@@ -3,6 +3,7 @@
  */
 package eu.semagrow.stack.modules.utils;
 
+import java.net.URI;
 import java.util.ArrayList;
 
 /**
@@ -11,26 +12,15 @@ import java.util.ArrayList;
  */
 public class SchemaIndex {
 	
-	private ArrayList<EquivalentURI> equivalent_uris;
-
 	/**
 	 *
 	 */
 	public SchemaIndex() {
 		super();
 	}
-	
-	/**
-	 * @param equivalent_uris the equivalent_uris to set
-	 */
-	public void setEquivalent_uris(ArrayList<EquivalentURI> equivalent_uris) {
-		this.equivalent_uris = equivalent_uris;
-	}
 
-
-
-	public ArrayList<SesameStoreAnswer> getEndpoints() {
-		return new ArrayList<SesameStoreAnswer>();
+	public ArrayList<SelectedResource> getEndpoints(URI uri) {
+		return new ArrayList<SelectedResource>();
 	}
 
 }

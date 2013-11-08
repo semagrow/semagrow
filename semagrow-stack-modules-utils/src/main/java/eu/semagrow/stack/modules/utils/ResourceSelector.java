@@ -27,8 +27,13 @@ public class ResourceSelector {
 		this.statementPattern = statementPattern;
 	}
 	
+	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException {
+		ProcessedStatement processedStatement = processStatement();
+		StatementEquivalents statementEquivalents = getEquivalents(processedStatement);
+		return runResourceDiscovery(statementEquivalents);
+	}
 	
-	public ProcessedStatement processStatement() throws URISyntaxException {
+	private ProcessedStatement processStatement() throws URISyntaxException {
 		ProcessedStatement processedStatement = new ProcessedStatement();
 		
 		Var subject = statementPattern.getSubjectVar();
@@ -48,10 +53,10 @@ public class ResourceSelector {
 			processedStatement.setObject(uri);
 		}
 		
-		return processedStatement;//TODO: the cases of bindings?
+		return processedStatement;
 	}
 	
-	public StatementEquivalents getEquivalents(ProcessedStatement processedStatement) {
+	private StatementEquivalents getEquivalents(ProcessedStatement processedStatement) {
 		StatementEquivalents statementEquivalents = new StatementEquivalents();
 		if (processedStatement.getSubject() != null) {
 			PatternDiscovery patternDiscovery = new PatternDiscovery(processedStatement.getSubject());
@@ -69,26 +74,47 @@ public class ResourceSelector {
 	}
 	
 	
-	public ArrayList<SesameStoreAnswer> getEndpoints(StatementEquivalents statementEquivalents) {
+	private ArrayList<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) {
 		
-		ArrayList<SesameStoreAnswer> subject_results = new ArrayList<SesameStoreAnswer>();
-		ArrayList<SesameStoreAnswer> object_results = new ArrayList<SesameStoreAnswer>();
-		ArrayList<SesameStoreAnswer> predicate_results = new ArrayList<SesameStoreAnswer>();
+		ArrayList<SelectedResource> subject_results = new ArrayList<SelectedResource>();
+		ArrayList<SelectedResource> object_results = new ArrayList<SelectedResource>();
+		ArrayList<SelectedResource> predicate_results = new ArrayList<SelectedResource>();
 		
-		InstanceIndex instanceIndex = new InstanceIndex();
-		SchemaIndex shcemaIndex = new SchemaIndex();
+		for (EquivalentURI equivalentURI : statementEquivalents.getSubject_equivalents()) {
+			InstanceIndex instanceIndex = new InstanceIndex();
+			URI uri = equivalentURI.getEquivalent_URI();
+			ArrayList<SelectedResource> list = instanceIndex.getEndpoints(uri);
+			for (SelectedResource resource : list) {
+				resource.setSubject(uri);
+				resource.setSubjectProximity(equivalentURI.getProximity());
+				subject_results.add(resource);
+			}
+		}
 		
-		instanceIndex.setEquivalent_uris(statementEquivalents.getSubject_equivalents());
-		subject_results.addAll(instanceIndex.getEndpoints());
+		for (EquivalentURI equivalentURI : statementEquivalents.getObject_equivalents()) {
+			InstanceIndex instanceIndex = new InstanceIndex();
+			URI uri = equivalentURI.getEquivalent_URI();
+			ArrayList<SelectedResource> list = instanceIndex.getEndpoints(uri);
+			for (SelectedResource resource : list) {
+				resource.setObject(uri);
+				resource.setObjectProximity(equivalentURI.getProximity());
+				object_results.add(resource);
+			}
+		}
 		
-		instanceIndex.setEquivalent_uris(statementEquivalents.getObject_equivalents());
-		object_results.addAll(instanceIndex.getEndpoints());
-		
-		shcemaIndex.setEquivalent_uris(statementEquivalents.getPredicate_equivalents());
-		predicate_results.addAll(shcemaIndex.getEndpoints());
+		for (EquivalentURI equivalentURI : statementEquivalents.getPredicate_equivalents()) {
+			SchemaIndex schemaIndex = new SchemaIndex();
+			URI uri = equivalentURI.getEquivalent_URI();
+			ArrayList<SelectedResource> list = schemaIndex.getEndpoints(uri);
+			for (SelectedResource resource : list) {
+				resource.setPredicate(uri);
+				resource.setPredicateProximity(equivalentURI.getProximity());
+				predicate_results.add(resource);
+			}
+		}
 				
 		if (subject_results.isEmpty() && object_results.isEmpty() && predicate_results.isEmpty()) {
-			return new ArrayList<SesameStoreAnswer>();//nothing to do, return empty list
+			return new ArrayList<SelectedResource>();//nothing to do, return empty list
 		} else if ( !subject_results.isEmpty() && object_results.isEmpty() && predicate_results.isEmpty()) {
 			return subject_results;
 		} else if ( subject_results.isEmpty() && !object_results.isEmpty() && predicate_results.isEmpty()) {
@@ -102,20 +128,20 @@ public class ResourceSelector {
 		} else if ( subject_results.isEmpty() && !object_results.isEmpty() && !predicate_results.isEmpty()) {
 			return findDuplicates(object_results, predicate_results);
 		} else {//none is empty
-			ArrayList<SesameStoreAnswer> temp_list = findDuplicates(subject_results, object_results);
-			ArrayList<SesameStoreAnswer> final_list = findDuplicates(temp_list, predicate_results);
+			ArrayList<SelectedResource> temp_list = findDuplicates(subject_results, object_results);
+			ArrayList<SelectedResource> final_list = findDuplicates(temp_list, predicate_results);
 			return final_list;
 		}
 
 	}
 
-	private ArrayList<SesameStoreAnswer> findDuplicates(ArrayList<SesameStoreAnswer> first_list, ArrayList<SesameStoreAnswer> second_list) {
-		ArrayList<SesameStoreAnswer> final_list = new ArrayList<SesameStoreAnswer>();
-		for (SesameStoreAnswer element_first : first_list) {
+	private ArrayList<SelectedResource> findDuplicates(ArrayList<SelectedResource> first_list, ArrayList<SelectedResource> second_list) {
+		ArrayList<SelectedResource> final_list = new ArrayList<SelectedResource>();
+		for (SelectedResource element_first : first_list) {
 			URI first_endpoint = element_first.getEndpoint();
 			int first_vol = element_first.getVol();
-			int first_var = element_first.getVar();			
-			for (SesameStoreAnswer element_second : second_list) {
+			int first_var = element_first.getVar();
+			for (SelectedResource element_second : second_list) {
 				URI second_endpoint = element_second.getEndpoint();
 				int second_vol = element_second.getVol();
 				int second_var = element_second.getVar();
@@ -129,38 +155,48 @@ public class ResourceSelector {
 						vol = second_vol;
 						var = second_var;
 					}
-					SesameStoreAnswer sesameStoreAnswer = new SesameStoreAnswer(first_endpoint, vol, var, element_first.getProximity());//TODO:check proximity to use
-					final_list.add(sesameStoreAnswer);
+					SelectedResource selectedResource = new SelectedResource(first_endpoint, vol, var);
+					
+					URI subject;
+					int subjectProximity;
+					URI predicate;
+					int predicateProximity;
+					URI object;
+					int objectProximity;
+					if (element_first.getSubject() != null) {
+						subject = element_first.getSubject();
+						subjectProximity = element_first.getSubjectProximity();
+					} else {
+						subject = element_second.getSubject();
+						subjectProximity = element_second.getSubjectProximity();
+					}
+					if (element_first.getPredicate() != null) {
+						predicate = element_first.getPredicate();
+						predicateProximity = element_first.getPredicateProximity();
+					} else {
+						predicate = element_second.getPredicate();
+						predicateProximity = element_second.getPredicateProximity();
+					}
+					if (element_first.getObject() != null) {
+						object = element_first.getObject();
+						objectProximity = element_first.getObjectProximity();
+					} else {
+						object = element_second.getObject();
+						objectProximity = element_second.getObjectProximity();;
+					}
+					selectedResource.setSubject(subject);
+					selectedResource.setSubjectProximity(subjectProximity);
+					selectedResource.setPredicate(predicate);
+					selectedResource.setPredicateProximity(predicateProximity);
+					selectedResource.setObject(object);
+					selectedResource.setObjectProximity(objectProximity);
+					
+					final_list.add(selectedResource);
 				}
 			}
 		}
-		//while (keep_only_min(final_list));
 		return final_list;
 	}
-/*	
-	private boolean keep_only_min(ArrayList<SesameStoreAnswer> list) {
-		boolean found = false;
-		for (SesameStoreAnswer element_first : list) {
-			URI first_endpoint = element_first.getEndpoint();
-			int first_vol = element_first.getVol();
-			int first_var = element_first.getVar();		
-			for (SesameStoreAnswer element_second : list) {
-				URI second_endpoint = element_second.getEndpoint();
-				int second_vol = element_second.getVol();
-				int second_var = element_second.getVar();
-				if (first_endpoint.equals(second_endpoint) && first_vol == second_vol && first_var != second_var) {
-					if (first_var<second_var) {
-						list.remove(element_second);
-					} else {
-						list.remove(element_first);
-					}
-					found = true;
-					return found;
-				}
-			}
-		}
-		return found;
-	}
-*/		
+
 
 }
