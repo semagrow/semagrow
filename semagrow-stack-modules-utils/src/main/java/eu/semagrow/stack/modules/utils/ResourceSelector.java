@@ -209,6 +209,9 @@ public class ResourceSelector {
 		return final_list;
 	} 
 	
-
+	private ArrayList<Measurement> getLoadInfo(URI endpoint, int measurement_id) {
+		String sql = "SELECT id, measurement_type, measurement FROM load_info WHERE endpoint = ? AND id >=?;";
+		return null;//TODO:fix
+	}
 
 }
