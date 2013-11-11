@@ -18,13 +18,16 @@ import org.openrdf.query.algebra.Var;
 public class ResourceSelector {
 	
 	private StatementPattern statementPattern;
+	private int measurement_id;
 
 	/**
 	 * @param statementPattern
+	 * @param measurement_id
 	 */
-	public ResourceSelector(StatementPattern statementPattern) {
+	public ResourceSelector(StatementPattern statementPattern, int measurement_id) {
 		super();
 		this.statementPattern = statementPattern;
+		this.measurement_id = measurement_id;
 	}
 	
 	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException {
@@ -204,7 +207,8 @@ public class ResourceSelector {
 			}
 		}
 		return final_list;
-	}
+	} 
+	
 
 
 }
