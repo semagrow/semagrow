@@ -4,6 +4,7 @@
 package eu.semagrow.stack.modules.utils;
 
 import java.net.URI;
+import java.util.ArrayList;
 
 /**
  * @author Giannis Mouchakis
@@ -20,6 +21,7 @@ public class SelectedResource {
 	private int predicateProximity = 0;
 	private URI object = null;
 	private int objectProximity = 0;
+	private ArrayList<Measurement> loadInfo = null;
 	
 	/**
 	 * @param endpoint
@@ -137,6 +139,21 @@ public class SelectedResource {
 	public void setObjectProximity(int objectProximity) {
 		this.objectProximity = objectProximity;
 	}
+	
+
+	/**
+	 * @return the loadInfo
+	 */
+	public ArrayList<Measurement> getLoadInfo() {
+		return loadInfo;
+	}
+
+	/**
+	 * @param loadInfo the loadInfo to set
+	 */
+	public void setLoadInfo(ArrayList<Measurement> loadInfo) {
+		this.loadInfo = loadInfo;
+	}
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
@@ -148,8 +165,8 @@ public class SelectedResource {
 				+ ", subjectProximity=" + subjectProximity + ", predicate="
 				+ predicate + ", predicateProximity=" + predicateProximity
 				+ ", object=" + object + ", objectProximity=" + objectProximity
-				+ "]";
+				+ ", loadInfo=" + loadInfo + "]";
 	}
-
+	
 
 }

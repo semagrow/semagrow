@@ -3,8 +3,14 @@
  */
 package eu.semagrow.stack.modules.utils;
 
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 
 import org.openrdf.model.Resource;
@@ -30,10 +36,16 @@ public class ResourceSelector {
 		this.measurement_id = measurement_id;
 	}
 	
-	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException {
+	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException, MalformedURLException, SQLException {
 		ProcessedStatement processedStatement = processStatement();
 		StatementEquivalents statementEquivalents = getEquivalents(processedStatement);
-		return runResourceDiscovery(statementEquivalents);
+		ArrayList<SelectedResource> resourceList = runResourceDiscovery(statementEquivalents);
+		//add load info for each endpoint
+		for (SelectedResource resource : resourceList) {
+			ArrayList<Measurement> loadInfo = getLoadInfo(resource.getEndpoint());
+			resource.setLoadInfo(loadInfo);
+		}
+		return resourceList;
 	}
 	
 	private ProcessedStatement processStatement() throws URISyntaxException {
@@ -77,7 +89,7 @@ public class ResourceSelector {
 	}
 	
 	
-	private ArrayList<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) {
+	private ArrayList<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws MalformedURLException, SQLException {
 		
 		ArrayList<SelectedResource> subject_results = new ArrayList<SelectedResource>();
 		ArrayList<SelectedResource> object_results = new ArrayList<SelectedResource>();
@@ -167,7 +179,7 @@ public class ResourceSelector {
 					}
 					
 					SelectedResource selectedResource = new SelectedResource(first_endpoint, vol, var);
-					
+										
 					URI subject;
 					int subjectProximity;
 					URI predicate;
@@ -209,9 +221,29 @@ public class ResourceSelector {
 		return final_list;
 	} 
 	
-	private ArrayList<Measurement> getLoadInfo(URI endpoint, int measurement_id) {
-		String sql = "SELECT id, measurement_type, measurement FROM load_info WHERE endpoint = ? AND id >=?;";
-		return null;//TODO:fix
+	private ArrayList<Measurement> getLoadInfo(URI endpoint) throws SQLException, MalformedURLException {
+		ArrayList<Measurement> loadInfo = new ArrayList<Measurement>();
+		Connection connection = null;
+		try {
+			connection = DriverManager.getConnection("jpostgresql://localhost:5432/testdb", "xxx", "xxx");
+			String sql = "SELECT id, measurement_type, measurement FROM load_info WHERE endpoint = ? AND id >=?;";
+			PreparedStatement preparedStatement = connection.prepareStatement(sql);
+			preparedStatement.setURL(1, endpoint.toURL());
+			preparedStatement.setInt(2, this.measurement_id);
+			ResultSet resultSet = preparedStatement.executeQuery();
+			while(resultSet.next()) {
+				int id = resultSet.getInt("id");
+				String measurement_type = resultSet.getString("measurement_type");
+				int measurement = resultSet.getInt("measurement");
+				Measurement measurementOjb = new Measurement(id, measurement_type, measurement);
+				loadInfo.add(measurementOjb);
+			}
+		} finally {
+			if (connection != null) {
+				connection.close();
+			}
+		}
+		return loadInfo;
 	}
 
 }
