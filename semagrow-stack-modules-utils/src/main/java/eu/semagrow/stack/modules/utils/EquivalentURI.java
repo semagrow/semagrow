@@ -63,7 +63,14 @@ public class EquivalentURI {
 		this.schema = schema;
 	}
 	
-	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "EquivalentURI [equivalent_URI=" + equivalent_URI
+				+ ", proximity=" + proximity + ", schema=" + schema + "]";
+	}
 
 
 }

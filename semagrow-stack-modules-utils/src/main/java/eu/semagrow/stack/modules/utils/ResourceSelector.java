@@ -3,6 +3,7 @@
  */
 package eu.semagrow.stack.modules.utils;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -36,7 +37,7 @@ public class ResourceSelector {
 		this.measurement_id = measurement_id;
 	}
 	
-	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException, MalformedURLException, SQLException {
+	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException, SQLException, ClassNotFoundException, IOException {
 		ProcessedStatement processedStatement = processStatement();
 		StatementEquivalents statementEquivalents = getEquivalents(processedStatement);
 		ArrayList<SelectedResource> resourceList = runResourceDiscovery(statementEquivalents);
@@ -71,7 +72,7 @@ public class ResourceSelector {
 		return processedStatement;
 	}
 	
-	private StatementEquivalents getEquivalents(ProcessedStatement processedStatement) {
+	private StatementEquivalents getEquivalents(ProcessedStatement processedStatement) throws ClassNotFoundException, IOException, SQLException, URISyntaxException {
 		StatementEquivalents statementEquivalents = new StatementEquivalents();
 		if (processedStatement.getSubject() != null) {
 			PatternDiscovery patternDiscovery = new PatternDiscovery(processedStatement.getSubject());
