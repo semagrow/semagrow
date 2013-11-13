@@ -71,6 +71,45 @@ public class EquivalentURI {
 		return "EquivalentURI [equivalent_URI=" + equivalent_URI
 				+ ", proximity=" + proximity + ", schema=" + schema + "]";
 	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result
+				+ ((equivalent_URI == null) ? 0 : equivalent_URI.hashCode());
+		result = prime * result + proximity;
+		result = prime * result + ((schema == null) ? 0 : schema.hashCode());
+		return result;
+	}
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		EquivalentURI other = (EquivalentURI) obj;
+		if (equivalent_URI == null) {
+			if (other.equivalent_URI != null)
+				return false;
+		} else if (!equivalent_URI.equals(other.equivalent_URI))
+			return false;
+		if (proximity != other.proximity)
+			return false;
+		if (schema == null) {
+			if (other.schema != null)
+				return false;
+		} else if (!schema.equals(other.schema))
+			return false;
+		return true;
+	}
 
 
 }

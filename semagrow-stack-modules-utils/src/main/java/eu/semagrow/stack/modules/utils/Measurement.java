@@ -45,6 +45,15 @@ public class Measurement {
 	public int getValue() {
 		return value;
 	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Measurement [id=" + id + ", type=" + type + ", value=" + value
+				+ "]";
+	}
 	
 	
 
