@@ -226,7 +226,7 @@ public class ResourceSelector {
 		ArrayList<Measurement> loadInfo = new ArrayList<Measurement>();
 		Connection connection = null;
 		try {
-			connection = DriverManager.getConnection("jpostgresql://localhost:5432/loadinfoDB", "postgres", "root");
+			connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/loadinfoDB", "postgres", "root");
 			String sql = "SELECT id, measurement_type, measurement FROM load_info WHERE endpoint = ? AND id >=?;";
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, endpoint.toString());
