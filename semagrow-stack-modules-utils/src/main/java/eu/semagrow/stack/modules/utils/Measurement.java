@@ -4,6 +4,8 @@
 package eu.semagrow.stack.modules.utils;
 
 /**
+ * Used to hold the query results returned by the {@link ResourceSelector} getLoadInfo method (see method's javadoc).
+ * 
  * @author Giannis Mouchakis
  *
  */

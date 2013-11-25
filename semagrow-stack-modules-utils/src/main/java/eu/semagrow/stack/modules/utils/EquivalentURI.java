@@ -7,6 +7,8 @@ import java.net.URI;
 
 
 /**
+ * For a URI this object holds its equivalent URI, the proximity of the equivalent to the original URI and the schema URI.
+ * 
  * @author Giannis Mouchakis
  *
  */

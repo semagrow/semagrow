@@ -5,7 +5,11 @@ package eu.semagrow.stack.modules.utils;
 
 import java.net.URI;
 
+import org.openrdf.query.algebra.StatementPattern;
+
 /**
+ * Object used to hold the subject, predicate and object of a {@link StatementPattern} if instanceof URI, else null. 
+ * 
  * @author Giannis Mouchakis
  *
  */

@@ -7,8 +7,14 @@ import java.net.URI;
 import java.util.ArrayList;
 
 /**
+ * This class is used to represent a {@link ResourceSelector} result. It
+ * contains a combination of equivalent URIs that make up a query pattern, their
+ * proximity to the original URIs, the source endpoint that holds triples for
+ * this pattern, the predicted volume of the results, the variety and load info
+ * of the endpoint.
+ * 
  * @author Giannis Mouchakis
- *
+ * 
  */
 public class SelectedResource {
 	

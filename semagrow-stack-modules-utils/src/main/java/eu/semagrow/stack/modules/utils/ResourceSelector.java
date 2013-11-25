@@ -19,8 +19,18 @@ import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Var;
 
 /**
+ * The resource discovery component provides an annotated list of candidate data
+ * sources that possibly hold triples matching a given query pattern; including
+ * sources that follow a different (but aligned) schema than that of the query
+ * pattern. The sources are annotated with schema and instance-level metadata
+ * and predicted response volume from the data summaries endpoint; as well as
+ * run-time information about current source load. When a source following an
+ * aligned schema is used, the annotation also includes relevant
+ * meta-information, such as the semantic proximity of the query schema and the
+ * source schema.
+ * 
  * @author Giannis Mouchakis
- *
+ * 
  */
 public class ResourceSelector {
 	
@@ -28,8 +38,8 @@ public class ResourceSelector {
 	private int measurement_id;
 
 	/**
-	 * @param statementPattern
-	 * @param measurement_id
+	 * @param statementPattern the StatementPattern to examine
+	 * @param measurement_id used to determine how many load info measurements should be returned for each source endpoint.
 	 */
 	public ResourceSelector(StatementPattern statementPattern, int measurement_id) {
 		super();
@@ -37,6 +47,16 @@ public class ResourceSelector {
 		this.measurement_id = measurement_id;
 	}
 	
+	/**
+	 * 
+	 * Public method to run the ResourceSelector module.
+	 * 
+	 * @return A list of {@link SelectedResource} objects. Empty list if none found.
+	 * @throws URISyntaxException
+	 * @throws SQLException
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 */
 	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException, SQLException, ClassNotFoundException, IOException {
 		ProcessedStatement processedStatement = processStatement();
 		StatementEquivalents statementEquivalents = getEquivalents(processedStatement);
@@ -49,6 +69,15 @@ public class ResourceSelector {
 		return resourceList;
 	}
 	
+	/**
+	 * This method creates a {@link ProcessedStatement} object with null
+	 * subject, predicate, and object field. Then extracts the subject, predicate and
+	 * object of the input {@link StatementPattern} and if their value is a {@link org.openrdf.model.URI}
+	 * replaces the equivalent field of the created {@link ProcessedStatement}.
+	 * 
+	 * @return a {@link ProcessedStatement} object
+	 * @throws URISyntaxException
+	 */
 	private ProcessedStatement processStatement() throws URISyntaxException {
 		ProcessedStatement processedStatement = new ProcessedStatement();
 		
@@ -72,6 +101,16 @@ public class ResourceSelector {
 		return processedStatement;
 	}
 	
+	/**
+	 * Uses {@link PatternDiscovery} to get {@link StatementEquivalents} for the given {@link StatementPattern}.
+	 * 
+	 * @param processedStatement
+	 * @return {@link StatementEquivalents}
+	 * @throws ClassNotFoundException
+	 * @throws IOException
+	 * @throws SQLException
+	 * @throws URISyntaxException
+	 */
 	private StatementEquivalents getEquivalents(ProcessedStatement processedStatement) throws ClassNotFoundException, IOException, SQLException, URISyntaxException {
 		StatementEquivalents statementEquivalents = new StatementEquivalents();
 		if (processedStatement.getSubject() != null) {
@@ -79,17 +118,25 @@ public class ResourceSelector {
 			statementEquivalents.setSubject_equivalents(patternDiscovery.retrieveEquivalentPatterns());
 		}
 		if (processedStatement.getPredicate() != null) {
-			PatternDiscovery antonis = new PatternDiscovery(processedStatement.getPredicate());
-			statementEquivalents.setPredicate_equivalents(antonis.retrieveEquivalentPatterns());
+			PatternDiscovery patternDiscovery = new PatternDiscovery(processedStatement.getPredicate());
+			statementEquivalents.setPredicate_equivalents(patternDiscovery.retrieveEquivalentPatterns());
 		}
 		if (processedStatement.getObject() != null) {
-			PatternDiscovery antonis = new PatternDiscovery(processedStatement.getObject());
-			statementEquivalents.setObject_equivalents(antonis.retrieveEquivalentPatterns());
+			PatternDiscovery patternDiscovery = new PatternDiscovery(processedStatement.getObject());
+			statementEquivalents.setObject_equivalents(patternDiscovery.retrieveEquivalentPatterns());
 		}
 		return statementEquivalents;
 	}
 	
-	
+	/**
+	 * 
+	 * @param statementEquivalents
+	 * @return A list of {@link SelectedResource}s after asking the instance and
+	 *         schema indices which sources hold triples for the provided
+	 *         equivalent URIs
+	 * @throws MalformedURLException
+	 * @throws SQLException
+	 */
 	private ArrayList<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws MalformedURLException, SQLException {
 		
 		ArrayList<SelectedResource> subject_results = new ArrayList<SelectedResource>();
@@ -151,6 +198,14 @@ public class ResourceSelector {
 
 	}
 
+	/**
+	 * Used to determine which combinations of equivalent URIs can be found in a
+	 * source endpoint in order to create a candidate query pattern
+	 * 
+	 * @param first_list
+	 * @param second_list
+	 * @return a list tha contains only valid URI combinations
+	 */
 	private ArrayList<SelectedResource> findDuplicates(ArrayList<SelectedResource> first_list, ArrayList<SelectedResource> second_list) {
 		ArrayList<SelectedResource> final_list = new ArrayList<SelectedResource>();
 		for (SelectedResource element_first : first_list) {
@@ -222,6 +277,24 @@ public class ResourceSelector {
 		return final_list;
 	} 
 	
+	/**
+	 * 
+	 * This method is used to get the load info of an endpoint. The info is
+	 * stored in postgresql database, in a table named load_info which contains
+	 * the following columns:
+	 * 
+	 * id (integer): the id of the measurement (incremental). 
+	 * measurement_type (text): the type of the measurement.
+	 * measurement (integer): the value of the measurement.
+	 * endpoint (text): the endpoint for which the measurement was taken.
+	 * 
+	 * The method returns the load info of an endpoint where id >= measurement_id (passed as {@link ResourceSelector} parameter)
+	 * 
+	 * @param endpoint the endpoint for which the load info is returned.
+	 * @return a list of {@link Measurement}. Empty list if no results.
+	 * @throws SQLException
+	 * @throws MalformedURLException
+	 */
 	private ArrayList<Measurement> getLoadInfo(URI endpoint) throws SQLException, MalformedURLException {
 		ArrayList<Measurement> loadInfo = new ArrayList<Measurement>();
 		Connection connection = null;

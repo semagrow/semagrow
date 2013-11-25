@@ -5,9 +5,15 @@ package eu.semagrow.stack.modules.utils;
 
 import java.util.ArrayList;
 
+import org.openrdf.query.algebra.StatementPattern;
+
 /**
+ * Object to hold lists of {@link EquivalentURI} for the subject, predicate and
+ * object of a {@link StatementPattern}. If no equivalents where found or if the
+ * {@link StatementPattern} does not contain URI then these list are empty.
+ * 
  * @author Giannis Mouchakis
- *
+ * 
  */
 public class StatementEquivalents {
 	
