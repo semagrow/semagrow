@@ -3,8 +3,8 @@
  */
 package eu.semagrow.stack.modules.utils;
 
-import java.net.URI;
-import java.util.ArrayList;
+import org.openrdf.model.URI;
+import java.util.List;
 
 /**
  * This class is used to represent a {@link ResourceSelector} result. It
@@ -27,7 +27,7 @@ public class SelectedResource {
 	private int predicateProximity = 0;
 	private URI object = null;
 	private int objectProximity = 0;
-	private ArrayList<Measurement> loadInfo = null;
+	private List<Measurement> loadInfo = null;
 	
 	/**
 	 * @param endpoint
@@ -150,14 +150,14 @@ public class SelectedResource {
 	/**
 	 * @return the loadInfo
 	 */
-	public ArrayList<Measurement> getLoadInfo() {
+	public List<Measurement> getLoadInfo() {
 		return loadInfo;
 	}
 
 	/**
 	 * @param loadInfo the loadInfo to set
 	 */
-	public void setLoadInfo(ArrayList<Measurement> loadInfo) {
+	public void setLoadInfo(List<Measurement> loadInfo) {
 		this.loadInfo = loadInfo;
 	}
 

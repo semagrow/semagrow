@@ -5,7 +5,7 @@ package eu.semagrow.stack.modules.utils;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
-import java.net.URI;
+//import java.net.URI;
 import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -13,8 +13,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
-import org.openrdf.model.Resource;
+import org.openrdf.model.URI;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Var;
 
@@ -57,13 +58,13 @@ public class ResourceSelector {
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 */
-	public ArrayList<SelectedResource> getSelectedResources() throws URISyntaxException, SQLException, ClassNotFoundException, IOException {
+	public List<SelectedResource> getSelectedResources() throws SQLException, ClassNotFoundException, IOException {
 		ProcessedStatement processedStatement = processStatement();
 		StatementEquivalents statementEquivalents = getEquivalents(processedStatement);
-		ArrayList<SelectedResource> resourceList = runResourceDiscovery(statementEquivalents);
+		List<SelectedResource> resourceList = runResourceDiscovery(statementEquivalents);
 		//add load info for each endpoint
 		for (SelectedResource resource : resourceList) {
-			ArrayList<Measurement> loadInfo = getLoadInfo(resource.getEndpoint());
+			List<Measurement> loadInfo = getLoadInfo(resource.getEndpoint());
 			resource.setLoadInfo(loadInfo);
 		}
 		return resourceList;
@@ -76,26 +77,22 @@ public class ResourceSelector {
 	 * replaces the equivalent field of the created {@link ProcessedStatement}.
 	 * 
 	 * @return a {@link ProcessedStatement} object
-	 * @throws URISyntaxException
 	 */
-	private ProcessedStatement processStatement() throws URISyntaxException {
+	private ProcessedStatement processStatement() {
 		ProcessedStatement processedStatement = new ProcessedStatement();
 		
 		Var subject = statementPattern.getSubjectVar();
 		Var predicate = statementPattern.getPredicateVar();
 		Var object = statementPattern.getObjectVar();
 		
-		if (subject.hasValue() && (subject.getValue() instanceof Resource)) {
-			URI uri = new URI(subject.getValue().toString());
-			processedStatement.setSubject(uri);
+		if (subject.hasValue() && (subject.getValue() instanceof URI)) {
+			processedStatement.setSubject((URI)subject.getValue());
 		}
-		if (predicate.hasValue() && (predicate.getValue() instanceof Resource)) {
-			URI uri = new URI(predicate.getValue().toString());
-			processedStatement.setPredicate(uri);
+		if (predicate.hasValue() && (predicate.getValue() instanceof URI)) {
+			processedStatement.setPredicate((URI)predicate.getValue());
 		}
-		if (object.hasValue() && (object.getValue() instanceof Resource)) {
-			URI uri = new URI(object.getValue().toString());
-			processedStatement.setObject(uri);
+		if (object.hasValue() && (object.getValue() instanceof URI)) {
+			processedStatement.setObject((URI)object.getValue());
 		}
 		
 		return processedStatement;
@@ -111,7 +108,7 @@ public class ResourceSelector {
 	 * @throws SQLException
 	 * @throws URISyntaxException
 	 */
-	private StatementEquivalents getEquivalents(ProcessedStatement processedStatement) throws ClassNotFoundException, IOException, SQLException, URISyntaxException {
+	private StatementEquivalents getEquivalents(ProcessedStatement processedStatement) throws ClassNotFoundException, IOException, SQLException {
 		StatementEquivalents statementEquivalents = new StatementEquivalents();
 		if (processedStatement.getSubject() != null) {
 			PatternDiscovery patternDiscovery = new PatternDiscovery(processedStatement.getSubject());
@@ -137,16 +134,16 @@ public class ResourceSelector {
 	 * @throws MalformedURLException
 	 * @throws SQLException
 	 */
-	private ArrayList<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws MalformedURLException, SQLException {
+	private List<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws MalformedURLException, SQLException {
 		
-		ArrayList<SelectedResource> subject_results = new ArrayList<SelectedResource>();
-		ArrayList<SelectedResource> object_results = new ArrayList<SelectedResource>();
-		ArrayList<SelectedResource> predicate_results = new ArrayList<SelectedResource>();
+		List<SelectedResource> subject_results = new ArrayList<SelectedResource>();
+		List<SelectedResource> object_results = new ArrayList<SelectedResource>();
+		List<SelectedResource> predicate_results = new ArrayList<SelectedResource>();
 		
 		for (EquivalentURI equivalentURI : statementEquivalents.getSubject_equivalents()) {
 			InstanceIndex instanceIndex = new InstanceIndex();
 			URI uri = equivalentURI.getEquivalent_URI();
-			ArrayList<SelectedResource> list = instanceIndex.getEndpoints(uri);
+			List<SelectedResource> list = instanceIndex.getEndpoints(uri);
 			for (SelectedResource resource : list) {
 				resource.setSubject(uri);
 				resource.setSubjectProximity(equivalentURI.getProximity());
@@ -157,7 +154,7 @@ public class ResourceSelector {
 		for (EquivalentURI equivalentURI : statementEquivalents.getObject_equivalents()) {
 			InstanceIndex instanceIndex = new InstanceIndex();
 			URI uri = equivalentURI.getEquivalent_URI();
-			ArrayList<SelectedResource> list = instanceIndex.getEndpoints(uri);
+			List<SelectedResource> list = instanceIndex.getEndpoints(uri);
 			for (SelectedResource resource : list) {
 				resource.setObject(uri);
 				resource.setObjectProximity(equivalentURI.getProximity());
@@ -168,7 +165,7 @@ public class ResourceSelector {
 		for (EquivalentURI equivalentURI : statementEquivalents.getPredicate_equivalents()) {
 			SchemaIndex schemaIndex = new SchemaIndex();
 			URI uri = equivalentURI.getEquivalent_URI();
-			ArrayList<SelectedResource> list = schemaIndex.getEndpoints(uri);
+			List<SelectedResource> list = schemaIndex.getEndpoints(uri);
 			for (SelectedResource resource : list) {
 				resource.setPredicate(uri);
 				resource.setPredicateProximity(equivalentURI.getProximity());
@@ -191,8 +188,8 @@ public class ResourceSelector {
 		} else if ( subject_results.isEmpty() && !object_results.isEmpty() && !predicate_results.isEmpty()) {
 			return findDuplicates(object_results, predicate_results);
 		} else {//none is empty
-			ArrayList<SelectedResource> temp_list = findDuplicates(subject_results, object_results);
-			ArrayList<SelectedResource> final_list = findDuplicates(temp_list, predicate_results);
+			List<SelectedResource> temp_list = findDuplicates(subject_results, object_results);
+			List<SelectedResource> final_list = findDuplicates(temp_list, predicate_results);
 			return final_list;
 		}
 
@@ -206,7 +203,7 @@ public class ResourceSelector {
 	 * @param second_list
 	 * @return a list tha contains only valid URI combinations
 	 */
-	private ArrayList<SelectedResource> findDuplicates(ArrayList<SelectedResource> first_list, ArrayList<SelectedResource> second_list) {
+	private List<SelectedResource> findDuplicates(List<SelectedResource> first_list, List<SelectedResource> second_list) {
 		ArrayList<SelectedResource> final_list = new ArrayList<SelectedResource>();
 		for (SelectedResource element_first : first_list) {
 			URI first_endpoint = element_first.getEndpoint();
@@ -293,9 +290,8 @@ public class ResourceSelector {
 	 * @param endpoint the endpoint for which the load info is returned.
 	 * @return a list of {@link Measurement}. Empty list if no results.
 	 * @throws SQLException
-	 * @throws MalformedURLException
 	 */
-	private ArrayList<Measurement> getLoadInfo(URI endpoint) throws SQLException, MalformedURLException {
+	private List<Measurement> getLoadInfo(URI endpoint) throws SQLException {
 		ArrayList<Measurement> loadInfo = new ArrayList<Measurement>();
 		Connection connection = null;
 		try {

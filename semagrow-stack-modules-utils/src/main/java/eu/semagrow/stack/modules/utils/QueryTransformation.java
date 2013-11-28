@@ -7,7 +7,6 @@ package eu.semagrow.stack.modules.utils;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -16,9 +15,12 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.impl.ValueFactoryImpl;
+
 /**
  *
- * @author akukurik
+ * @author Antonis Kukirikos
  */
 public class QueryTransformation {
     private URI uri;
@@ -32,7 +34,7 @@ public class QueryTransformation {
         /**
 	 * @return A list of equivalent URIs aligned with a certain confidence with the initial URI and belonging to a specific schema
 	 */	
-	public ArrayList<EquivalentURI> retrieveEquivalentPatterns(URI schema) throws IOException, ClassNotFoundException, SQLException, URISyntaxException {
+	public ArrayList<EquivalentURI> retrieveEquivalentPatterns(URI schema) throws IOException, ClassNotFoundException, SQLException {
             ArrayList<EquivalentURI> list = new ArrayList<EquivalentURI>();
             
             
@@ -47,6 +49,9 @@ public class QueryTransformation {
             
             Connection connection = null;
             try {
+            	
+            	ValueFactory valueFactory = new ValueFactoryImpl();
+            	
 	            Class.forName("org.postgresql.Driver");
 	            String url = "jdbc:postgresql://" + host + ":" + port + "/" + dbName + "";
 	            //System.out.println(url);
@@ -63,7 +68,7 @@ public class QueryTransformation {
 	                String onto = rs.getString("onto2_uri");
 	                int normalized = (int) (confidence*1000);
 	                
-	                EquivalentURI equri = new EquivalentURI(new URI(equri_raw), normalized, new URI(onto));
+	                EquivalentURI equri = new EquivalentURI(valueFactory.createURI(equri_raw), normalized, valueFactory.createURI(onto));
 	                list.add(equri);
 	            }
 	            

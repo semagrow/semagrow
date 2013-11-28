@@ -3,7 +3,7 @@
  */
 package eu.semagrow.stack.modules.utils;
 
-import java.net.URI;
+import org.openrdf.model.URI;
 
 
 /**
