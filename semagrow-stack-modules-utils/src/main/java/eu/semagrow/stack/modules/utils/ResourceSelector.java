@@ -4,9 +4,6 @@
 package eu.semagrow.stack.modules.utils;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-//import java.net.URI;
-import java.net.URISyntaxException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -134,7 +131,7 @@ public class ResourceSelector {
 	 * @throws MalformedURLException
 	 * @throws SQLException
 	 */
-	private List<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws MalformedURLException, SQLException {
+	private List<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws SQLException {
 		
 		List<SelectedResource> subject_results = new ArrayList<SelectedResource>();
 		List<SelectedResource> object_results = new ArrayList<SelectedResource>();
@@ -292,7 +289,7 @@ public class ResourceSelector {
 	 * @throws SQLException
 	 */
 	private List<Measurement> getLoadInfo(URI endpoint) throws SQLException {
-		ArrayList<Measurement> loadInfo = new ArrayList<Measurement>();
+		List<Measurement> loadInfo = new ArrayList<Measurement>();
 		Connection connection = null;
 		try {
 			connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/loadinfoDB", "postgres", "root");
