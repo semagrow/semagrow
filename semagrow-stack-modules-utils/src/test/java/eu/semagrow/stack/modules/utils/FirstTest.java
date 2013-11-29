@@ -13,6 +13,8 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Var;
 
+import eu.semagrow.stack.modules.utils.impl.ResourceSelectorImpl;
+
 /**
  * @author Giannis Mouchakis
  *
@@ -37,7 +39,7 @@ public class FirstTest {
 		StatementPattern statementPattern = new StatementPattern(subject, predicate, object);
 		System.out.println(statementPattern);
 		
-		ResourceSelector resourceSelector = new ResourceSelector(statementPattern, 0);
+		ResourceSelector resourceSelector = new ResourceSelectorImpl(statementPattern, 0);
 		System.out.println(resourceSelector.getSelectedResources());
 
 	}

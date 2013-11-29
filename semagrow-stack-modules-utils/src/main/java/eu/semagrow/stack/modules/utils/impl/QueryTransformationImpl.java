@@ -2,11 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.semagrow.stack.modules.utils;
+package eu.semagrow.stack.modules.utils.impl;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
@@ -15,25 +14,28 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Properties;
 
+import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-/**
- *
- * @author Antonis Kukirikos
- */
-public class QueryTransformation {
+import eu.semagrow.stack.modules.utils.EquivalentURI;
+import eu.semagrow.stack.modules.utils.QueryTranformation;
+
+/* (non-Javadoc)
+ * @see eu.semagrow.stack.modules.utils.QueryTranformation
+ */	
+public class QueryTransformationImpl implements QueryTranformation {
     private URI uri;
 	/**
 	 * @param uri the URI for which equivalent expressions are asked
 	 */
-	public QueryTransformation(URI uri) {
+	public QueryTransformationImpl(URI uri) {
 		super();
 		this.uri = uri;
 	}
-        /**
-	 * @return A list of equivalent URIs aligned with a certain confidence with the initial URI and belonging to a specific schema
-	 */	
+        /* (non-Javadoc)
+		 * @see eu.semagrow.stack.modules.utils.impl.QueryTranformation#retrieveEquivalentPatterns(org.openrdf.model.URI)
+		 */	
 	public ArrayList<EquivalentURI> retrieveEquivalentPatterns(URI schema) throws IOException, ClassNotFoundException, SQLException {
             ArrayList<EquivalentURI> list = new ArrayList<EquivalentURI>();
             
@@ -68,7 +70,7 @@ public class QueryTransformation {
 	                String onto = rs.getString("onto2_uri");
 	                int normalized = (int) (confidence*1000);
 	                
-	                EquivalentURI equri = new EquivalentURI(valueFactory.createURI(equri_raw), normalized, valueFactory.createURI(onto));
+	                EquivalentURI equri = new EquivalentURIImpl(valueFactory.createURI(equri_raw), normalized, valueFactory.createURI(onto));
 	                list.add(equri);
 	            }
 	            

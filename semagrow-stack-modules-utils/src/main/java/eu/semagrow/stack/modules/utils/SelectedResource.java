@@ -1,13 +1,13 @@
-/**
- * 
- */
 package eu.semagrow.stack.modules.utils;
 
-import org.openrdf.model.URI;
 import java.util.List;
 
+import org.openrdf.model.URI;
+
+import eu.semagrow.stack.modules.utils.impl.ResourceSelectorImpl;
+
 /**
- * This class is used to represent a {@link ResourceSelector} result. It
+ * This class is used to represent a {@link ResourceSelectorImpl} result. It
  * contains a combination of equivalent URIs that make up a query pattern, their
  * proximity to the original URIs, the source endpoint that holds triples for
  * this pattern, the predicted volume of the results, the variety and load info
@@ -16,163 +16,96 @@ import java.util.List;
  * @author Giannis Mouchakis
  * 
  */
-public class SelectedResource {
-	
-	private URI endpoint;
-	private int vol;
-	private int var;
-	private URI subject = null;
-	private int subjectProximity = 0;
-	private URI predicate = null;
-	private int predicateProximity = 0;
-	private URI object = null;
-	private int objectProximity = 0;
-	private List<Measurement> loadInfo = null;
-	
-	/**
-	 * @param endpoint
-	 * @param vol
-	 * @param var
-	 */
-	public SelectedResource(URI endpoint, int vol, int var) {
-		super();
-		this.endpoint = endpoint;
-		this.vol = vol;
-		this.var = var;
-	}
-	
+public interface SelectedResource {
+
 	/**
 	 * @return the endpoint
 	 */
-	public URI getEndpoint() {
-		return endpoint;
-	}
-	
+	public URI getEndpoint();
+
 	/**
 	 * @return the vol
 	 */
-	public int getVol() {
-		return vol;
-	}
-	
+	public int getVol();
+
 	/**
 	 * @return the var
 	 */
-	public int getVar() {
-		return var;
-	}
-	
+	public int getVar();
+
 	/**
 	 * @return the subject
 	 */
-	public URI getSubject() {
-		return subject;
-	}
-	
+	public URI getSubject();
+
 	/**
 	 * @param subject the subject to set
 	 */
-	public void setSubject(URI subject) {
-		this.subject = subject;
-	}
-	
+	public void setSubject(URI subject);
+
 	/**
 	 * @return the subjectProximity
 	 */
-	public int getSubjectProximity() {
-		return subjectProximity;
-	}
-	
+	public int getSubjectProximity();
+
 	/**
 	 * @param subjectProximity the subjectProximity to set
 	 */
-	public void setSubjectProximity(int subjectProximity) {
-		this.subjectProximity = subjectProximity;
-	}
-	
+	public void setSubjectProximity(int subjectProximity);
+
 	/**
 	 * @return the predicate
 	 */
-	public URI getPredicate() {
-		return predicate;
-	}
-	
+	public URI getPredicate();
+
 	/**
 	 * @param predicate the predicate to set
 	 */
-	public void setPredicate(URI predicate) {
-		this.predicate = predicate;
-	}
-	
+	public void setPredicate(URI predicate);
+
 	/**
 	 * @return the predicateProximity
 	 */
-	public int getPredicateProximity() {
-		return predicateProximity;
-	}
-	
+	public int getPredicateProximity();
+
 	/**
 	 * @param predicateProximity the predicateProximity to set
 	 */
-	public void setPredicateProximity(int predicateProximity) {
-		this.predicateProximity = predicateProximity;
-	}
-	
+	public void setPredicateProximity(int predicateProximity);
+
 	/**
 	 * @return the object
 	 */
-	public URI getObject() {
-		return object;
-	}
-	
+	public URI getObject();
+
 	/**
 	 * @param object the object to set
 	 */
-	public void setObject(URI object) {
-		this.object = object;
-	}
-	
+	public void setObject(URI object);
+
 	/**
 	 * @return the objectProximity
 	 */
-	public int getObjectProximity() {
-		return objectProximity;
-	}
-	
+	public int getObjectProximity();
+
 	/**
 	 * @param objectProximity the objectProximity to set
 	 */
-	public void setObjectProximity(int objectProximity) {
-		this.objectProximity = objectProximity;
-	}
-	
+	public void setObjectProximity(int objectProximity);
 
 	/**
 	 * @return the loadInfo
 	 */
-	public List<Measurement> getLoadInfo() {
-		return loadInfo;
-	}
+	public List<Measurement> getLoadInfo();
 
 	/**
 	 * @param loadInfo the loadInfo to set
 	 */
-	public void setLoadInfo(List<Measurement> loadInfo) {
-		this.loadInfo = loadInfo;
-	}
+	public void setLoadInfo(List<Measurement> loadInfo);
 
 	/* (non-Javadoc)
 	 * @see java.lang.Object#toString()
 	 */
-	@Override
-	public String toString() {
-		return "SelectedResource [endpoint=" + endpoint + ", vol=" + vol
-				+ ", var=" + var + ", subject=" + subject
-				+ ", subjectProximity=" + subjectProximity + ", predicate="
-				+ predicate + ", predicateProximity=" + predicateProximity
-				+ ", object=" + object + ", objectProximity=" + objectProximity
-				+ ", loadInfo=" + loadInfo + "]";
-	}
-	
+	public String toString();
 
 }
