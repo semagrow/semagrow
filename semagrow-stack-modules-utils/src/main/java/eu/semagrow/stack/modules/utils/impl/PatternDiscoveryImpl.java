@@ -11,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.openrdf.model.URI;
@@ -36,8 +37,8 @@ public class PatternDiscoveryImpl implements PatternDiscovery {
         /* (non-Javadoc)
 		 * @see eu.semagrow.stack.modules.utils.PatternDiscovery#retrieveEquivalentPatterns()
 		 */	
-	public ArrayList<EquivalentURI> retrieveEquivalentPatterns() throws IOException, ClassNotFoundException, SQLException {
-            ArrayList<EquivalentURI> list = new ArrayList<EquivalentURI>();
+	public List<EquivalentURI> retrieveEquivalentPatterns() throws IOException, ClassNotFoundException, SQLException {
+            List<EquivalentURI> list = new ArrayList<EquivalentURI>();
             
             Properties prop = new Properties();
             prop.load(new FileInputStream("config.db"));

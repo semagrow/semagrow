@@ -96,7 +96,6 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * @throws ClassNotFoundException
 	 * @throws IOException
 	 * @throws SQLException
-	 * @throws URISyntaxException
 	 */
 	private StatementEquivalents getEquivalents(ProsessedStatement processedStatement) throws ClassNotFoundException, IOException, SQLException {
 		StatementEquivalents statementEquivalents = new StatementEquivalentsImpl();
@@ -121,7 +120,6 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * @return A list of {@link SelectedResource}s after asking the instance and
 	 *         schema indices which sources hold triples for the provided
 	 *         equivalent URIs
-	 * @throws MalformedURLException
 	 * @throws SQLException
 	 */
 	private List<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws SQLException {
@@ -191,7 +189,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * 
 	 * @param first_list
 	 * @param second_list
-	 * @return a list tha contains only valid URI combinations
+	 * @return a list that contains only valid URI combinations
 	 */
 	private List<SelectedResource> findDuplicates(List<SelectedResource> first_list, List<SelectedResource> second_list) {
 		ArrayList<SelectedResource> final_list = new ArrayList<SelectedResource>();

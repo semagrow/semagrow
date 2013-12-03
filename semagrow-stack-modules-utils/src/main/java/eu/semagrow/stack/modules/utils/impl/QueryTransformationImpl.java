@@ -12,6 +12,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.openrdf.model.URI;
@@ -36,8 +37,8 @@ public class QueryTransformationImpl implements QueryTranformation {
         /* (non-Javadoc)
 		 * @see eu.semagrow.stack.modules.utils.impl.QueryTranformation#retrieveEquivalentPatterns(org.openrdf.model.URI)
 		 */	
-	public ArrayList<EquivalentURI> retrieveEquivalentPatterns(URI schema) throws IOException, ClassNotFoundException, SQLException {
-            ArrayList<EquivalentURI> list = new ArrayList<EquivalentURI>();
+	public List<EquivalentURI> retrieveEquivalentPatterns(URI schema) throws IOException, ClassNotFoundException, SQLException {
+            List<EquivalentURI> list = new ArrayList<EquivalentURI>();
             
             
             Properties prop = new Properties();

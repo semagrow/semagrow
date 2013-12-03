@@ -4,10 +4,8 @@ import java.util.List;
 
 import org.openrdf.model.URI;
 
-import eu.semagrow.stack.modules.utils.impl.ResourceSelectorImpl;
-
 /**
- * This class is used to represent a {@link ResourceSelectorImpl} result. It
+ * This class is used to represent a {@link ResourceSelector} result. It
  * contains a combination of equivalent URIs that make up a query pattern, their
  * proximity to the original URIs, the source endpoint that holds triples for
  * this pattern, the predicted volume of the results, the variety and load info

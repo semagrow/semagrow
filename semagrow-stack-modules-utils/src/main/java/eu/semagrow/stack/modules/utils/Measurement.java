@@ -1,7 +1,7 @@
 package eu.semagrow.stack.modules.utils;
 
 /**
- * Used to hold the query results returned by the {@link ResourceSelector} getLoadInfo method (see method's javadoc).
+ * Used to hold load info of a source.
  * 
  * @author Giannis Mouchakis
  *
