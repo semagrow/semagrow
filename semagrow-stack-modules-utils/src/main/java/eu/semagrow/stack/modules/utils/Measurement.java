@@ -9,23 +9,19 @@ package eu.semagrow.stack.modules.utils;
 public interface Measurement {
 
 	/**
-	 * @return the id
+	 * @return the id of the measurement
 	 */
 	public int getId();
 
 	/**
-	 * @return the type
+	 * @return the type of the measurement
 	 */
 	public String getType();
 
 	/**
-	 * @return the value
+	 * @return the value of the measurement
 	 */
 	public int getValue();
 
-	/* (non-Javadoc)
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString();
 
 }

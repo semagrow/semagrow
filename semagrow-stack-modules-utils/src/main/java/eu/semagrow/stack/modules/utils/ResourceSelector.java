@@ -1,7 +1,5 @@
 package eu.semagrow.stack.modules.utils;
 
-import java.io.IOException;
-import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -23,12 +21,8 @@ public interface ResourceSelector {
 	 * 
 	 * Public method to run the ResourceSelector module.
 	 * 
-	 * @return A list of {@link SelectedResource} objects. Empty list if none found.
-	 * @throws SQLException
-	 * @throws ClassNotFoundException
-	 * @throws IOException
+	 * @return A list of {@link SelectedResource} objects. Empty list if no resources found. Null in case of exceptions.
 	 */
-	public List<SelectedResource> getSelectedResources() throws SQLException,
-			ClassNotFoundException, IOException;
+	public List<SelectedResource> getSelectedResources();
 
 }

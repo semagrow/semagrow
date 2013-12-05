@@ -48,14 +48,31 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	/* (non-Javadoc)
 	 * @see eu.semagrow.stack.modules.utils.ResourceSelector#getSelectedResources()
 	 */
-	public List<SelectedResource> getSelectedResources() throws SQLException, ClassNotFoundException, IOException {
+	public List<SelectedResource> getSelectedResources() {
 		ProsessedStatement processedStatement = processStatement();
-		StatementEquivalents statementEquivalents = getEquivalents(processedStatement);
+		StatementEquivalents statementEquivalents = null;
+		try {
+			statementEquivalents = getEquivalents(processedStatement);
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		if (statementEquivalents == null) {
+			return null;
+		}
 		List<SelectedResource> resourceList = runResourceDiscovery(statementEquivalents);
 		//add load info for each endpoint
-		for (SelectedResource resource : resourceList) {
-			List<Measurement> loadInfo = getLoadInfo(resource.getEndpoint());
-			resource.setLoadInfo(loadInfo);
+		try {
+			for (SelectedResource resource : resourceList) {
+				List<Measurement> loadInfo = getLoadInfo(resource.getEndpoint());
+				resource.setLoadInfo(loadInfo);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			return null;
 		}
 		return resourceList;
 	}
@@ -122,7 +139,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 *         equivalent URIs
 	 * @throws SQLException
 	 */
-	private List<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) throws SQLException {
+	private List<SelectedResource> runResourceDiscovery(StatementEquivalents statementEquivalents) {
 		
 		List<SelectedResource> subject_results = new ArrayList<SelectedResource>();
 		List<SelectedResource> object_results = new ArrayList<SelectedResource>();
