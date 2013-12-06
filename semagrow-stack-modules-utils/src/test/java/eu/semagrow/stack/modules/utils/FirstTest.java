@@ -39,8 +39,8 @@ public class FirstTest {
 		StatementPattern statementPattern = new StatementPattern(subject, predicate, object);
 		System.out.println(statementPattern);
 		
-		ResourceSelector resourceSelector = new ResourceSelectorImpl(statementPattern, 0);
-		System.out.println(resourceSelector.getSelectedResources());
+		ResourceSelector resourceSelector = new ResourceSelectorImpl();
+		System.out.println(resourceSelector.getSelectedResources(statementPattern, 0));
 
 	}
 

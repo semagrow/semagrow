@@ -32,24 +32,19 @@ import eu.semagrow.stack.modules.utils.StatementEquivalents;
  */
 public class ResourceSelectorImpl implements ResourceSelector {
 	
-	private StatementPattern statementPattern;
-	private int measurement_id;
 
 	/**
-	 * @param statementPattern the StatementPattern to examine
-	 * @param measurement_id used to determine how many load info measurements should be returned for each source endpoint.
+	 * constructor for the ResourceSelectorImpl.
 	 */
-	public ResourceSelectorImpl(StatementPattern statementPattern, int measurement_id) {
+	public ResourceSelectorImpl() {
 		super();
-		this.statementPattern = statementPattern;
-		this.measurement_id = measurement_id;
 	}
 	
 	/* (non-Javadoc)
 	 * @see eu.semagrow.stack.modules.utils.ResourceSelector#getSelectedResources()
 	 */
-	public List<SelectedResource> getSelectedResources() {
-		ProsessedStatement processedStatement = processStatement();
+	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, int measurement_id) {
+		ProsessedStatement processedStatement = processStatement(statementPattern);
 		StatementEquivalents statementEquivalents = null;
 		try {
 			statementEquivalents = getEquivalents(processedStatement);
@@ -67,7 +62,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 		//add load info for each endpoint
 		try {
 			for (SelectedResource resource : resourceList) {
-				List<Measurement> loadInfo = getLoadInfo(resource.getEndpoint());
+				List<Measurement> loadInfo = getLoadInfo(resource.getEndpoint(), measurement_id);
 				resource.setLoadInfo(loadInfo);
 			}
 		} catch (SQLException e) {
@@ -83,9 +78,10 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * object of the input {@link StatementPattern} and if their value is a {@link org.openrdf.model.URI}
 	 * replaces the equivalent field of the created {@link ProcessedStatement}.
 	 * 
+	 * @param statementPattern the StatementPattern to examine
 	 * @return a {@link ProcessedStatement} object
 	 */
-	private ProsessedStatement processStatement() {
+	private ProsessedStatement processStatement(StatementPattern statementPattern) {
 		ProsessedStatement processedStatement = new ProcessedStatementImpl();
 		
 		Var subject = statementPattern.getSubjectVar();
@@ -290,13 +286,14 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * measurement (integer): the value of the measurement.
 	 * endpoint (text): the endpoint for which the measurement was taken.
 	 * 
-	 * The method returns the load info of an endpoint where id >= measurement_id (passed as {@link ResourceSelectorImpl} parameter)
+	 * The method returns the load info of an endpoint where id >= measurement_id
 	 * 
 	 * @param endpoint the endpoint for which the load info is returned.
+	 * @param measurement_id used to determine how many load info measurements should be returned for each source endpoint.
 	 * @return a list of {@link Measurement}. Empty list if no results.
 	 * @throws SQLException
 	 */
-	private List<Measurement> getLoadInfo(URI endpoint) throws SQLException {
+	private List<Measurement> getLoadInfo(URI endpoint, int measurement_id) throws SQLException {
 		List<Measurement> loadInfo = new ArrayList<Measurement>();
 		Connection connection = null;
 		try {
@@ -304,7 +301,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 			String sql = "SELECT id, measurement_type, measurement FROM load_info WHERE endpoint = ? AND id >=?;";
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, endpoint.toString());
-			preparedStatement.setInt(2, this.measurement_id);
+			preparedStatement.setInt(2, measurement_id);
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
 				int id = resultSet.getInt("id");
