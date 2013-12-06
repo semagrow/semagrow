@@ -38,7 +38,7 @@ public class ReactivityParameters {
     /**
      * The maximum time for a response (i.e. before timeout).
      */
-    protected long MaximumResponseTime;
+    protected int MaximumResponseTime;
 
     /**
      * Initializes the reactivity parameters with a given max response time and
@@ -49,7 +49,7 @@ public class ReactivityParameters {
      * @throws eu.semagrow.stack.modules.utils.ReactivityParameters.InvalidStrategyException 
      * when the strategy is not known or allowed.
      */
-    public ReactivityParameters(long MaximumResponseTime, String Strategy) throws 
+    public ReactivityParameters(int MaximumResponseTime, String Strategy) throws 
             InvalidStrategyException {
         this.MaximumResponseTime = MaximumResponseTime;
         if (!AllowedStrategies.contains(Strategy))
@@ -62,11 +62,17 @@ public class ReactivityParameters {
      * An exception thrown whan an invalid strategy is designated as
      * part of the reactivity parameters.
      */
-    class InvalidStrategyException extends Exception {
+    public class InvalidStrategyException extends Exception {
 
         public InvalidStrategyException(String sMsg) {
             super(sMsg);
         }
         
     }
+
+    public int getMaximumResponseTime() {
+        return MaximumResponseTime;
+    }
+    
+    
 }
