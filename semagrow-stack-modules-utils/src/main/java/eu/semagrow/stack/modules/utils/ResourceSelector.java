@@ -2,6 +2,8 @@ package eu.semagrow.stack.modules.utils;
 
 import java.util.List;
 
+import org.openrdf.query.algebra.StatementPattern;
+
 /**
  * This component provides an annotated list of candidate data sources that
  * possibly hold triples matching a given query pattern; including sources that
@@ -21,8 +23,17 @@ public interface ResourceSelector {
 	 * 
 	 * Public method to run the ResourceSelector module.
 	 * 
-	 * @return A list of {@link SelectedResource} objects. Empty list if no resources found. Null in case of exceptions.
+	 * @param statementPattern
+	 *            the {@link StatementPattern} (query pattern) to examine.
+	 * @param measurement_id
+	 *            used to determine how many load info measurements should be
+	 *            returned for each candidate source endpoint. Each measurement has an
+	 *            incremental id so this method returns the load info of an
+	 *            endpoint where id >= measurement_id
+	 * 
+	 * @return A list of {@link SelectedResource} objects. Empty list if no
+	 *         resources found. Null in case of exceptions.
 	 */
-	public List<SelectedResource> getSelectedResources();
+	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, int measurement_id);
 
 }
