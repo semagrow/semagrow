@@ -8,8 +8,10 @@ import eu.semagrow.stack.modules.utils.SelectedResource;
 
 /**
  * @author Giannis Mouchakis
+ * @author Stasinos Konstantopoulos
  *
  */
+
 public interface SchemaIndex {
 
 	public List<SelectedResource> getEndpoints(URI uri);
