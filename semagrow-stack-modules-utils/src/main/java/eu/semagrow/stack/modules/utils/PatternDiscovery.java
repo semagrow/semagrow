@@ -15,7 +15,7 @@ import org.openrdf.model.URI;
 public interface PatternDiscovery {
 
 	/**
-	 * @return A list of {@link EquivalentURI}s.
+	 * @return A {@link List} of {@link EquivalentURI}s.
 	 */
 	public List<EquivalentURI> retrieveEquivalentPatterns()
 			throws IOException, ClassNotFoundException, SQLException;

@@ -7,9 +7,11 @@ import java.util.List;
 import org.openrdf.model.URI;
 
 /**
-*
-* @author Antonis Kukirikos
-*/
+ * {@todo Descrption}
+ * 
+ * @author Antonis Kukurikos
+ */
+
 public interface QueryTranformation {
 
 	/**

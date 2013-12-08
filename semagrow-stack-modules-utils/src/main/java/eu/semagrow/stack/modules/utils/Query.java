@@ -1,12 +1,9 @@
-/*
- * 
- */
-
 package eu.semagrow.stack.modules.utils;
 
-/** Represents a SPARQL query to the Semagrow stack.
- *
- * @author ggianna
+/**
+ * Represents a SPARQL query to the Semagrow stack.
+ * 
+ * @author Georgios Giannakopoulos
  */
 public class Query {
     protected String Query;
@@ -19,7 +16,6 @@ public class Query {
     public String toString() {
         return Query;
     }
-    
-    
+  
     
 }

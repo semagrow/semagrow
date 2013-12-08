@@ -20,8 +20,7 @@ import org.openrdf.query.algebra.StatementPattern;
 public interface ResourceSelector {
 
 	/**
-	 * 
-	 * Public method to run the ResourceSelector module.
+	 * Public method that acts as entry point to the ResourceSelector module.
 	 * 
 	 * @param statementPattern
 	 *            the {@link StatementPattern} (query pattern) to examine.
