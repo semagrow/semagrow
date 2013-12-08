@@ -19,183 +19,57 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.StatementImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.QueryResult;
-import org.openrdf.query.TupleQuery;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.sparql.SPARQLConnection;
-import org.openrdf.repository.sparql.SPARQLRepository;
-import org.openrdf.repository.sparql.config.SPARQLRepositoryConfig;
-import org.openrdf.repository.sparql.config.SPARQLRepositoryFactory;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriterFactory;
 
 /**
  *
  * @author ggianna
  */
-public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint {
+public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
+        TupleQueryResultHandler {
     Map<UUID, HttpExchange> toServe;
+    protected HttpServer server;
     
-    protected static String TEST_QUERY = 
-            "PREFIX a: "
-            + "<http://www.w3.org/2000/10/rdf-tests/j/file2.rdf>\n" +
-                "SELECT ?name \n" +
-                "WHERE {\n" +
-                "?name rdf:type ?surname\n" +
-                "}";
-    private ReactivityParameters reactivityParameters;
-
+    protected ReactivityParameters reactivityParameters;
+    /**
+     * Constants
+     */
+    public static final String STRATEGY_PARAM_NAME = "strategy";
+    public static final String TIMEOUT_PARAM_NAME = "timeout";
+    public static final String QUERY_PARAM_NAME = "query";
+    
     public SPARQLEndpointImpl() {
-        try {
-            // TODO: Read server settings from parameter file
-            HttpServer server = HttpServer.create(new InetSocketAddress(8000), 
-                    0);
-            server.createContext("/endpoint", this);
-            server.setExecutor(null); // creates a default executor
-            server.start();
-        } catch (IOException ex) {
-            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
         // Init query map
         toServe = new HashMap<UUID, HttpExchange>();
     }
 
+    public void stopServing() {
+        if (server != null)
+            // TODO: Use parameter for delay seconds
+            server.stop(5);
+    }
     
     public String getBaseURI() {
         // TODO: Change
-        return "http://seamgrow.eu/";
+        return "http://localhost:18000/";
     }
     
-    
-    public static void main(String[] saArgs) {
-        SPARQLRepositoryConfig config = new SPARQLRepositoryConfig();
-        config.setURL("http://www.semagrow.eu/");
-
-        SPARQLRepositoryFactory factory = new SPARQLRepositoryFactory();
-        SPARQLRepository repo;
-        try {
-            repo = factory.getRepository(config);
-            RepositoryConnection rcConn;
-            rcConn = (SPARQLConnection) repo.getConnection();
-            Resource rG = new Resource() {
-
-                public String stringValue() {
-                    return "George";
-                }
-            };
-            Value vName = new Value() {
-
-                public String stringValue() {
-                    return "foaf:name";
-                }
-            };
-            rcConn.add(new StatementImpl(rG, 
-                    new URIImpl("http://purl.org/dc/elements/1.1/#rdf:type"), 
-                    vName));
-            rcConn.commit();
-            
-            TupleQuery q = rcConn.prepareTupleQuery(QueryLanguage.SPARQL, TEST_QUERY);
-            try {
-                q.evaluate(new TupleQueryResultHandler() {
-                    
-                    public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
-                        System.err.println(list.toString());
-                    }
-                    
-                    public void endQueryResult() throws TupleQueryResultHandlerException {
-                        // IGNORE
-                    }
-                    
-                    public void handleSolution(BindingSet bs) throws TupleQueryResultHandlerException {
-                        
-                        for (Binding bCur : bs) {
-                            System.err.println(bCur.toString());
-                        }
-                    }
-                });
-            } catch (QueryEvaluationException ex) {
-                Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (TupleQueryResultHandlerException ex) {
-                Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            
-        } catch (RepositoryException ex) {
-            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (RepositoryConfigException ex) {
-            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MalformedQueryException ex) {
-            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        
-        
-//        
-//        
-//        Repository hrRepos;
-//        RepositoryConnection rcConn;
-//        
-//        String sLocalRepos = "http://localhost:8080/openrdf-workbench/repositories/10/";
-//        // Initialize repository
-//        try {
-//            hrRepos = new SPARQLEndpointImpl(sLocalRepos);
-//            hrRepos.initialize();
-//        } catch (RepositoryException ex) {
-//            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(
-//                    Level.SEVERE, null, ex);
-//            return;
-//        }
-//        
-//        try {
-//             rcConn = hrRepos.getConnection();
-//        } catch (RepositoryException ex) {
-//            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(
-//                    Level.SEVERE, null, ex);
-//            return;            
-//        }
-//        
-//        try {
-//            rcConn.prepareQuery(QueryLanguage.SPARQL, TEST_QUERY);
-//        } catch (MalformedQueryException ex) {
-//            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(
-//                    Level.SEVERE, null, ex);
-//            return;            
-//        } catch (RepositoryException ex) {
-//            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(
-//                    Level.SEVERE, null, ex);
-//            return;            
-//        }
-//        try {
-//            // Finalize connection
-//            hrRepos.shutDown();
-//        } catch (RepositoryException ex) {
-//            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
-//        }
-    }
-
-    /**
-     * Returns result to the client that called.
-     * @param res 
-     */
-    public void useQueryResult(QueryResult<BindingSet> res) {
-        System.err.println("Result:" + res.toString());
-    }
+//    /**
+//     * Returns result to the client that called.
+//     * @param res The query result returned.
+//     */
+//    public void useQueryResult(UUID queryID, QueryResult<BindingSet> res) {
+//        System.err.println("Result:" + res.toString());
+//    }
 
     public void handle(HttpExchange he) throws IOException {
         // Create unique ID
@@ -207,12 +81,15 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint {
         
         // Get reactivity parameters
         // TODO: replace with constant parameter name
-        String sStrategy = he.getAttribute("strategy").toString();
-        int iTimeout = Integer.valueOf(he.getAttribute("strategy").toString());
+        String sStrategy = he.getAttribute(STRATEGY_PARAM_NAME).toString();
+        int iTimeout = Integer.valueOf(he.getAttribute(TIMEOUT_PARAM_NAME).toString());
         
         try {
             ReactivityParameters rpParams = new ReactivityParameters(iTimeout, 
                     sStrategy);
+            // Update reactivity params
+            setReactivityParameters(rpParams);
+            
             // TODO: replace with constant parameter name
             qd.decomposeQuery(this, queryID, he.getAttribute("query").toString());
         } catch (ReactivityParameters.InvalidStrategyException ex) {
@@ -239,10 +116,64 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint {
     }
 
     public void renderResults(UUID uQueryID, QueryResult<BindingSet> result) {
-        RDFXMLPrettyWriterFactory factory = new RDFXMLPrettyWriterFactory();
-        RDFWriter resultWriter = factory.getWriter(
+        PrintStream resultWriter = new PrintStream(
                 toServe.get(uQueryID).getResponseBody());
+        try {
+            // For every result
+            while (result.hasNext()) {
+                BindingSet bsCur = result.next();
+                Set<String> ssNames = bsCur.getBindingNames();
+                
+                // For each name in binding
+                for (String sName: ssNames) {
+                    // Output value
+                    // TODO: Change
+                    resultWriter.format("%s = %s", sName, 
+                            bsCur.getValue(sName));
+                }
+            }
+        } catch (QueryEvaluationException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        try {
+            //Finalize output
+            toServe.get(uQueryID).getResponseBody().close();
+        } catch (IOException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public void init() {
+        try {
+            // TODO: Read server settings from parameter file
+            server = HttpServer.create(new InetSocketAddress(18000), 
+                    0);
+            server.createContext("/sparql", this);
+            server.setExecutor(null); // creates a default executor
+            server.start();
+        } catch (IOException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
         
         
+    }
+
+    public void cleanUp() {
+        // TODO: Use a parameter for the shutdown delay
+        this.server.stop(5);
+    }
+
+    // TODO: Implement one-by-one
+    public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void endQueryResult() throws TupleQueryResultHandlerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    public void handleSolution(BindingSet bs) throws TupleQueryResultHandlerException {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 }

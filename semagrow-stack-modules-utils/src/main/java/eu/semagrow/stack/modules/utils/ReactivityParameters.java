@@ -39,6 +39,7 @@ public class ReactivityParameters {
      * The maximum time for a response (i.e. before timeout).
      */
     protected int MaximumResponseTime;
+    protected String Strategy;
 
     /**
      * Initializes the reactivity parameters with a given max response time and
@@ -55,6 +56,7 @@ public class ReactivityParameters {
         if (!AllowedStrategies.contains(Strategy))
             throw new InvalidStrategyException(Strategy + " is not a valid "
                     + "strategy.");
+        this.Strategy = Strategy;
     }
 
 
@@ -73,6 +75,10 @@ public class ReactivityParameters {
     public int getMaximumResponseTime() {
         return MaximumResponseTime;
     }
-    
+
+    public String getStrategy() {
+        return this.Strategy;
+    }
+
     
 }

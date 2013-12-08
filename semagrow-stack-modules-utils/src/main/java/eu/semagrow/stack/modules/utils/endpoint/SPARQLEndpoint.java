@@ -8,13 +8,16 @@ import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import java.util.UUID;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryResult;
+import org.openrdf.query.TupleQueryResultHandler;
 
 /**
  *
  * @author ggianna
  */
-public interface SPARQLEndpoint {
+public interface SPARQLEndpoint extends TupleQueryResultHandler{
+    public void init();
     public void setReactivityParameters(ReactivityParameters rpParams);
     public void renderResults(UUID uQueryID, QueryResult<BindingSet> result);
-    public String getBaseURI();
+    public String getBaseURI();    
+    public void cleanUp();
 }
