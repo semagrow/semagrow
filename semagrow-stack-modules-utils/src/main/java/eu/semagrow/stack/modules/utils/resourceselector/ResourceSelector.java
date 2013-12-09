@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.utils;
+package eu.semagrow.stack.modules.utils.resourceselector;
 
 import java.util.List;
 
@@ -33,6 +33,6 @@ public interface ResourceSelector {
 	 * @return A list of {@link SelectedResource} objects. Empty list if no
 	 *         resources found. Null in case of exceptions.
 	 */
-	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, int measurement_id);
+	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, long measurement_id);
 
 }

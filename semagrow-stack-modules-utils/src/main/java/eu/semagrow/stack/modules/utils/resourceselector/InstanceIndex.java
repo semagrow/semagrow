@@ -1,20 +1,18 @@
-package eu.semagrow.stack.modules.utils;
+package eu.semagrow.stack.modules.utils.resourceselector;
 
 import java.util.List;
 
 import org.openrdf.model.URI;
 
-import eu.semagrow.stack.modules.utils.SelectedResource;
-
 /**
  * Instances of this class act as proxies for repositories
- * holding schema-level metadata about the data sources of
+ * holding instance-level metadata about the data sources of
  * the federation.
  *
  * @author Stasinos Konstantopoulos
  */
 
-public interface SchemaIndex {
+public interface InstanceIndex {
 
 	/**
 	 * This method returns a {@link List} of {@link SelectedResource}

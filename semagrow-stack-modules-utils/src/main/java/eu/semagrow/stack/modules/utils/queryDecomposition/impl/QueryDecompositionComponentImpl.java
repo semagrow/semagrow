@@ -20,20 +20,21 @@
 
 package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 
-import eu.semagrow.stack.modules.utils.QueryTranformation;
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
-import eu.semagrow.stack.modules.utils.ResourceSelector;
-import eu.semagrow.stack.modules.utils.SelectedResource;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.endpoint.impl.SPARQLEndpointImpl;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
 import eu.semagrow.stack.modules.utils.federationWrapper.impl.FederationEndpointWrapperComponentImpl;
-import eu.semagrow.stack.modules.utils.impl.QueryTransformationImpl;
-import eu.semagrow.stack.modules.utils.impl.ResourceSelectorImpl;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DistributedExecutionPlan;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecomposer;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecompositionComponent;
+import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
+import eu.semagrow.stack.modules.utils.querytransformation.impl.QueryTransformationImpl;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -44,6 +45,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.OpenRDFException;
 import org.openrdf.query.Query;

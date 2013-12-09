@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package eu.semagrow.stack.modules.utils.impl;
+package eu.semagrow.stack.modules.utils.querytransformation.impl;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -19,11 +19,12 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import eu.semagrow.stack.modules.utils.EquivalentURI;
-import eu.semagrow.stack.modules.utils.QueryTranformation;
+import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
+import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
+import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.utils.QueryTranformation
+ * @see eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation
  */	
 public class QueryTransformationImpl implements QueryTranformation {
     private URI uri;
@@ -35,7 +36,7 @@ public class QueryTransformationImpl implements QueryTranformation {
 		this.uri = uri;
 	}
         /* (non-Javadoc)
-		 * @see eu.semagrow.stack.modules.utils.impl.QueryTranformation#retrieveEquivalentPatterns(org.openrdf.model.URI)
+		 * @see eu.semagrow.stack.modules.utils.impl.querytransformation.QueryTranformation#retrieveEquivalentPatterns(org.openrdf.model.URI)
 		 */	
 	public List<EquivalentURI> retrieveEquivalentPatterns(URI schema) throws IOException, ClassNotFoundException, SQLException {
             List<EquivalentURI> list = new ArrayList<EquivalentURI>();

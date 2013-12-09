@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.utils;
+package eu.semagrow.stack.modules.utils.resourceselector;
 
 /**
  * This interface specifies classes of load info and similar measurements
@@ -20,7 +20,7 @@ public interface Measurement {
 	 * 
 	 * @return the measurement id
 	 */
-	public unsigned long getId();
+	public long getId();
 
 	/**
 	 * This method returns a textual name or description of the kind

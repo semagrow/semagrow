@@ -1,16 +1,16 @@
 /**
  * 
  */
-package eu.semagrow.stack.modules.utils.impl;
+package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.semagrow.stack.modules.utils.EquivalentURI;
-import eu.semagrow.stack.modules.utils.StatementEquivalents;
+import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
+import eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents;
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.utils.StatementEquivalents
+ * @see eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents
  */
 public class StatementEquivalentsImpl implements StatementEquivalents {
 	
@@ -27,38 +27,38 @@ public class StatementEquivalentsImpl implements StatementEquivalents {
 		object_equivalents = new ArrayList<EquivalentURI>();
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.StatementEquivalents#getSubject_equivalents()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents#getSubject_equivalents()
 	 */
 	public List<EquivalentURI> getSubject_equivalents() {
 		return subject_equivalents;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.StatementEquivalents#setSubject_equivalents(java.util.ArrayList)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents#setSubject_equivalents(java.util.ArrayList)
 	 */
 	public void setSubject_equivalents(List<EquivalentURI> subject_equivalents) {
 		this.subject_equivalents = subject_equivalents;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.StatementEquivalents#getPredicate_equivalents()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents#getPredicate_equivalents()
 	 */
 	public List<EquivalentURI> getPredicate_equivalents() {
 		return predicate_equivalents;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.StatementEquivalents#setPredicate_equivalents(java.util.ArrayList)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents#setPredicate_equivalents(java.util.ArrayList)
 	 */
 	public void setPredicate_equivalents(
 			List<EquivalentURI> predicate_equivalents) {
 		this.predicate_equivalents = predicate_equivalents;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.StatementEquivalents#getObject_equivalents()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents#getObject_equivalents()
 	 */
 	public List<EquivalentURI> getObject_equivalents() {
 		return object_equivalents;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.StatementEquivalents#setObject_equivalents(java.util.ArrayList)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents#setObject_equivalents(java.util.ArrayList)
 	 */
 	public void setObject_equivalents(List<EquivalentURI> object_equivalents) {
 		this.object_equivalents = object_equivalents;

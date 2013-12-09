@@ -6,15 +6,17 @@
 
 package eu.semagrow.stack.modules.utils.federationWrapper.impl;
 
-import eu.semagrow.stack.modules.utils.QueryTranformation;
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DistributedExecutionPlan;
+import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
+
 import java.util.Iterator;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;

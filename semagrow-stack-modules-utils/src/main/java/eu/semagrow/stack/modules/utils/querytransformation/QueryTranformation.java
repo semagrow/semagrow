@@ -1,10 +1,12 @@
-package eu.semagrow.stack.modules.utils;
+package eu.semagrow.stack.modules.utils.querytransformation;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
 import org.openrdf.model.URI;
+
+import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
 
 /**
  * {@todo Descrption}

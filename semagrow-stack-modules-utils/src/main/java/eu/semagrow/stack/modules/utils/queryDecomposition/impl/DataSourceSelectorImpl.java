@@ -5,13 +5,15 @@
 package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
-import eu.semagrow.stack.modules.utils.SelectedResource;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DistributedExecutionPlan;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.StatementPattern;
 

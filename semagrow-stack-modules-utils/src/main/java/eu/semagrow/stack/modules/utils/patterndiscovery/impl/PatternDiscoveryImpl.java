@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.semagrow.stack.modules.utils.impl;
+package eu.semagrow.stack.modules.utils.patterndiscovery.impl;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -18,11 +18,12 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import eu.semagrow.stack.modules.utils.EquivalentURI;
-import eu.semagrow.stack.modules.utils.PatternDiscovery;
+import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
+import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
+import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.utils.PatternDiscovery
+ * @see eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery
  */	
 public class PatternDiscoveryImpl implements PatternDiscovery {
 	
@@ -35,7 +36,7 @@ public class PatternDiscoveryImpl implements PatternDiscovery {
 		this.uri = uri;
 	}
         /* (non-Javadoc)
-		 * @see eu.semagrow.stack.modules.utils.PatternDiscovery#retrieveEquivalentPatterns()
+		 * @see eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery#retrieveEquivalentPatterns()
 		 */	
 	public List<EquivalentURI> retrieveEquivalentPatterns() throws IOException, ClassNotFoundException, SQLException {
             List<EquivalentURI> list = new ArrayList<EquivalentURI>();

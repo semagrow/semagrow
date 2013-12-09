@@ -5,8 +5,10 @@
 package eu.semagrow.stack.modules.utils.queryDecomposition;
 
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
-import eu.semagrow.stack.modules.utils.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+
 import java.util.List;
+
 import org.openrdf.query.algebra.StatementPattern;
 
 /**

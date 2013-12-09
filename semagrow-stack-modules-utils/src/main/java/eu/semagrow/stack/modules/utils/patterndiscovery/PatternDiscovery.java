@@ -1,10 +1,12 @@
-package eu.semagrow.stack.modules.utils;
+package eu.semagrow.stack.modules.utils.patterndiscovery;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 
 import org.openrdf.model.URI;
+
+import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
 
 /**
  * For a {@link URI} get equivalent URIs aligned with a certain confidence with the initial URI and belonging to a specific schema.

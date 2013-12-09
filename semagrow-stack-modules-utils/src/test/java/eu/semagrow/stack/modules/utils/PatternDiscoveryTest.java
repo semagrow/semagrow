@@ -15,8 +15,10 @@ import org.junit.Test;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import eu.semagrow.stack.modules.utils.impl.EquivalentURIImpl;
-import eu.semagrow.stack.modules.utils.impl.PatternDiscoveryImpl;
+import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
+import eu.semagrow.stack.modules.utils.patterndiscovery.impl.PatternDiscoveryImpl;
+import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
+import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
 
 /**
  * @author Giannis Mouchakis
@@ -37,7 +39,7 @@ public class PatternDiscoveryTest {
 	}
 	
 	/**
-	 * Test method for {@link eu.semagrow.stack.modules.utils.PatternDiscoveryImpl#retrieveEquivalentPatterns()}.
+	 * Test method for {@link eu.semagrow.stack.modules.utils.patterndiscovery.impl.PatternDiscoveryImpl#retrieveEquivalentPatterns()}.
 	 * @throws SQLException 
 	 * @throws IOException 
 	 * @throws ClassNotFoundException 

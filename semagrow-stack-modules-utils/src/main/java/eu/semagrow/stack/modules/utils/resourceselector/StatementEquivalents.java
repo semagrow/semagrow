@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.utils;
+package eu.semagrow.stack.modules.utils.resourceselector;
 
 import java.util.List;
 

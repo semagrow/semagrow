@@ -1,7 +1,7 @@
 /**
  * 
  */
-package eu.semagrow.stack.modules.utils.impl;
+package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
 import java.io.IOException;
 import java.sql.Connection;
@@ -16,19 +16,20 @@ import org.openrdf.model.URI;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Var;
 
-import eu.semagrow.stack.modules.utils.EquivalentURI;
-import eu.semagrow.stack.modules.utils.InstanceIndex;
-import eu.semagrow.stack.modules.utils.Measurement;
-import eu.semagrow.stack.modules.utils.PatternDiscovery;
-import eu.semagrow.stack.modules.utils.ProsessedStatement;
-import eu.semagrow.stack.modules.utils.ResourceSelector;
-import eu.semagrow.stack.modules.utils.SchemaIndex;
-import eu.semagrow.stack.modules.utils.SelectedResource;
-import eu.semagrow.stack.modules.utils.StatementEquivalents;
+import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
+import eu.semagrow.stack.modules.utils.patterndiscovery.impl.PatternDiscoveryImpl;
+import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
+import eu.semagrow.stack.modules.utils.resourceselector.InstanceIndex;
+import eu.semagrow.stack.modules.utils.resourceselector.Measurement;
+import eu.semagrow.stack.modules.utils.resourceselector.ProsessedStatement;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SchemaIndex;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents;
 
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.utils.ResourceSelector
+ * @see eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector
  */
 public class ResourceSelectorImpl implements ResourceSelector {
 	
@@ -41,9 +42,9 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.ResourceSelector#getSelectedResources()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector#getSelectedResources()
 	 */
-	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, int measurement_id) {
+	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, long measurement_id) {
 		ProsessedStatement processedStatement = processStatement(statementPattern);
 		StatementEquivalents statementEquivalents = null;
 		try {
@@ -293,7 +294,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * @return a list of {@link Measurement}. Empty list if no results.
 	 * @throws SQLException
 	 */
-	private List<Measurement> getLoadInfo(URI endpoint, int measurement_id) throws SQLException {
+	private List<Measurement> getLoadInfo(URI endpoint, long measurement_id) throws SQLException {
 		List<Measurement> loadInfo = new ArrayList<Measurement>();
 		Connection connection = null;
 		try {
@@ -301,10 +302,10 @@ public class ResourceSelectorImpl implements ResourceSelector {
 			String sql = "SELECT id, measurement_type, measurement FROM load_info WHERE endpoint = ? AND id >=?;";
 			PreparedStatement preparedStatement = connection.prepareStatement(sql);
 			preparedStatement.setString(1, endpoint.toString());
-			preparedStatement.setInt(2, measurement_id);
+			preparedStatement.setLong(2, measurement_id);
 			ResultSet resultSet = preparedStatement.executeQuery();
 			while(resultSet.next()) {
-				int id = resultSet.getInt("id");
+				long id = resultSet.getLong("id");
 				String measurement_type = resultSet.getString("measurement_type");
 				int measurement = resultSet.getInt("measurement");
 				Measurement measurementOjb = new MeasurementImpl(id, measurement_type, measurement);

@@ -1,20 +1,20 @@
 /**
  * 
  */
-package eu.semagrow.stack.modules.utils.impl;
+package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import eu.semagrow.stack.modules.utils.InstanceIndex;
-import eu.semagrow.stack.modules.utils.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.InstanceIndex;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 
 import java.util.ArrayList;
 import java.util.List;
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.utils.InstanceIndex
+ * @see eu.semagrow.stack.modules.utils.resourceselector.InstanceIndex
  */
 public class InstanceIndexImpl implements InstanceIndex {
 	
@@ -26,7 +26,7 @@ public class InstanceIndexImpl implements InstanceIndex {
 	}
 
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.InstanceIndexInterface#getEndpoints(org.openrdf.model.URI)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.InstanceIndexInterface#getEndpoints(org.openrdf.model.URI)
 	 */
 	public List<SelectedResource> getEndpoints(URI uri) {//TODO:remove dummy	
 		List<SelectedResource> list = new ArrayList<SelectedResource>();
