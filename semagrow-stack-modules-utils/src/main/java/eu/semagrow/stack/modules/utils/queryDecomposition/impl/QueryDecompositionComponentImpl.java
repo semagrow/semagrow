@@ -22,7 +22,6 @@ package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
-import eu.semagrow.stack.modules.utils.endpoint.impl.SPARQLEndpointImpl;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
 import eu.semagrow.stack.modules.utils.federationWrapper.impl.FederationEndpointWrapperComponentImpl;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
@@ -35,9 +34,6 @@ import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
 import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -48,17 +44,7 @@ import java.util.logging.Logger;
 
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.OpenRDFException;
-import org.openrdf.query.Query;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.query.parser.QueryParserUtil;
-import org.openrdf.query.parser.sparql.SPARQLParser;
-import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.http.HTTPRepository;
-import org.openrdf.repository.sail.SailQuery;
 
 
 
@@ -76,8 +62,8 @@ public class QueryDecompositionComponentImpl implements
     Map<UUID, Iterator<DistributedExecutionPlan>> plansPerQuery;
     
     // TODO: Replace with parameter
-    protected final String FEDERATION_REPOS_URL = "http://localhost:8080/"
-            + "openrdf-workbench/repositories/10/";
+    // protected final String FEDERATION_REPOS_URL = "http://localhost:8080/"
+    //        + "openrdf-workbench/repositories/10/";
     
     public QueryDecompositionComponentImpl(SPARQLEndpoint seiCaller) {
         // Init decomposer
@@ -138,9 +124,11 @@ public class QueryDecompositionComponentImpl implements
                 
         
         // Call federation wrapper
-        final FederationEndpointWrapperComponent fedWrapper = new 
-            FederationEndpointWrapperComponentImpl(qtTransformer, 
-                    new HTTPRepository(FEDERATION_REPOS_URL));
+        final FederationEndpointWrapperComponent fedWrapper;
+        // TODO: Replace with repos based on param/request
+        fedWrapper = new 
+                    FederationEndpointWrapperComponentImpl(
+                            new HTTPRepository(caller.getBaseURI()));
         
         new Thread(new Runnable() {
 
@@ -149,7 +137,7 @@ public class QueryDecompositionComponentImpl implements
                 fedWrapper.executeDistributedQuery(callerEndpoint, sQuery, 
                         uQueryID, plansForQuery(uQueryID), rpParams);
             }
-        });
+        }).start();
     }
 
     public Iterator<DistributedExecutionPlan> plansForQuery(UUID queryID) {

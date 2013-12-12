@@ -6,6 +6,7 @@ package eu.semagrow.stack.modules.utils.queryDecomposition;
 
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
+import java.util.Iterator;
 import java.util.UUID;
 
 /**
@@ -30,4 +31,5 @@ import java.util.UUID;
 public interface QueryDecompositionComponent {
     public void decompose(SPARQLEndpoint caller, UUID uQueryID, String sQuery, 
             ReactivityParameters rpParams);
+    public Iterator<DistributedExecutionPlan> plansForQuery(UUID queryID);
 }

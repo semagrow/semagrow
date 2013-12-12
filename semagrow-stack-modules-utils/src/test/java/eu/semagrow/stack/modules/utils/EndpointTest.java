@@ -6,22 +6,18 @@ package eu.semagrow.stack.modules.utils;
 
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.endpoint.impl.SPARQLEndpointImpl;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintStream;
-import java.io.StringReader;
 import java.io.StringWriter;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.sql.SQLException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import sun.net.www.http.HttpClient;
 
 /**
  *
@@ -36,7 +32,7 @@ public class EndpointTest {
     @Before
     public void setUp() {
         se = new SPARQLEndpointImpl();
-        
+        se.init();
         // TODO: Create hard coded repositories
         // from DBpedia (proxy)
         // from FactBook (proxy)
@@ -68,9 +64,16 @@ public class EndpointTest {
             " {?city rdf:type ntonto:City}\n" +
             " {?city rdfs:label ?cityName}\n" +
             "}";
+        try {        
+            querySPARQLEndpoint(sQuery);
+        } catch (Exception ex) {
+            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
+        }
         assert(true);
     }
 
+    // @Test
     public void testRemoteQuery() {
         // Check 10 DBPedia cities
         String sQuery = "PREFIX dc:<http://purl.org/dc/elements/1.1/>\n" +
@@ -96,7 +99,7 @@ public class EndpointTest {
     /**
      * Test method for 
      */
-    @Test
+    // @Test
     public void testDistributedQuery() {
         // Combine new testament cities
         // with DBPedia cities, based on label
@@ -164,11 +167,18 @@ public class EndpointTest {
             
         } 
         catch (MalformedURLException e) { 
+            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, e);
+            assert(false);
+            
             // new URL() failed
             // ...
+            assert(false);
         } 
         catch (IOException e) {   
             // openConnection() failed
+            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, e);
+            assert(false);
+            
             // ...
         }
 

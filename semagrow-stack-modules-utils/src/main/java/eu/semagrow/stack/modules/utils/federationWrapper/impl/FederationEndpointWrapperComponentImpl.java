@@ -40,13 +40,12 @@ public class FederationEndpointWrapperComponentImpl implements
     QueryTranformation transformationService;
     HTTPRepository federation;
 
-    public FederationEndpointWrapperComponentImpl(QueryTranformation 
-            transformationService, HTTPRepository federation) 
+    public FederationEndpointWrapperComponentImpl(HTTPRepository federation) 
     {
-        this.transformationService = transformationService;
         this.federation = federation;
     }
 
+    
     
     public void executeDistributedQuery(SPARQLEndpoint caller, String query, 
             UUID queryID,
