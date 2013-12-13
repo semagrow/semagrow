@@ -62,11 +62,14 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
     public static final String TIMEOUT_PARAM_NAME = "timeout";
     public static final String QUERY_PARAM_NAME = "query";
     public static final String SPARQL_URL_SUFFIX = "/sparql";
+    public static final String SERVER_STOP_SUFFIX = "/sparql/quit";
     
+    protected String FederationURL;
     
-    public SPARQLEndpointImpl() {
+    public SPARQLEndpointImpl(String sFederationURL) {
         // Init query map
         toServe = new HashMap<UUID, HttpExchange>();
+        FederationURL = sFederationURL;
     }
 
     public void stopServing() {
@@ -75,14 +78,23 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
             server.stop(5);
     }
 
+    /**
+     * 
+     * @param federationRepos 
+     */
     public void setFederationRepos(HTTPRepository federationRepos) {
         this.federationRepos = federationRepos;
     }
 
-    
+
+    /**
+     * Returns the URI of the server endpoint.
+     * @return The URI as a string.
+     */
     public String getBaseURI() {
-        // TODO: Change based on params
-        return "http://localhost:18000" + SPARQL_URL_SUFFIX;
+        return "http://" + server.getAddress().getHostName() + ":" +
+                String.valueOf(server.getAddress().getPort()) + 
+                SPARQL_URL_SUFFIX;
     }
     
 //    /**
@@ -126,12 +138,8 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
             setReactivityParameters(rpParams);
             
             // Init federation endpoint wrapper component
-            // TODO: Use param-based federation
             FederationEndpointWrapperComponent fed = 
-                    new FederationEndpointWrapperComponentImpl(
-                            new HTTPRepository(
-                            "http://localhost:8080/openrdf-sesame/repositories/10")
-                        );
+                    new FederationEndpointWrapperComponentImpl(federationRepos);
             
             // Init decomposition component
             QueryDecompositionComponent qd = new QueryDecompositionComponentImpl(
@@ -201,6 +209,8 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
         PrintStream resultWriter = new PrintStream(
                 toServe.get(uQueryID).getResponseBody());
         try {
+            // Init HTML output
+            resultWriter.append("<HTML><BODY><PRE>");
             // For every result
             while (result.hasNext()) {
                 BindingSet bsCur = result.next();
@@ -214,11 +224,17 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
                             bsCur.getValue(sName));
                 }
             }
+            // Finalize HTML output
+            resultWriter.append("</PRE></BODY></HTML>");
         } catch (QueryEvaluationException ex) {
             Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
         
         try {
+            // Type of response
+            toServe.get(uQueryID).getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+            // Send OK header together with other headers
+            toServe.get(uQueryID).sendResponseHeaders(200, 0);
             //Finalize output
             toServe.get(uQueryID).getResponseBody().close();
         } catch (IOException ex) {
@@ -232,6 +248,16 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
             server = HttpServer.create(new InetSocketAddress(18000), 
                     0);
             server.createContext(SPARQL_URL_SUFFIX, this);
+            // Allow shutdown
+            // TODO: Remove when not for test
+            final SPARQLEndpointImpl me = this;
+            server.createContext(SERVER_STOP_SUFFIX, new HttpHandler() {
+
+                public void handle(HttpExchange he) throws IOException {
+                    me.stopServing();
+                }
+            });
+            
             Executor toUse = Executors.newFixedThreadPool(
                     Runtime.getRuntime().availableProcessors());
             server.setExecutor(toUse); // creates a default executor

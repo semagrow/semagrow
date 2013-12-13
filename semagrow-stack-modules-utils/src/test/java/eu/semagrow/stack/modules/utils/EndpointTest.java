@@ -6,8 +6,10 @@ package eu.semagrow.stack.modules.utils;
 
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.endpoint.impl.SPARQLEndpointImpl;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -31,7 +33,7 @@ public class EndpointTest {
 
     @Before
     public void setUp() {
-        se = new SPARQLEndpointImpl();
+        se = new SPARQLEndpointImpl("http://localhost:8080/openrdf-sesame/repositories/10");
         se.init();
         // TODO: Create hard coded repositories
         // from DBpedia (proxy)
@@ -41,13 +43,7 @@ public class EndpointTest {
         
     }
 
-    /**
-     * Test method for 
-     */
-    @Test
-    public void testLocalQuery() {
-        // Check 10 DBPedia cities
-        String sQuery = "PREFIX dc:<http://purl.org/dc/elements/1.1/>\n" +
+    final static String PREFIXES = "PREFIX dc:<http://purl.org/dc/elements/1.1/>\n" +
             "PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>\n" +
             "PREFIX owl:<http://www.w3.org/2002/07/owl#>\n" +
             "PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>\n" +
@@ -57,15 +53,26 @@ public class EndpointTest {
             "PREFIX ntind:<http://www.semanticbible.org/2005/09/NTN-individuals.owl#>\n" +
             "PREFIX ntonto:<http://semanticbible.org/ns/2006/NTNames#>\n" +
             "PREFIX dbo:<http://dbpedia.org/ontology/>\n" +
-            "PREFIX dbpedia:<http://dbpedia.org/resource/>\n" +
+            "PREFIX dbpedia:<http://dbpedia.org/resource/>\n";
+    /**
+     * Test method for 
+     */
+    @Test
+    public void testLocalQuery() {
+        // Check 10 DBPedia cities
+        String sQuery = PREFIXES +
             "\n" +
             "SELECT ?city ?cityName WHERE\n" +
             "{\n" +
             " {?city rdf:type ntonto:City}\n" +
             " {?city rdfs:label ?cityName}\n" +
-            "}";
+            "} LIMIT 10";
         try {        
             querySPARQLEndpoint(sQuery);
+            Logger.getLogger(EndpointTest.class.getName()).log(Level.INFO, 
+                    "Waiting for the 10sec query to execute.");
+            shutDownSPARQLEndpoint();
+            Thread.sleep(10000);
         } catch (Exception ex) {
             Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, ex);
             assert(false);
@@ -151,19 +158,20 @@ public class EndpointTest {
             URL myURL = new URL(sCallURL);
             URLConnection myURLConnection = myURL.openConnection();
             myURLConnection.connect();
-            StringWriter os = new StringWriter();
+            
             InputStream is = myURLConnection.getInputStream();
+            BufferedReader br = new BufferedReader(new InputStreamReader(is));
+            StringBuffer sRes = new StringBuffer();
             // Get result to output
-            int iNext = is.read();
-            while (iNext > -1) { 
-                os.write(iNext);
-                iNext = is.read();
+            String sLine = br.readLine();
+            while (sLine != null) {
+                sRes.append(sLine);
+                sLine = br.readLine();
             }
             // Finalize
             is.close();
-            os.close();
             // Output result
-            System.out.println(os.toString());
+            System.out.println(sRes.toString());
             
         } 
         catch (MalformedURLException e) { 
@@ -182,6 +190,19 @@ public class EndpointTest {
             // ...
         }
 
+    }
+
+    private void shutDownSPARQLEndpoint() {
+        try {
+            String sCallURL = se.getBaseURI() + SPARQLEndpointImpl.SERVER_STOP_SUFFIX;
+            URL myURL = new URL(sCallURL);
+            URLConnection myURLConnection = myURL.openConnection();
+            myURLConnection.connect();
+        } catch (IOException ex) {
+            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Logger.getLogger(EndpointTest.class.getName()).log(Level.INFO, 
+                "Shutting down server...");
     }
 }
     

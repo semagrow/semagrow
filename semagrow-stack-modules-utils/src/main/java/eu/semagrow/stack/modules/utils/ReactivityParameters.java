@@ -20,7 +20,7 @@ public class ReactivityParameters {
      * Strategy of delivering tuples only after the complete
      * results have been gathered.
      */
-    public static String STRATEGY_DELIVER_ON_COMPLETION = "DeliverOnArrival";
+    public static String STRATEGY_DELIVER_ON_COMPLETION = "DeliverOnCompletion";
     
     /**
      * Set of strategies.
