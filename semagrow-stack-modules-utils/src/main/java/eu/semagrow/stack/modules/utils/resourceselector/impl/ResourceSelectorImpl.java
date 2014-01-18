@@ -3,6 +3,7 @@
  */
 package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
+
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -11,6 +12,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.StatementPattern;
@@ -45,6 +48,8 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * @see eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector#getSelectedResources()
 	 */
 	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, long measurement_id) {
+		String log_start = "start resource discovery for " + statementPattern.toString() + " with measurement_id=" + measurement_id;
+		Logger.getLogger(ResourceSelectorImpl.class.getName()).log(Level.INFO, log_start);
 		ProsessedStatement processedStatement = processStatement(statementPattern);
 		StatementEquivalents statementEquivalents = null;
 		try {
@@ -70,6 +75,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 			e.printStackTrace();
 			return null;
 		}
+		Logger.getLogger(ResourceSelectorImpl.class.getName()).log(Level.INFO, "Resource Selector finish");
 		return resourceList;
 	}
 	
@@ -296,7 +302,25 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 */
 	private List<Measurement> getLoadInfo(URI endpoint, long measurement_id) throws SQLException {
 		List<Measurement> loadInfo = new ArrayList<Measurement>();
-		Connection connection = null;
+		//dummy data for sources
+		if (endpoint.toString().equals("http://www.semagrow.eu:8080/bigdata_seamless/sparql")) {
+			for (long i=1; i<=measurement_id; i++) {
+				loadInfo.add(new MeasurementImpl(i, "source measurement", (int) (i + 1)));
+			}
+		} else if (endpoint.toString().equals("http://www.semagrow.eu:8080/bigdata_t4f/sparql")){
+			for (long i=1; i<=measurement_id; i++) {
+				loadInfo.add(new MeasurementImpl(i, "source measurement", (int) (i + 2)));
+			}
+		} else if (endpoint.toString().equals("http://www.semagrow.eu:8080/bigdata_eururalis/sparql")){
+			for (long i=1; i<=measurement_id; i++) {
+				loadInfo.add(new MeasurementImpl(i, "source measurement", (int) (i + 1)));
+			}
+		} else if (endpoint.toString().equals("http://www.semagrow.eu:8080/bigdata_laflor/sparql")){
+			for (long i=1; i<=measurement_id; i++) {
+				loadInfo.add(new MeasurementImpl(i, "source measurement", (int) (i + 2)));
+			}
+		}
+		/*Connection connection = null;
 		try {
 			connection = DriverManager.getConnection("jdbc:postgresql://localhost:5432/loadinfoDB", "postgres", "root");
 			String sql = "SELECT id, measurement_type, measurement FROM load_info WHERE endpoint = ? AND id >=?;";
@@ -315,7 +339,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 			if (connection != null) {
 				connection.close();
 			}
-		}
+		}*/
 		return loadInfo;
 	}
 

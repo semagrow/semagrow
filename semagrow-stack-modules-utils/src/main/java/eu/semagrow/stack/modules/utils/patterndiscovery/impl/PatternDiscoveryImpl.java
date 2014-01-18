@@ -13,6 +13,8 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
@@ -20,7 +22,9 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
 import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
+import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
 
 /* (non-Javadoc)
  * @see eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery
@@ -39,8 +43,30 @@ public class PatternDiscoveryImpl implements PatternDiscovery {
 		 * @see eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery#retrieveEquivalentPatterns()
 		 */	
 	public List<EquivalentURI> retrieveEquivalentPatterns() throws IOException, ClassNotFoundException, SQLException {
+		Logger.getLogger(PatternDiscoveryImpl.class.getName()).log(Level.INFO, "starting Pattern Discovery for URI: " + this.uri.toString());
             List<EquivalentURI> list = new ArrayList<EquivalentURI>();
-            
+            ValueFactory valueFactory = new ValueFactoryImpl();
+            //also add the original URI to the EquivalentURI list, with proximity -1 and schema null. TODO:check if this is OK with the exception handling.
+            if (this.uri.toString().equals("http://semagrow.eu/schemas/t4f#precipitation")) {
+                EquivalentURI equri = new EquivalentURIImpl(valueFactory.createURI("http://ontologies.seamless-ip.org/farm.owl#rainfall"), 1000, valueFactory.createURI("http://ontologies.seamless-ip.org/farm.owl"));
+                list.add(equri);
+                EquivalentURI equri2 = new EquivalentURIImpl(valueFactory.createURI("http://ontologies.seamless-ip.org/farm.owl#rainfallMin"), 700, valueFactory.createURI("http://ontologies.seamless-ip.org/farm.owl"));
+                list.add(equri2);
+                EquivalentURI equri3 = new EquivalentURIImpl(valueFactory.createURI("http://ontologies.seamless-ip.org/farm.owl#rainfallMin"), 700, valueFactory.createURI("http://ontologies.seamless-ip.org/farm.owl"));
+                list.add(equri3);
+            }
+            if (list.size() == 0) {
+            	Logger.getLogger(PatternDiscoveryImpl.class.getName()).log(Level.INFO, "found 0 equivalent URIs");
+            } else {
+            	String logger_message_result = "";
+        		for (EquivalentURI equivalentURI : list) {
+        			logger_message_result += "found equivalent URI " + equivalentURI.getEquivalent_URI().toString() + " with proximity " + equivalentURI.getProximity() + " and schema " + equivalentURI.getSchema() + "\n";
+        		}
+            	Logger.getLogger(PatternDiscoveryImpl.class.getName()).log(Level.INFO, logger_message_result);
+            }
+            EquivalentURI eq_original = new EquivalentURIImpl(uri, -1, null);
+            list.add(eq_original);
+            /*
             Properties prop = new Properties();
             prop.load(new FileInputStream("config.db"));
         
@@ -81,7 +107,7 @@ public class PatternDiscoveryImpl implements PatternDiscovery {
             		connection.close();
             	}
             } 
-            
+            */
             return list;
 	}
 }

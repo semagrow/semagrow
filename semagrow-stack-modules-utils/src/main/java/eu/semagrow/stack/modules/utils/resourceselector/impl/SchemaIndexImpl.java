@@ -3,8 +3,12 @@
  */
 package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
+import Main2;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
@@ -29,9 +33,32 @@ public class SchemaIndexImpl implements SchemaIndex {
 	 * @see eu.semagrow.stack.modules.utils.resourceselector.SchemaIndex#getEndpoints(org.openrdf.model.URI)
 	 */
 	public List<SelectedResource> getEndpoints(URI uri) {//TODO:remove dummy
+		String logger_message = "try to discover possible sources for URI:" + uri.toString();
+		Logger.getLogger(SchemaIndexImpl.class.getName()).log(Level.INFO, logger_message);
 		List<SelectedResource> list = new ArrayList<SelectedResource>();
 		ValueFactory valueFactory = new ValueFactoryImpl();
-		SelectedResource selectedResource1 = new SelectedResourceImpl(valueFactory.createURI("http://a"), 100, 1);
+		String uri_str = uri.toString();
+		if (uri_str.startsWith("http://ontologies.seamless-ip.org/crop.owl#") || uri_str.startsWith("http://ontologies.seamless-ip.org/farm.owl#")) {
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_seamless/sparql"), 1, 1));
+		} else if (uri_str.startsWith("http://semagrow.eu/schemas/eururalis#")) {
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_t4f/sparql"), 2, 2));
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_eururalis/sparql"), 2, 2));
+		} else if (uri_str.startsWith("http://semagrow.eu/schemas/t4f#")) {
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_t4f/sparql"), 2, 1));	
+		} else if (uri_str.startsWith("http://purl.org/dc/terms/")) {
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_laflor/sparql"), 0, 0));	
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_t4f/sparql"), 0, 0));	
+		} else if (uri_str.startsWith("http://semagrow.eu/schemas/laflor#") || uri_str.startsWith("http://www.w3.org/2003/01/geo/wgs84_pos#") || uri_str.startsWith("http://aims.fao.org/aos/agrovoc/") || uri_str.startsWith("http://schema.org/")) {
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_laflor/sparql"), 0, 0));	
+		} else if (uri_str.startsWith("http://id.loc.gov/")) {
+			list.add(new SelectedResourceImpl(valueFactory.createURI("http://www.semagrow.eu:8080/bigdata_laflor/sparql"), 0, 0));
+		}
+		String logger_message_result = "";
+		for (SelectedResource selectedResource : list) {
+			logger_message_result += "found candidate source " + selectedResource.getEndpoint().toString() + "containing " + selectedResource.getVol() + " results\n";
+		}
+		Logger.getLogger(SchemaIndexImpl.class.getName()).log(Level.INFO, logger_message_result);
+		/*SelectedResource selectedResource1 = new SelectedResourceImpl(valueFactory.createURI("http://a"), 100, 1);
 		SelectedResource selectedResource2 = new SelectedResourceImpl(valueFactory.createURI("http://b"), 10, 2);
 		SelectedResource selectedResource3 = new SelectedResourceImpl(valueFactory.createURI("http://c"), 100, 1);
 		SelectedResource selectedResource4 = new SelectedResourceImpl(valueFactory.createURI("http://d"), 100, 1);
@@ -40,7 +67,7 @@ public class SchemaIndexImpl implements SchemaIndex {
 		list.add(selectedResource2);
 		list.add(selectedResource3);
 		list.add(selectedResource4);
-		list.add(selectedResource5);
+		list.add(selectedResource5);*/
 		return list;
 	}
 
