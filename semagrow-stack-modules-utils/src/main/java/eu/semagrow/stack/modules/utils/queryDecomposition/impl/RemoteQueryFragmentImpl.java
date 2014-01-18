@@ -7,8 +7,8 @@
 package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 
 import eu.semagrow.stack.modules.utils.queryDecomposition.RemoteQueryFragment;
+import java.net.URI;
 import java.util.List;
-import org.openrdf.model.URI;
 import org.openrdf.query.parser.ParsedOperation;
 
 /** Represents a single query fragment, that needs/can be executed

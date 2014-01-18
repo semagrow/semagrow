@@ -6,6 +6,7 @@
 
 package eu.semagrow.stack.modules.utils.endpoint.impl;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -16,7 +17,9 @@ import eu.semagrow.stack.modules.utils.federationWrapper.impl.FederationEndpoint
 import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecompositionComponent;
 import eu.semagrow.stack.modules.utils.queryDecomposition.impl.QueryDecompositionComponentImpl;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
@@ -114,10 +117,11 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
 
     public void handle(HttpExchange he) throws IOException {
         // Get parameters
-        Map<String, Object> urlQueryParams;
-        urlQueryParams = parseRequestQuery(
-                he.getRequestURI().getQuery());
-        String sQuery = urlQueryParams.get(QUERY_PARAM_NAME).toString();
+        Map<String, List<String>> urlQueryParams;
+        
+        urlQueryParams = parseRequestPOSTParams(
+                he);
+        String sQuery = urlQueryParams.get(QUERY_PARAM_NAME).get(0).toString();
         
         // Try parsing the query
         ParsedQuery pqQuery = null;
@@ -144,7 +148,7 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
         UUID queryID;
         try {
             queryID = UUID.nameUUIDFromBytes(
-                    he.getRequestURI().getRawQuery().toString().getBytes());
+                    sQuery.getBytes());
         } catch (Exception e) {
             Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(
                     Level.WARNING, null, e);
@@ -157,8 +161,18 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
         
         // Get reactivity parameters
         // TODO: Update as required
-        String sStrategy = urlQueryParams.get(STRATEGY_PARAM_NAME).toString();
-        int iTimeout = Integer.valueOf(urlQueryParams.get(TIMEOUT_PARAM_NAME).toString());
+        String sStrategy = urlQueryParams.get(STRATEGY_PARAM_NAME).get(0).toString();
+        
+        int iTimeout = 60000;
+        try {
+            Integer.valueOf(urlQueryParams.get(TIMEOUT_PARAM_NAME).get(0).toString());
+        } catch (Exception e) {
+            // Ignore
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(
+                    Level.WARNING, "Cannot parse timeout param. Using default.", 
+                    e);
+        }
+        
         
         try {
             ReactivityParameters rpParams = new ReactivityParameters(iTimeout, 
@@ -352,5 +366,55 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
         } catch (IOException ex) {
             Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    private Map<String, List<String>> parseRequestPOSTParams(HttpExchange exchange) throws IOException {
+        // determine encoding
+        Headers reqHeaders = exchange.getRequestHeaders();
+        String contentType = reqHeaders.getFirst("Content-Type");
+        String encoding = "UTF-8";
+//        if (contentType != null) {
+//            Map<String,String> parms = reqHeaders.parse(contentType);
+//            if (parms.containsKey("charset")) {
+//                encoding = parms.get("charset");
+//            }
+//        }
+        
+        // read the query string from the request body
+        String qry;
+        InputStream in = exchange.getRequestBody();
+        try {
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            byte buf[] = new byte[4096];
+            for (int n = in.read(buf); n > 0; n = in.read(buf)) {
+                out.write(buf, 0, n);
+            }
+            qry = new String(out.toByteArray(), encoding);
+        } finally {
+            in.close();
+        }
+        // parse the query
+        Map<String,List<String>> parms = new HashMap<String,List<String>>();
+        String defs[] = qry.split("[&]");
+        for (String def: defs) {
+            int ix = def.indexOf('=');
+            String name;
+            String value;
+            if (ix < 0) {
+                name = def;
+                value = "";
+            } else {
+                name = def.substring(0, ix);
+                value = URLDecoder.decode(def.substring(ix+1), encoding);
+            }
+            List<String> list = parms.get(name);
+            if (list == null) {
+                list = new ArrayList<String>();
+                parms.put(name, list);
+            }
+            list.add(value);
+        }
+        
+        return parms;
     }
 }

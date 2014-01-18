@@ -11,7 +11,9 @@ import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
 import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
+import eu.semagrow.stack.modules.utils.queryDecomposition.RemoteQueryFragment;
 import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
+import info.aduna.iteration.CloseableIteration;
 import java.net.URI;
 import java.util.ArrayList;
 
@@ -20,18 +22,18 @@ import java.util.List;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openrdf.query.BindingSet;
 
-import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.query.TupleQueryResultHandlerException;
+import org.openrdf.query.QueryResult;
+import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.repository.sail.SailRepositoryConnection;
+import org.openrdf.sail.SailConnection;
+import org.openrdf.sail.SailException;
 
 /**
  *
@@ -41,7 +43,7 @@ public class FederationEndpointWrapperComponentImpl implements
         FederationEndpointWrapperComponent {
 
     SPARQLEndpoint caller;
-    String query;
+    ParsedQuery query;
     Iterator<AlternativeDecomposition> possibleDecompositions;
     QueryTranformation transformationService;
 
@@ -51,7 +53,7 @@ public class FederationEndpointWrapperComponentImpl implements
 
     
     
-    public void executeDistributedQuery(SPARQLEndpoint caller, String query, 
+    public void executeDistributedQuery(SPARQLEndpoint caller, ParsedQuery query, 
             UUID queryID,
             Iterator<AlternativeDecomposition> possiblePlans, 
             ReactivityParameters rpParams) {
@@ -60,72 +62,91 @@ public class FederationEndpointWrapperComponentImpl implements
         this.possibleDecompositions = possiblePlans;
         
         
-        ParsedQuery p = null;
-        TupleQuery q = null;
-        TupleQueryResult t = null;
+//        TupleQuery q = null;
+//        TupleQueryResult t = null;
+        CloseableIteration<BindingSet, QueryEvaluationException> bsRes = null;
         
         try {
-            // Check query
-            p = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, 
-                    query, "http://semagrow.eu/");
-            
-            
-            // Initialize connection
-            
             // For every plan
             while (possiblePlans.hasNext()) {
                 // Get all endpoints in plan
                 AlternativeDecomposition curPlan = possiblePlans.next();
                 // Initialize list
                 List<Endpoint> lEndpoints = new ArrayList<Endpoint>();
-                for (URI uCurEndpointURI : curPlan.getEndpoints()) {
-                    Endpoint e = new Endpoint(uCurEndpointURI.toString(), 
-                            uCurEndpointURI.getHost(), 
-                            uCurEndpointURI.toString(), 
-                            Endpoint.EndpointType.SparqlEndpoint, 
-                            Endpoint.EndpointClassification.Remote);
-                    lEndpoints.add(e);
+                for (RemoteQueryFragment uCurRFrag : curPlan.getRemoteQueryFragments()) {
+                    for (URI uCurEndpoint : uCurRFrag.getSources()) {
+                        Endpoint e = new Endpoint(uCurEndpoint.toString(), 
+                                uCurEndpoint.getHost(), 
+                                uCurEndpoint.toString(), 
+                                Endpoint.EndpointType.SparqlEndpoint, 
+                                Endpoint.EndpointClassification.Remote);
+                        lEndpoints.add(e);
+                    }
                 }
                     
                 // Initialize federation
                 SailRepository srFederation = 
                         FedXFactory.initializeFederation(lEndpoints);
                 RepositoryConnection rc = srFederation.getConnection();
+                SailRepositoryConnection sl = srFederation.getConnection();
+                SailConnection sc = sl.getSailConnection();
                 
-                // Perform query
-                q = rc.prepareTupleQuery(QueryLanguage.SPARQL, query);
-                // Set the time, taking into account the time limitations
-                q.setMaxQueryTime(rpParams.getMaximumResponseTime());
-
-                if (rpParams.getStrategy().equals(
-                        ReactivityParameters.STRATEGY_DELIVER_ON_ARRIVAL))
-                    // Call incrementally
-                    try {
-                        // Call incrementally
-                        q.evaluate(caller);
-                        
-                    } catch (QueryEvaluationException ex) {
-                        Logger.getLogger(
-                          FederationEndpointWrapperComponentImpl.class.getName()
-                        ).log(Level.SEVERE, "Could not incrementally "
-                                + "evaluate query..."
-                                + " Trying alternate plan.", ex);
-                    }
-                else
-                {
-                    try {
-                        // Call one-put
-                        t = q.evaluate();
-                        break; // Ignore other plans
-                    } catch (QueryEvaluationException ex) {
-                        Logger.getLogger(
-                          FederationEndpointWrapperComponentImpl.class.getName()
-                        ).log(Level.SEVERE, "Could not evaluate query..."
-                                + " Trying alternate plan.", ex);
-                    }
+                
+                // BEGIN DEMO
+                // Initialize binding set
+                
+                try {
+                    // Perform query
+                    // TODO: Implement normally
+                    bsRes = (CloseableIteration<BindingSet, QueryEvaluationException>) 
+                            sc.evaluate(query.getTupleExpr(), null, 
+                                new EmptyBindingSet(), false);
+                    /////////////
+                } catch (SailException ex) {
+                    Logger.getLogger(
+                      FederationEndpointWrapperComponentImpl.class.getName()
+                      ).log(Level.SEVERE, "Could not evaluate...", ex);
+                    
                 }
-                // Render results
-                caller.renderResults(queryID, t);
+                // END DEMO
+                try {
+                    // TODO: Restore
+//                // Set the time, taking into account the time limitations
+//                q.setMaxQueryTime(rpParams.getMaximumResponseTime());
+
+//                if (rpParams.getStrategy().equals(
+//                        ReactivityParameters.STRATEGY_DELIVER_ON_ARRIVAL))
+//                    // Call incrementally
+//                    try {
+//                        // Call incrementally
+//                        q.evaluate(caller);
+//                        
+//                    } catch (QueryEvaluationException ex) {
+//                        Logger.getLogger(
+//                          FederationEndpointWrapperComponentImpl.class.getName()
+//                        ).log(Level.SEVERE, "Could not incrementally "
+//                                + "evaluate query..."
+//                                + " Trying alternate plan.", ex);
+//                    }
+//                else
+//                {
+//                    try {
+//                        // Call one-put
+//                        t = q.evaluate();
+//                        break; // Ignore other plans
+//                    } catch (QueryEvaluationException ex) {
+//                        Logger.getLogger(
+//                          FederationEndpointWrapperComponentImpl.class.getName()
+//                        ).log(Level.SEVERE, "Could not evaluate query..."
+//                                + " Trying alternate plan.", ex);
+//                    }
+//                }
+                    // Render results
+                    caller.renderResults(queryID, (QueryResult<BindingSet>) bsRes.next());
+                } catch (QueryEvaluationException ex) {
+                    Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).log(
+                            Level.SEVERE, null, ex);
+                }
                 
             }
                         
@@ -133,29 +154,32 @@ public class FederationEndpointWrapperComponentImpl implements
             Logger.getLogger(
                     FederationEndpointWrapperComponentImpl.class.getName()).log(
                             Level.SEVERE, null, ex);
-        } catch (MalformedQueryException ex) {
-            p = null;
-            Logger.getLogger(
-                    FederationEndpointWrapperComponentImpl.class.getName()).log(
-                            Level.SEVERE, null, ex);
-        } catch (TupleQueryResultHandlerException ex) {
-            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (FedXException ex) {
-            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).log(Level.SEVERE, null, ex);
+        } 
+//        catch (MalformedQueryException ex) {
+//            p = null;
+//            Logger.getLogger(
+//                    FederationEndpointWrapperComponentImpl.class.getName()).log(
+//                            Level.SEVERE, null, ex);
+//        } catch (TupleQueryResultHandlerException ex) {
+//            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).log(Level.SEVERE, null, ex);
+//        } 
+        catch (FedXException ex) {
+            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()
+            ).log(Level.SEVERE, "FedX federation failed...", ex);
         }
         finally {
             // TODO: Handle malformed query
             // Clean-up query
-            if (t != null) 
+            if (bsRes != null) 
             {
-                try {
-                        t.close();
-                        t = null;
-                } catch (QueryEvaluationException ex) {
-                    Logger.getLogger(
-                            FederationEndpointWrapperComponentImpl.class.getName()
-                            ).log(Level.SEVERE, null, ex);
-                }
+//                try {
+//                        t.close();
+//                        t = null;
+//                } catch (QueryEvaluationException ex) {
+//                    Logger.getLogger(
+//                            FederationEndpointWrapperComponentImpl.class.getName()
+//                            ).log(Level.SEVERE, null, ex);
+//                }
             }
         }
     }

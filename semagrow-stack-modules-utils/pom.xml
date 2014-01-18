@@ -11,4 +11,12 @@
   <artifactId>semagrow-stack-modules-utils</artifactId>
   <version>1.0.0-rc1</version>
   <name>semagrow-stack-modules-utils</name>
+    <dependencies>
+        <dependency>
+            <groupId>fedx</groupId>
+            <artifactId>fedx.core</artifactId>
+            <version>3.0</version>
+            <type>jar</type>
+        </dependency>
+    </dependencies>
 </project>

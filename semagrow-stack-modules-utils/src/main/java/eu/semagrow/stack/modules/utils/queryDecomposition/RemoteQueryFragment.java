@@ -6,8 +6,8 @@
 
 package eu.semagrow.stack.modules.utils.queryDecomposition;
 
+import java.net.URI;
 import java.util.List;
-import org.openrdf.model.URI;
 import org.openrdf.query.parser.ParsedOperation;
 
 /**

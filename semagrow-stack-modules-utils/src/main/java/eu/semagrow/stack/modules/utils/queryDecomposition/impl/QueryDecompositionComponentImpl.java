@@ -23,17 +23,14 @@ package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.endpoint.impl.SPARQLEndpointImpl;
-import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
-import eu.semagrow.stack.modules.utils.federationWrapper.impl.FederationEndpointWrapperComponentImpl;
 import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecomposer;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecompositionComponent;
-import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
-import eu.semagrow.stack.modules.utils.querytransformation.impl.QueryTransformationImpl;
 import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
 import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
+import java.net.URI;
 import java.util.ArrayList;
 
 import java.util.HashMap;
@@ -45,14 +42,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.OpenRDFException;
-import org.openrdf.model.URI;
 import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.UnsupportedQueryLanguageException;
 import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.query.parser.QueryParserUtil;
 
 
@@ -227,7 +221,7 @@ public class QueryDecompositionComponentImpl implements
     
     private List<URI> URIListFromItem(String sURL) {
         ArrayList<URI> alRes = new ArrayList();
-        alRes.add(new URIImpl(sURL));
+        alRes.add(URI.create(sURL));
         return alRes;
     }
 }
