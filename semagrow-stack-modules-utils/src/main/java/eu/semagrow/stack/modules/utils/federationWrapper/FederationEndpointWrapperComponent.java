@@ -6,11 +6,12 @@ package eu.semagrow.stack.modules.utils.federationWrapper;
 
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
-import eu.semagrow.stack.modules.utils.queryDecomposition.DistributedExecutionPlan;
+import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
 import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
 
 import java.util.Iterator;
 import java.util.UUID;
+import org.openrdf.query.parser.ParsedQuery;
 
 /**
  * The Federated End-point Wrapper manages the communication with the external 
@@ -44,10 +45,12 @@ public interface FederationEndpointWrapperComponent {
      * of alternative plans.
      * @param endpoint The SPARQLEndpoint that requested the query.
      * @param sQuery The original full text query.
-     * @param plans An iterator of possible plans to execute.
+     * @param queryID The UUID of the query.
+     * @param decompositions An iterator of possible decompositions to execute.
+     * @param rpParams The responsiveness parameters.
      */
-    public void executeDistributedQuery(SPARQLEndpoint endpoint, String sQuery,
-            UUID queryID, Iterator<DistributedExecutionPlan> plans, 
+    public void executeDistributedQuery(SPARQLEndpoint endpoint, ParsedQuery sQuery,
+            UUID queryID, Iterator<AlternativeDecomposition> decompositions, 
             ReactivityParameters rpParams);
     public void setTransformationService(QueryTranformation transformer);
 }

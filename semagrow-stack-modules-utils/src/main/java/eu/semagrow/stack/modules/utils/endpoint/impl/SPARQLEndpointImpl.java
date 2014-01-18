@@ -13,15 +13,15 @@ import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
 import eu.semagrow.stack.modules.utils.federationWrapper.impl.FederationEndpointWrapperComponentImpl;
-import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
-import eu.semagrow.stack.modules.utils.queryDecomposition.DistributedExecutionPlan;
+import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecompositionComponent;
-import eu.semagrow.stack.modules.utils.queryDecomposition.impl.DataSourceSelectorImpl;
 import eu.semagrow.stack.modules.utils.queryDecomposition.impl.QueryDecompositionComponentImpl;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.UnsupportedEncodingException;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,10 +37,13 @@ import java.util.logging.Logger;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.QueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.algebra.StatementPattern;
+import org.openrdf.query.UnsupportedQueryLanguageException;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.repository.http.HTTPRepository;
 
 /**
@@ -52,8 +55,11 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
     protected Map<UUID, HttpExchange> toServe;
     protected HttpServer server;
     protected HTTPRepository federationRepos;
+    protected int Port;
     
     protected ReactivityParameters reactivityParameters;
+    protected URI FederationURI;
+    
     
     /**
      * Constants
@@ -64,12 +70,12 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
     public static final String SPARQL_URL_SUFFIX = "/sparql";
     public static final String SERVER_STOP_SUFFIX = "/sparql/quit";
     
-    protected String FederationURL;
-    
-    public SPARQLEndpointImpl(String sFederationURL) {
+    public SPARQLEndpointImpl(String sFederationURL) throws URISyntaxException {
         // Init query map
         toServe = new HashMap<UUID, HttpExchange>();
-        FederationURL = sFederationURL;
+        // Initialize the URI and serving port
+        FederationURI = new URI(sFederationURL);
+        Port = FederationURI.getPort();
     }
 
     public void stopServing() {
@@ -92,9 +98,10 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
      * @return The URI as a string.
      */
     public String getBaseURI() {
-        return "http://" + server.getAddress().getHostName() + ":" +
-                String.valueOf(server.getAddress().getPort()) + 
-                SPARQL_URL_SUFFIX;
+//        return "http://" + server.getAddress().getHostString() + ":" +
+//                String.valueOf(server.getAddress().getPort()) + 
+//                SPARQL_URL_SUFFIX;
+        return FederationURI + SPARQL_URL_SUFFIX;
     }
     
 //    /**
@@ -106,10 +113,32 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
 //    }
 
     public void handle(HttpExchange he) throws IOException {
+        // Get parameters
         Map<String, Object> urlQueryParams;
         urlQueryParams = parseRequestQuery(
                 he.getRequestURI().getQuery());
         String sQuery = urlQueryParams.get(QUERY_PARAM_NAME).toString();
+        
+        // Try parsing the query
+        ParsedQuery pqQuery = null;
+        try {
+            pqQuery = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, 
+                    sQuery, "http://semagrow.eu/");
+        } catch (MalformedQueryException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.WARNING
+                    , "Malformed query:\n" + sQuery,  ex);
+            
+            returnError(he, "Malformed query:\n" + sQuery + "\n" + 
+                    ex.getMessage());
+            return;
+        } catch (UnsupportedQueryLanguageException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.WARNING
+                    , "Unsupported query language. Should NOT happen if SPARQL is used."
+                            + "Please check:\n" + sQuery,  ex);
+            returnError(he, "Server error. The server does not seem capable to "
+                    + "handle SPARQL. Please contact the administrator.");
+            return;
+        }
         
         // Create unique ID (based on query string)
         UUID queryID;
@@ -127,7 +156,7 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
         toServe.put(queryID, he);
         
         // Get reactivity parameters
-        // TODO: replace with constant parameter name
+        // TODO: Update as required
         String sStrategy = urlQueryParams.get(STRATEGY_PARAM_NAME).toString();
         int iTimeout = Integer.valueOf(urlQueryParams.get(TIMEOUT_PARAM_NAME).toString());
         
@@ -137,25 +166,43 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
             // Update reactivity params
             setReactivityParameters(rpParams);
             
-            // Init federation endpoint wrapper component
-            FederationEndpointWrapperComponent fed = 
-                    new FederationEndpointWrapperComponentImpl(federationRepos);
-            
             // Init decomposition component
-            QueryDecompositionComponent qd = new QueryDecompositionComponentImpl(
+            // TODO: Check if we need a static one to avoid excess objects
+            final QueryDecompositionComponent qd = new QueryDecompositionComponentImpl(
                 this);
-            // Init datasource selector
-            Iterator<DistributedExecutionPlan> idepPlans = qd.plansForQuery(queryID);
-            // Initiate the execution of the query
-            fed.executeDistributedQuery(this, sQuery, queryID, 
-                    idepPlans, reactivityParameters);
+            // Perform decomposition
+            final Iterator<AlternativeDecomposition> idepDecompositions = 
+                    qd.decompose(this, queryID, pqQuery, rpParams);
+            
+            
+            // Handle NO PLANS case (i.e. impossible query)
+            if (!idepDecompositions.hasNext()) {
+                returnError(he, "No viable plans found. Aboring execution.");
+                return;
+            }
+            
+            // Init federation endpoint wrapper component
+            final FederationEndpointWrapperComponent fed = 
+                    new FederationEndpointWrapperComponentImpl();
+            // Create multi-threaded arguments, as needed
+            final SPARQLEndpoint replyTo = this;
+            final ParsedQuery pqQueryArg = pqQuery;
+            final UUID queryIDArg = queryID;            
+            
+            // Initiate the asynchronous execution of the query
+            new Thread(new Runnable() {
+                public void run() {
+                    fed.executeDistributedQuery(replyTo, pqQueryArg, queryIDArg, 
+                        idepDecompositions, reactivityParameters);
+                }
+            }).start();
+            
         } catch (ReactivityParameters.InvalidStrategyException ex) {
             Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(
                     Level.SEVERE, null, ex);
-            // TODO: Return failure in a more efficient way
-            new PrintStream(he.getResponseBody()).println(
-                    "Cannot execute query.");
-            he.getResponseBody().close();
+            
+            returnError(he, "Invalid strategy requested.");
+            return;
         }
         
     }
@@ -244,10 +291,13 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
 
     public void init() {
         try {
-            // TODO: Read server settings from parameter file
-            server = HttpServer.create(new InetSocketAddress(18000), 
+            // Init listener
+            server = HttpServer.create(new InetSocketAddress(Port), 
                     0);
-            server.createContext(SPARQL_URL_SUFFIX, this);
+            // Add context handler
+            server.createContext(FederationURI.getPath() + SPARQL_URL_SUFFIX, 
+                    this);
+            
             // Allow shutdown
             // TODO: Remove when not for test
             final SPARQLEndpointImpl me = this;
@@ -285,5 +335,22 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
 
     public void handleSolution(BindingSet bs) throws TupleQueryResultHandlerException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    private void returnError(HttpExchange he, String sErrorMsg) {
+        PrintStream errorWriter = new PrintStream(
+                he.getResponseBody());
+        errorWriter.print("<html><body><h1>Error:</h1>\n<code>" + 
+                sErrorMsg + "</code><body></html>");
+        try {
+            // Type of response
+            he.getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
+            // Send OK header together with other headers
+            he.sendResponseHeaders(200, 0);
+            //Finalize output
+            he.getResponseBody().close();
+        } catch (IOException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

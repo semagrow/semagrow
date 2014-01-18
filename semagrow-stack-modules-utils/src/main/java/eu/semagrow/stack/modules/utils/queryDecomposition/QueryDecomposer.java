@@ -11,12 +11,13 @@ import java.util.List;
 import java.util.UUID;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.algebra.StatementPattern;
+import org.openrdf.query.parser.ParsedQuery;
 
 /**
  *
  * @author ggianna
  */
 public interface QueryDecomposer {
-    public List<StatementPattern> decomposeQuery(SPARQLEndpoint caller, UUID uQueryID, String sQuery)
-            throws MalformedQueryException;
+    public List<StatementPattern> getPatterns(SPARQLEndpoint caller, 
+            UUID uQueryID, ParsedQuery sQuery);
 }

@@ -8,6 +8,7 @@ import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 
 import java.util.List;
+import java.util.Map;
 
 import org.openrdf.query.algebra.StatementPattern;
 
@@ -17,7 +18,7 @@ import org.openrdf.query.algebra.StatementPattern;
  */
 public interface DataSourceSelector {
     public void setReactivityParameters(ReactivityParameters rpParams);
-    public List<DistributedExecutionPlan> getPlans(String sQuery);
-    public void addFragmentInfo(StatementPattern st, 
+    public Map<StatementPattern, List<SelectedResource>> getStatementInfo();
+    public void addStatementInfo(StatementPattern st, 
             List<SelectedResource> resourceInfo);  
 }

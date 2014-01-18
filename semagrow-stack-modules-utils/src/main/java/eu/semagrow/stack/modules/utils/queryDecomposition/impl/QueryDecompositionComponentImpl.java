@@ -22,10 +22,11 @@ package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
+import eu.semagrow.stack.modules.utils.endpoint.impl.SPARQLEndpointImpl;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
 import eu.semagrow.stack.modules.utils.federationWrapper.impl.FederationEndpointWrapperComponentImpl;
+import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
-import eu.semagrow.stack.modules.utils.queryDecomposition.DistributedExecutionPlan;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecomposer;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecompositionComponent;
 import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
@@ -33,6 +34,7 @@ import eu.semagrow.stack.modules.utils.querytransformation.impl.QueryTransformat
 import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
 import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
+import java.util.ArrayList;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -44,7 +46,14 @@ import java.util.logging.Logger;
 
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.OpenRDFException;
-import org.openrdf.repository.http.HTTPRepository;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.URIImpl;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.UnsupportedQueryLanguageException;
+import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.ParsedTupleQuery;
+import org.openrdf.query.parser.QueryParserUtil;
 
 
 
@@ -59,7 +68,7 @@ public class QueryDecompositionComponentImpl implements
     QueryDecomposer decomposer;
     SPARQLEndpoint callerEndpoint;
     DataSourceSelector dataSourceSelector;
-    Map<UUID, Iterator<DistributedExecutionPlan>> plansPerQuery;
+    Map<UUID, Iterator<AlternativeDecomposition>> plansPerQuery;
     
     // TODO: Replace with parameter
     // protected final String FEDERATION_REPOS_URL = "http://localhost:8080/"
@@ -73,25 +82,26 @@ public class QueryDecompositionComponentImpl implements
         // Set caller
         callerEndpoint = seiCaller;
         // Init plans per query
-        plansPerQuery = new HashMap<UUID, Iterator<DistributedExecutionPlan>>();
+        plansPerQuery = new HashMap<UUID, Iterator<AlternativeDecomposition>>();
     }
 
     
     /**
-     * Decomposes a SPARQL query, also forwarding it for distributed execution on
-     * the federation.
+     * Decomposes a SPARQL query, creating a set of alternative decompositions
+     * usable by the federation wrapper component.
      * @param caller The calling endpoint.
      * @param uQueryID The unique ID of the query.
      * @param sQuery The text of the SPARQL query.
      * @param rpParams The reactivity parameters for the query.
      */
-    public void decompose(final SPARQLEndpoint caller, final UUID uQueryID, 
-            final String sQuery, final ReactivityParameters rpParams) {
+    public Iterator<AlternativeDecomposition> decompose(
+            final SPARQLEndpoint caller, final UUID uQueryID, 
+            final ParsedQuery pqQuery, final ReactivityParameters rpParams) {
         // Decompose query
         try {
             // Get statement patterns
-            List<StatementPattern> lspPatterns = decomposer.decomposeQuery(caller, 
-                    uQueryID, sQuery);
+            List<StatementPattern> lspPatterns = decomposer.getPatterns(caller, 
+                    uQueryID, pqQuery);
             
             // Init data source selector
             dataSourceSelector = new DataSourceSelectorImpl(rpParams);
@@ -99,49 +109,126 @@ public class QueryDecompositionComponentImpl implements
             // For every pattern
             for (StatementPattern spCurNode : lspPatterns) {
                 // Get sources
-                // TODO: check measurement_id (3???)
+                // TODO: check measurement_id (0???)
                 List<SelectedResource> lsrCurResources = 
-                        resourceSelector.getSelectedResources(spCurNode, 3);
+                        resourceSelector.getSelectedResources(spCurNode, 1);
                 
                 // Add selected as alternatives for planning
-                dataSourceSelector.addFragmentInfo(spCurNode, lsrCurResources);                
+                dataSourceSelector.addStatementInfo(spCurNode, lsrCurResources);
             }
-            // Update plans per query map
-            plansPerQuery.put(uQueryID, dataSourceSelector.getPlans(
-                    sQuery).iterator());
+            // TODO: Implement normally
+            // DEMO START
+            AlternativeDecomposition ad = getDemoDecomposition();
+            List<AlternativeDecomposition> lDecomps = new ArrayList();
+            lDecomps.add(ad);
+            // Update possible decomposition list for query
+            plansPerQuery.put(uQueryID, lDecomps.iterator());
             
-            
-        } catch (OpenRDFException ex) {
-            Logger.getLogger(QueryDecompositionComponentImpl.class.getName()
-                ).log(Level.SEVERE, null, ex);
+            // DEMO END
         } catch (Exception ex) {
             Logger.getLogger(QueryDecompositionComponentImpl.class.getName()
                 ).log(Level.SEVERE, "Possibly not a valid query...", ex);
         }
         
-        // TODO: Perform transformation
-        QueryTranformation qtTransformer = new QueryTransformationImpl(null);
-                
-        
-        // Call federation wrapper
-        final FederationEndpointWrapperComponent fedWrapper;
-        // TODO: Replace with repos based on param/request
-        fedWrapper = new 
-                    FederationEndpointWrapperComponentImpl(
-                            new HTTPRepository(caller.getBaseURI()));
-        
-        new Thread(new Runnable() {
-
-            public void run() {
-                // Execute given query asynchronously
-                fedWrapper.executeDistributedQuery(callerEndpoint, sQuery, 
-                        uQueryID, plansForQuery(uQueryID), rpParams);
-            }
-        }).start();
+        // Return caclulated plans
+        return plansPerQuery.get(uQueryID);
     }
 
-    public Iterator<DistributedExecutionPlan> plansForQuery(UUID queryID) {
+    public Iterator<AlternativeDecomposition> decompositionsForQuery(UUID queryID) {
         return plansPerQuery.get(queryID);
+    }
+
+    private final String DEMO_PREFIX = "PREFIX  farm: <http://ontologies.seamless-ip.org/farm.owl#>\n" +
+"PREFIX  dc:   <http://purl.org/dc/terms/>\n" +
+"PREFIX  wgs84_pos: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" +
+"PREFIX  t4f:  <http://semagrow.eu/schemas/t4f#>\n" +
+"PREFIX  laflor: <http://semagrow.eu/schemas/laflor#>\n" +
+"PREFIX  eururalis: <http://semagrow.eu/schemas/eururalis#>\n" +
+"PREFIX  crop: <http://ontologies.seamless-ip.org/crop.owl#>";
+    
+    
+    private final String FIRST_FRAG = DEMO_PREFIX +
+        "\n" +
+        "SELECT  ?Longitude ?Latitude (avg(?PR) AS ?PRE)\n" +
+        "WHERE\n" +
+        "  { ?R t4f:hasLong ?Longitude .\n" +
+        "    ?R t4f:hasLat ?Latitude .\n" +
+        "    ?R eururalis:landuse \"11\" .\n" +
+        "    ?R t4f:precipitation ?PR\n" +
+        "  }\n" +
+"GROUP BY ?Longitude ?Latitude";
+    
+    private final String SECOND_FRAG = DEMO_PREFIX + 
+        "\n" +
+        "SELECT  ?F ?C ?A ?D ?PRE2\n" +
+        "WHERE\n" +
+        "  { ?F farm:year 2010 .\n" +
+        "    ?F farm:cropinformation ?C .\n" +
+        "    ?C crop:productionmushrooms ?M .\n" +
+        "    ?F farm:agrienvironmentalzone ?A .\n" +
+        "    ?A farm:longitude ?ALONG .\n" +
+        "    ?A farm:latitude ?ALAT\n" +
+        "    { SELECT  ?A (avg(?PR) AS ?PRE2)\n" +
+        "      WHERE\n" +
+        "        { ?A farm:dailyclimate ?D .\n" +
+        "          ?D farm:rainfall ?PR\n" +
+        "        }\n" +
+        "      GROUP BY ?A\n" +
+        "    }\n" +
+        "  }";
+
+    private final String THIRD_FRAG = DEMO_PREFIX + "\n" +
+            "SELECT  ?J ?U ?P ?ALAT2 ?ALONG2\n" +
+            "WHERE\n" +
+            "  { ?J dc:subject <http://aims.fao.org/aos/agrovoc/xl_en_1299487055215> .\n" +
+            "    ?J laflor:location ?U .\n" +
+            "    ?J laflor:language <http://id.loc.gov/vocabulary/iso639-2/es> .\n" +
+            "    ?J <http://schema.org/about> ?P .\n" +
+            "    ?P wgs84_pos:lat ?ALAT2 .\n" +
+            "    ?P wgs84_pos:long ?ALONG2\n" +
+            "  }";
+    
+    private AlternativeDecomposition getDemoDecomposition() {
+        AlternativeDecomposition ad = new AlternativeDecompositionImpl();
+        
+        // Queries
+        ParsedQuery p1 = null;
+        ParsedQuery p2 = null;
+        ParsedQuery p3 = null;
+        try {
+            p1 = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, 
+                    FIRST_FRAG, "http://semagrow.eu/");
+            p2 = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, 
+                    SECOND_FRAG, "http://semagrow.eu/");
+            p3 = QueryParserUtil.parseQuery(QueryLanguage.SPARQL, 
+                    THIRD_FRAG, "http://semagrow.eu/");
+        } catch (MalformedQueryException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.WARNING
+                    , "Malformed query",  ex);
+            return ad;
+        } catch (UnsupportedQueryLanguageException ex) {
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.WARNING
+                    , "Unsupported query language. Should NOT happen if SPARQL is used."
+                            + "Please check program.",  ex);
+            return ad;
+        }
+        
+        // Endpoints
+        ad.add(new RemoteQueryFragmentImpl(p1, 
+                URIListFromItem("http://www.semagrow.eu:8080/bigdata_t4f/sparql")));
+        ad.add(new RemoteQueryFragmentImpl(p2, 
+                URIListFromItem("http://www.semagrow.eu:8080/bigdata_seamless/sparql")));
+        ad.add(new RemoteQueryFragmentImpl(p3, 
+                URIListFromItem("http://www.semagrow.eu:8080/bigdata_laflor/sparql")));
+        
+        // Return dummy decomposition
+        return ad;
+    }
+    
+    private List<URI> URIListFromItem(String sURL) {
+        ArrayList<URI> alRes = new ArrayList();
+        alRes.add(new URIImpl(sURL));
+        return alRes;
     }
 }
 

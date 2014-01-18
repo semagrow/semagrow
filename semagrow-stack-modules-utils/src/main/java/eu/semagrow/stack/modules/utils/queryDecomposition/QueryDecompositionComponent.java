@@ -8,6 +8,7 @@ import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import java.util.Iterator;
 import java.util.UUID;
+import org.openrdf.query.parser.ParsedQuery;
 
 /**
  * The query decomposition component analyses SPARQL queries and decides about 
@@ -29,7 +30,7 @@ import java.util.UUID;
  * @author ggianna
  */
 public interface QueryDecompositionComponent {
-    public void decompose(SPARQLEndpoint caller, UUID uQueryID, String sQuery, 
-            ReactivityParameters rpParams);
-    public Iterator<DistributedExecutionPlan> plansForQuery(UUID queryID);
+    public Iterator<AlternativeDecomposition> decompose(SPARQLEndpoint caller, 
+            UUID uQueryID, ParsedQuery sQuery, ReactivityParameters rpParams);
+    public Iterator<AlternativeDecomposition> decompositionsForQuery(UUID queryID);
 }
