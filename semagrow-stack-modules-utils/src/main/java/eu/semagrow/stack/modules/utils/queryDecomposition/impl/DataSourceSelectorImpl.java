@@ -39,16 +39,16 @@ public class DataSourceSelectorImpl implements DataSourceSelector {
         this.reactivityParams = rpParams;
     }
     
-    protected void addFragmentInfo(StatementPattern st, 
-            List<SelectedResource> resourceInfo) {
-        fragmentInfo.put(st, resourceInfo);
-    }
+//    protected void addFragmentInfo(StatementPattern st, 
+//            List<SelectedResource> resourceInfo) {
+//        fragmentInfo.put(st, resourceInfo);
+//    }
 
     public Map<StatementPattern, List<SelectedResource>> getStatementInfo() {
         return fragmentInfo;
     }
 
     public void addStatementInfo(StatementPattern st, List<SelectedResource> resourceInfo) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        fragmentInfo.put(st, resourceInfo);
     }
 }
