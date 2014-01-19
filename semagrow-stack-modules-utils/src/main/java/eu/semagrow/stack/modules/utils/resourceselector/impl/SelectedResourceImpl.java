@@ -164,7 +164,7 @@ public class SelectedResourceImpl implements SelectedResource {
 	/* (non-Javadoc)
 	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#toString()
 	 */
-	@Override
+/*	@Override
 	public String toString() {
 		return "SelectedResource [endpoint=" + endpoint + ", vol=" + vol
 				+ ", var=" + var + ", subject=" + subject
@@ -172,7 +172,20 @@ public class SelectedResourceImpl implements SelectedResource {
 				+ predicate + ", predicateProximity=" + predicateProximity
 				+ ", object=" + object + ", objectProximity=" + objectProximity
 				+ ", loadInfo=" + loadInfo + "]";
+	}*/
+	
+	@Override
+	public String toString() {
+		return "CandidateSources [endpoint=" + endpoint + ", vol=" + vol + "]";
 	}
 	
+	public String toStringAll() {
+		return "[endpoint=" + endpoint + ", vol=" + vol
+				+ ", var=" + var + ", subject=" + subject
+				+ ", subjectProximity=" + subjectProximity + ", predicate="
+				+ predicate + ", predicateProximity=" + predicateProximity
+				+ ", object=" + object + ", objectProximity=" + objectProximity
+				+ ", loadInfo=" + loadInfo + "]";
+	}
 
 }

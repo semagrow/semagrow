@@ -31,17 +31,18 @@ public class FirstTest {
 	public static void main(String[] args) throws ClassNotFoundException, SQLException, IOException {
 		
 		ValueFactory vf = new ValueFactoryImpl();
-		Resource a = vf.createURI("http://oaei.ontologymatching.org/2011/benchmarks/biblio/1/101/onto.rdf#abstract");
+		Literal a = vf.createLiteral("foobara");
 		Var subject = new Var("a", a);
-		Literal b = vf.createLiteral("foobara");
+		Resource b = vf.createURI("http://semagrow.eu/schemas/laflor#language");
 		Var predicate = new Var("b", b);
-		Literal c = vf.createLiteral("foobarb");
+		Resource c = vf.createURI("http://id.loc.gov/vocabulary/iso639-2/es#language");
 		Var object = new Var("c", c);
 		StatementPattern statementPattern = new StatementPattern(subject, predicate, object);
-		System.out.println(statementPattern);
-		
+		//System.out.println(statementPattern);
+
 		ResourceSelector resourceSelector = new ResourceSelectorImpl();
-		System.out.println(resourceSelector.getSelectedResources(statementPattern, 0));
+		resourceSelector.getSelectedResources(statementPattern, 1);
+		//System.out.println(resourceSelector.getSelectedResources(statementPattern, 1));
 
 	}
 

@@ -75,7 +75,11 @@ public class ResourceSelectorImpl implements ResourceSelector {
 			e.printStackTrace();
 			return null;
 		}
-		Logger.getLogger(ResourceSelectorImpl.class.getName()).log(Level.INFO, "Resource Selector finish");
+		String results = "\n";
+		for (SelectedResource selectedResource: resourceList) {
+			results += ((SelectedResourceImpl) selectedResource).toStringAll() + "\n";
+		}
+		Logger.getLogger(ResourceSelectorImpl.class.getName()).log(Level.INFO, "Resource Selector finished. Results: " + results);
 		return resourceList;
 	}
 	
@@ -212,6 +216,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	 * @return a list that contains only valid URI combinations
 	 */
 	private List<SelectedResource> findDuplicates(List<SelectedResource> first_list, List<SelectedResource> second_list) {
+		Logger.getLogger(ResourceSelectorImpl.class.getName()).log(Level.INFO, "Find common sources between " + first_list.toString() + " and " + second_list.toString());
 		ArrayList<SelectedResource> final_list = new ArrayList<SelectedResource>();
 		for (SelectedResource element_first : first_list) {
 			URI first_endpoint = element_first.getEndpoint();
@@ -279,6 +284,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 				}
 			}
 		}
+		Logger.getLogger(ResourceSelectorImpl.class.getName()).log(Level.INFO, "Found " + final_list.toString());
 		return final_list;
 	} 
 	
