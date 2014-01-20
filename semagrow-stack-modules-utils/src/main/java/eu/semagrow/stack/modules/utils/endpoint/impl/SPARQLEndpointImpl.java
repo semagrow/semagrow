@@ -39,9 +39,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.QueryResult;
 import org.openrdf.query.TupleQueryResultHandler;
 import org.openrdf.query.TupleQueryResultHandlerException;
 import org.openrdf.query.UnsupportedQueryLanguageException;
@@ -420,4 +418,6 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
         
         return parms;
     }
+    
+    
 }
