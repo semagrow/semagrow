@@ -207,6 +207,8 @@ public class QueryDecompositionComponentImpl implements
             return ad;
         }
         
+        // TODO: IMPLEMENT ParsedQuery to Sparql query generator
+        
         // Endpoints
         ad.add(new RemoteQueryFragmentImpl(p1, 
                 URIListFromItem("http://www.semagrow.eu:8080/bigdata_t4f/sparql")));

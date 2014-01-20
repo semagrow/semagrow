@@ -16,5 +16,6 @@ import org.openrdf.query.parser.ParsedOperation;
  */
 public interface RemoteQueryFragment {
     public ParsedOperation getFragment();
+    public String getEquivalentSPARQLQuery();
     public List<URI> getSources();
 }

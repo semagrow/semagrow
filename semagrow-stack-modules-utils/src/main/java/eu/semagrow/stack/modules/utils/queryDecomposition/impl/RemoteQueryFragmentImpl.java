@@ -20,19 +20,30 @@ public class RemoteQueryFragmentImpl implements RemoteQueryFragment {
 
     protected ParsedOperation fragment;
     protected List<URI> Sources;
+    protected String equivalentSPARQLQuery;
+
+    public RemoteQueryFragmentImpl(ParsedOperation fragment, List<URI> Sources, String equivalentSPARQLQuery) {
+        this.fragment = fragment;
+        this.Sources = Sources;
+        this.equivalentSPARQLQuery = equivalentSPARQLQuery;
+    }
 
     public RemoteQueryFragmentImpl(ParsedOperation fragment, List<URI> Sources) {
         this.fragment = fragment;
         this.Sources = Sources;
+        this.equivalentSPARQLQuery = fragment.getSourceString();
     }
     
-
     public ParsedOperation getFragment() {
         return fragment;
     }
 
     public List<URI> getSources() {
         return Sources;
+    }
+
+    public String getEquivalentSPARQLQuery() {
+        return equivalentSPARQLQuery;
     }
 
 }
