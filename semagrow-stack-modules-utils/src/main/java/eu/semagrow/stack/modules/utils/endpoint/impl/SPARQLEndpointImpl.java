@@ -285,7 +285,7 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
                         bsCur.getValue(sName));
                 
                 // DEBUG LINES
-                sRes += String.format("%s = %s\n", sName,
+                sRes += String.format("%s = %s ; ", sName,
                         bsCur.getValue(sName));
                 //////////////
             }
