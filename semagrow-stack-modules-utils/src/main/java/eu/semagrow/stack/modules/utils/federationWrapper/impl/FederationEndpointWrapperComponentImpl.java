@@ -4,7 +4,6 @@
 
 package eu.semagrow.stack.modules.utils.federationWrapper.impl;
 
-import com.fluidops.fedx.structures.Endpoint;
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
@@ -22,18 +21,19 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.MalformedQueryException;
 
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.QueryResult;
+import org.openrdf.query.QueryResultUtil;
 import org.openrdf.query.TupleQuery;
+import org.openrdf.query.impl.ListBindingSet;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.http.HTTPRepository;
-import org.openrdf.repository.sparql.SPARQLRepository;
 
 /**
  *
@@ -72,7 +72,7 @@ public class FederationEndpointWrapperComponentImpl implements
                 // Get all endpoints in plan
                 AlternativeDecomposition curPlan = possiblePlans.next();
                 // Initialize list
-                List<Endpoint> lEndpoints = new ArrayList<Endpoint>();
+//                List<Endpoint> lEndpoints = new ArrayList<Endpoint>();
                 RepositoryConnection rc = null;
                 
                 // Init results list
@@ -82,7 +82,8 @@ public class FederationEndpointWrapperComponentImpl implements
                 for (RemoteQueryFragment uCurRFrag : curPlan.getRemoteQueryFragments()) {
                     
                     // DEBUG LINES
-                    Logger.getGlobal().info("Handling fragment:" + uCurRFrag.getFragment().getSourceString());
+                    Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()
+                              ).info("Handling fragment:" + uCurRFrag.getFragment().getSourceString());
                     
                     // Init fragment results
                     fragsToRes.put(uCurRFrag, new ArrayList<BindingSet>());
@@ -91,8 +92,9 @@ public class FederationEndpointWrapperComponentImpl implements
                         try {
                             // Perform query
                             // DEBUG LINES
-                            Logger.getGlobal().info(
-                                    "-- Asking:" + uCurSource.toString());
+                            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()
+                              ).info(
+                              "-- Asking:" + uCurSource.toString());
                             
                             HTTPRepository sr = new HTTPRepository(uCurSource.toString());
 //                            SPARQLRepository sr = new SPARQLRepository(uCurSource.toString());
@@ -113,12 +115,13 @@ public class FederationEndpointWrapperComponentImpl implements
                                     fragsToRes.get(uCurRFrag).add(bsRes.next());
                             
                             // DEBUG LINES
-                            Logger.getGlobal().info(
-                                    "-- Got results.");
+                            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()
+                              ).info("-- Got results.");
                             
                             /////////////
                         } catch (QueryEvaluationException ex) {
-                            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).log(Level.SEVERE, null, ex);
+                            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()
+                            ).log(Level.SEVERE, null, ex);
                         } catch (MalformedQueryException ex) {
                             Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).log(Level.SEVERE, null, ex);
                         }
@@ -140,50 +143,6 @@ public class FederationEndpointWrapperComponentImpl implements
                     } // end for every source
 
                     // TODO: DEMO Perform full query
-String sFullQueryWService = ""
-        + "PREFIX  farm: <http://ontologies.seamless-ip.org/farm.owl#>\n" +
-"PREFIX  dc:   <http://purl.org/dc/terms/>\n" +
-"PREFIX  wgs84_pos: <http://www.w3.org/2003/01/geo/wgs84_pos#>\n" +
-"PREFIX  t4f:  <http://semagrow.eu/schemas/t4f#>\n" +
-"PREFIX  laflor: <http://semagrow.eu/schemas/laflor#>\n" +
-"PREFIX  eururalis: <http://semagrow.eu/schemas/eururalis#>\n" +
-"PREFIX  crop: <http://ontologies.seamless-ip.org/crop.owl#>\n" +
-"\n" +
-"SELECT  ?Longitude ?Latitude ?U\n" +
-"WHERE\n" +
-"  { " +
-       "SERVICE <> " 
-        + "{ SELECT  ?Longitude ?Latitude (avg(?PR) AS ?PRE)\n" +
-"      WHERE\n" +
-"        { ?R t4f:hasLong ?Longitude .\n" +
-"          ?R t4f:hasLat ?Latitude .\n" +
-"          ?R eururalis:landuse \"11\" .\n" +
-"          ?R t4f:precipitation ?PR\n" +
-"        }\n" +
-"      GROUP BY ?Longitude ?Latitude\n" +
-"    }\n" +
-"    ?F farm:year 2010 .\n" +
-"    ?F farm:cropinformation ?C .\n" +
-"    ?C crop:productionmushrooms ?M .\n" +
-"    ?F farm:agrienvironmentalzone ?A .\n" +
-"    ?A farm:longitude ?ALONG .\n" +
-"    ?A farm:latitude ?ALAT\n" +
-"    { SELECT  ?A (avg(?PR) AS ?PRE2)\n" +
-"      WHERE\n" +
-"        { ?A farm:dailyclimate ?D .\n" +
-"          ?D farm:rainfall ?PR\n" +
-"        }\n" +
-"      GROUP BY ?A\n" +
-"    }\n" +
-"    ?J dc:subject <http://aims.fao.org/aos/agrovoc/xl_en_1299487055215> .\n" +
-"    ?J laflor:location ?U .\n" +
-"    ?J laflor:language <http://id.loc.gov/vocabulary/iso639-2/es> .\n" +
-"    ?J <http://schema.org/about> ?P .\n" +
-"    ?P wgs84_pos:lat ?ALAT2 .\n" +
-"    ?P wgs84_pos:long ?ALONG2\n" +
-"    FILTER ( ( ( ( ( ( ( ?M > 10 ) && ( ( ?PRE - ?PRE2 ) < 1 ) ) && ( ( ?PRE - ?PRE2 ) > -1 ) ) && ( ( ?ALAT - ?ALAT2 ) < 1 ) ) && ( ( ?ALAT - ?ALAT2 ) > -1 ) ) && ( ?Longitude < 42.02 ) ) && ( ?Latitude < 1.667 ) )\n" +
-"  }";                    
-                    
     //                // Initialize federation with defaults
     //                Config.initialize(null);
     //                SailRepository srFederation = 
@@ -192,15 +151,21 @@ String sFullQueryWService = ""
     //                SailRepositoryConnection sl = srFederation.getConnection();
     //                SailConnection sc = sl.getSailConnection();
                 }
+                // Join all results
+                List<BindingSet> lbsRes = join(fragsToRes);
                 
+                // Perform filtering
+                lbsRes = filter(lbsRes);
+
                 
-                // Check if results were returned
-                if (bsRes != null) {
+//                // Check if results were returned
+                if (lbsRes != null) {
                     // Render results
-                    caller.renderResults(queryID, (
-                            QueryResult<BindingSet>) bsRes);
+                    caller.renderResults(queryID,
+                            lbsRes);
                     break; // Ignore other plans on success
                 }
+                
             } // end while more plans exist
                         
         } catch (RepositoryException ex) {
@@ -237,8 +202,154 @@ String sFullQueryWService = ""
         }
     }
 
+    private List<BindingSet> join(Map<RemoteQueryFragment, List<BindingSet>> mFragRes) {
+        List<BindingSet> lPreviousBindings = new ArrayList<BindingSet>();
+        Iterator<RemoteQueryFragment> iCurPos = mFragRes.keySet().iterator();
+        
+        // For every binding set related to the current fragment
+        while (iCurPos.hasNext()) {
+            // Init new bindings list
+            List<BindingSet> lNewBindings = new ArrayList<BindingSet>();
+            // Get current step bindings, by moving iterator on
+            List<BindingSet> lRightHandSide = mFragRes.get(iCurPos.next());
+            // Assign on first run
+            if (lPreviousBindings.isEmpty())
+                lNewBindings.addAll(lRightHandSide);
+            else
+                // For every previous binding
+                for (BindingSet bsLeftSideCur : lPreviousBindings) {
+                    // For every new possible binding
+                    for (BindingSet bsRightSideCur : lRightHandSide) {
+                        List<String> lNewNames = new ArrayList<String>();
+                        List<Value> lNewValues = new ArrayList<Value>();
+                        // If OK
+                        if (isCompatible(bsLeftSideCur, bsRightSideCur)) {
+                            // For each var on left side
+                            for (String sVarName : bsLeftSideCur.getBindingNames()) {
+                                // If var is bound
+                                if (bsLeftSideCur.hasBinding(sVarName)) {
+                                    // just add
+                                    // name
+                                    lNewNames.add(sVarName);
+                                    // and value
+                                    lNewValues.add(bsLeftSideCur.getValue(sVarName));
+                                }
+                                else // if unbound
+                                {
+                                    // name
+                                    lNewNames.add(sVarName);
+                                    // if right side contains var
+                                    if (bsRightSideCur.hasBinding(sVarName))
+                                        // Assign existing value
+                                        lNewValues.add(bsRightSideCur.getValue(sVarName));
+                                    else
+                                        // Assign null value (unbound)
+                                        lNewValues.add(null);
+                                }
+                            }
+                            
+                            // For each var on right side
+                            for (String sVarName : bsRightSideCur.getBindingNames()) {
+                                // If not already added
+                                if (!lNewNames.contains(sVarName)) {
+                                    // If var is bound
+                                    if (bsRightSideCur.hasBinding(sVarName)) {
+                                        // just add
+                                        // name
+                                        lNewNames.add(sVarName);
+                                        // and value
+                                        lNewValues.add(bsRightSideCur.getValue(sVarName));
+                                    }
+                                    else // if unbound
+                                    {
+                                        // name
+                                        lNewNames.add(sVarName);
+                                        // Assign null value (unbound)
+                                        lNewValues.add(null);
+                                    }                                    
+                                }
+                            }
+                            
+                        } // end if
+                        
+                        // Create new binding
+                        BindingSet bsNew = new ListBindingSet(lNewNames, lNewValues);
+                        // Add to list
+                        lNewBindings.add(bsNew);
+                    }
+                }
+            // Update left hand side
+            lPreviousBindings = lNewBindings;
+        }
+        
+        // Return all results
+        return lPreviousBindings;
+    }
+    
     public void setTransformationService(QueryTranformation transformer) {
         transformationService = transformer;
+    }
+
+    private boolean isCompatible(BindingSet bsLeftSideCur, BindingSet bsRightSideCur) {
+        // Use existing implementation
+        return QueryResultUtil.bindingSetsCompatible(bsLeftSideCur, 
+                bsRightSideCur);
+
+//        // For every variable
+//        for (String sVarName: bsLeftSideCur.getBindingNames()) {
+//            boolean bLeftBound = bsLeftSideCur.hasBinding(sVarName);
+//            boolean bRightBound = bsRightSideCur.hasBinding(sVarName);
+//            // If both bound
+//            if (bLeftBound && bRightBound)
+//                // but different value
+//                if (!bsLeftSideCur.getValue(sVarName).equals(bsRightSideCur.getValue(sVarName)))
+//                    // not compatible
+//                    return false;
+//        }
+//        // else compatible
+//        return true;
+    }
+
+    private List<BindingSet> filter(List<BindingSet> lbsRes) {
+        // Filter
+        /*
+        ( ?M > 10 ) && 
+        ( ( ?PRE - ?PRE2 ) < 1 ) ) && 
+        ( ( ?PRE - ?PRE2 ) > -1 ) ) && 
+        ( ( ?ALAT - ?ALAT2 ) < 1 ) ) && 
+        ( ( ?ALAT - ?ALAT2 ) > -1 ) ) && 
+        ( ?Longitude < 42.02 ) ) && 
+        ( ?Latitude < 1.667 )        
+        */
+        
+        List<BindingSet> lRes = new ArrayList<BindingSet>();
+        
+        for (BindingSet bsCur : lbsRes) {
+            
+            float M = Float.parseFloat(bsCur.getValue("M").stringValue());
+            float  PRE = Float.parseFloat(bsCur.getValue("PRE").stringValue());
+            float  PRE2 = Float.parseFloat(bsCur.getValue("PRE2").stringValue());
+            float  Longitude = Float.parseFloat(bsCur.getValue("Longitude").stringValue());
+            float  Latitude = Float.parseFloat(bsCur.getValue("Latitude").stringValue());
+            // TODO: Check
+//            float  ALAT2 = Float.parseFloat(bsCur.getValue("ALAT2").stringValue());
+//            float  ALAT = Float.parseFloat(bsCur.getValue("ALAT").stringValue());
+            float  ALAT2 = 0.0f;
+            float  ALAT = 0.0f;
+
+            if ( (M > 10) && 
+                ( ( PRE - PRE2 ) < 1 )  && 
+                ( ( PRE - PRE2 ) > -1 )  && 
+                ( ( ALAT - ALAT2 ) < 1 )  && 
+                ( ( ALAT - ALAT2 ) > -1 )  && 
+                ( Longitude < 42.02 )  && 
+                ( Latitude < 1.667 ) )
+                // Add current
+                lRes.add(bsCur);
+                
+        }
+        
+        return lRes;
     }
     
 }

@@ -266,38 +266,41 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
         this.reactivityParameters = rpParams;
     }
 
-    public void renderResults(UUID uQueryID, QueryResult<BindingSet> result) {
+    public void renderResults(UUID uQueryID, List<BindingSet> result) {
         PrintStream resultWriter = new PrintStream(
                 toServe.get(uQueryID).getResponseBody());
-        try {
-            // Init HTML output
-            resultWriter.append("<HTML><BODY><PRE>");
-            // For every result
-            while (result.hasNext()) {
-                BindingSet bsCur = result.next();
-                Set<String> ssNames = bsCur.getBindingNames();
-                
-                // For each name in binding
-                for (String sName: ssNames) {
-                    // Output value
-                    // TODO: Change
-                    resultWriter.format("%s = %s", sName, 
-                            bsCur.getValue(sName));
-                }
+        resultWriter.append("<HTML><BODY><PRE>");
+        Iterator<BindingSet> iSets = result.iterator();
+        while (iSets.hasNext()) {
+            BindingSet bsCur = iSets.next();
+            Set<String> ssNames = bsCur.getBindingNames();
+            
+            // For each name in binding
+            for (String sName: ssNames) {
+                // Output value
+                // TODO: Change
+                resultWriter.format("%s = %s", sName,
+                        bsCur.getValue(sName));
+                Logger.getGlobal().info("Result:" +
+                  String.format("%s = %s", sName,
+                        bsCur.getValue(sName)));
             }
-            // Finalize HTML output
-            resultWriter.append("</PRE></BODY></HTML>");
-        } catch (QueryEvaluationException ex) {
-            Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
         }
+        resultWriter.append("</PRE></BODY></HTML>");
         
         try {
             // Type of response
             toServe.get(uQueryID).getResponseHeaders().add("Content-Type", "text/html; charset=UTF-8");
             // Send OK header together with other headers
             toServe.get(uQueryID).sendResponseHeaders(200, 0);
+            // DEBUG LINES
+            Logger.getGlobal().info("Returned HTML:" + 
+                    resultWriter);
+            //////////////
+            
             //Finalize output
             toServe.get(uQueryID).getResponseBody().close();
+            
         } catch (IOException ex) {
             Logger.getLogger(SPARQLEndpointImpl.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -14,7 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.reflect.Method;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.Proxy;
@@ -30,9 +29,6 @@ import org.apache.commons.httpclient.NameValuePair;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.QueryParserUtil;
 
 /**
  *
@@ -266,23 +262,17 @@ public class EndpointTest {
             // Finalize
             is.close();
             // Output result
-            System.out.println(sRes.toString());
+            Logger.getLogger(EndpointTest.class.getName()).info(sRes.toString());
             
         } 
         catch (MalformedURLException e) { 
             Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, e);
-            assert(false);
-            
-            // new URL() failed
-            // ...
             assert(false);
         } 
         catch (IOException e) {   
             // openConnection() failed
             Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, e);
             assert(false);
-            
-            // ...
         }
 
     }
