@@ -154,7 +154,7 @@ public class QueryDecompositionComponentImpl implements
     
     private final String SECOND_FRAG = DEMO_PREFIX + 
         "\n" +
-        "SELECT  ?F ?C ?A ?D ?PRE2 ?M\n" +
+        "SELECT  ?F ?C ?A ?D ?PRE2 ?M ?ALONG ?ALAT\n" +
         "WHERE\n" +
         "  { ?F farm:year 2010 .\n" +
         "    ?F farm:cropinformation ?C .\n" +

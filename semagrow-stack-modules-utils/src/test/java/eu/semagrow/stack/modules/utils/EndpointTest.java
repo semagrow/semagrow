@@ -144,13 +144,14 @@ public class EndpointTest {
 //            "} LIMIT 10";
         try {        
             // DEBUG LINES
-            System.out.println(sQuery);
+            Logger.getLogger(EndpointTest.class.getName()).log(Level.INFO, 
+                    "Sending query:\n" + sQuery);
             ////////
             querySPARQLEndpoint(sQuery);
             Logger.getLogger(EndpointTest.class.getName()).log(Level.INFO, 
                     "Waiting for the 10sec query to execute.");
-            shutDownSPARQLEndpoint();
             Thread.sleep(10000);
+            shutDownSPARQLEndpoint();
         } catch (Exception ex) {
             Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, ex);
             assert(false);
@@ -158,6 +159,12 @@ public class EndpointTest {
         assert(true);
     }
 
+//    public static void main(String[] saArgs) {
+//        EndpointTest t = new EndpointTest();
+//        t.testLocalQuery();
+//        
+//    }
+    
     // @Test
     public void testRemoteQuery() {
         // Check 10 DBPedia cities

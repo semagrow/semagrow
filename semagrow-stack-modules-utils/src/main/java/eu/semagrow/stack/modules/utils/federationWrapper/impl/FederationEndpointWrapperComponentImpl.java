@@ -14,10 +14,12 @@ import info.aduna.iteration.CloseableIteration;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,7 +113,7 @@ public class FederationEndpointWrapperComponentImpl implements
                                     tqCur.evaluate();
                             // Update results' list, if something was returned                            
                             if (bsRes != null)
-                                if (bsRes.hasNext())
+                                while (bsRes.hasNext())
                                     fragsToRes.get(uCurRFrag).add(bsRes.next());
                             
                             // DEBUG LINES
@@ -157,6 +159,13 @@ public class FederationEndpointWrapperComponentImpl implements
                 // Perform filtering
                 lbsRes = filter(lbsRes);
 
+                // Keep only useful variables
+                Set<String> sUseful = new HashSet<String>();
+                sUseful.add("Longitude");
+                sUseful.add("Latitude");
+                sUseful.add("U");
+                lbsRes = filterVars(lbsRes, sUseful);
+                
                 
 //                // Check if results were returned
                 if (lbsRes != null) {
@@ -203,6 +212,8 @@ public class FederationEndpointWrapperComponentImpl implements
     }
 
     private List<BindingSet> join(Map<RemoteQueryFragment, List<BindingSet>> mFragRes) {
+        int iNumberOfJoins = 0;
+        
         List<BindingSet> lPreviousBindings = new ArrayList<BindingSet>();
         Iterator<RemoteQueryFragment> iCurPos = mFragRes.keySet().iterator();
         
@@ -212,6 +223,14 @@ public class FederationEndpointWrapperComponentImpl implements
             List<BindingSet> lNewBindings = new ArrayList<BindingSet>();
             // Get current step bindings, by moving iterator on
             List<BindingSet> lRightHandSide = mFragRes.get(iCurPos.next());
+            
+            // DEBUG LINES
+            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).info(
+                "During join " + iNumberOfJoins++ + " : right hand set size:" + lRightHandSide.size());
+            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).info(
+                "...and left hand set size:" + lPreviousBindings.size());
+            //////////////
+            
             // Assign on first run
             if (lPreviousBindings.isEmpty())
                 lNewBindings.addAll(lRightHandSide);
@@ -311,6 +330,9 @@ public class FederationEndpointWrapperComponentImpl implements
     }
 
     private List<BindingSet> filter(List<BindingSet> lbsRes) {
+        // DEBUG LINES
+        Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).info(
+            "Before filtering:" + lbsRes.size());
         // Filter
         /*
         ( ?M > 10 ) && 
@@ -325,31 +347,74 @@ public class FederationEndpointWrapperComponentImpl implements
         List<BindingSet> lRes = new ArrayList<BindingSet>();
         
         for (BindingSet bsCur : lbsRes) {
-            
-            float M = Float.parseFloat(bsCur.getValue("M").stringValue());
-            float  PRE = Float.parseFloat(bsCur.getValue("PRE").stringValue());
-            float  PRE2 = Float.parseFloat(bsCur.getValue("PRE2").stringValue());
-            float  Longitude = Float.parseFloat(bsCur.getValue("Longitude").stringValue());
-            float  Latitude = Float.parseFloat(bsCur.getValue("Latitude").stringValue());
-            // TODO: Check
-//            float  ALAT2 = Float.parseFloat(bsCur.getValue("ALAT2").stringValue());
-//            float  ALAT = Float.parseFloat(bsCur.getValue("ALAT").stringValue());
-            float  ALAT2 = 0.0f;
-            float  ALAT = 0.0f;
+            // DEBUG LINES
+            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).info(
+                "Checking filter on:" + bsCur.toString());
+            try {
+                float M = Float.parseFloat(bsCur.getValue("M").stringValue());
+                float  PRE = Float.parseFloat(bsCur.getValue("PRE").stringValue());
+                float  PRE2 = Float.parseFloat(bsCur.getValue("PRE2").stringValue());
+                float  Longitude = Float.parseFloat(bsCur.getValue("Longitude").stringValue());
+                float  Latitude = Float.parseFloat(bsCur.getValue("Latitude").stringValue());
+                // TODO: Check
+                float  ALAT2 = Float.parseFloat(bsCur.getValue("ALAT2").stringValue());
+                float  ALAT = Float.parseFloat(bsCur.getValue("ALAT").stringValue());
+    //            float  ALAT2 = 0.0f;
+    //            float  ALAT = 0.0f;
+                String sArt = bsCur.getValue("U").stringValue();
 
-            if ( (M > 10) && 
-                ( ( PRE - PRE2 ) < 1 )  && 
-                ( ( PRE - PRE2 ) > -1 )  && 
-                ( ( ALAT - ALAT2 ) < 1 )  && 
-                ( ( ALAT - ALAT2 ) > -1 )  && 
-                ( Longitude < 42.02 )  && 
-                ( Latitude < 1.667 ) )
-                // Add current
-                lRes.add(bsCur);
+                // DEBUG LINES
+    //            Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).info(
+    //                    String.format("M %4.2f PRE %4.2f PRE2 %4.2f "
+    //                            + "Long %4.2f Lat %4.2f "
+    //                            + "Alat %4.2f Alat2 %4.2f %s \n\n",
+    //                            M, PRE, PRE2, Longitude, Latitude, ALAT2, ALAT, sArt));
+
+                if ( (M > 10) && 
+                    ( ( PRE - PRE2 ) < 1 )  && 
+                    ( ( PRE - PRE2 ) > -1 )  && 
+                    ( ( ALAT - ALAT2 ) < 1 )  && 
+                    ( ( ALAT - ALAT2 ) > -1 )  && 
+                    ( Longitude < 42.02 )  && 
+                    ( Latitude < 1.667 ) )
+                    // Add current
+                    lRes.add(bsCur);
+            }
+            catch (NullPointerException npe) {
+                // Unbound, ignore
+                Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).info(
+                    "Found unbound result after final join. Ignoring...");
+            }
                 
         }
         
+        // DEBUG LINES
+        Logger.getLogger(FederationEndpointWrapperComponentImpl.class.getName()).info(
+            "After filtering:" + lRes.size());
         return lRes;
+    }
+
+    private List<BindingSet> filterVars(List<BindingSet> toFilter, Set<String> ssVarNames) {
+        List<BindingSet> lbsRes = new ArrayList<BindingSet>();
+        
+        // For each binding set
+        for (BindingSet bsCur : toFilter) {
+            List<String> lNames = new ArrayList<String>();
+            List<Value> lValues = new ArrayList<Value>();
+            
+            for (String sVarName : bsCur.getBindingNames()) {
+                if (ssVarNames.contains(sVarName)) {
+                    lNames.add(sVarName);
+                    lValues.add(bsCur.getValue(sVarName));
+                }
+            }
+            BindingSet bsNew = new ListBindingSet(lNames, lValues);
+            
+            // Add to returned set
+            lbsRes.add(bsNew);
+        }
+        
+        return lbsRes;
     }
     
 }

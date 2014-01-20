@@ -273,16 +273,25 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
             BindingSet bsCur = iSets.next();
             Set<String> ssNames = bsCur.getBindingNames();
             
+            // DEBUG LINES
+            String sRes="";
+            //////////////
+            
             // For each name in binding
             for (String sName: ssNames) {
                 // Output value
                 // TODO: Change
                 resultWriter.format("%s = %s", sName,
                         bsCur.getValue(sName));
-                Logger.getGlobal().info("Result:" +
-                  String.format("%s = %s", sName,
-                        bsCur.getValue(sName)));
+                
+                // DEBUG LINES
+                sRes += String.format("%s = %s\n", sName,
+                        bsCur.getValue(sName));
+                //////////////
             }
+            // DEBUG LINES
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).info("Result:" + sRes);
+            //////////////
         }
         resultWriter.append("</PRE></BODY></HTML>");
         
@@ -292,7 +301,7 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
             // Send OK header together with other headers
             toServe.get(uQueryID).sendResponseHeaders(200, 0);
             // DEBUG LINES
-            Logger.getGlobal().info("Returned HTML:" + 
+            Logger.getLogger(SPARQLEndpointImpl.class.getName()).info("Returned HTML:" + 
                     resultWriter);
             //////////////
             
