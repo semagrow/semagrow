@@ -49,7 +49,7 @@ public class Manager {
             "?s <http://www.semagrow.eu/schema/farms/yield> ?y.\n" +
             "?s <http://www.semagrow.eu/schema/biblios/URL> ?urlz.\n" +
             "FILTER regex(?y,\"80\")\n" +
-            "}";
+            "} LIMIT 100";
 
     final static String BIG_QUERY = "PREFIX  farm: <http://ontologies.seamless-ip.org/farm.owl#>\n" +
             "PREFIX  dc:   <http://purl.org/dc/terms/>\n" +

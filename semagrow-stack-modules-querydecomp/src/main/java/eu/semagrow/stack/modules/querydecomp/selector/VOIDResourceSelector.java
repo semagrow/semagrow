@@ -59,7 +59,7 @@ public class VOIDResourceSelector implements ResourceSelector {
 
     private static final String PRED_TRIPLES2 = PREFIX +
             "SELECT ?count WHERE {" +
-            " ?dataset rdf:a void:Dataset ; " +
+            " <" + VAR_DATASET + "> rdf:a void:Dataset ; " +
             "    void:property \"" + VAR_PRED + "\" ;" +
             "    void:triples ?count ." +
             "}";
@@ -358,10 +358,11 @@ public class VOIDResourceSelector implements ResourceSelector {
     }
 
     private int getUserPreference(URI endpoint) {
-        String query = "SELECT ?preference WHERE {\n"+
+        String query = PREFIX +
+                "SELECT ?preference WHERE {\n"+
                 " [] rdf:a void:Dataset ;\n"  +
-                " void:sparqlEndpoint  <" + endpoint + ">;\n" +
-                " ncsrd:userPreference ?preference" +
+                "  void:sparqlEndpoint  \"" + endpoint + "\";\n" +
+                "  ncsrd:userPreference ?preference.\n" +
                 "}";
 
         List<String> bindings = evalQuery(query, "preference");
