@@ -53,21 +53,23 @@
     </mailingLists>
 
     <!-- REPOSITORIES -->
-    <repositories>
-        <repository>
-            <id>swc-semagrow</id>
-            <name>SWC SemaGrow Repository</name>
-            <url>http://semagrow.semantic-web.at/mvn/</url>
-            <snapshots>
-                <updatePolicy>always</updatePolicy>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>maven-central</id>
-            <url>http://repo1.maven.org/maven2</url>
-        </repository>
-    </repositories>
+
+<repositories>
+
+    <repository>
+        <id>swc-semagrow</id>
+        <name>SWC SemaGrow Repository</name>
+        <url>http://semagrow.semantic-web.at/mvn/</url>
+        <snapshots>
+            <updatePolicy>always</updatePolicy>
+            <enabled>true</enabled>
+        </snapshots>
+    </repository>
+    <repository>
+        <id>maven-central</id>
+        <url>http://repo1.maven.org/maven2</url>
+    </repository>
+</repositories>
 
     <pluginRepositories>
         <pluginRepository>
@@ -99,13 +101,13 @@
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
-
+        <!--
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>openrdf-sesame</artifactId>
             <version>2.6.9</version>
             <classifier>onejar</classifier>
-        </dependency>
+        </dependency> -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -211,5 +213,6 @@
         <module>semagrow-stack-modules-commons</module>
         <module>semagrow-stack-modules-utils</module>
         <module>semagrow-stack-modules-sails</module>
-    </modules>
+    <module>semagrow-stack-modules-querydecomp</module>
+  </modules>
 </project>

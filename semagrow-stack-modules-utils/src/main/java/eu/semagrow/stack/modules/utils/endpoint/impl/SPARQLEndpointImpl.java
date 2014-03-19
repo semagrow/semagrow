@@ -37,12 +37,8 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQueryResultHandler;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.UnsupportedQueryLanguageException;
+
+import org.openrdf.query.*;
 import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.QueryParserUtil;
 import org.openrdf.repository.http.HTTPRepository;
@@ -346,6 +342,14 @@ public class SPARQLEndpointImpl implements HttpHandler, SPARQLEndpoint,
     public void cleanUp() {
         // TODO: Use a parameter for the shutdown delay
         this.server.stop(5);
+    }
+
+    public void handleBoolean(boolean b) throws QueryResultHandlerException {
+
+    }
+
+    public void handleLinks(List<String> strings) throws QueryResultHandlerException {
+
     }
 
     // TODO: Implement one-by-one

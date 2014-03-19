@@ -14,9 +14,7 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UpdateExpr;
 import org.openrdf.query.algebra.evaluation.TripleSource;
-import org.openrdf.sail.Sail;
-import org.openrdf.sail.SailConnection;
-import org.openrdf.sail.SailException;
+import org.openrdf.sail.*;
 
 /**
  *
@@ -56,6 +54,14 @@ public class PowderSailConnection implements SailConnection, TripleSource {
         return 1L;
     }
 
+    public void begin() throws SailException {
+
+    }
+
+    public void prepare() throws SailException {
+
+    }
+
     public void commit() throws SailException {
         
     }
@@ -64,12 +70,32 @@ public class PowderSailConnection implements SailConnection, TripleSource {
         
     }
 
+    public boolean isActive() throws UnknownSailTransactionStateException {
+        return false;
+    }
+
     public void addStatement(Resource rsrc, URI uri, Value value, Resource... rsrcs) throws SailException {
         
     }
 
     public void removeStatements(Resource rsrc, URI uri, Value value, Resource... rsrcs) throws SailException {
         
+    }
+
+    public void startUpdate(UpdateContext updateContext) throws SailException {
+
+    }
+
+    public void addStatement(UpdateContext updateContext, Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+
+    }
+
+    public void removeStatement(UpdateContext updateContext, Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+
+    }
+
+    public void endUpdate(UpdateContext updateContext) throws SailException {
+
     }
 
     public void clear(Resource... rsrcs) throws SailException {
