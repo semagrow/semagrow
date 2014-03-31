@@ -7,11 +7,10 @@
     <groupId>eu.semagrow.stack.modules</groupId>
     <version>1.0.0-rc1</version>
   </parent>
-  <groupId>eu.semagrow.stack.modules.querycomp</groupId>
+  <groupId>eu.semagrow.stack.modules</groupId>
   <artifactId>semagrow-stack-modules-querydecomp</artifactId>
   <version>1.0.0-rc1</version>
   <name>semagrow-stack-modules-querydecomp</name>
-  <url>http://maven.apache.org</url>
   <developers>
       <developer>
           <id>acharal</id>
@@ -74,9 +73,9 @@
           <version>2.7.0</version>
       </dependency>
       <dependency>
-          <groupId>org.openrdf</groupId>
-          <artifactId>openrdf-rio-rdfxml</artifactId>
-          <version>2.0.1</version>
+          <groupId>org.openrdf.sesame</groupId>
+          <artifactId>sesame-rio-rdfxml</artifactId>
+          <version>2.7.0</version>
       </dependency>
 
     <dependency>
