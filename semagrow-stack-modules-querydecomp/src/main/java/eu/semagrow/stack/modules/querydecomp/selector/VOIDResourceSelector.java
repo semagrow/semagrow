@@ -5,26 +5,13 @@ import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
 import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.MeasurementImpl;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.SelectedResourceImpl;
-import org.apache.commons.io.filefilter.NameFileFilter;
-import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
-import org.apache.commons.io.monitor.FileAlterationMonitor;
-import org.apache.commons.io.monitor.FileAlterationObserver;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.RepositoryResult;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.memory.MemoryStore;
-
-import java.io.*;
 import java.util.*;
 
 import static org.openrdf.query.QueryLanguage.SPARQL;

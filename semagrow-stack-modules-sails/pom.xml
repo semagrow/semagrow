@@ -14,5 +14,6 @@
   <packaging>pom</packaging>
   <modules>
     <module>semagrow-stack-modules-sails-powder</module>
+    <module>semagrow-stack-modules-sails-semagrow</module>
   </modules>
 </project>
