@@ -101,13 +101,12 @@
             <version>4.11</version>
             <scope>test</scope>
         </dependency>
-        <!--
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>openrdf-sesame</artifactId>
-            <version>2.6.9</version>
+            <version>2.7.10</version>
             <classifier>onejar</classifier>
-        </dependency> -->
+        </dependency> 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
@@ -212,7 +211,7 @@
         <module>semagrow-stack-modules-vocabulary</module>
         <module>semagrow-stack-modules-commons</module>
         <module>semagrow-stack-modules-utils</module>
+    	<module>semagrow-stack-modules-querydecomp</module>
         <module>semagrow-stack-modules-sails</module>
-    <module>semagrow-stack-modules-querydecomp</module>
   </modules>
 </project>
