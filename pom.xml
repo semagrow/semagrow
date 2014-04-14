@@ -9,7 +9,8 @@
     <name>semagrow-stack-modules</name>
     <url>http://semagrow.eu</url>
 
-    <properties>
+    <properties>        
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>
         <distribution.mvn>/var/www/mvn</distribution.mvn>
     </properties>
