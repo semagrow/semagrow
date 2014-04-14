@@ -24,7 +24,7 @@ import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
  * @author Giannis Mouchakis
  *
  */
-public class PatternDiscoveryTest {
+public class PatternDiscoveryTXest {
 	
 	List<EquivalentURI> expected;
 	PatternDiscovery patternDiscovery;

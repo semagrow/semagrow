@@ -34,7 +34,7 @@ import org.junit.Test;
  *
  * @author ggianna
  */
-public class EndpointTest {
+public class EndpointTXest {
 /**
  * Using endpoints DBPedia, FactBook and http://www.semanticbible.com/ntn/ntn-view.html 
  */
@@ -46,7 +46,7 @@ public class EndpointTest {
             se = new SPARQLEndpointImpl("http://127.0.0.1:18000/"
                     + "openrdf-sesame/repositories/SemagrowEndpoint");
         } catch (URISyntaxException ex) {
-            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EndpointTXest.class.getName()).log(Level.SEVERE, null, ex);
         }
         se.init();
         // TODO: Create hard coded repositories
@@ -144,16 +144,16 @@ public class EndpointTest {
 //            "} LIMIT 10";
         try {        
             // DEBUG LINES
-            Logger.getLogger(EndpointTest.class.getName()).log(Level.INFO, 
+            Logger.getLogger(EndpointTXest.class.getName()).log(Level.INFO, 
                     "Sending query:\n" + sQuery);
             ////////
             querySPARQLEndpoint(sQuery);
-            Logger.getLogger(EndpointTest.class.getName()).log(Level.INFO, 
+            Logger.getLogger(EndpointTXest.class.getName()).log(Level.INFO, 
                     "Waiting for the 10sec query to execute.");
             Thread.sleep(10000);
             shutDownSPARQLEndpoint();
         } catch (Exception ex) {
-            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EndpointTXest.class.getName()).log(Level.SEVERE, null, ex);
             assert(false);
         }
         assert(true);
@@ -269,16 +269,16 @@ public class EndpointTest {
             // Finalize
             is.close();
             // Output result
-            Logger.getLogger(EndpointTest.class.getName()).info(sRes.toString());
+            Logger.getLogger(EndpointTXest.class.getName()).info(sRes.toString());
             
         } 
         catch (MalformedURLException e) { 
-            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(EndpointTXest.class.getName()).log(Level.SEVERE, null, e);
             assert(false);
         } 
         catch (IOException e) {   
             // openConnection() failed
-            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, e);
+            Logger.getLogger(EndpointTXest.class.getName()).log(Level.SEVERE, null, e);
             assert(false);
         }
 
@@ -311,9 +311,9 @@ public class EndpointTest {
             URLConnection myURLConnection = myURL.openConnection();
             myURLConnection.connect();
         } catch (IOException ex) {
-            Logger.getLogger(EndpointTest.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(EndpointTXest.class.getName()).log(Level.SEVERE, null, ex);
         }
-        Logger.getLogger(EndpointTest.class.getName()).log(Level.INFO, 
+        Logger.getLogger(EndpointTXest.class.getName()).log(Level.INFO, 
                 "Shutting down server...");
     }
 }

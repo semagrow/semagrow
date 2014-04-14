@@ -20,7 +20,7 @@ import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImp
  * @author Giannis Mouchakis
  *
  */
-public class FirstTest {
+public class FirstTXest {
 
 	/**
 	 * @param args
