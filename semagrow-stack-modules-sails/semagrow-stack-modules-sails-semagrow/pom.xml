@@ -16,18 +16,18 @@
     <dependencies>
         <dependency>
             <groupId>eu.semagrow.stack.modules</groupId>
-            <artifactId>semagrow-stack-modules-utils</artifactId>
-            <version>1.0.0-rc1</version>
-        </dependency>
-        <dependency>
-            <groupId>eu.semagrow.stack.modules</groupId>
-            <artifactId>semagrow-stack-modules-vocabulary</artifactId>
+            <artifactId>semagrow-stack-modules-architectureutils</artifactId>
             <version>1.0.0-rc1</version>
         </dependency>
         <dependency>
             <groupId>eu.semagrow.stack.modules</groupId>
             <artifactId>semagrow-stack-modules-querydecomp</artifactId>
-            <version>1.0.0-rc1</version>            
+            <version>1.0.0-rc1</version>
+        </dependency>        
+        <dependency>
+            <groupId>eu.semagrow.stack.modules</groupId>
+            <artifactId>semagrow-stack-modules-vocabulary</artifactId>
+            <version>1.0.0-rc1</version>
         </dependency>
     </dependencies>
 </project>

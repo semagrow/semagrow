@@ -26,8 +26,8 @@
         </dependency>
         <dependency>
             <groupId>eu.semagrow.stack.modules</groupId>
-            <artifactId>semagrow-stack-modules-utils</artifactId>
-            <version>1.0.0-rc1</version>
+            <artifactId>semagrow-stack-modules-architectureutils</artifactId>
+            <version>1.0.0-rc1</version>                        
         </dependency>
     </dependencies>
     <properties>
