@@ -29,7 +29,7 @@ public class PatternDiscoveryTest {
 	List<EquivalentURI> expected;
 	PatternDiscovery patternDiscovery;
 
-	@Before
+	//@Before
 	public void setUp() {
 		expected = new ArrayList<EquivalentURI>();
 		ValueFactory valueFactory = new ValueFactoryImpl();
@@ -44,7 +44,7 @@ public class PatternDiscoveryTest {
 	 * @throws IOException 
 	 * @throws ClassNotFoundException 
 	 */
-	@Test
+	//@Test
 	public void testRetrieveEquivalentPatterns() throws ClassNotFoundException, IOException, SQLException {
 		String message = "Pattern Discovery for input "
 				+ "uri http://oaei.ontologymatching.org/2011/benchmarks/biblio/1/201/onto.rdf#tiadthaumjrqaltngfuvjllglf "

@@ -40,7 +40,7 @@ public class EndpointTest {
  */
     SPARQLEndpoint se;
 
-    @Before
+    //@Before
     public void setUp() {
         try {
             se = new SPARQLEndpointImpl("http://127.0.0.1:18000/"
@@ -130,7 +130,7 @@ public class EndpointTest {
     /**
      * Test method for 
      */
-    @Test
+    //@Test
     public void testLocalQuery() {
         // Check 10 DBPedia cities
         String sQuery = BIG_QUERY;
@@ -203,7 +203,7 @@ public class EndpointTest {
         assert(true);
     }
 
-    @After
+    //@After
     public void cleanUp(){
         // Terminate server
         se.cleanUp();
