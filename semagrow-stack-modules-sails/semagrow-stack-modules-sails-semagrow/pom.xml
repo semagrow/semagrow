@@ -3,11 +3,11 @@
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>eu.semagrow.stack.modules.sails</groupId>
+        <groupId>eu.semagrow.stack.modules</groupId>
         <artifactId>semagrow-stack-modules-sails</artifactId>
         <version>1.0.0-rc1</version>
     </parent>
-    <groupId>eu.semagrow.stack.modules.sails</groupId>
+    <groupId>eu.semagrow.stack.modules</groupId>
     <artifactId>semagrow-stack-modules-sails-semagrow</artifactId>
     <version>1.0.0-rc1</version>
     <name>semagrow-stack-modules-sails-semagrow</name>

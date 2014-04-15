@@ -209,8 +209,9 @@
     </build>
 
     <modules>
-        <module>semagrow-stack-modules-vocabulary</module>
         <module>semagrow-stack-modules-commons</module>
+        <module>semagrow-stack-modules-vocabulary</module>
+	<module>semagrow-stack-modules-api</module>
         <module>semagrow-stack-modules-utils</module>
     	<module>semagrow-stack-modules-querydecomp</module>
         <module>semagrow-stack-modules-sails</module>

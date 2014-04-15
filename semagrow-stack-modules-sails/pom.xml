@@ -7,7 +7,7 @@
     <artifactId>semagrow-stack-modules</artifactId>
     <version>1.0.0-rc1</version>
   </parent>
-  <groupId>eu.semagrow.stack.modules.sails</groupId>
+  <groupId>eu.semagrow.stack.modules</groupId>
   <artifactId>semagrow-stack-modules-sails</artifactId>
   <version>1.0.0-rc1</version>
   <name>semagrow-stack-modules-sails</name>
