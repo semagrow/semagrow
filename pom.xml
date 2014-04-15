@@ -32,15 +32,23 @@
             <id>turnguard</id>
             <name>Jürgen W. Jakobitsch A</name>
             <url>http://www.turnguard.com/turnguard</url>
+            <email>j.jakobitsch@semantic-web.at</email>
         </developer>
         <developer>
             <id>cmader</id>
             <name>Christian Mader</name>
             <url>http://company.semantic-web.at/person/christian_mader</url>
+            <email>c.mader@semantic-web.at</email>
         </developer>
         <developer>
             <id>gmouchakis</id>
             <name>Giannis Mouchakis</name>
+            <email>gmouchakis@iit.demokritos.gr</email>
+        </developer>
+        <developer>
+            <id>acharal</id>
+            <name>Angelos Charalambidis</name>
+            <email>acharal@iit.demokritos.gr</email>
         </developer>
     </developers>
 
