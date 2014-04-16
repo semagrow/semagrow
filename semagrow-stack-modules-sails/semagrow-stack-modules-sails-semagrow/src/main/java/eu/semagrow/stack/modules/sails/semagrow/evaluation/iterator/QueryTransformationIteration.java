@@ -4,7 +4,7 @@ import info.aduna.iteration.CloseableIteration;
 import org.openrdf.query.BindingSet;
 
 /**
- * Created by angel on 3/13/14.
+ * Provision for heterogeneous responses that must be transformed
  */
 public class QueryTransformationIteration implements CloseableIteration<BindingSet,Exception> {
 

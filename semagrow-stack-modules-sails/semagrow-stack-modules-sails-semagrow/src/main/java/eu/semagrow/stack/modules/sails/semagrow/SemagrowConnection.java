@@ -24,7 +24,8 @@ import org.openrdf.query.algebra.helpers.QueryModelTreePrinter;
 import org.openrdf.sail.SailException;
 
 /**
- * Created by angel on 3/12/14.
+ * A Semagrow Readonly Connection
+ * @author acharal@iit.demokritos.gr
  */
 public class SemagrowConnection extends ReadonlySailConnection {
 
@@ -38,6 +39,15 @@ public class SemagrowConnection extends ReadonlySailConnection {
 
     }
 
+    /**
+     * Evaluates a query represented as TupleExpr
+     * @param tupleExpr the tuple expression to evaluate
+     * @param dataset
+     * @param bindings
+     * @param b
+     * @return the resultset as a closable iteration
+     * @throws SailException
+     */
     @Override
     protected CloseableIteration<? extends BindingSet, QueryEvaluationException>
                    evaluateInternal(TupleExpr tupleExpr,

@@ -9,7 +9,8 @@ import org.openrdf.sail.helpers.SailBase;
 import java.io.File;
 
 /**
- * Created by angel on 3/12/14.
+ * Semagrow Sail implementation.
+ * @author acharal@iit.demokritos.gr
  */
 public class SemagrowSail extends SailBase {
 
@@ -23,6 +24,11 @@ public class SemagrowSail extends SailBase {
         return false;
     }
 
+    /**
+     * Creates a new Semagrow SailConnection
+     * @return a new SailConnection
+     * @throws SailException
+     */
     @Override
     public SailConnection getConnectionInternal() throws SailException {
         return new SemagrowConnection(this);

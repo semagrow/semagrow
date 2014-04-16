@@ -12,7 +12,11 @@ import java.util.Set;
 
 
 /**
- * Created by angel on 3/15/14.
+ * Push down projection into SingleSourceExpr expressions.
+ * Only interesting variables will be projected.
+ * This will eventually optimize the SPARQL subquery issued to the actual data source
+ * and thus the bandwidth used.
+ * @author acharal@iit.demokritos.gr
  */
 public class SingleSourceProjectionOptimization implements QueryOptimizer {
 

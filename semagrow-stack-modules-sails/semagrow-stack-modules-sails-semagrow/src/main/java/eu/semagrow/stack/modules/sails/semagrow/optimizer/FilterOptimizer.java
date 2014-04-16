@@ -11,7 +11,7 @@ import org.openrdf.query.algebra.helpers.VarNameCollector;
 import java.util.Set;
 
 /**
- * Created by angel on 3/15/14.
+ *
  */
 public class FilterOptimizer implements QueryOptimizer {
 

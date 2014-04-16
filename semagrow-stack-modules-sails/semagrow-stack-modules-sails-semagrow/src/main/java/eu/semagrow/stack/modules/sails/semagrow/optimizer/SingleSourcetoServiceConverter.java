@@ -15,7 +15,10 @@ import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
 
 /**
- * Created by angel on 3/15/14.
+ * Used to translate SingleSourceExpr expressions to Service expressions.
+ * Execute this optimizer in order to produce a tupleExpr that can be
+ * evaluated by the vanilla sesame engine.
+ * @author acharal@iit.demokritos.gr
  */
 public class SingleSourcetoServiceConverter implements QueryOptimizer {
 

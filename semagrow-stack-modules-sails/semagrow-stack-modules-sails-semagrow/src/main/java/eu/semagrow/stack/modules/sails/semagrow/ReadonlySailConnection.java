@@ -10,7 +10,8 @@ import org.openrdf.sail.helpers.SailConnectionBase;
 
 
 /**
- * Created by angel on 3/13/14.
+ * A readonly Sail Connection
+ * @author acharal@iit.demokritos.gr
  */
 public abstract class ReadonlySailConnection extends SailConnectionBase {
 

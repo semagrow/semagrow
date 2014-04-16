@@ -10,7 +10,9 @@ import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl;
 
 /**
- * Created by angel on 3/12/14.
+ * Overrides the behavior of the default evaluation strategy implementation.
+ * Functionality will be added for (potential) custom operators of the execution plan.
+ * @author acharal@iit.demokritos.gr
  */
 public class EvaluationStrategy extends EvaluationStrategyImpl {
 

@@ -14,7 +14,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by angel on 3/14/14.
+ * Creates a cluster of annotated Statements with the same data source
+ * and creates a SingleSourceExpr.
+ * @author acharal@iit.demokritos.gr
  */
 public class SingleSourceClusterOptimizer implements QueryOptimizer {
 

@@ -19,7 +19,8 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * Created by angel on 3/14/14.
+ * Annotates each Statement with a designated source
+ * @author acharal@iit.demokritos.gr
  */
 public class StatementSourceSelection extends QueryModelVisitorBase<RuntimeException>
         implements QueryOptimizer  {
