@@ -7,15 +7,11 @@ package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
 import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
-import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
-import java.net.URISyntaxException;
+import eu.semagrow.stack.modules.api.SelectedResource;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import org.openrdf.query.algebra.StatementPattern;
 

@@ -5,7 +5,7 @@
 package eu.semagrow.stack.modules.utils.queryDecomposition;
 
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
-import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+import eu.semagrow.stack.modules.api.SelectedResource;
 
 import java.util.List;
 import java.util.Map;

@@ -27,8 +27,8 @@ import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecompositi
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecomposer;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecompositionComponent;
-import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
-import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+import eu.semagrow.stack.modules.api.ResourceSelector;
+import eu.semagrow.stack.modules.api.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
 import java.net.URI;
 import java.util.ArrayList;
@@ -42,7 +42,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.model.impl.URIImpl;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.UnsupportedQueryLanguageException;

@@ -7,7 +7,7 @@ import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceClusterOpt
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourcetoServiceConverter;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.StatementSourceSelection;
-import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.api.ResourceSelector;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.query.BindingSet;

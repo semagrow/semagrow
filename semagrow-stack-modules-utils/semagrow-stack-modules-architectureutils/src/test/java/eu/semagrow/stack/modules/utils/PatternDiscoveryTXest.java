@@ -3,21 +3,17 @@
  */
 package eu.semagrow.stack.modules.utils;
 
-import static org.junit.Assert.*;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
 import eu.semagrow.stack.modules.utils.patterndiscovery.impl.PatternDiscoveryImpl;
-import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
+import eu.semagrow.stack.modules.api.EquivalentURI;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
 
 /**

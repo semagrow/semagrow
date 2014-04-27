@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.utils.resourceselector;
+package eu.semagrow.stack.modules.api;
 
 /**
  * This interface specifies classes of load info and similar measurements

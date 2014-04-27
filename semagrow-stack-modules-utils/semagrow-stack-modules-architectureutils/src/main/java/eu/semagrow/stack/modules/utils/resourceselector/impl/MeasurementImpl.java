@@ -3,10 +3,10 @@
  */
 package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
-import eu.semagrow.stack.modules.utils.resourceselector.Measurement;
+import eu.semagrow.stack.modules.api.Measurement;
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.utils.resourceselector.Measurement
+ * @see eu.semagrow.stack.modules.api.Measurement
  */
 public class MeasurementImpl implements Measurement {
 	
@@ -27,21 +27,21 @@ public class MeasurementImpl implements Measurement {
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.resourceselector.Measurement#getId()
+	 * @see eu.semagrow.stack.modules.api.Measurement#getId()
 	 */
 	public long getId() {
 		return id;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.resourceselector.Measurement#getType()
+	 * @see eu.semagrow.stack.modules.api.Measurement#getType()
 	 */
 	public String getType() {
 		return type;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.resourceselector.Measurement#getValue()
+	 * @see eu.semagrow.stack.modules.api.Measurement#getValue()
 	 */
 	public int getValue() {
 		return value;
@@ -51,7 +51,7 @@ public class MeasurementImpl implements Measurement {
 	 * @see java.lang.Object#toString()
 	 */
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.utils.resourceselector.Measurement#toString()
+	 * @see eu.semagrow.stack.modules.api.Measurement#toString()
 	 */
 	@Override
 	public String toString() {

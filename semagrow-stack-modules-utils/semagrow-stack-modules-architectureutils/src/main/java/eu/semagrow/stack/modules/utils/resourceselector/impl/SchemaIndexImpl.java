@@ -14,7 +14,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 import eu.semagrow.stack.modules.utils.resourceselector.SchemaIndex;
-import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+import eu.semagrow.stack.modules.api.SelectedResource;
 
 /* (non-Javadoc)
  * @see eu.semagrow.stack.modules.utils.resourceselector.SchemaIndex

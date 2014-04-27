@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.utils.resourceselector;
+package eu.semagrow.stack.modules.api;
 
 import org.openrdf.model.URI;
 

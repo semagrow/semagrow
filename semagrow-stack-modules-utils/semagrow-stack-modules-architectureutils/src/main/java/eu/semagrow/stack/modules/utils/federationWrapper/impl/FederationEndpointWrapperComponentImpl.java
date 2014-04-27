@@ -9,7 +9,7 @@ import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.federationWrapper.FederationEndpointWrapperComponent;
 import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
 import eu.semagrow.stack.modules.utils.queryDecomposition.RemoteQueryFragment;
-import eu.semagrow.stack.modules.utils.querytransformation.QueryTranformation;
+import eu.semagrow.stack.modules.api.QueryTranformation;
 import info.aduna.iteration.CloseableIteration;
 import java.net.URI;
 import java.util.ArrayList;

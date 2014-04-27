@@ -3,16 +3,10 @@
  */
 package eu.semagrow.stack.modules.utils.patterndiscovery.impl;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,10 +15,8 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
-import eu.semagrow.stack.modules.utils.resourceselector.EquivalentURI;
-import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+import eu.semagrow.stack.modules.api.EquivalentURI;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
-import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
 
 /* (non-Javadoc)
  * @see eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery

@@ -13,7 +13,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.Var;
 
-import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.api.ResourceSelector;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
 
 /**
