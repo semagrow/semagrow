@@ -6,17 +6,18 @@ import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.BPGCollector;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.CombinationIterator;
+import eu.semagrow.stack.modules.sails.semagrow.helpers.FilterCollector;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
+import org.openrdf.query.algebra.helpers.VarNameCollector;
 
 import java.util.*;
+import java.util.logging.Logger;
 
 /**
  * Created by angel on 3/13/14.
@@ -39,9 +40,10 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
      * @param expr
      * @return a list of access plans.
      */
-    protected PlanCollection accessPlans(TupleExpr expr) {
+    protected PlanCollection accessPlans(TupleExpr expr, Collection<ValueExpr> filterConditions) {
 
         PlanCollection plans = new PlanCollection();
+
 
         // extract the statement patterns
         List<StatementPattern> statementPatterns = StatementPatternCollector.process(expr);
@@ -53,8 +55,8 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
             List<SelectedResource> resources = resourceSelector.getSelectedResources(pattern, 0);
 
             // apply filters that can be applied to the statementpattern
+            TupleExpr e = applyRemainingFilters(pattern, filterConditions);
 
-            TupleExpr e = pattern;
             Set<TupleExpr> exprLabel =  new HashSet<TupleExpr>();
             exprLabel.add(e);
 
@@ -72,25 +74,128 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
     protected void prunePlans(Collection<TupleExpr> plans) {
         // group equivalent plans
         // get the minimum-cost plan for each equivalence class
+
+        Collection<TupleExpr> bestPlans = new ArrayList<TupleExpr>();
+        Map<TupleExpr, Long> estimatedCosts = new HashMap<TupleExpr, Long>();
+
+        boolean inComparable = true;
+
+        for (TupleExpr candidatePlan : plans) {
+            inComparable = true;
+            long cost1 = costEstimator.estimateCost(candidatePlan);
+
+            for (TupleExpr plan : bestPlans) {
+                if (isPlanComparable(candidatePlan, plan)) {
+                    inComparable = false;
+                    long cost2 = estimatedCosts.get(plan);
+                    if (cost1 < cost2) {
+                        bestPlans.remove(plan);
+                        bestPlans.add(candidatePlan);
+                        estimatedCosts.put(candidatePlan, cost1);
+                    }
+                }
+            }
+            // check if plan is incomparable with all best plans yet discovered.
+            if (inComparable) {
+                bestPlans.add(candidatePlan);
+                estimatedCosts.put(candidatePlan, cost1);
+            }
+        }
+
+        plans.retainAll(bestPlans);
     }
 
-    protected Collection<TupleExpr> joinPlans(Collection<TupleExpr> plan1, Collection<TupleExpr> plan2) {
+    private boolean isPlanComparable(TupleExpr plan1, TupleExpr plan2) {
+        return true;
+    }
+
+    protected Collection<TupleExpr> joinPlans(Collection<TupleExpr> plan1, Collection<TupleExpr> plan2,
+                                              Collection<ValueExpr> filterConditions) {
 
         Collection<TupleExpr> plans = new LinkedList<TupleExpr>();
 
         for (TupleExpr p1 : plan1) {
             for (TupleExpr p2 : plan2) {
-                TupleExpr expr = new Join(p1,p2);
-                plans.add(expr);
 
-                expr = new Join(p2,p1);
-                plans.add(expr);
+                Collection<TupleExpr> joins = createPhysicalJoins(p1, p2);
+
+                for (TupleExpr plan : joins) {
+                    TupleExpr p = applyRemainingFilters(plan, filterConditions);
+                    plans.add(p);
+                }
+
+                TupleExpr expr = pushJoinRemote(p1, p2, filterConditions);
+                if (expr != null)
+                    plans.add(expr);
             }
         }
         return plans;
     }
 
-    protected void finalizePlans() {
+    private List<URI> commonSources(SourceQuery e1, SourceQuery e2) {
+        List<URI> commonURIs = new LinkedList<URI>(e1.getSources());
+        commonURIs.retainAll(e2.getSources());
+        return commonURIs;
+    }
+
+    private TupleExpr pushJoinRemote(TupleExpr e1, TupleExpr e2, Collection<ValueExpr> filterConditions) {
+        if (e1 instanceof SourceQuery &&
+                e2 instanceof SourceQuery) {
+
+            SourceQuery q1 = (SourceQuery) e1;
+            SourceQuery q2 = (SourceQuery) e2;
+            List<URI> sources = commonSources(q1, q2);
+            if (!sources.isEmpty()) {
+                TupleExpr expr = applyRemainingFilters(new Join(q1.getArg(), q2.getArg()), filterConditions);
+                return new SourceQuery(expr, sources);
+            }
+        }
+
+        return null;
+    }
+
+    private Collection<TupleExpr> createPhysicalJoins(TupleExpr e1, TupleExpr e2) {
+        Collection<TupleExpr> plans = new LinkedList<TupleExpr>();
+
+        TupleExpr expr = new Join(e1, e2);
+        plans.add(expr);
+
+        //expr = new Join(e2, e1);
+        //plans.add(expr);
+
+        return plans;
+    }
+
+    private Collection<ValueExpr> getRelevantFiltersConditions(TupleExpr e, Collection<ValueExpr> filterConditions) {
+        Set<String> variables = VarNameCollector.process(e);
+        Collection<ValueExpr> relevantConditions = new LinkedList<ValueExpr>();
+
+        for (ValueExpr condition : filterConditions) {
+            Set<String> conditionVariables = VarNameCollector.process(condition);
+            if (variables.containsAll(conditionVariables))
+                relevantConditions.add(condition);
+        }
+
+        return relevantConditions;
+    }
+
+    private static TupleExpr applyFilters(TupleExpr e, Collection<ValueExpr> conditions) {
+        TupleExpr expr = e;
+
+        for (ValueExpr condition : conditions)
+            expr = new Filter(expr, condition);
+
+        return expr;
+    }
+
+    private TupleExpr applyRemainingFilters(TupleExpr e, Collection<ValueExpr> conditions) {
+        Collection<ValueExpr> filtersApplied = FilterCollector.process(e);
+        Collection<ValueExpr> remainingFilters = getRelevantFiltersConditions(e, conditions);
+        remainingFilters.removeAll(filtersApplied);
+        return applyFilters(e, remainingFilters);
+    }
+
+    protected void finalizePlans(Collection<TupleExpr> plans) {
 
     }
 
@@ -104,9 +209,11 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
 
     public void optimizebgp(TupleExpr bgp) {
 
+        Collection<ValueExpr> filterConditions = FilterCollector.process(bgp);
+
         // optPlans is a function from (Set of Expressions) to (Set of Plans)
 
-        PlanCollection optPlans = accessPlans(bgp);
+        PlanCollection optPlans = accessPlans(bgp, filterConditions);
 
         // plans.getExpressions() get basic expressions
         // subsets S of size i
@@ -130,17 +237,20 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
 
                         Collection<TupleExpr> plans1 = optPlans.get(o1);
                         Collection<TupleExpr> plans2 = optPlans.get(o2);
-                        Collection<TupleExpr> newPlans = joinPlans(plans1, plans2);
+                        Collection<TupleExpr> newPlans = joinPlans(plans1, plans2, filterConditions);
 
                         optPlans.add(s, newPlans);
-                        prunePlans(optPlans.get(s));
                     }
                 }
+                prunePlans(optPlans.get(s));
             }
         }
         Collection<TupleExpr> fullPlans = optPlans.get(r);
+        //finalizePlans(fullPlans,filterConditions)
 
         if (!fullPlans.isEmpty()) {
+            Logger logger = Logger.getLogger(this.getClass().toString());
+            logger.info(fullPlans.size()+" number of plans");
             TupleExpr bestPlan = fullPlans.iterator().next();
             bgp.replaceWith(bestPlan);
         }

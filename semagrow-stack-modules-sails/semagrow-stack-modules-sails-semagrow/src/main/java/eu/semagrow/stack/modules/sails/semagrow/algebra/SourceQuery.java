@@ -34,6 +34,8 @@ public class SourceQuery extends UnaryTupleOperator {
         this.sources = new LinkedList<URI>(sources);
     }
 
+    public List<URI> getSources() { return sources; }
+
     public <X extends Exception> void visit(QueryModelVisitor<X> xQueryModelVisitor) throws X {
         xQueryModelVisitor.meetOther(this);
     }
