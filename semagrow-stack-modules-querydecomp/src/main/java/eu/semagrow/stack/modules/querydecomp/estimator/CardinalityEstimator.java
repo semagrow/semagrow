@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.querydecomp.estimator;
 
+import org.openrdf.model.URI;
 import org.openrdf.query.algebra.TupleExpr;
 
 /**
@@ -7,7 +8,7 @@ import org.openrdf.query.algebra.TupleExpr;
  */
 public interface CardinalityEstimator {
 
-    public long getCardinality(TupleExpr expr);
+    long getCardinality(TupleExpr expr);
 
-    public long getSelectivity(TupleExpr expr);
+    long getCardinality(TupleExpr expr, URI source);
 }

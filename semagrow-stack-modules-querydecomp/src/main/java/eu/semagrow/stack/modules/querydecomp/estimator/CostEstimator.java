@@ -7,5 +7,5 @@ import org.openrdf.query.algebra.TupleExpr;
  */
 public interface CostEstimator {
 
-    public long estimateCost(TupleExpr expr);
+    public long getCost(TupleExpr expr);
 }

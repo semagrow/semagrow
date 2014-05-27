@@ -82,7 +82,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
 
         for (TupleExpr candidatePlan : plans) {
             inComparable = true;
-            long cost1 = costEstimator.estimateCost(candidatePlan);
+            long cost1 = costEstimator.getCost(candidatePlan);
 
             for (TupleExpr plan : bestPlans) {
                 if (isPlanComparable(candidatePlan, plan)) {
