@@ -6,8 +6,11 @@ import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.BindJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.Union;
+import org.openrdf.model.URI;
+import org.openrdf.query.algebra.*;
+import sun.org.mozilla.javascript.ast.UnaryExpression;
+
+import javax.naming.BinaryRefAddr;
 
 /**
  * Created by angel on 4/28/14.
@@ -15,6 +18,9 @@ import org.openrdf.query.algebra.Union;
 public class CostEstimatorImpl implements CostEstimator {
 
     private CardinalityEstimator cardinalityEstimator;
+
+    private static int C_TRANSFER_TUPLE = 1;
+    private static int C_TRANSFER_QUERY = 5;
 
 
     public CostEstimatorImpl(CardinalityEstimator cardinalityEstimator) {
@@ -25,7 +31,7 @@ public class CostEstimatorImpl implements CostEstimator {
      * @param expr
      * @return
      */
-    public long getCost(TupleExpr expr) {
+    public double getCost(TupleExpr expr) {
 
         // just favor remote queries.
         if (expr instanceof SourceQuery)
@@ -34,7 +40,7 @@ public class CostEstimatorImpl implements CostEstimator {
             return 1;
     }
 
-    public long getCost(SourceQuery expr) {
+    public double getCost(SourceQuery expr) {
 
         // cardinality on a specific endpoint.
         // communication cost of the endpoint * cardinality
@@ -44,26 +50,39 @@ public class CostEstimatorImpl implements CostEstimator {
 
         //totalCost = processingCost(subexpr) + communicationCost(count, source) + initializationCostOfQuery;
 
-        return 0;
+        double cost = 0;
+        for (URI src : expr.getSources()) {
+            cost += cardinalityEstimator.getCardinality(expr) * C_TRANSFER_TUPLE + C_TRANSFER_QUERY;
+        }
+        return cost;
     }
 
-    public long getCost(BindJoin join) {
+    public double getCost(BindJoin join) {
         // long cardinalityOfLeft = cardinalityEstimator.getCardinality(join.getLeftArg());
         // long costLeftArgument = estimateCost(join.getLeftArg());
         // long cardinalityAll = cardinalityEstimator.getCardinality(join);
         // long queries = cardinalityOfLeft / bindingsPerQuery;
         // long resultsPerQuery = cardinalityAll / queries;
         // totalCost = costLeftArgument + queries * costOfRightArgumentWithBinding
-        return 0;
+
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        long joinCard = cardinalityEstimator.getCardinality(join);
+
+        return leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE) + joinCard * C_TRANSFER_TUPLE;
     }
 
-    public long getCost(HashJoin join) {
-        return 0;
+    public double getCost(HashJoin join) {
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+
+        return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
     }
 
-    public long getCost(Union union) {
-        return 0;
+    public double getCost(UnaryTupleOperator expr) {
+        return getCost(expr.getArg());
     }
 
-
+    public double getCost(BinaryTupleOperator expr) {
+        return getCost(expr.getLeftArg()) + getCost(expr.getRightArg());
+    }
 }
