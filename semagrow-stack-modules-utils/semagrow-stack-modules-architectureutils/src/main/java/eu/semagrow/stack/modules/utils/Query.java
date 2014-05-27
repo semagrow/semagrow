@@ -5,6 +5,7 @@ package eu.semagrow.stack.modules.utils;
  * 
  * @author Georgios Giannakopoulos
  */
+@Deprecated
 public class Query {
     protected String Query;
 

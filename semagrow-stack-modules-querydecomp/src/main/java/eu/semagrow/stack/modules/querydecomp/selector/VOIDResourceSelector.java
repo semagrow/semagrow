@@ -5,8 +5,10 @@ import eu.semagrow.stack.modules.api.ResourceSelector;
 import eu.semagrow.stack.modules.api.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.MeasurementImpl;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.SelectedResourceImpl;
+import eu.semagrow.stack.modules.vocabulary.VOID;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.repository.Repository;
@@ -21,14 +23,11 @@ import static org.openrdf.query.QueryLanguage.SPARQL;
  */
 public class VOIDResourceSelector implements ResourceSelector {
 
-    private static final String VOIDNamespace = "http://rdfs.org/ns/void#";
-
-    private static final String RDFNamespace = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
     private static final String NCSRDNamespace = "http://rdf.iit.demokritos.gr/2014/smo#";
 
     private static final String PREFIX =
-            "PREFIX void: <" + VOIDNamespace + ">\n" +
-            "PREFIX rdf: <" + RDFNamespace +">\n" +
+            "PREFIX void: <" + VOID.NAMESPACE + ">\n" +
+            "PREFIX rdf: <" + RDF.NAMESPACE +">\n" +
             "PREFIX ncsrd: <" + NCSRDNamespace + ">\n";
 
     private static final String VAR_TYPE  = "$TYPE$";
@@ -36,7 +35,6 @@ public class VOIDResourceSelector implements ResourceSelector {
     private static final String VAR_PRED  = "$PRED$";
 
     private static final String VAR_DATASET = "$DATASET$";
-
 
     private static final String TRIPLE_COUNT = PREFIX +
             "SELECT ?count WHERE {" +
@@ -296,38 +294,6 @@ public class VOIDResourceSelector implements ResourceSelector {
         return resultSize.longValue();
     }
 
-    public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, long measurement_id) {
-
-        Set<URI> datasets = getDatasets(statementPattern);
-        ArrayList<SelectedResource> resources = new ArrayList<SelectedResource>(datasets.size());
-
-        Map<URI, List<SelectedResource>> resourcesByEndpoint = new HashMap<URI, List<SelectedResource>>();
-
-        for (URI dataset : datasets) {
-            long vol = getPatternCount(dataset, statementPattern);
-            Set<URI> sources = getSource(dataset);
-
-            for (URI source : sources) {
-                SelectedResource selected = new SelectedResourceImpl(source, (int)vol, 0);
-                selected.setLoadInfo(getLoadInfo(source));
-                if (resourcesByEndpoint.containsKey(source)) {
-                    resourcesByEndpoint.get(source).add(selected);
-                } else {
-                    List<SelectedResource> list = new ArrayList<SelectedResource>();
-                    list.add(selected);
-                    resourcesByEndpoint.put(source, list);
-                }
-            }
-        }
-
-
-        for (URI endpoint : resourcesByEndpoint.keySet()) {
-            resources.add(getResource(resourcesByEndpoint.get(endpoint)));
-        }
-
-        return resources;
-    }
-
     private SelectedResource getResource(List<SelectedResource> resources) {
         if (resources.size() == 0)
             return null;
@@ -369,6 +335,38 @@ public class VOIDResourceSelector implements ResourceSelector {
         List<Measurement> list = new ArrayList<Measurement>();
         list.add(measurement);
         return list;
+    }
+
+    public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, long measurement_id) {
+
+        Set<URI> datasets = getDatasets(statementPattern);
+        ArrayList<SelectedResource> resources = new ArrayList<SelectedResource>(datasets.size());
+
+        Map<URI, List<SelectedResource>> resourcesByEndpoint = new HashMap<URI, List<SelectedResource>>();
+
+        for (URI dataset : datasets) {
+            long vol = getPatternCount(dataset, statementPattern);
+            Set<URI> sources = getSource(dataset);
+
+            for (URI source : sources) {
+                SelectedResource selected = new SelectedResourceImpl(source, (int)vol, 0);
+                selected.setLoadInfo(getLoadInfo(source));
+                if (resourcesByEndpoint.containsKey(source)) {
+                    resourcesByEndpoint.get(source).add(selected);
+                } else {
+                    List<SelectedResource> list = new ArrayList<SelectedResource>();
+                    list.add(selected);
+                    resourcesByEndpoint.put(source, list);
+                }
+            }
+        }
+
+
+        for (URI endpoint : resourcesByEndpoint.keySet()) {
+            resources.add(getResource(resourcesByEndpoint.get(endpoint)));
+        }
+
+        return resources;
     }
 }
 

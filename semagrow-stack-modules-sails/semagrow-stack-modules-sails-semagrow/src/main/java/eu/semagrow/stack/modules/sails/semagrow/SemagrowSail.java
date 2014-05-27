@@ -11,6 +11,16 @@ import java.io.File;
 /**
  * Semagrow Sail implementation.
  * @author acharal@iit.demokritos.gr
+ *
+ * TODO list and other suggestions from the plenary meeting in Wageningen
+ * TODO: lineage of evaluation (track the sources of the produced tuples)
+ * TODO: define clean interfaces for sourceselector
+ * TODO: rethink voID descriptions
+ * TODO: estimate processing cost of subqueries to the sources (some sources may contain indexes etc
+ * TODO: order-by and sort-merge-join
+ * TODO: voID and configuration as sailbase and able to be SPARQL queried.
+ * TODO: do transformation
+ * TODO: geosparql
  */
 public class SemagrowSail extends SailBase {
 
