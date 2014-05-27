@@ -1,7 +1,8 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
-import eu.semagrow.stack.modules.api.ResourceSelector;
 import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.querydecomp.SourceMetadata;
+import eu.semagrow.stack.modules.querydecomp.SourceSelector;
 import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.BPGCollector;
@@ -24,11 +25,11 @@ import java.util.logging.Logger;
 public class DynamicProgrammingOptimizer implements QueryOptimizer {
 
     private CostEstimator costEstimator;
-    private ResourceSelector resourceSelector;
+    private SourceSelector sourceSelector;
 
-    public DynamicProgrammingOptimizer(CostEstimator estimator, ResourceSelector selector) {
+    public DynamicProgrammingOptimizer(CostEstimator estimator, SourceSelector selector) {
         costEstimator = estimator;
-        resourceSelector = selector;
+        sourceSelector = selector;
     }
 
     /**
@@ -51,7 +52,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
 
         for (StatementPattern pattern : statementPatterns) {
             // get sources for each pattern
-            List<SelectedResource> resources = resourceSelector.getSelectedResources(pattern, 0);
+            List<SourceMetadata> sources = sourceSelector.getSources(pattern);
 
             // apply filters that can be applied to the statementpattern
             TupleExpr e = FilterUtils.applyRemainingFilters(pattern, filterConditions);
@@ -60,8 +61,11 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
             exprLabel.add(e);
 
             // create alternative SourceQuery for each filtered-statementpattern
-            for (SelectedResource r : resources) {
-                plans.add(exprLabel, new SourceQuery(e, r.getEndpoint()));
+            for (SourceMetadata sourceMetadata : sources) {
+                // TODO: Use alternative mirror data sources and not just the first
+                // TODO: Transformation and semantic proximity
+                if (sourceMetadata.getEndpoints().size() > 0)
+                    plans.add(exprLabel, new SourceQuery(e, sourceMetadata.getEndpoints().get(0)));
             }
         }
 
@@ -75,18 +79,18 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
         // get the minimum-cost plan for each equivalence class
 
         Collection<TupleExpr> bestPlans = new ArrayList<TupleExpr>();
-        Map<TupleExpr, Long> estimatedCosts = new HashMap<TupleExpr, Long>();
+        Map<TupleExpr, Double> estimatedCosts = new HashMap<TupleExpr, Double>();
 
         boolean inComparable = true;
 
         for (TupleExpr candidatePlan : plans) {
             inComparable = true;
-            long cost1 = costEstimator.getCost(candidatePlan);
+            double cost1 = costEstimator.getCost(candidatePlan);
 
             for (TupleExpr plan : bestPlans) {
                 if (isPlanComparable(candidatePlan, plan)) {
                     inComparable = false;
-                    long cost2 = estimatedCosts.get(plan);
+                    double cost2 = estimatedCosts.get(plan);
                     if (cost1 < cost2) {
                         bestPlans.remove(plan);
                         bestPlans.add(candidatePlan);

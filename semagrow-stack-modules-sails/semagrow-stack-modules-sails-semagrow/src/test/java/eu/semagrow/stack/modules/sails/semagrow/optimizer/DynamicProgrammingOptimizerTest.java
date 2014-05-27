@@ -1,7 +1,9 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
 import eu.semagrow.stack.modules.api.ResourceSelector;
+import eu.semagrow.stack.modules.querydecomp.SourceSelector;
 import eu.semagrow.stack.modules.querydecomp.Statistics;
+import eu.semagrow.stack.modules.querydecomp.selector.SourceSelectorAdapter;
 import eu.semagrow.stack.modules.querydecomp.selector.VOIDStatistics;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
@@ -49,7 +51,7 @@ public class DynamicProgrammingOptimizerTest extends TestCase {
         SPARQLParser parser = new SPARQLParser();
         ParsedQuery query = parser.parseQuery(q, null);
 
-        ResourceSelector selector = new TrivialResourceSelector();
+        SourceSelector selector = new SourceSelectorAdapter(new TrivialResourceSelector());
         DynamicProgrammingOptimizer optimizer =
                 new DynamicProgrammingOptimizer(costEstimator, selector);
         TupleExpr expr = query.getTupleExpr();
