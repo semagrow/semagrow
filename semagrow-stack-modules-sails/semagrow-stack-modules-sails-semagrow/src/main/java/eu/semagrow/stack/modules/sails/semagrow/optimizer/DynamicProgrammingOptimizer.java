@@ -7,14 +7,13 @@ import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.BPGCollector;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.CombinationIterator;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.FilterCollector;
+import eu.semagrow.stack.modules.sails.semagrow.helpers.FilterUtils;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
-import org.openrdf.query.algebra.helpers.VarNameCollector;
 
 import java.util.*;
 import java.util.logging.Logger;
@@ -55,7 +54,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
             List<SelectedResource> resources = resourceSelector.getSelectedResources(pattern, 0);
 
             // apply filters that can be applied to the statementpattern
-            TupleExpr e = applyRemainingFilters(pattern, filterConditions);
+            TupleExpr e = FilterUtils.applyRemainingFilters(pattern, filterConditions);
 
             Set<TupleExpr> exprLabel =  new HashSet<TupleExpr>();
             exprLabel.add(e);
@@ -120,7 +119,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
                 Collection<TupleExpr> joins = createPhysicalJoins(p1, p2);
 
                 for (TupleExpr plan : joins) {
-                    TupleExpr p = applyRemainingFilters(plan, filterConditions);
+                    TupleExpr p = FilterUtils.applyRemainingFilters(plan, filterConditions);
                     plans.add(p);
                 }
 
@@ -146,7 +145,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
             SourceQuery q2 = (SourceQuery) e2;
             List<URI> sources = commonSources(q1, q2);
             if (!sources.isEmpty()) {
-                TupleExpr expr = applyRemainingFilters(new Join(q1.getArg(), q2.getArg()), filterConditions);
+                TupleExpr expr = FilterUtils.applyRemainingFilters(new Join(q1.getArg(), q2.getArg()), filterConditions);
                 return new SourceQuery(expr, sources);
             }
         }
@@ -164,35 +163,6 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
         //plans.add(expr);
 
         return plans;
-    }
-
-    private Collection<ValueExpr> getRelevantFiltersConditions(TupleExpr e, Collection<ValueExpr> filterConditions) {
-        Set<String> variables = VarNameCollector.process(e);
-        Collection<ValueExpr> relevantConditions = new LinkedList<ValueExpr>();
-
-        for (ValueExpr condition : filterConditions) {
-            Set<String> conditionVariables = VarNameCollector.process(condition);
-            if (variables.containsAll(conditionVariables))
-                relevantConditions.add(condition);
-        }
-
-        return relevantConditions;
-    }
-
-    private static TupleExpr applyFilters(TupleExpr e, Collection<ValueExpr> conditions) {
-        TupleExpr expr = e;
-
-        for (ValueExpr condition : conditions)
-            expr = new Filter(expr, condition);
-
-        return expr;
-    }
-
-    private TupleExpr applyRemainingFilters(TupleExpr e, Collection<ValueExpr> conditions) {
-        Collection<ValueExpr> filtersApplied = FilterCollector.process(e);
-        Collection<ValueExpr> remainingFilters = getRelevantFiltersConditions(e, conditions);
-        remainingFilters.removeAll(filtersApplied);
-        return applyFilters(e, remainingFilters);
     }
 
     protected void finalizePlans(Collection<TupleExpr> plans) {
