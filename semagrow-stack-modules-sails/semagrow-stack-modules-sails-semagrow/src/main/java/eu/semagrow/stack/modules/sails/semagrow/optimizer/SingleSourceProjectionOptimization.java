@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SingleSourceExpr;
+import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;
@@ -62,21 +63,27 @@ public class SingleSourceProjectionOptimization implements QueryOptimizer {
         @Override
         public void meetNode(QueryModelNode node) {
             if (node instanceof SingleSourceExpr) {
-                TupleExpr expr = ((SingleSourceExpr) node).getArg();
-                Set<String> vars = ProvidedVarsVisitor.process(expr);
-                if (requestedVars != null) {
-                    vars.retainAll(requestedVars);
-                }
-                ProjectionElemList projectionList = new ProjectionElemList();
-                for (String v : vars) {
-                    projectionList.addElement(new ProjectionElem(v));
-                }
-                Projection projection = new Projection(expr, projectionList);
-                //expr.replaceWith(projection);
-                node.replaceChildNode(expr, projection);
+                addProjectionVars(((SingleSourceExpr) node).getArg());
             }
-            else
+            else if (node instanceof SourceQuery){
+                addProjectionVars(((SourceQuery) node).getArg());
+            } else
                 super.meetNode(node);
+        }
+
+        private void addProjectionVars(TupleExpr expr) {
+
+            Set<String> vars = ProvidedVarsVisitor.process(expr);
+            if (requestedVars != null) {
+                vars.retainAll(requestedVars);
+            }
+            ProjectionElemList projectionList = new ProjectionElemList();
+            for (String v : vars) {
+                projectionList.addElement(new ProjectionElem(v));
+            }
+            Projection projection = new Projection(expr, projectionList);
+            //expr.replaceWith(projection);
+            expr.replaceWith(projection);
         }
     }
 

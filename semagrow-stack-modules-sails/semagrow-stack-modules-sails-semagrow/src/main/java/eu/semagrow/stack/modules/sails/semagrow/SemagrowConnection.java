@@ -1,12 +1,13 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
+import eu.semagrow.stack.modules.querydecomp.SourceSelector;
+import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
+import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
+import eu.semagrow.stack.modules.querydecomp.selector.SourceSelectorAdapter;
 import eu.semagrow.stack.modules.querydecomp.selector.VOIDLoader;
+import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategy;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.FilterOptimizer;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceClusterOptimizer;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourcetoServiceConverter;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.StatementSourceSelection;
+import eu.semagrow.stack.modules.sails.semagrow.optimizer.*;
 import eu.semagrow.stack.modules.api.ResourceSelector;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
@@ -59,13 +60,13 @@ public class SemagrowConnection extends ReadonlySailConnection {
         * query optimization is placed traditionally here prior evaluation.
         * then evaluation strategy is called to actually evaluate the ``optimized'' query
         * */
-        QueryOptimizer optimizer = getSourceOptimizer();
+        //QueryOptimizer optimizer = getSourceOptimizer();
+        QueryOptimizer optimizer = getOptimizer();
 
         optimizer.optimize(tupleExpr,dataset,bindings);
-        System.out.print(QueryModelTreePrinter.printTree(tupleExpr));
+        //System.out.print(QueryModelTreePrinter.printTree(tupleExpr));
 
         EvaluationStrategy strategy = new EvaluationStrategy();
-
 
         try {
             return strategy.evaluate(tupleExpr,bindings);
@@ -93,6 +94,33 @@ public class SemagrowConnection extends ReadonlySailConnection {
         );
 
         return optimizer;
+    }
+
+    private QueryOptimizer getOptimizer() {
+        SourceSelector selector = getSourceSelector();
+        CostEstimator costEstimator = getCostEstimator();
+
+        QueryOptimizerList optimizer = new QueryOptimizerList(
+            new ConjunctiveConstraintSplitter(),
+            new CompareOptimizer(),
+            new SameTermFilterOptimizer(),
+            new DynamicProgrammingOptimizer(costEstimator,selector),
+            new SingleSourceProjectionOptimization()
+        );
+
+        return optimizer;
+    }
+
+    private SourceSelector getSourceSelector() {
+        VOIDLoader loader = new VOIDLoader();
+        ResourceSelector resourceSelector = loader.getSelector();
+        return new SourceSelectorAdapter(resourceSelector);
+    }
+
+    private CostEstimator getCostEstimator() {
+        CardinalityEstimator cardinalityEstimator = null;
+        CostEstimator estimator = new CostEstimatorImpl(cardinalityEstimator);
+        return estimator;
     }
 
     @Override
