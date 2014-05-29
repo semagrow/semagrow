@@ -7,4 +7,6 @@ import org.openrdf.sail.config.SailImplConfigBase;
  */
 public class SemagrowConfig extends SailImplConfigBase {
 
+    public SemagrowConfig() { super(SemagrowFactory.SAIL_TYPE); }
+
 }
