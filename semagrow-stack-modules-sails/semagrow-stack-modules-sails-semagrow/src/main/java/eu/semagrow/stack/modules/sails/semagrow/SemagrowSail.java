@@ -1,7 +1,22 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
+import eu.semagrow.stack.modules.api.ResourceSelector;
+import eu.semagrow.stack.modules.querydecomp.SourceSelector;
+import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
+import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
+import eu.semagrow.stack.modules.querydecomp.selector.SourceSelectorAdapter;
+import eu.semagrow.stack.modules.querydecomp.selector.VOIDLoader;
+import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
+import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingOptimizer;
+import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
+import org.openrdf.query.algebra.evaluation.QueryOptimizer;
+import org.openrdf.query.algebra.evaluation.impl.CompareOptimizer;
+import org.openrdf.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
+import org.openrdf.query.algebra.evaluation.impl.SameTermFilterOptimizer;
+import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
 import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 import org.openrdf.sail.helpers.SailBase;
@@ -47,4 +62,36 @@ public class SemagrowSail extends SailBase {
     public ValueFactory getValueFactory() {
         return ValueFactoryImpl.getInstance();
     }
+
+    public QueryOptimizer getOptimizer() {
+        SourceSelector selector = getSourceSelector();
+        CostEstimator costEstimator = getCostEstimator();
+
+        QueryOptimizerList optimizer = new QueryOptimizerList(
+                new ConjunctiveConstraintSplitter(),
+                new CompareOptimizer(),
+                new SameTermFilterOptimizer(),
+                new DynamicProgrammingOptimizer(costEstimator,selector),
+                new SingleSourceProjectionOptimization()
+        );
+
+        return optimizer;
+    }
+
+    public EvaluationStrategy getEvaluationStrategy() {
+        return new eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategy();
+    }
+
+    private SourceSelector getSourceSelector() {
+        VOIDLoader loader = new VOIDLoader();
+        ResourceSelector resourceSelector = loader.getSelector();
+        return new SourceSelectorAdapter(resourceSelector);
+    }
+
+    private CostEstimator getCostEstimator() {
+        CardinalityEstimator cardinalityEstimator = null;
+        CostEstimator estimator = new CostEstimatorImpl(cardinalityEstimator);
+        return estimator;
+    }
+
 }

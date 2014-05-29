@@ -24,6 +24,9 @@ public class SemagrowFactory implements SailFactory {
     }
 
     public Sail getSail(SailImplConfig sailImplConfig) throws SailConfigException {
+
+        assert sailImplConfig instanceof SemagrowConfig;
+
         SemagrowSail sail = new SemagrowSail();
         // create metadata sail and attach to semagrowsail
         //Sail metadataSail = new FileReloadingMemoryStore(FILENAME);
