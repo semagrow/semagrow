@@ -1,11 +1,12 @@
 package eu.semagrow.stack.modules.sails.semagrow.config;
 
+import eu.semagrow.stack.modules.sails.VOID.VOIDInferencer;
+import eu.semagrow.stack.modules.sails.memory.FileReloadingMemoryStore;
 import eu.semagrow.stack.modules.sails.semagrow.SemagrowSail;
+import org.openrdf.sail.NotifyingSail;
 import org.openrdf.sail.Sail;
-import org.openrdf.sail.config.SailConfigException;
-import org.openrdf.sail.config.SailFactory;
-import org.openrdf.sail.config.SailImplConfig;
-import org.openrdf.sail.config.SailRegistry;
+import org.openrdf.sail.StackableSail;
+import org.openrdf.sail.config.*;
 import org.openrdf.sail.memory.MemoryStore;
 
 /**
@@ -28,9 +29,38 @@ public class SemagrowFactory implements SailFactory {
         assert sailImplConfig instanceof SemagrowConfig;
 
         SemagrowSail sail = new SemagrowSail();
-        // create metadata sail and attach to semagrowsail
-        //Sail metadataSail = new FileReloadingMemoryStore(FILENAME);
-        //metadataSail = new VOIDInferencer(metadataSail);
+        Sail metadataSail = getMetadataSail(((SemagrowConfig) sailImplConfig).getMetadataConfig());
+
+        sail.setBaseSail(metadataSail);
+
         return sail;
     }
+
+    public Sail getMetadataSail(SailImplConfig sailImplConfig) throws SailConfigException {
+        return createSailStack(sailImplConfig);
+    }
+
+    public Sail createSailStack(SailImplConfig sailImplConfig) throws SailConfigException {
+        SailFactory factory = SailRegistry.getInstance().get(sailImplConfig.getType());
+        Sail sail;
+        if (factory != null)
+            sail = factory.getSail(sailImplConfig);
+        else
+            throw new SailConfigException("Not valid sail config");
+
+        if (sailImplConfig instanceof DelegatingSailImplConfig) {
+            SailImplConfig delegateConfig = ((DelegatingSailImplConfig)sailImplConfig).getDelegate();
+            addDelegate(sail, delegateConfig);
+        }
+
+        return sail;
+    }
+
+    public void addDelegate(Sail upperSail, SailImplConfig delegateConfig) throws SailConfigException {
+        if (upperSail instanceof StackableSail) {
+            Sail delegateSail = createSailStack(delegateConfig);
+            ((StackableSail)upperSail).setBaseSail(delegateSail);
+        }
+    }
+
 }

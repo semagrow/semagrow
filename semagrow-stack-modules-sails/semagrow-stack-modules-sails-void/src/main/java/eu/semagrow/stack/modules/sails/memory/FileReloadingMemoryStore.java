@@ -144,8 +144,8 @@ public class FileReloadingMemoryStore extends SailBase implements NotifyingSail 
 
     public void handleFileChange(File file) {
         MemoryStore memoryStore = new MemoryStore();
-
         try {
+            memoryStore.initialize();
             loadFile(file, memoryStore);
         } catch (SailException e) {
             e.printStackTrace();
@@ -156,6 +156,7 @@ public class FileReloadingMemoryStore extends SailBase implements NotifyingSail 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         changeStore(memoryStore);
     }
 

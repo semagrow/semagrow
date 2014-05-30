@@ -2,33 +2,46 @@ package eu.semagrow.stack.modules.sails.semagrow;
 
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
+import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
+import org.openrdf.sail.SailReadOnlyException;
+import org.openrdf.sail.helpers.SailConnectionBase;
+
+import java.util.Set;
 
 /**
  * A Semagrow Readonly Connection
  * @author acharal@iit.demokritos.gr
  */
-public class SemagrowConnection extends ReadonlySailConnection {
+public class SemagrowConnection extends SailConnectionBase {
 
     private QueryOptimizer optimizer;
+
     private EvaluationStrategy evaluationStrategy;
 
-    public SemagrowConnection(SemagrowSail sail)
+    private SailConnection metadataConnection;
+
+    private static final URI METADATA_GRAPH = ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
+
+    public SemagrowConnection(SemagrowSail sail, SailConnection baseConn)
     {
         super(sail);
+        ValueFactory vf = sail.getValueFactory();
+        metadataConnection = baseConn;
         optimizer = sail.getOptimizer();
         evaluationStrategy = sail.getEvaluationStrategy();
     }
 
     @Override
     protected void closeInternal() throws SailException {
-
+        metadataConnection.close();
     }
 
     /**
@@ -47,6 +60,10 @@ public class SemagrowConnection extends ReadonlySailConnection {
                                     BindingSet bindings,
                                     boolean b) throws SailException {
 
+
+        if (redirectToBase(tupleExpr, dataset, bindings, b))
+            return metadataConnection.evaluate(tupleExpr, dataset, bindings, b);
+
         optimizer.optimize(tupleExpr,dataset,bindings);
 
         try {
@@ -54,6 +71,17 @@ public class SemagrowConnection extends ReadonlySailConnection {
         } catch (QueryEvaluationException e) {
             throw new SailException(e);
         }
+    }
+
+    protected boolean redirectToBase(TupleExpr tupleExpr,
+                               Dataset dataset,
+                               BindingSet bindings,
+                               boolean b) {
+
+        if (dataset != null && dataset.getDefaultGraphs() != null) {
+            return dataset.getDefaultGraphs().contains(METADATA_GRAPH);
+        }
+        return false;
     }
 
     @Override
@@ -98,4 +126,34 @@ public class SemagrowConnection extends ReadonlySailConnection {
         return null;
     }
 
+
+    @Override
+    protected void addStatementInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+        throw new SailReadOnlyException("");
+    }
+
+    @Override
+    protected void removeStatementsInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+        throw new SailReadOnlyException("");
+    }
+
+    @Override
+    protected void clearInternal(Resource... resources) throws SailException {
+        throw new SailReadOnlyException("");
+    }
+
+    @Override
+    protected void setNamespaceInternal(String s, String s2) throws SailException {
+        throw new SailReadOnlyException("");
+    }
+
+    @Override
+    protected void removeNamespaceInternal(String s) throws SailException {
+        throw new SailReadOnlyException("");
+    }
+
+    @Override
+    protected void clearNamespacesInternal() throws SailException {
+        throw new SailReadOnlyException("");
+    }
 }

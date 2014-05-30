@@ -1,27 +1,39 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.api.ResourceSelector;
+import eu.semagrow.stack.modules.api.SelectedResource;
 import eu.semagrow.stack.modules.querydecomp.SourceSelector;
+import eu.semagrow.stack.modules.querydecomp.Statistics;
 import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
 import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
 import eu.semagrow.stack.modules.querydecomp.selector.SourceSelectorAdapter;
 import eu.semagrow.stack.modules.querydecomp.selector.VOIDLoader;
+import eu.semagrow.stack.modules.querydecomp.selector.VOIDResourceSelector;
+import eu.semagrow.stack.modules.querydecomp.selector.VOIDStatistics;
+import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingOptimizer;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.evaluation.impl.CompareOptimizer;
 import org.openrdf.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
 import org.openrdf.query.algebra.evaluation.impl.SameTermFilterOptimizer;
 import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.sail.Sail;
 import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
+import org.openrdf.sail.StackableSail;
 import org.openrdf.sail.helpers.SailBase;
+import org.openrdf.sail.helpers.SailWrapper;
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Semagrow Sail implementation.
@@ -37,30 +49,37 @@ import java.io.File;
  * TODO: do transformation
  * TODO: geosparql
  */
-public class SemagrowSail extends SailBase {
+public class SemagrowSail extends SailBase implements StackableSail {
 
+    private Sail metadataSail;
 
-    @Override
-    protected void shutDownInternal() throws SailException {
+    public SemagrowSail() { }
 
-    }
+    public SemagrowSail(Sail metadataSail) { setBaseSail(metadataSail); }
 
     public boolean isWritable() throws SailException {
         return false;
     }
 
-    /**
-     * Creates a new Semagrow SailConnection
-     * @return a new SailConnection
-     * @throws SailException
-     */
     @Override
-    public SailConnection getConnectionInternal() throws SailException {
-        return new SemagrowConnection(this);
+    protected void shutDownInternal() throws SailException {
+        metadataSail.shutDown();
+    }
+
+    public void setBaseSail(Sail sail) {
+        metadataSail = sail;
+    }
+
+    public Sail getBaseSail() {
+        return metadataSail;
     }
 
     public ValueFactory getValueFactory() {
         return ValueFactoryImpl.getInstance();
+    }
+
+    public SailConnection getConnectionInternal() throws SailException {
+        return new SemagrowConnection(this, this.getBaseSail().getConnection());
     }
 
     public QueryOptimizer getOptimizer() {
@@ -83,15 +102,26 @@ public class SemagrowSail extends SailBase {
     }
 
     private SourceSelector getSourceSelector() {
-        VOIDLoader loader = new VOIDLoader();
-        ResourceSelector resourceSelector = loader.getSelector();
+        VOIDResourceSelector resourceSelector = new VOIDResourceSelector();
+        resourceSelector.setRepository(getMetadataAsRepository());
         return new SourceSelectorAdapter(resourceSelector);
     }
 
     private CostEstimator getCostEstimator() {
-        CardinalityEstimator cardinalityEstimator = null;
-        CostEstimator estimator = new CostEstimatorImpl(cardinalityEstimator);
-        return estimator;
+        CardinalityEstimator cardinalityEstimator = getCardinalityEstimator();
+        return new CostEstimatorImpl(cardinalityEstimator);
     }
 
+    private CardinalityEstimator getCardinalityEstimator() {
+        return new CardinalityEstimatorImpl(getStatistics());
+    }
+
+    private Statistics getStatistics() {
+        return new VOIDStatistics(getMetadataAsRepository());
+    }
+
+    private Repository getMetadataAsRepository() {
+        assert metadataSail != null;
+        return new SailRepository(metadataSail);
+    }
 }

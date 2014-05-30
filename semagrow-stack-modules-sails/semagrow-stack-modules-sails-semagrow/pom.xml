@@ -29,5 +29,10 @@
             <artifactId>semagrow-stack-modules-vocabulary</artifactId>
             <version>1.0.0-rc1</version>
         </dependency>
+        <dependency>
+            <groupId>eu.semagrow.stack.modules</groupId>
+            <artifactId>semagrow-stack-modules-sails-void</artifactId>
+            <version>1.0.0-rc1</version>
+        </dependency>
     </dependencies>
 </project>
