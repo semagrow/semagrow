@@ -64,13 +64,21 @@ public class SemagrowConnection extends SailConnectionBase {
         if (redirectToBase(tupleExpr, dataset, bindings, b))
             return metadataConnection.evaluate(tupleExpr, dataset, bindings, b);
 
-        optimizer.optimize(tupleExpr,dataset,bindings);
+        TupleExpr decomposed = decompose(tupleExpr, dataset, bindings);
 
         try {
-            return evaluationStrategy.evaluate(tupleExpr,bindings);
+            return evaluationStrategy.evaluate(decomposed,bindings);
         } catch (QueryEvaluationException e) {
             throw new SailException(e);
         }
+    }
+
+    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {
+
+        if (!redirectToBase(tupleExpr, dataset, bindings, false)) {
+            optimizer.optimize(tupleExpr, dataset, bindings);
+        }
+        return tupleExpr;
     }
 
     protected boolean redirectToBase(TupleExpr tupleExpr,
@@ -129,12 +137,14 @@ public class SemagrowConnection extends SailConnectionBase {
 
     @Override
     protected void addStatementInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
-        throw new SailReadOnlyException("");
+        //throw new SailReadOnlyException("");
+        metadataConnection.addStatement(resource,uri,value,resources);
     }
 
     @Override
     protected void removeStatementsInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
-        throw new SailReadOnlyException("");
+        //throw new SailReadOnlyException("");
+        metadataConnection.removeStatements(resource,uri,value,resources);
     }
 
     @Override

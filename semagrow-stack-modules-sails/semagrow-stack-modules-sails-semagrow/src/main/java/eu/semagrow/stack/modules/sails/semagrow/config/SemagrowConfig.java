@@ -12,12 +12,11 @@ public class SemagrowConfig extends SailImplConfigBase {
 
     public SemagrowConfig() { super(SemagrowFactory.SAIL_TYPE); }
 
-
     public SailImplConfig getMetadataConfig() {
         return new VOIDInferencerConfig(new FileReloadingMemoryStoreConfig(getMetadataFilename()));
     }
 
     private String getMetadataFilename() {
-        return "metadata.xml";
+        return "/tmp/metadata.xml";
     }
 }

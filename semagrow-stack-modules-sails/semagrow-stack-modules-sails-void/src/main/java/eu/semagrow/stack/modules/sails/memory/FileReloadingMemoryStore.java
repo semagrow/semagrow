@@ -81,7 +81,7 @@ public class FileReloadingMemoryStore extends SailBase implements NotifyingSail 
     public NotifyingSailConnection getConnection()
             throws SailException
     {
-        return (NotifyingSailConnection)super.getConnection();
+        return store.getConnection();
     }
 
     private void addSailChangedListenerInternal(SailChangedListener listener) {

@@ -62,6 +62,12 @@ public class SemagrowSail extends SailBase implements StackableSail {
     }
 
     @Override
+    protected void initializeInternal() throws SailException {
+        if (metadataSail != null)
+            metadataSail.initialize();
+    }
+
+    @Override
     protected void shutDownInternal() throws SailException {
         metadataSail.shutDown();
     }
