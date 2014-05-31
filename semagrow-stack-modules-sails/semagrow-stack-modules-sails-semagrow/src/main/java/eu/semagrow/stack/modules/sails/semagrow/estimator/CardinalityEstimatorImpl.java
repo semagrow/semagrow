@@ -115,7 +115,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
     }
 
     public double getVarSelectivity(String varName, TupleExpr expr, URI source) {
-        return 1/2;
+        return (double)1/2;
     }
 
     protected double getSubjectSel(StatementPattern pattern, URI source) {

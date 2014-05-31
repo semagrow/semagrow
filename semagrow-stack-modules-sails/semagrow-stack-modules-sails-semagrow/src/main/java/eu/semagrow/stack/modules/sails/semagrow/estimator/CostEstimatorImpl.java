@@ -22,7 +22,6 @@ public class CostEstimatorImpl implements CostEstimator {
     private static int C_TRANSFER_TUPLE = 1;
     private static int C_TRANSFER_QUERY = 5;
 
-
     public CostEstimatorImpl(CardinalityEstimator cardinalityEstimator) {
         this.cardinalityEstimator = cardinalityEstimator;
     }
@@ -36,6 +35,8 @@ public class CostEstimatorImpl implements CostEstimator {
         // just favor remote queries.
         if (expr instanceof SourceQuery)
             return getCost((SourceQuery)expr);
+        else if (expr instanceof Join)
+            return getCost((Join)expr);
         else
             return 1;
     }
@@ -72,6 +73,13 @@ public class CostEstimatorImpl implements CostEstimator {
     }
 
     public double getCost(HashJoin join) {
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+
+        return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
+    }
+
+    public double getCost(Join join) {
         long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
         long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
 
