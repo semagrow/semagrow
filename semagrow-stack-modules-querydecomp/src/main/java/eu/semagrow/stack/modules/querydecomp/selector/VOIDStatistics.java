@@ -287,6 +287,34 @@ public class VOIDStatistics implements Statistics {
         if (pVal != null)
         {
 
+            if (pVal != null) {
+                String s = "SELECT ?triples { " +
+                        "[] <" + VOID.PROPERTY + "> ?property ; " +
+                        "   <" + VOID.SPARQLENDPOINT + "> ?endpoint ; " +
+                        "   <" + VOID.TRIPLES +"> ?triples . }";
+
+                RepositoryConnection conn = null;
+
+                try {
+                    conn = voidRepository.getConnection();
+                    TupleQuery q = conn.prepareTupleQuery(QueryLanguage.SPARQL, s);
+                    q.setIncludeInferred(true);
+                    q.setBinding("property", pVal);
+                    q.setBinding("endpoint", source);
+                    TupleQueryResult result = q.evaluate();
+                    if (result.hasNext()) {
+                        return Long.parseLong(result.next().getBinding("triples").getValue().stringValue());
+                    }
+                    return 0;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (conn != null)
+                        try { conn.close(); }catch(Exception e){ }
+                }
+            }
+
+
             if (sVal != null) { // case (s p O)
 
             } else { // case (S p O) || (S p o)
@@ -307,7 +335,7 @@ public class VOIDStatistics implements Statistics {
 
         }
 
-        return 0;
+        return 10;
     }
 
 

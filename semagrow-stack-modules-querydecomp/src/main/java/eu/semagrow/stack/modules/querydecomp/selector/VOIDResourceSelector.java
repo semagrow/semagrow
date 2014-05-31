@@ -160,6 +160,42 @@ public class VOIDResourceSelector implements ResourceSelector {
         return null;
     }
 
+
+    private List<Value> evalQueryValue(String query, String bindingName) {
+        try {
+            RepositoryConnection con = this.getRepository().getConnection();
+            try {
+                TupleQuery tupleQuery = con.prepareTupleQuery(SPARQL, query);
+                TupleQueryResult result = tupleQuery.evaluate();
+
+                try {
+                    List<Value> bindings = new ArrayList<Value>();
+                    while (result.hasNext()) {
+                        bindings.add(result.next().getValue(bindingName));
+                    }
+                    return bindings;
+                } catch (QueryEvaluationException e) {
+
+                } finally {
+                    result.close();
+                }
+            } catch (IllegalArgumentException e) {
+
+            } catch (RepositoryException e) {
+
+            } catch (MalformedQueryException e) {
+
+            } catch (QueryEvaluationException e) {
+
+            } finally {
+                con.close();
+            }
+        } catch (RepositoryException e) {
+
+        }
+        return null;
+    }
+
     public Set<URI> getDatasets(StatementPattern pattern) {
         Value s = pattern.getSubjectVar().getValue();
         Value p = pattern.getPredicateVar().getValue();
