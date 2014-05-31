@@ -6,10 +6,7 @@ import eu.semagrow.stack.modules.querydecomp.SourceSelector;
 import eu.semagrow.stack.modules.querydecomp.Statistics;
 import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
 import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
-import eu.semagrow.stack.modules.querydecomp.selector.SourceSelectorAdapter;
-import eu.semagrow.stack.modules.querydecomp.selector.VOIDLoader;
-import eu.semagrow.stack.modules.querydecomp.selector.VOIDResourceSelector;
-import eu.semagrow.stack.modules.querydecomp.selector.VOIDStatistics;
+import eu.semagrow.stack.modules.querydecomp.selector.*;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingOptimizer;
@@ -63,8 +60,9 @@ public class SemagrowSail extends SailBase implements StackableSail {
 
     @Override
     protected void initializeInternal() throws SailException {
-        if (metadataSail != null)
-            metadataSail.initialize();
+        // TODO: uncomment initialization to work properly!
+        //if (metadataSail != null && metadataSail.)
+        //   metadataSail.initialize();
     }
 
     @Override
@@ -108,9 +106,10 @@ public class SemagrowSail extends SailBase implements StackableSail {
     }
 
     private SourceSelector getSourceSelector() {
-        VOIDResourceSelector resourceSelector = new VOIDResourceSelector();
-        resourceSelector.setRepository(getMetadataAsRepository());
-        return new SourceSelectorAdapter(resourceSelector);
+        //VOIDResourceSelector resourceSelector = new VOIDResourceSelector();
+        //resourceSelector.setRepository(getMetadataAsRepository());
+        //return new SourceSelectorAdapter(resourceSelector);
+        return new VOIDSourceSelector(getMetadataAsRepository());
     }
 
     private CostEstimator getCostEstimator() {

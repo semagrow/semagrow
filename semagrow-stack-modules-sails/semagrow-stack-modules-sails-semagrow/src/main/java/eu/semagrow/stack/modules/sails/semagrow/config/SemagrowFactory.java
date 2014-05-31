@@ -3,11 +3,20 @@ package eu.semagrow.stack.modules.sails.semagrow.config;
 import eu.semagrow.stack.modules.sails.VOID.VOIDInferencer;
 import eu.semagrow.stack.modules.sails.memory.FileReloadingMemoryStore;
 import eu.semagrow.stack.modules.sails.semagrow.SemagrowSail;
+import org.openrdf.repository.Repository;
+import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sail.SailRepository;
+import org.openrdf.rio.RDFFormat;
+import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.NotifyingSail;
 import org.openrdf.sail.Sail;
 import org.openrdf.sail.StackableSail;
 import org.openrdf.sail.config.*;
 import org.openrdf.sail.memory.MemoryStore;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  * Created by angel on 5/29/14.
@@ -31,6 +40,7 @@ public class SemagrowFactory implements SailFactory {
         SemagrowSail sail = new SemagrowSail();
         Sail metadataSail = getMetadataSail(((SemagrowConfig) sailImplConfig).getMetadataConfig());
 
+        initializeMetadata(metadataSail, ((SemagrowConfig) sailImplConfig).getMetadataFilename());
         sail.setBaseSail(metadataSail);
 
         return sail;
@@ -38,6 +48,32 @@ public class SemagrowFactory implements SailFactory {
 
     public Sail getMetadataSail(SailImplConfig sailImplConfig) throws SailConfigException {
         return createSailStack(sailImplConfig);
+    }
+
+    public void initializeMetadata(Sail metadata, String filename) {
+        Repository repository = new SailRepository(metadata);
+        RepositoryConnection conn = null;
+
+            try {
+                repository.initialize();
+                conn = repository.getConnection();
+                File file = new File(filename);
+                conn.add(file, "file://" + file.getAbsoluteFile(), RDFFormat.TURTLE);
+            } catch (RepositoryException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
+            } catch (RDFParseException e) {
+                e.printStackTrace();
+            } finally {
+                if (conn != null) {
+                    try {
+                        conn.close();
+                    } catch (RepositoryException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
     }
 
     public Sail createSailStack(SailImplConfig sailImplConfig) throws SailConfigException {
