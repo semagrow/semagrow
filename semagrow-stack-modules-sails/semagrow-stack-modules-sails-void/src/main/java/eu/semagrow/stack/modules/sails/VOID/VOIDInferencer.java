@@ -39,8 +39,8 @@ public class VOIDInferencer extends NotifyingSailWrapper {
         VOIDInferencerConnection con = getConnection();
         try {
             con.begin();
-            con.flushUpdates();
             con.addAxiomStatements();
+            con.flushUpdates();
             con.commit();
         }
         finally {

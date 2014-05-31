@@ -193,7 +193,7 @@ public class VOIDInferencerConnection extends InferencerConnectionWrapper
     }
 
 
-    // xxx void:subset yyy && yyy void:sparqlEndpoint zzz --> xxx void:sparqlEndpoint zzz
+    // xxx void:subset yyy && xxx void:sparqlEndpoint zzz --> yyy void:sparqlEndpoint zzz
     protected int applyRule2() throws SailException {
 
         int nofInferred = 0;
@@ -202,20 +202,41 @@ public class VOIDInferencerConnection extends InferencerConnectionWrapper
         while ( iter.hasNext()) {
             Statement st = iter.next();
 
-            Resource yyy = st.getSubject();
+            Resource xxx = st.getSubject();
             Value zzz  = st.getObject();
             CloseableIteration<? extends Statement, SailException> t1Iter;
-            t1Iter = getWrappedConnection().getStatements(null, VOID.SUBSET, yyy, true);
+            t1Iter = getWrappedConnection().getStatements(xxx, VOID.SUBSET, null, true);
 
             while (t1Iter.hasNext()) {
                 Statement t1 = t1Iter.next();
-                Resource xxx = t1.getSubject();
-                boolean added = addInferredStatement(xxx, VOID.SPARQLENDPOINT, zzz);
+                Resource yyy = (Resource) t1.getObject();
+                boolean added = addInferredStatement(yyy, VOID.SPARQLENDPOINT, zzz);
                 if (added) {
                     nofInferred++;
                 }
             }
         }
+
+        Iterator<Statement> iter1 = currentIteration.filter(null, VOID.SUBSET, null).iterator();
+
+        while ( iter1.hasNext()) {
+            Statement st = iter1.next();
+
+            Resource xxx = st.getSubject();
+            Resource yyy  = (Resource) st.getObject();
+            CloseableIteration<? extends Statement, SailException> t1Iter;
+            t1Iter = getWrappedConnection().getStatements(xxx, VOID.SPARQLENDPOINT, null, true);
+
+            while (t1Iter.hasNext()) {
+                Statement t1 = t1Iter.next();
+                Value zzz =  t1.getObject();
+                boolean added = addInferredStatement(yyy, VOID.SPARQLENDPOINT, zzz);
+                if (added) {
+                    nofInferred++;
+                }
+            }
+        }
+
 
         return nofInferred;
     }
