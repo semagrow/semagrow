@@ -1,10 +1,13 @@
 package eu.semagrow.stack.modules.sails.memory;
 
+import info.aduna.iteration.CloseableIteration;
 import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.openrdf.model.ValueFactory;
+import org.openrdf.model.*;
+import org.openrdf.query.*;
+import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -12,6 +15,7 @@ import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
 import org.openrdf.sail.*;
+import org.openrdf.sail.helpers.NotifyingSailConnectionBase;
 import org.openrdf.sail.helpers.NotifyingSailConnectionWrapper;
 import org.openrdf.sail.helpers.SailBase;
 import org.openrdf.sail.memory.MemoryStore;
@@ -26,9 +30,16 @@ import java.util.Set;
 public class FileReloadingMemoryStore extends SailBase implements NotifyingSail {
 
     private MemoryStore store = new MemoryStore();
+    private String filename;
 
     public FileReloadingMemoryStore(String filename) {
         // TODO: check that filename exists
+        this.filename = filename;
+    }
+
+    @Override
+    public void initialize() throws SailException {
+        super.initialize();
         File file = new File(filename);
         handleFileChange(file);
         try {
@@ -36,6 +47,7 @@ public class FileReloadingMemoryStore extends SailBase implements NotifyingSail 
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 
     protected class ReloadListener extends FileAlterationListenerAdaptor {
@@ -81,6 +93,7 @@ public class FileReloadingMemoryStore extends SailBase implements NotifyingSail 
     public NotifyingSailConnection getConnection()
             throws SailException
     {
+        //TODO: check what happens when the store is replaced with a new one. Danger for dangling open connections?
         return store.getConnection();
     }
 
@@ -109,7 +122,7 @@ public class FileReloadingMemoryStore extends SailBase implements NotifyingSail 
 
     @Override
     protected NotifyingSailConnection getConnectionInternal() throws SailException {
-        return new NotifyingSailConnectionWrapper(store.getConnection());
+        return store.getConnection();
     }
 
     public void addSailChangedListener(SailChangedListener listener) {
@@ -188,6 +201,19 @@ public class FileReloadingMemoryStore extends SailBase implements NotifyingSail 
             throws SailException, RepositoryException, RDFParseException, IOException {
         Repository sailRepo = new SailRepository(sail);
         RepositoryConnection conn = sailRepo.getConnection();
-        conn.add(file, "file://" + file.getAbsoluteFile(), RDFFormat.RDFXML);
+        conn.add(file, "file://" + file.getAbsoluteFile(), RDFFormat.TURTLE);
+        conn.commit();
+        conn.close();
+
+        /*
+        String q = "SELECT * FROM {?s ?p ?o}. "
+        conn = sailRepo.getConnection();
+        TupleQuery query =  conn.prepareTupleQuery(QueryLanguage.SPARQL, q);
+        TupleQueryResult result = query.evaluate();
+
+        while( result.hasNext()) {
+            System.out.println(result.next());
+        }
+        */
     }
 }
