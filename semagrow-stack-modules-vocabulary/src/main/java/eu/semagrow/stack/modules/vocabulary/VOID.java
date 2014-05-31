@@ -40,8 +40,8 @@ public final class VOID {
 
     static {
         ValueFactory factory = ValueFactoryImpl.getInstance();
-        DATASET = factory.createURI(VOID.NAMESPACE, "dataset");
-        LINKSET = factory.createURI(VOID.NAMESPACE, "linkset");
+        DATASET = factory.createURI(VOID.NAMESPACE, "Dataset");
+        LINKSET = factory.createURI(VOID.NAMESPACE, "Linkset");
         SUBSET = factory.createURI(VOID.NAMESPACE, "subset");
         PROPERTYPARTITION = factory.createURI(VOID.NAMESPACE, "propertyPartition");
         CLASSPARTITION = factory.createURI(VOID.NAMESPACE, "classPartition");

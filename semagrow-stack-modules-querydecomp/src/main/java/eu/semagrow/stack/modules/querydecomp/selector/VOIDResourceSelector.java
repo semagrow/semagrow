@@ -65,8 +65,8 @@ public class VOIDResourceSelector implements ResourceSelector {
 
     private static final String PRED_DATASETS = PREFIX +
             "SELECT ?dataset WHERE {" +
-            " ?dataset rdf:a void:Dataset ; " +
-            "    void:property \"" + VAR_PRED + "\" ;" +
+            " ?dataset rdf:type void:Dataset ; " +
+            "    void:property <" + VAR_PRED + "> ." +
             "}";
 
     private static final String DATASET_SOURCE = PREFIX +
