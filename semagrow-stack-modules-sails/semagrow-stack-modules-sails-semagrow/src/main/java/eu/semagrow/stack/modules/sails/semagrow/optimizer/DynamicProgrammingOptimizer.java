@@ -234,7 +234,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
         return new CombinationIterator(k, s);
     }
 
-    public class PlanCollection {
+    protected class PlanCollection {
 
         private Map<Set<TupleExpr>, Collection<TupleExpr>> planMap;
 
