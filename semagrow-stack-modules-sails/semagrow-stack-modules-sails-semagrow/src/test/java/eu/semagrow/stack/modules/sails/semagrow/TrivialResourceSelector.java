@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.querydecomp.selector.mock;
+package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.api.Measurement;
 import eu.semagrow.stack.modules.api.ResourceSelector;

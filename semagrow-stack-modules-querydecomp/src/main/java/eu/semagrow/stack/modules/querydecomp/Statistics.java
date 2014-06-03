@@ -12,7 +12,7 @@ import java.util.Collection;
  */
 public interface Statistics {
 
-    long getTripleCount(URI source);
+    long getTriplesCount(URI source);
 
     long getPatternCount(StatementPattern pattern, URI source);
 

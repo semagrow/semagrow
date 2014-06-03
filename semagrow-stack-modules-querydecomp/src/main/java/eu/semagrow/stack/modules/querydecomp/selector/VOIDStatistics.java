@@ -12,265 +12,109 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.openrdf.query.QueryLanguage.SPARQL;
 
 /**
  * Created by angel on 4/30/14.
  */
-public class VOIDStatistics implements Statistics {
+public class VOIDStatistics extends VOIDBase implements Statistics {
 
-    private Repository voidRepository;
-
-    private static final String PREFIX =
-            "PREFIX void: <" + VOID.NAMESPACE + ">\n";
-
-    private static final String TRIPLE_COUNT = PREFIX +
-            "SELECT ?count WHERE {" +
-            "  [] void:sparqlEndpoint ?endpoint ;" +
-            "     void:triples ?count." +
-            "}";
-
-    private static final String TRIPLE_COUNT1 = PREFIX +
-            "SELECT ?count WHERE {" +
-            "  [] void:sparqlEndpoint ?endpoint ;" +
-            "     void:uriRegexPattern ?pattern ;" +
-            "     void:triples ?count." +
-            " FILTER regex(?s, ?pattern) " +
-            "}";
-
-    private static final String TRIPLE_COUNT2 = PREFIX +
-            "SELECT ?count WHERE {" +
-            "  [] void:sparqlEndpoint ?endpoint ;" +
-            "     void:property ?p ;" +
-            "     void:triples ?count." +
-            "}";
-
-    private class StatisticsStruct {
-        long triples;
-        long distinctSubjects;
-        long distinctObjects;
-        long distinctPredicates;
-    }
 
     public VOIDStatistics(Repository voidRepository) {
-        this.voidRepository = voidRepository;
-    }
-
-    protected Repository getRepository() { return voidRepository; }
-
-    /**
-     * Returns the count value defined by the supplied query and variable substitutions.
-     *
-     * @param query the query to be executed on the voiD repository.
-     * @param vars the variable bindings to be substituted in the query.
-     * @return the resulting count value.
-     */
-    private long getCount(String query, String... vars) {
-
-        // replace query variables
-        for (int i = 0; i < vars.length; i++) {
-            query = query.replace(vars[i], vars[++i]);
-        }
-
-        List<String> bindings = evalQuery(query, "count");
-
-        // check result validity
-        if (bindings.size() == 0) {
-
-            return -1;
-        }
-
-        return Long.parseLong(bindings.get(0));
-    }
-
-    /**
-     * Evaluates the given query and returns the result values for the specified binding name.
-     *
-     * @param query the query to evaluate.
-     * @param bindingName the desired result bindings.
-     * @return a list of result binding values.
-     */
-    private List<String> evalQuery(String query, String bindingName) {
-        try {
-            RepositoryConnection con = this.getRepository().getConnection();
-            try {
-                TupleQuery tupleQuery = con.prepareTupleQuery(SPARQL, query);
-                TupleQueryResult result = tupleQuery.evaluate();
-
-                try {
-                    List<String> bindings = new ArrayList<String>();
-                    while (result.hasNext()) {
-                        bindings.add(result.next().getValue(bindingName).stringValue());
-                    }
-                    return bindings;
-                } catch (QueryEvaluationException e) {
-
-                } finally {
-                    result.close();
-                }
-            } catch (IllegalArgumentException e) {
-
-            } catch (RepositoryException e) {
-
-            } catch (MalformedQueryException e) {
-
-            } catch (QueryEvaluationException e) {
-
-            } finally {
-                con.close();
-            }
-        } catch (RepositoryException e) {
-
-        }
-        return null;
+        super(voidRepository);
     }
 
     public long getDistinctObjects(StatementPattern pattern, URI source) {
-        return 0;
+        Value pVal = pattern.getPredicateVar().getValue();
+        Value sVal = pattern.getSubjectVar().getValue();
+        Value oVal = pattern.getObjectVar().getValue();
+
+        Set<Resource> datasets  = getMatchingDatasetsOfEndpoint(source);
+
+        if (datasets.isEmpty())
+            return 0;
+
+        if (oVal != null)
+            return 1;
+
+        Set<Resource> pDatasets = new HashSet<Resource>(datasets);
+        Set<Resource> sDatasets = new HashSet<Resource>(datasets);
+
+        if (pVal != null)
+            pDatasets.retainAll(getMatchingDatasetsOfPredicate((URI) pVal));
+
+        if (sVal != null && sVal instanceof URI)
+            sDatasets.retainAll(getMatchingDatasetsOfSubject((URI)sVal));
+
+        Set<Resource> spDatasets = new HashSet<Resource>(pDatasets);
+        spDatasets.retainAll(sDatasets);
+
+        if (!spDatasets.isEmpty()) { // datasets that match both the predicate and subject
+            return getDistinctObjects(spDatasets);
+        } else if (pVal != null && !pDatasets.isEmpty()) {
+            return getDistinctObjects(pDatasets);
+        } else if (sVal != null && !sDatasets.isEmpty()) {
+            return getDistinctObjects(sDatasets);
+        }
+        else {
+            return getDistinctObjects(datasets);
+        }
     }
 
     public long getDistinctSubjects(StatementPattern pattern, URI source) {
-        return 0;
+        Value pVal = pattern.getPredicateVar().getValue();
+        Value sVal = pattern.getSubjectVar().getValue();
+
+        Set<Resource> datasets  = getMatchingDatasetsOfEndpoint(source);
+
+        if (datasets.isEmpty())
+            return 0;
+
+        if (sVal != null)
+            return 1;
+
+        Set<Resource> pDatasets = new HashSet<Resource>(datasets);
+
+        if (pVal != null && pVal instanceof URI)
+            pDatasets.retainAll(getMatchingDatasetsOfSubject((URI)pVal));
+
+        //TODO: check datasets that must subject uriRegexPattern
+        //
+
+        if (sVal != null && !pDatasets.isEmpty()) {
+            return getDistinctSubjects(pDatasets);
+        }else{
+            return getDistinctSubjects(datasets);
+        }
     }
 
     public long getDistinctPredicates(StatementPattern pattern, URI source){
-        return 0;
-    }
+        Value pVal = pattern.getPredicateVar().getValue();
+        Value sVal = pattern.getSubjectVar().getValue();
 
-    public long getTripleCount(URI source) {
+        Set<Resource> datasets  = getMatchingDatasetsOfEndpoint(source);
 
-        // get all triples statistics from datasets with property sparqlEndpoint = source
-        // and get the maximum
-        return 0;
-    }
+        if (datasets.isEmpty())
+            return 0;
 
-    private Set<Resource> getDatasetsOfSubject(URI source, Value subjectValue)
-            throws QueryEvaluationException, RepositoryException {
+        if (pVal != null)
+            return 1;
 
-        String queryString =
-                "SELECT DISTINCT ?dataset WHERE {" +
-                "?dataset " + VOID.SPARQLENDPOINT + " ?endpoint" +
-                "?dataset " + VOID.URIREGEXPATTERN + " ?rp. " +
-                "FILTER regex(?s, ?rp). }";
 
-        RepositoryConnection conn = null;
+        Set<Resource> sDatasets = new HashSet<Resource>(datasets);
 
-        try {
-            conn = voidRepository.getConnection();
-            TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-            query.setBinding("endpoint", source);
-            query.setBinding("s", subjectValue);
 
-            return getDatasets(query.evaluate());
+        if (sVal != null && sVal instanceof URI)
+            sDatasets.retainAll(getMatchingDatasetsOfSubject((URI)sVal));
 
-        } catch (RepositoryException e) {
 
-        } catch (MalformedQueryException e) {
-
-        } finally {
-            if (conn != null)
-                conn.close();
+        if (sVal != null && !sDatasets.isEmpty()) {
+            return getDistinctPredicates(sDatasets);
+        }else{
+            return getDistinctPredicates(datasets);
         }
-
-        return new HashSet<Resource>();
-    }
-
-    private Set<Resource> getDatasetsOfObject(URI source, Value objectValue)
-            throws QueryEvaluationException, RepositoryException {
-
-        String queryString = "SELECT DISTINCT ?dataset WHERE {" +
-                "?dataset " + VOID.SPARQLENDPOINT + " ?endpoint" +
-                "?dataset svd:objectUriRegexPattern ?rp. " +
-                "FILTER regex(?o, ?rp). }";
-
-        RepositoryConnection conn = null;
-        try {
-            conn = voidRepository.getConnection();
-            TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-            query.setBinding("endpoint", source);
-            query.setBinding("o", objectValue);
-
-            return getDatasets(query.evaluate());
-
-        } catch (RepositoryException e) {
-
-        } catch (MalformedQueryException e) {
-
-        } finally {
-            if (conn != null)
-                conn.close();
-        }
-
-        return new HashSet<Resource>();
-    }
-
-    private Set<Resource> getDatasetsOfPredicate(URI source, Value propertyValue)
-            throws QueryEvaluationException, RepositoryException {
-
-        String queryString = "SELECT DISTINCT ?dataset WHERE {" +
-                "?dataset " + VOID.SPARQLENDPOINT + " ?endpoint" +
-                "?dataset " + VOID.PROPERTY + " ?p. }";
-
-        RepositoryConnection conn = null;
-        try {
-            conn = voidRepository.getConnection();
-            TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-            query.setBinding("endpoint", source);
-            query.setBinding("p", propertyValue);
-
-            return getDatasets(query.evaluate());
-
-        } catch (RepositoryException e) {
-
-        } catch (MalformedQueryException e) {
-
-        } finally {
-            if (conn != null)
-                conn.close();
-        }
-
-        return new HashSet<Resource>();
-    }
-
-    private Set<Resource> getDatasetsOfEndpoint(URI source)
-            throws QueryEvaluationException, RepositoryException {
-
-        String queryString = "SELECT DISTINCT ?dataset WHERE {" +
-                "?dataset " + VOID.SPARQLENDPOINT + " ?endpoint. }";
-
-        RepositoryConnection conn = null;
-        try {
-            conn = voidRepository.getConnection();
-            TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString);
-            query.setBinding("endpoint", source);
-
-            return getDatasets(query.evaluate());
-
-        } catch (RepositoryException e) {
-
-        } catch (MalformedQueryException e) {
-
-        } finally {
-            if (conn != null)
-                conn.close();
-        }
-
-        return new HashSet<Resource>();
-    }
-
-    private Set<Resource> getDatasets(TupleQueryResult result) throws QueryEvaluationException {
-        Set<Resource> set = new HashSet<Resource>();
-        while (result.hasNext()){
-            Value bindingValue = result.next().getBinding("dataset").getValue();
-            if (bindingValue instanceof Resource)
-                set.add((Resource)bindingValue);
-        }
-        return set;
     }
 
     public long getPatternCount(StatementPattern pattern, URI source) {
@@ -279,64 +123,124 @@ public class VOIDStatistics implements Statistics {
         Value pVal = pattern.getPredicateVar().getValue();
         Value oVal = pattern.getObjectVar().getValue();
 
-        // case (s p o)
         if (sVal != null && pVal != null && oVal != null)
             return 1;
 
-        // cases (s p O) || (S p O) || (S p o)
+        Set<Resource> datasets  = getMatchingDatasetsOfEndpoint(source);
+
+        //Set<Resource> oDatasets = new HashSet<Resource>(datasets);
+
+        if (datasets.isEmpty())
+            return 0;
+
+        Set<Resource> pDatasets = new HashSet<Resource>(datasets);
+
+        Set<Resource> sDatasets = new HashSet<Resource>(datasets);
+
         if (pVal != null)
-        {
+            pDatasets.retainAll(getMatchingDatasetsOfPredicate((URI) pVal));
 
-            if (pVal != null) {
-                String s = "SELECT ?triples { " +
-                        "[] <" + VOID.PROPERTY + "> ?property ; " +
-                        "   <" + VOID.SPARQLENDPOINT + "> ?endpoint ; " +
-                        "   <" + VOID.TRIPLES +"> ?triples . }";
+        if (sVal != null && sVal instanceof URI)
+            sDatasets.retainAll(getMatchingDatasetsOfSubject((URI)sVal));
 
-                RepositoryConnection conn = null;
+        Set<Resource> spDatasets = new HashSet<Resource>(pDatasets);
+        spDatasets.retainAll(sDatasets);
 
-                try {
-                    conn = voidRepository.getConnection();
-                    TupleQuery q = conn.prepareTupleQuery(QueryLanguage.SPARQL, s);
-                    q.setIncludeInferred(true);
-                    q.setBinding("property", pVal);
-                    q.setBinding("endpoint", source);
-                    TupleQueryResult result = q.evaluate();
-                    if (result.hasNext()) {
-                        return Long.parseLong(result.next().getBinding("triples").getValue().stringValue());
-                    }
-                    return 0;
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    if (conn != null)
-                        try { conn.close(); }catch(Exception e){ }
-                }
-            }
+        if (!spDatasets.isEmpty()) { // datasets that match both the predicate and subject
+            long d = 1;
+            if (oVal != null)
+                d = getDistinctObjects(spDatasets);
+            return getTriplesCount(spDatasets) / d;
+        } else if (pVal != null && !pDatasets.isEmpty()) {
+            long d = 1;
+            if (oVal != null)
+                d *= getDistinctObjects(pDatasets);
+            if (sVal != null)
+                d *= getDistinctSubjects(pDatasets);
 
+            return getTriplesCount(pDatasets) / d;
+        } else if (sVal != null && !sDatasets.isEmpty()) {
+            long d = 1;
+            if (oVal != null)
+                d *= getDistinctObjects(sDatasets);
+            if (pVal != null)
+                d *= getDistinctPredicates(sDatasets);
 
-            if (sVal != null) { // case (s p O)
-
-            } else { // case (S p O) || (S p o)
-
-            }
+            return getTriplesCount(sDatasets) / d;
         }
+        else {
+            long d = 1;
 
-        // cases (s P o) || (s P O)
-        if (sVal != null) {
+            if (oVal != null)
+                d *= getDistinctObjects(datasets);
+            if (pVal != null)
+                d *= getDistinctPredicates(datasets);
+            if (sVal != null)
+                d *= getDistinctSubjects(datasets);
 
+            return getTriplesCount(datasets) / d;
         }
-
-        // case (S P o)
-        if (oVal != null) {
-
-
-        } else { // case (S P O)
-
-        }
-
-        return 10;
     }
 
+    public long getTriplesCount(URI source) {
 
+        // get all triples statistics from datasets with property sparqlEndpoint = source
+        // and get the maximum
+        return 0;
+    }
+
+    private Long getTriplesCount(Collection<Resource> datasets) {
+        long triples = 0;
+        boolean realData = false;
+        for (Resource dataset : datasets) {
+            Long t = getTriples(dataset);
+            if (t != null && triples < t.longValue()) {
+                realData = true;
+                triples = t.longValue();
+            }
+        }
+        if (realData)
+            return triples;
+        else
+            return null;
+    }
+
+    private Long getDistinctSubjects(Collection<Resource> datasets) {
+        long triples = 0;
+        int i = 0;
+        for (Resource dataset : datasets) {
+            Long t = getDistinctSubjects(dataset);
+            if (t != null) {
+                triples += t.longValue();
+                i++;
+            }
+        }
+        return (i == 0) ? 1 : triples/i;
+    }
+
+    private Long getDistinctObjects(Collection<Resource> datasets) {
+        long triples = 0;
+        int i = 0;
+        for (Resource dataset : datasets) {
+            Long t = getDistinctObjects(dataset);
+            if (t != null) {
+                triples += t.longValue();
+                i++;
+            }
+        }
+        return (i==0) ? 1 : triples/i;
+    }
+
+    private Long getDistinctPredicates(Collection<Resource> datasets) {
+        long triples = 0;
+        int i = 0;
+        for (Resource dataset : datasets) {
+            Long t = getDistinctPredicates(dataset);
+            if (t != null) {
+                triples += t.longValue();
+                i++;
+            }
+        }
+        return (i == 0) ? 1 : triples/i;
+    }
 }

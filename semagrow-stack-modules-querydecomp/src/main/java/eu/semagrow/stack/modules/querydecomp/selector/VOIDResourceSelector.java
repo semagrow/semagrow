@@ -21,6 +21,7 @@ import static org.openrdf.query.QueryLanguage.SPARQL;
 /**
  * Created by angel on 3/17/14.
  */
+@Deprecated
 public class VOIDResourceSelector implements ResourceSelector {
 
     private static final String NCSRDNamespace = "http://rdf.iit.demokritos.gr/2014/smo#";

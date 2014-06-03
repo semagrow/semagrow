@@ -14,6 +14,7 @@ import java.util.List;
 /**
  * Created by angel on 5/27/14.
  */
+@Deprecated
 public class SourceSelectorAdapter implements SourceSelector{
 
     private ResourceSelector resourceSelector;

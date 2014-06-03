@@ -21,6 +21,7 @@ import java.io.*;
 /**
  * Created by angel on 3/18/14.
  */
+@Deprecated
 public class VOIDLoader {
 
     private static final String VOIDNamespace = "http://rdfs.org/ns/void#";
