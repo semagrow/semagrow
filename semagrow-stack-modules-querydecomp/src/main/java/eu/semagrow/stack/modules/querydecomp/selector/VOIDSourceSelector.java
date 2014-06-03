@@ -60,14 +60,14 @@ public class VOIDSourceSelector implements SourceSelector {
         //String q = "SELECT ?dataset { ?dataset ?p ?p1. }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("prop", pred);
-        return createSet(evalQuery(q, bindings), "dataset");
+        return evalQuerySet(q, bindings, "dataset");
     }
 
     private Set<Resource> getMatchingDatasetsOfSubject(URI subject) {
         String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(?). }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("subject", subject);
-        return createSet(evalQuery(q, bindings), "dataset");
+        return evalQuerySet(q, bindings, "dataset");
     }
 
     private Set<Resource> createSet(TupleQueryResult result, String binding) {
@@ -90,7 +90,7 @@ public class VOIDSourceSelector implements SourceSelector {
         return set;
     }
 
-    private TupleQueryResult evalQuery(String queryString, BindingSet bindingSet) {
+    private Set<Resource> evalQuerySet(String queryString, BindingSet bindingSet, String proj) {
         RepositoryConnection conn = null;
         try {
             conn = voidRepository.getConnection();
@@ -98,10 +98,12 @@ public class VOIDSourceSelector implements SourceSelector {
             q.setIncludeInferred(true);
             //for (Binding b : bindingSet)
             //    q.setBinding(b.getName(), b.getValue());
-            return q.evaluate();
+            return createSet(q.evaluate(), proj);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
+            if (conn != null)
+                try { conn.close(); } catch (Exception e) { }
         }
         return null;
     }
