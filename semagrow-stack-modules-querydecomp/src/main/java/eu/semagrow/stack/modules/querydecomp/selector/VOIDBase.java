@@ -40,7 +40,7 @@ public abstract class VOIDBase {
     }
 
     protected Set<Resource> getMatchingDatasetsOfSubject(URI subject) {
-        String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(?). }";
+        String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(?subject, ?pattern). }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("subject", subject);
         return evalQuerySet(q, bindings, "dataset");

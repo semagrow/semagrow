@@ -52,4 +52,19 @@ public class SourceQuery extends UnaryTupleOperator {
 
         return sb.toString();
     }
+
+    @Override
+    public int hashCode() {
+
+        return this.sources.hashCode() + super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof SourceQuery) {
+            return this.sources.equals(((SourceQuery) o).sources) &&
+                   super.equals(o);
+        }
+        return false;
+    }
 }

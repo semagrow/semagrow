@@ -5,6 +5,7 @@ import eu.semagrow.stack.modules.querydecomp.Statistics;
 import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.VarNameCollector;
 
@@ -111,43 +112,55 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
     }
 
     private double getConditionSelectivity(ValueExpr condition, URI source) {
-        return 1/2;
+        return 0.5;
     }
 
     public double getVarSelectivity(String varName, TupleExpr expr, URI source) {
-        return (double)1/2;
+        if (expr instanceof StatementPattern)
+            return getVarSelectivity(varName, (StatementPattern)expr, source);
+        else if (expr instanceof BinaryTupleOperator)
+            return getVarSelectivity(varName, (BinaryTupleOperator)expr, source);
+        else if (expr instanceof UnaryTupleOperator)
+            return getVarSelectivity(varName, (UnaryTupleOperator)expr, source);
+
+        Set<String> varNames = VarNameCollector.process(expr);
+
+        if (!varNames.contains(varName))
+            return 1;
+
+        return 0.5;
     }
 
-    protected double getSubjectSel(StatementPattern pattern, URI source) {
-        if (pattern.getSubjectVar().hasValue()) {
-            long p = statistics.getPatternCount(pattern, source);
-            long s = statistics.getDistinctSubjects(pattern, source);
-            return p / s;
+    public double getVarSelectivity(String varName, StatementPattern pattern, URI source) {
+        Var sVar = pattern.getSubjectVar();
+        Var pVar = pattern.getPredicateVar();
+        Var oVar = pattern.getObjectVar();
+
+        //long count = statistics.getPatternCount(pattern, source);
+        long distinct = 1;
+        if (sVar.getName().equals(varName) && !sVar.hasValue()) {
+            distinct = statistics.getDistinctSubjects(pattern, source);
         }
-        return 1;
+
+        if (pVar.getName().equals(varName) && !pVar.hasValue()) {
+            distinct = statistics.getDistinctPredicates(pattern, source);
+        }
+
+        if (oVar.getName().equals(varName) && !oVar.hasValue()) {
+            distinct = statistics.getDistinctObjects(pattern, source);
+        }
+
+        return ((double)1/distinct);
     }
 
-    protected double getObjectSel(StatementPattern pattern, URI source) {
-        if (pattern.getObjectVar().hasValue()) {
-            // create a new pattern with object unbound.
-            StatementPattern pattern1 =
-                    new StatementPattern(pattern.getSubjectVar(),
-                            pattern.getPredicateVar(),
-                            pattern.getObjectVar());
-            long p = statistics.getPatternCount(pattern1, source);
-            long o = statistics.getDistinctObjects(pattern1, source);
-            return p / o;
-        }
-        return 1;
+    public double getVarSelectivity(String varName, UnaryTupleOperator expr, URI source) {
+        return getVarSelectivity(varName, expr.getArg(), source);
     }
 
-    protected double getPredicateSel(StatementPattern pattern, URI source) {
-        if (pattern.getPredicateVar().hasValue()) {
-            long p = statistics.getPatternCount(pattern, source);
-            long s = statistics.getDistinctPredicates(pattern, source);
-            return p / s;
-        }
-        return 1;
+    public double getVarSelectivity(String varName, BinaryTupleOperator expr, URI source) {
+        double leftSel = getVarSelectivity(varName, expr.getLeftArg(), source);
+        double rightSel = getVarSelectivity(varName, expr.getLeftArg(), source);
+        return Math.min(leftSel, rightSel);
     }
 
     // helper
@@ -158,3 +171,4 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
         return set1;
     }
 }
+
