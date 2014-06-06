@@ -22,6 +22,7 @@ import java.util.List;
  * Annotates each Statement with a designated source
  * @author acharal@iit.demokritos.gr
  */
+@Deprecated
 public class StatementSourceSelection extends QueryModelVisitorBase<RuntimeException>
         implements QueryOptimizer  {
 
