@@ -13,12 +13,12 @@ import java.util.List;
 /**
  * Created by angel on 6/5/14.
  */
-public class UnionBindingsConversionIteration
+public class InsertUnionBindingsIteration
         extends ConvertingIteration<BindingSet, BindingSet, QueryEvaluationException> {
 
     protected final List<BindingSet> bindings;
 
-    public UnionBindingsConversionIteration(CloseableIteration<BindingSet,
+    public InsertUnionBindingsIteration(CloseableIteration<BindingSet,
             QueryEvaluationException> iter, List<BindingSet> bindings) {
         super(iter);
         this.bindings = bindings;

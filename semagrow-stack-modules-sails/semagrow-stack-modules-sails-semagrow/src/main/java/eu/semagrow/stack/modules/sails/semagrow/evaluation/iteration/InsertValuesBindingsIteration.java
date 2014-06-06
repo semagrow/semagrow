@@ -13,13 +13,13 @@ import java.util.List;
 /**
  * Created by angel on 6/5/14.
  */
-public class ValuesBindingsConversionIteration extends
+public class InsertValuesBindingsIteration extends
     ConvertingIteration<BindingSet, BindingSet, QueryEvaluationException> {
 
     public static final String INDEX_BINDING_NAME = "__rowIdx";
     protected final List<BindingSet> bindings;
 
-    public ValuesBindingsConversionIteration(
+    public InsertValuesBindingsIteration(
             CloseableIteration<BindingSet, QueryEvaluationException> iter,
             List<BindingSet> bindings) {
         super(iter);

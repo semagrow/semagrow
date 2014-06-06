@@ -1,10 +1,10 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration;
 
-import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategy;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
+import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 
 /**
@@ -15,7 +15,7 @@ public class BindJoinIteration extends JoinExecutorBase<BindingSet> {
     private EvaluationStrategy evaluationStrategy;
 
     public BindJoinIteration(CloseableIteration<BindingSet,QueryEvaluationException> leftIter,
-                             SourceQuery rightArg, org.openrdf.query.BindingSet bindings,
+                             TupleExpr rightArg, org.openrdf.query.BindingSet bindings,
                              EvaluationStrategy strategy)
             throws org.openrdf.query.QueryEvaluationException {
         super(leftIter, rightArg, bindings);
@@ -25,8 +25,6 @@ public class BindJoinIteration extends JoinExecutorBase<BindingSet> {
 
     @Override
     protected void handleBindings() throws Exception {
-        while (!closed && leftIter.hasNext()) {
-
-        }
+        addResult(evaluationStrategy.evaluate(rightArg,leftIter));
     }
 }

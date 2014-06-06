@@ -1,7 +1,5 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.api.SelectedResource;
 import eu.semagrow.stack.modules.querydecomp.SourceSelector;
 import eu.semagrow.stack.modules.querydecomp.Statistics;
 import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
@@ -9,11 +7,12 @@ import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
 import eu.semagrow.stack.modules.querydecomp.selector.*;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.QueryExecutorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingOptimizer;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.evaluation.impl.CompareOptimizer;
@@ -27,10 +26,6 @@ import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 import org.openrdf.sail.StackableSail;
 import org.openrdf.sail.helpers.SailBase;
-import org.openrdf.sail.helpers.SailWrapper;
-
-import java.io.File;
-import java.util.List;
 
 /**
  * Semagrow Sail implementation.
@@ -102,7 +97,7 @@ public class SemagrowSail extends SailBase implements StackableSail {
     }
 
     public EvaluationStrategy getEvaluationStrategy() {
-        return new eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategy();
+        return new EvaluationStrategyImpl(new QueryExecutorImpl());
     }
 
     private SourceSelector getSourceSelector() {
