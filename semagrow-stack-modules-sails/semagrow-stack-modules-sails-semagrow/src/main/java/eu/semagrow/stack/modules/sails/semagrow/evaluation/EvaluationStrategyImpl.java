@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
 import eu.semagrow.stack.modules.sails.semagrow.algebra.BindJoin;
+import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.Transform;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.BindJoinIteration;
@@ -15,6 +16,7 @@ import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UnaryTupleOperator;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
+import org.openrdf.query.algebra.evaluation.iterator.BottomUpJoinIterator;
 import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
 import org.openrdf.query.impl.EmptyBindingSet;
 
@@ -29,6 +31,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
     implements EvaluationStrategy {
 
     private int batchSize = 10;
+
     private QueryExecutor queryExecutor;
 
     public EvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
@@ -80,8 +83,16 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
 
         if (join instanceof BindJoin)
             return evaluate((BindJoin)join, bindings);
+        else if (join instanceof HashJoin)
+            return evaluate((HashJoin)join, bindings);
         else
             return super.evaluate(join, bindings);
+    }
+
+    public CloseableIteration<BindingSet,QueryEvaluationException>
+        evaluate(HashJoin join, BindingSet bindings) throws QueryEvaluationException {
+
+        return new BottomUpJoinIterator(this, join, bindings);
     }
 
     public CloseableIteration<BindingSet,QueryEvaluationException>

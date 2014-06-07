@@ -1,40 +1,60 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.InsertValuesBindingsIteration;
 import info.aduna.iteration.CloseableIteration;
+import info.aduna.iteration.EmptyIteration;
+import info.aduna.iteration.Iterations;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.Var;
+import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
+import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sparql.query.InsertBindingSetCursor;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Created by angel on 6/6/14.
  */
+//FIXME: Shutdown connections and repositories properly
 public class QueryExecutorImpl implements QueryExecutor {
 
+    public RepositoryConnection getConnection(URI endpoint) {
+        return null;
+    }
+
     public CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluate(URI endpoint, TupleExpr expr, BindingSet bindings) throws QueryEvaluationException {
+        evaluate(URI endpoint, TupleExpr expr, BindingSet bindings)
+            throws QueryEvaluationException {
 
+        CloseableIteration<BindingSet,QueryEvaluationException> result = null;
         try {
-            RepositoryConnection conn = getConnection(endpoint);
+
             String sparqlQuery = buildSPARQLQuery(expr);
-            TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery);
 
-            Iterator<Binding> bIter = bindings.iterator();
-            while (bIter.hasNext()) {
-                Binding b = bIter.next();
-                query.setBinding(b.getName(), b.getValue());
-            }
+            Set<String> freeVars = computeVars(expr);
+            freeVars.removeAll(bindings.getBindingNames());
 
-            return query.evaluate();
+            // FIXME: check if no free vars in the query. If so, send an ASK query.
+            // if (freeVars.isEmpty())
+
+            result = sendQuery(endpoint, sparqlQuery, bindings);
+
+            result = new InsertBindingSetCursor(result, bindings);
+
+            return result;
+        } catch (QueryEvaluationException e) {
+            Iterations.closeCloseable(result);
+            throw e;
         } catch (Exception e) {
+            Iterations.closeCloseable(result);
             throw new QueryEvaluationException(e);
         }
     }
@@ -43,14 +63,90 @@ public class QueryExecutorImpl implements QueryExecutor {
         evaluate(URI endpoint, TupleExpr expr,
                  CloseableIteration<BindingSet, QueryEvaluationException> bindingIter)
             throws QueryEvaluationException {
-        return null;
+
+        CloseableIteration<BindingSet, QueryEvaluationException> result = null;
+        try {
+            List<BindingSet> bindings = Iterations.asList(bindingIter);
+
+            if (bindings.isEmpty()) {
+                return new EmptyIteration<BindingSet, QueryEvaluationException>();
+            }
+
+            if (bindings.size() == 1) {
+                result = evaluate(endpoint, expr, bindings.get(0));
+                return result;
+            }
+
+            result = evaluateInternal(endpoint, expr, bindings);
+            return result;
+
+        } catch (MalformedQueryException e) {
+                // this exception must not be silenced, bug in our code
+                throw new QueryEvaluationException(e);
+        }
+        catch (QueryEvaluationException e) {
+            Iterations.closeCloseable(result);
+            throw e;
+        } catch (Exception e) {
+            Iterations.closeCloseable(result);
+            throw new QueryEvaluationException(e);
+        }
     }
 
 
-    public RepositoryConnection getConnection(URI endpoint) {
-        return null;
+    protected CloseableIteration<BindingSet, QueryEvaluationException>
+        evaluateInternal(URI endpoint, TupleExpr expr, List<BindingSet> bindings)
+            throws Exception {
+
+        CloseableIteration<BindingSet, QueryEvaluationException> result = null;
+
+        Set<String> exprVars = computeVars(expr);
+
+        List<String> relevant = getRelevantBindingNames(bindings, exprVars);
+
+        String sparqlQuery = buildSPARQLQueryVALUES(expr, bindings, relevant);
+
+        result = sendQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
+
+        result = new InsertValuesBindingsIteration(result, bindings);
+
+        return result;
     }
 
+    private List<String> getRelevantBindingNames(List<BindingSet> bindings, Set<String> exprVars) {
+
+        List<String> relevantBindingNames = new ArrayList<String>(5);
+        for (String bName : bindings.get(0).getBindingNames()) {
+            if (exprVars.contains(bName))
+                relevantBindingNames.add(bName);
+        }
+
+        return relevantBindingNames;
+    }
+
+    /**
+     * Compute the variable names occurring in the service expression using tree
+     * traversal, since these are necessary for building the SPARQL query.
+     *
+     * @return the set of variable names in the given service expression
+     */
+    private Set<String> computeVars(TupleExpr serviceExpression) {
+        final Set<String> res = new HashSet<String>();
+        serviceExpression.visit(new QueryModelVisitorBase<RuntimeException>() {
+
+            @Override
+            public void meet(Var node)
+                    throws RuntimeException
+            {
+                // take only real vars, i.e. ignore blank nodes
+                if (!node.hasValue() && !node.isAnonymous())
+                    res.add(node.getName());
+            }
+            // TODO maybe stop tree traversal in nested SERVICE?
+            // TODO special case handling for BIND
+        });
+        return res;
+    }
 
     private CloseableIteration<BindingSet, QueryEvaluationException>
         sendQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
@@ -82,7 +178,7 @@ public class QueryExecutorImpl implements QueryExecutor {
     {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(" VALUES (?__rowIdx"); // __rowIdx: see comment in evaluate()
+        sb.append(" VALUES (?"+ InsertValuesBindingsIteration.INDEX_BINDING_NAME +")");
 
         for (String bName : relevantBindingNames) {
             sb.append(" ?").append(bName);
@@ -116,6 +212,11 @@ public class QueryExecutorImpl implements QueryExecutor {
         return buildSPARQLQuery(expr) + buildVALUESClause(bindings,relevantBindingNames);
     }
 
+    private String buildSPARQLQueryUNION(TupleExpr expr, List<BindingSet> bindings, List<String> relevantBindingNames)
+            throws Exception {
+
+        return null;
+    }
 
     protected StringBuilder appendValueAsString(StringBuilder sb, Value value) {
 
