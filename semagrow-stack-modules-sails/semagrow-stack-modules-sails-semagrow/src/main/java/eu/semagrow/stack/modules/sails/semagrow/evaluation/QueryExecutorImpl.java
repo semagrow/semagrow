@@ -10,6 +10,7 @@ import org.openrdf.model.Value;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.Var;
+import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -77,8 +78,12 @@ public class QueryExecutorImpl implements QueryExecutor {
                 return result;
             }
 
-            result = evaluateInternal(endpoint, expr, bindings);
-            return result;
+            try {
+                result = evaluateInternal(endpoint, expr, bindings);
+                return result;
+            } catch(QueryEvaluationException e) {
+                return new SequentialQueryIteration(endpoint, expr, bindings);
+            }
 
         } catch (MalformedQueryException e) {
                 // this exception must not be silenced, bug in our code
@@ -269,5 +274,29 @@ public class QueryExecutorImpl implements QueryExecutor {
             sb.append('>');
         //}
         return sb;
+    }
+
+    protected class SequentialQueryIteration extends JoinExecutorBase<BindingSet> {
+
+        private TupleExpr expr;
+        private URI endpoint;
+        private Collection<BindingSet> bindings;
+
+        public SequentialQueryIteration(URI endpoint, TupleExpr expr, Collection<BindingSet> bindings)
+                throws QueryEvaluationException {
+            super(null, null, EmptyBindingSet.getInstance());
+            this.endpoint = endpoint;
+            this.expr = expr;
+            this.bindings = bindings;
+            run();
+        }
+
+        @Override
+        protected void handleBindings() throws QueryEvaluationException {
+            for (BindingSet b : bindings) {
+                CloseableIteration<BindingSet,QueryEvaluationException> result = evaluate(endpoint, expr, b);
+                addResult(result);
+            }
+        }
     }
 }

@@ -75,6 +75,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
     public CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(Transform expr, BindingSet bindings) throws QueryEvaluationException {
 
+        // transform bindings to evaluate expr and then transform back the result.
         return new TransformIteration(this.evaluate(expr.getArg(), bindings));
     }
 
@@ -124,9 +125,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         evaluateInternal(SourceQuery expr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException {
 
-        // try evaluate with VALUES... else with UNION else default.
         return queryExecutor.evaluate(expr.getSources().get(0), expr.getArg(), bIter);
-        // return new EmptyIteration<BindingSet, QueryEvaluationException>();
     }
 
     protected CloseableIteration<BindingSet,QueryEvaluationException>
