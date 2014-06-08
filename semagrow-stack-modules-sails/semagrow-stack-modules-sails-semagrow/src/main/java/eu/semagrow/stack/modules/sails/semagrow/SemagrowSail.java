@@ -78,7 +78,7 @@ public class SemagrowSail extends SailBase implements StackableSail {
     }
 
     public SailConnection getConnectionInternal() throws SailException {
-        return new SemagrowConnection(this, this.getBaseSail().getConnection());
+        return new SemagrowSailConnection(this, this.getBaseSail().getConnection());
     }
 
     public QueryOptimizer getOptimizer() {

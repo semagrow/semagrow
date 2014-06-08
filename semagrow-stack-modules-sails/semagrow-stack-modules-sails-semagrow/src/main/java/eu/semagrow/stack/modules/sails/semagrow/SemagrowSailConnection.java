@@ -18,7 +18,7 @@ import org.openrdf.sail.helpers.SailConnectionBase;
  * A Semagrow Readonly Connection
  * @author acharal@iit.demokritos.gr
  */
-public class SemagrowConnection extends SailConnectionBase {
+public class SemagrowSailConnection extends SailConnectionBase {
 
     private QueryOptimizer optimizer;
 
@@ -28,7 +28,7 @@ public class SemagrowConnection extends SailConnectionBase {
 
     private static final URI METADATA_GRAPH = ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
 
-    public SemagrowConnection(SemagrowSail sail, SailConnection baseConn)
+    public SemagrowSailConnection(SemagrowSail sail, SailConnection baseConn)
     {
         super(sail);
         ValueFactory vf = sail.getValueFactory();
