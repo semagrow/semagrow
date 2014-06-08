@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow.algebra;
 
 import org.openrdf.query.algebra.Join;
+import org.openrdf.query.algebra.TupleExpr;
 
 /**
  * Will evaluate the result of the leftArg and
@@ -9,4 +10,21 @@ import org.openrdf.query.algebra.Join;
  */
 public class BindJoin extends Join {
 
+    public BindJoin(TupleExpr e1, TupleExpr e2) {
+        super(e1,e2);
+    }
+
+    @Override
+    public int hashCode() {
+        return "bind".hashCode() + super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o instanceof BindJoin) {
+            BindJoin j = (BindJoin) o;
+            return getLeftArg().equals(j.getLeftArg()) && getRightArg().equals(j.getRightArg());
+        }
+        return false;
+    }
 }
