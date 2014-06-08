@@ -1,7 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
 import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.EmptyIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
@@ -14,8 +13,6 @@ import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 import org.openrdf.sail.SailReadOnlyException;
 import org.openrdf.sail.helpers.SailConnectionBase;
-
-import java.util.Set;
 
 /**
  * A Semagrow Readonly Connection
@@ -67,15 +64,12 @@ public class SemagrowConnection extends SailConnectionBase {
 
         TupleExpr decomposed = decompose(tupleExpr, dataset, bindings);
 
-        return new EmptyIteration<BindingSet, QueryEvaluationException>();
-        /*
         try {
             return evaluationStrategy.evaluate(decomposed,bindings);
 
         } catch (QueryEvaluationException e) {
             throw new SailException(e);
         }
-        */
     }
 
     public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {

@@ -15,8 +15,10 @@ import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sparql.SPARQLRepository;
 import org.openrdf.repository.sparql.query.InsertBindingSetCursor;
 
 import java.util.*;
@@ -27,8 +29,23 @@ import java.util.*;
 //FIXME: Shutdown connections and repositories properly
 public class QueryExecutorImpl implements QueryExecutor {
 
-    public RepositoryConnection getConnection(URI endpoint) {
-        return null;
+    private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
+
+
+    public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
+        Repository repo = null;
+
+        if (!repoMap.containsKey(endpoint)) {
+            repo = new SPARQLRepository(endpoint.stringValue());
+            repoMap.put(endpoint,repo);
+        } else {
+            repo = repoMap.get(endpoint);
+        }
+
+        if (!repo.isInitialized())
+            repo.initialize();
+
+        return repo.getConnection();
     }
 
     public CloseableIteration<BindingSet, QueryEvaluationException>

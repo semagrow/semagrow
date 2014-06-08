@@ -69,7 +69,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
     public CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(SourceQuery expr, BindingSet bindings) throws QueryEvaluationException {
 
-        return new EmptyIteration<BindingSet, QueryEvaluationException>();
+        return queryExecutor.evaluate(expr.getSources().get(0), expr, bindings);
     }
 
     public CloseableIteration<BindingSet,QueryEvaluationException>
