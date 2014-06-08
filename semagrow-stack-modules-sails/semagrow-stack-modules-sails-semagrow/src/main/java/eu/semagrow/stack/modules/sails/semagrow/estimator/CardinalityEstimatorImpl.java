@@ -153,8 +153,19 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
         return ((double)1/distinct);
     }
 
+    public double getVarSelectivity(String varName, SourceQuery expr, URI source) {
+        double sel = 1;
+        for (URI src : expr.getSources()) {
+            sel = Math.min(sel, getVarSelectivity(varName, expr.getArg(), src));
+        }
+        return sel;
+    }
+
     public double getVarSelectivity(String varName, UnaryTupleOperator expr, URI source) {
-        return getVarSelectivity(varName, expr.getArg(), source);
+        if (expr instanceof SourceQuery)
+            return getVarSelectivity(varName, (SourceQuery)expr, source);
+        else
+            return getVarSelectivity(varName, expr.getArg(), source);
     }
 
     public double getVarSelectivity(String varName, BinaryTupleOperator expr, URI source) {

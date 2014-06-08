@@ -80,6 +80,11 @@ public class CostEstimatorImpl implements CostEstimator {
     }
 
     public double getCost(Join join) {
+        if (join instanceof BindJoin)
+            return getCost((BindJoin)join);
+        else if (join instanceof HashJoin)
+            return getCost((HashJoin)join);
+
         long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
         long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
 
