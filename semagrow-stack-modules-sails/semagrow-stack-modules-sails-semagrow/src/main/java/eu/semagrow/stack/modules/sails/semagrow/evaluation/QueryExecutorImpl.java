@@ -20,6 +20,8 @@ import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLRepository;
 import org.openrdf.repository.sparql.query.InsertBindingSetCursor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
@@ -29,8 +31,9 @@ import java.util.*;
 //FIXME: Shutdown connections and repositories properly
 public class QueryExecutorImpl implements QueryExecutor {
 
-    private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
+    private final Logger logger = LoggerFactory.getLogger(QueryExecutorImpl.class);
 
+    private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
 
     public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
         Repository repo = null;
@@ -180,6 +183,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
+        logger.info("Sending to " + endpoint.stringValue() + " query " + sparqlQuery);
         return query.evaluate();
     }
 
