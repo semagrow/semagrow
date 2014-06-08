@@ -1,9 +1,10 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
-import eu.semagrow.stack.modules.api.SelectedResource;
 import eu.semagrow.stack.modules.querydecomp.SourceMetadata;
 import eu.semagrow.stack.modules.querydecomp.SourceSelector;
 import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
+import eu.semagrow.stack.modules.sails.semagrow.algebra.BindJoin;
+import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.BPGCollector;
 import eu.semagrow.stack.modules.sails.semagrow.helpers.CombinationIterator;
@@ -15,9 +16,11 @@ import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.logging.Logger;
+
 
 /**
  * Created by angel on 3/13/14.
@@ -25,7 +28,10 @@ import java.util.logging.Logger;
 public class DynamicProgrammingOptimizer implements QueryOptimizer {
 
     private CostEstimator costEstimator;
+
     private SourceSelector sourceSelector;
+
+    final private Logger logger = LoggerFactory.getLogger(DynamicProgrammingOptimizer.class);
 
     public DynamicProgrammingOptimizer(CostEstimator estimator, SourceSelector selector) {
         costEstimator = estimator;
@@ -105,7 +111,9 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
             }
         }
 
+        int planSize = plans.size();
         plans.retainAll(bestPlans);
+        logger.info("Pruned " + (planSize - plans.size()) + " suboptimal plans of " + planSize + " plans");
     }
 
     private boolean isPlanComparable(TupleExpr plan1, TupleExpr plan2) {
@@ -160,7 +168,11 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
     private Collection<TupleExpr> createPhysicalJoins(TupleExpr e1, TupleExpr e2) {
         Collection<TupleExpr> plans = new LinkedList<TupleExpr>();
 
-        TupleExpr expr = new Join(e1, e2);
+        //TupleExpr expr = new Join(e1, e2);
+        TupleExpr expr = new BindJoin(e1,e2);
+        plans.add(expr);
+
+        expr = new HashJoin(e1,e2);
         plans.add(expr);
 
         //expr = new Join(e2, e1);
@@ -223,8 +235,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
         //finalizePlans(fullPlans,filterConditions)
 
         if (!fullPlans.isEmpty()) {
-            Logger logger = Logger.getLogger(this.getClass().toString());
-            logger.info(fullPlans.size()+" number of plans");
+            logger.info("Found " + fullPlans.size()+" complete optimal plans");
             TupleExpr bestPlan = fullPlans.iterator().next();
             bgp.replaceWith(bestPlan);
         }
