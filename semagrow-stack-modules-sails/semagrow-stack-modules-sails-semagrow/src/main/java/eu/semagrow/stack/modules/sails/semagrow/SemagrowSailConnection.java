@@ -13,12 +13,18 @@ import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 import org.openrdf.sail.SailReadOnlyException;
 import org.openrdf.sail.helpers.SailConnectionBase;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
 
 /**
  * A Semagrow Readonly Connection
  * @author acharal@iit.demokritos.gr
  */
 public class SemagrowSailConnection extends SailConnectionBase {
+
+    private final Logger logger = LoggerFactory.getLogger(SemagrowSailConnection.class);
 
     private QueryOptimizer optimizer;
 
@@ -62,10 +68,17 @@ public class SemagrowSailConnection extends SailConnectionBase {
         if (redirectToBase(tupleExpr, dataset, bindings, b))
             return metadataConnection.evaluate(tupleExpr, null, bindings, b);
 
+        logger.debug("Starting decomposition of " + tupleExpr.toString());
         TupleExpr decomposed = decompose(tupleExpr, dataset, bindings);
+        logger.debug("Query decomposed to " + decomposed.toString());
 
         try {
-            return evaluationStrategy.evaluate(decomposed,bindings);
+
+            logger.info("Query evaluation started.");
+            CloseableIteration<BindingSet,QueryEvaluationException> result =
+                   evaluationStrategy.evaluate(decomposed,bindings);
+            logger.info("Query evaluation completed.");
+            return result;
 
         } catch (QueryEvaluationException e) {
             throw new SailException(e);
