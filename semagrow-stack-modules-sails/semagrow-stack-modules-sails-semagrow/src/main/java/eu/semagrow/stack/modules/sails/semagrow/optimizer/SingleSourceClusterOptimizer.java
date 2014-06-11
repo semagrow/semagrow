@@ -18,6 +18,7 @@ import java.util.Map;
  * and creates a SingleSourceExpr.
  * @author acharal@iit.demokritos.gr
  */
+@Deprecated
 public class SingleSourceClusterOptimizer implements QueryOptimizer {
 
     public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {

@@ -8,6 +8,7 @@ import org.openrdf.query.algebra.UnaryTupleOperator;
 /**
  * Created by angel on 3/14/14.
  */
+@Deprecated
 public class SingleSourceExpr extends UnaryTupleOperator {
 
     private URI source;

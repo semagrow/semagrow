@@ -20,6 +20,7 @@ import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
  * evaluated by the vanilla sesame engine.
  * @author acharal@iit.demokritos.gr
  */
+@Deprecated
 public class SingleSourcetoServiceConverter implements QueryOptimizer {
 
     public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {
