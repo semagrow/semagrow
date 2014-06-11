@@ -10,6 +10,7 @@ import org.openrdf.model.Value;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.Var;
+import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
@@ -61,12 +62,16 @@ public class QueryExecutorImpl implements QueryExecutor {
             String sparqlQuery = buildSPARQLQuery(expr);
 
             Set<String> freeVars = computeVars(expr);
+
+            List<String> relevant = getRelevantBindingNames(bindings, freeVars);
+            BindingSet relevantBindings = filterRelevant(bindings, relevant);
+
             freeVars.removeAll(bindings.getBindingNames());
 
             // FIXME: check if no free vars in the query. If so, send an ASK query.
             // if (freeVars.isEmpty())
 
-            result = sendQuery(endpoint, sparqlQuery, bindings);
+            result = sendQuery(endpoint, sparqlQuery, relevantBindings);
 
             result = new InsertBindingSetCursor(result, bindings);
 
@@ -78,6 +83,16 @@ public class QueryExecutorImpl implements QueryExecutor {
             Iterations.closeCloseable(result);
             throw new QueryEvaluationException(e);
         }
+    }
+
+    private BindingSet filterRelevant(BindingSet bindings, List<String> relevant) {
+        QueryBindingSet newBindings = new QueryBindingSet();
+        for (Binding b : bindings) {
+            if (relevant.contains(b.getName())) {
+                newBindings.setBinding(b);
+            }
+        }
+        return newBindings;
     }
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
@@ -140,8 +155,12 @@ public class QueryExecutorImpl implements QueryExecutor {
 
     private List<String> getRelevantBindingNames(List<BindingSet> bindings, Set<String> exprVars) {
 
+        return getRelevantBindingNames(bindings.get(0), exprVars);
+    }
+
+    private List<String> getRelevantBindingNames(BindingSet bindings, Set<String> exprVars){
         List<String> relevantBindingNames = new ArrayList<String>(5);
-        for (String bName : bindings.get(0).getBindingNames()) {
+        for (String bName : bindings.getBindingNames()) {
             if (exprVars.contains(bName))
                 relevantBindingNames.add(bName);
         }

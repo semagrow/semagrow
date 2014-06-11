@@ -1,23 +1,23 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
-import eu.semagrow.stack.modules.sails.semagrow.algebra.BindJoin;
-import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
-import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
-import eu.semagrow.stack.modules.sails.semagrow.algebra.Transform;
-import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.BindJoinIteration;
-import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.TransformIteration;
+import eu.semagrow.stack.modules.sails.semagrow.algebra.*;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.*;
 import info.aduna.iteration.*;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
+import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.Join;
+import org.openrdf.query.algebra.Projection;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UnaryTupleOperator;
+import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.evaluation.iterator.BottomUpJoinIterator;
 import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
+import org.openrdf.query.algebra.evaluation.iterator.ProjectionIterator;
 import org.openrdf.query.impl.EmptyBindingSet;
 
 import java.util.ArrayList;
@@ -31,6 +31,10 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
     implements EvaluationStrategy {
 
     private int batchSize = 10;
+
+    private boolean includeProvenance = false;
+
+    public static String provenanceField = "__endpoint";
 
     private QueryExecutor queryExecutor;
 
@@ -54,6 +58,10 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         this(queryExecutor,ValueFactoryImpl.getInstance());
     }
 
+    public void setIncludeProvenance(boolean includeProvenance) { this.includeProvenance = includeProvenance; }
+
+    public boolean getIncludeProvenance() { return this.includeProvenance; }
+
     @Override
     public CloseableIteration<BindingSet, QueryEvaluationException>
         evaluate(UnaryTupleOperator expr, BindingSet bindings) throws QueryEvaluationException {
@@ -66,17 +74,38 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         }
     }
 
+    @Override
+    public CloseableIteration<BindingSet, QueryEvaluationException>
+        evaluate(Projection projection, BindingSet bindings) throws QueryEvaluationException {
+
+        CloseableIteration<BindingSet, QueryEvaluationException> result;
+
+        result = this.evaluate(projection.getArg(), bindings);
+        result = new ProjectionIteration(projection, result, bindings);
+        return result;
+    }
+
     public CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(SourceQuery expr, BindingSet bindings) throws QueryEvaluationException {
 
-        return queryExecutor.evaluate(expr.getSources().get(0), expr, bindings);
+        URI endpoint = expr.getSources().get(0);
+
+        CloseableIteration<BindingSet,QueryEvaluationException> result =
+                queryExecutor.evaluate(endpoint, expr, bindings);
+
+        if (getIncludeProvenance()) {
+            ProvenanceValue provenance = new ProvenanceValue(endpoint);
+            result = new InsertProvenanceIteration(result, provenance);
+        }
+        return result;
     }
 
     public CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(Transform expr, BindingSet bindings) throws QueryEvaluationException {
 
         // transform bindings to evaluate expr and then transform back the result.
-        return new TransformIteration(this.evaluate(expr.getArg(), bindings));
+        BindingSet bindingsT = bindings;
+        return new TransformIteration(this.evaluate(expr.getArg(), bindingsT));
     }
 
     public CloseableIteration<BindingSet,QueryEvaluationException>
@@ -93,7 +122,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
     public CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(HashJoin join, BindingSet bindings) throws QueryEvaluationException {
 
-        return new BottomUpJoinIterator(this, join, bindings);
+        return new HashJoinIteration(this, join, bindings);
     }
 
     public CloseableIteration<BindingSet,QueryEvaluationException>
@@ -117,6 +146,8 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
     {
         if (expr instanceof SourceQuery)
             return evaluateInternal((SourceQuery)expr, bIter);
+        else if (expr instanceof Transform)
+            return evaluateInternal((Transform)expr, bIter);
         else
             return evaluateInternalDefault(expr, bIter);
     }
@@ -125,7 +156,27 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         evaluateInternal(SourceQuery expr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException {
 
-        return queryExecutor.evaluate(expr.getSources().get(0), expr.getArg(), bIter);
+        URI endpoint = expr.getSources().get(0);
+
+        CloseableIteration<BindingSet,QueryEvaluationException> result =
+                queryExecutor.evaluate(endpoint, expr.getArg(), bIter);
+
+        if (getIncludeProvenance()) {
+            ProvenanceValue provenance = new ProvenanceValue(endpoint);
+            result = new InsertProvenanceIteration(result, provenance);
+        }
+
+        return result;
+    }
+
+    protected CloseableIteration<BindingSet,QueryEvaluationException>
+        evaluateInternal(Transform transform, CloseableIteration<BindingSet,QueryEvaluationException> bIter)
+            throws QueryEvaluationException {
+
+        CloseableIteration<BindingSet,QueryEvaluationException> bIterT =
+                new TransformIteration(bIter);
+
+        return new TransformIteration(evaluateInternal(transform.getArg(), bIterT));
     }
 
     protected CloseableIteration<BindingSet,QueryEvaluationException>
@@ -184,4 +235,5 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         }
 
     }
+
 }
