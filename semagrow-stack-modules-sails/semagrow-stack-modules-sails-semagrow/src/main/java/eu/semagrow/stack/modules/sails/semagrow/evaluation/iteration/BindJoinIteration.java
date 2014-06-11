@@ -21,6 +21,7 @@ public class BindJoinIteration extends JoinExecutorBase<BindingSet> {
         super(leftIter, rightArg, bindings);
 
         this.evaluationStrategy = strategy;
+        run();
     }
 
     @Override
