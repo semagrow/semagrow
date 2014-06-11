@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.sails.semagrow.query;
+package eu.semagrow.stack.modules.api.query;
 
 import org.openrdf.query.Query;
 

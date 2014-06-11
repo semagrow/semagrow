@@ -17,19 +17,19 @@ import org.openrdf.query.algebra.Var;
 
 import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
 import eu.semagrow.stack.modules.utils.patterndiscovery.impl.PatternDiscoveryImpl;
-import eu.semagrow.stack.modules.api.EquivalentURI;
+import eu.semagrow.stack.modules.api.transformation.EquivalentURI;
 import eu.semagrow.stack.modules.utils.resourceselector.InstanceIndex;
 import eu.semagrow.stack.modules.utils.resourceselector.SchemaIndex;
 import eu.semagrow.stack.modules.utils.resourceselector.ProsessedStatement;
-import eu.semagrow.stack.modules.api.Measurement;
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.Measurement;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 
 import eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents;
 
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.api.ResourceSelector
+ * @see eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector
  */
 public class ResourceSelectorImpl implements ResourceSelector {
 	
@@ -42,7 +42,7 @@ public class ResourceSelectorImpl implements ResourceSelector {
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.ResourceSelector#getSelectedResources()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector#getSelectedResources()
 	 */
 	public List<SelectedResource> getSelectedResources(StatementPattern statementPattern, long measurement_id) {
 		String log_start = "start resource discovery for " + statementPattern.toString() + " with measurement_id=" + measurement_id;

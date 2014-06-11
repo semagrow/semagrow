@@ -1,18 +1,12 @@
 package eu.semagrow.stack.modules.querydecomp.selector;
 
-import eu.semagrow.stack.modules.querydecomp.SourceMetadata;
-import eu.semagrow.stack.modules.querydecomp.SourceSelector;
-import eu.semagrow.stack.modules.vocabulary.VOID;
+import eu.semagrow.stack.modules.api.source.SourceMetadata;
+import eu.semagrow.stack.modules.api.source.SourceSelector;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.query.*;
 import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
-import org.openrdf.query.impl.ListBindingSet;
 import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 import java.util.*;
 

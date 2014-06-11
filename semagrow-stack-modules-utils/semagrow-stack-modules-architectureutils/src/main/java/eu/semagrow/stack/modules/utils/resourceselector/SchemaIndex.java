@@ -2,7 +2,6 @@ package eu.semagrow.stack.modules.utils.resourceselector;
 
 import java.util.List;
 
-import eu.semagrow.stack.modules.api.SelectedResource;
 import org.openrdf.model.URI;
 
 /**

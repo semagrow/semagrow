@@ -5,11 +5,11 @@ package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
 import org.openrdf.model.URI;
 
-import eu.semagrow.stack.modules.api.EquivalentURI;
+import eu.semagrow.stack.modules.api.transformation.EquivalentURI;
 
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.api.EquivalentURI()
+ * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI()
  */
 public class EquivalentURIImpl implements EquivalentURI {
 	
@@ -28,37 +28,37 @@ public class EquivalentURIImpl implements EquivalentURI {
 		this.schema = schema;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#getEquivalent_URI()
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#getEquivalent_URI()
 	 */
 	public URI getEquivalent_URI() {
 		return equivalent_URI;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#setEquivalent_URI(org.openrdf.model.URI)
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#setEquivalent_URI(org.openrdf.model.URI)
 	 */
 	public void setEquivalent_URI(URI equivalent_URI) {
 		this.equivalent_URI = equivalent_URI;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#getProximity()
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#getProximity()
 	 */
 	public int getProximity() {
 		return proximity;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#setProximity(int)
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#setProximity(int)
 	 */
 	public void setProximity(int proximity) {
 		this.proximity = proximity;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#getSchema()
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#getSchema()
 	 */
 	public URI getSchema() {
 		return schema;
 	}
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#setSchema(org.openrdf.model.URI)
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#setSchema(org.openrdf.model.URI)
 	 */
 	public void setSchema(URI schema) {
 		this.schema = schema;
@@ -68,7 +68,7 @@ public class EquivalentURIImpl implements EquivalentURI {
 	 * @see java.lang.Object#toString()
 	 */
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#toString()
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#toString()
 	 */
 	@Override
 	public String toString() {
@@ -79,7 +79,7 @@ public class EquivalentURIImpl implements EquivalentURI {
 	 * @see java.lang.Object#hashCode()
 	 */
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#hashCode()
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#hashCode()
 	 */
 	@Override
 	public int hashCode() {
@@ -95,7 +95,7 @@ public class EquivalentURIImpl implements EquivalentURI {
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.EquivalentURI#equals(java.lang.Object)
+	 * @see eu.semagrow.stack.modules.api.transformation.EquivalentURI#equals(java.lang.Object)
 	 */
 	@Override
 	public boolean equals(Object obj) {

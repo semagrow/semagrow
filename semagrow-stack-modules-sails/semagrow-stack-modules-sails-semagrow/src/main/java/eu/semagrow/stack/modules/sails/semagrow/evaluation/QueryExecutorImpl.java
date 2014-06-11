@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
+import eu.semagrow.stack.modules.api.evaluation.QueryExecutor;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.InsertValuesBindingsIteration;
 import info.aduna.iteration.CloseableIteration;
 import info.aduna.iteration.EmptyIteration;

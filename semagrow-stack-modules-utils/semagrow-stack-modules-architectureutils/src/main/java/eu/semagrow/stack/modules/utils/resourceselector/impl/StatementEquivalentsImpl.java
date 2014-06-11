@@ -6,7 +6,7 @@ package eu.semagrow.stack.modules.utils.resourceselector.impl;
 import java.util.ArrayList;
 import java.util.List;
 
-import eu.semagrow.stack.modules.api.EquivalentURI;
+import eu.semagrow.stack.modules.api.transformation.EquivalentURI;
 import eu.semagrow.stack.modules.utils.resourceselector.StatementEquivalents;
 
 /* (non-Javadoc)

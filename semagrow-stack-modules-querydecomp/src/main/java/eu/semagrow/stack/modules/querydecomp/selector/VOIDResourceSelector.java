@@ -1,8 +1,8 @@
 package eu.semagrow.stack.modules.querydecomp.selector;
 
-import eu.semagrow.stack.modules.api.Measurement;
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.Measurement;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.MeasurementImpl;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.SelectedResourceImpl;
 import eu.semagrow.stack.modules.vocabulary.VOID;

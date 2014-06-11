@@ -7,7 +7,7 @@ package eu.semagrow.stack.modules.utils.federationWrapper;
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.endpoint.SPARQLEndpoint;
 import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
-import eu.semagrow.stack.modules.api.QueryTranformation;
+import eu.semagrow.stack.modules.api.transformation.QueryTranformation;
 
 import java.util.Iterator;
 import java.util.UUID;

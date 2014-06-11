@@ -1,9 +1,9 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SingleSourceExpr;
-import eu.semagrow.stack.modules.api.Measurement;
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.Measurement;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.Slice;

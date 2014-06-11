@@ -1,23 +1,19 @@
 package eu.semagrow.stack.modules.sails.semagrow.query;
 
-import eu.semagrow.stack.modules.sails.semagrow.SemagrowRepository;
-import eu.semagrow.stack.modules.sails.semagrow.SemagrowRepositoryConnection;
+import eu.semagrow.stack.modules.api.query.SemagrowTupleQuery;
+import eu.semagrow.stack.modules.sails.semagrow.SemagrowSailRepositoryConnection;
 import eu.semagrow.stack.modules.sails.semagrow.SemagrowSailConnection;
 import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.TupleQueryResult;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.impl.TupleQueryResultImpl;
 import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.repository.sail.SailRepositoryConnection;
 import org.openrdf.repository.sail.SailTupleQuery;
-import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 
 /**
  * Created by angel on 6/9/14.
@@ -26,7 +22,7 @@ public class SemagrowSailTupleQuery extends SailTupleQuery implements SemagrowTu
 
     private boolean includeProvenanceData = false;
 
-    public SemagrowSailTupleQuery(ParsedTupleQuery query, SemagrowRepositoryConnection connection)
+    public SemagrowSailTupleQuery(ParsedTupleQuery query, SemagrowSailRepositoryConnection connection)
     {
         super(query,connection);
     }
@@ -60,7 +56,7 @@ public class SemagrowSailTupleQuery extends SailTupleQuery implements SemagrowTu
     public boolean getIncludeProvenanceData() { return includeProvenanceData; }
 
     @Override
-    public SemagrowRepositoryConnection getConnection() {
-        return (SemagrowRepositoryConnection) super.getConnection();
+    public SemagrowSailRepositoryConnection getConnection() {
+        return (SemagrowSailRepositoryConnection) super.getConnection();
     }
 }

@@ -1,16 +1,12 @@
 package eu.semagrow.stack.modules.sails.semagrow.estimator;
 
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
-import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
+import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
+import eu.semagrow.stack.modules.api.estimator.CostEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.BindJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.*;
-import sun.org.mozilla.javascript.ast.UnaryExpression;
-
-import javax.naming.BinaryRefAddr;
 
 /**
  * Created by angel on 4/28/14.

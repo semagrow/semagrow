@@ -1,8 +1,8 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
-import eu.semagrow.stack.modules.querydecomp.SourceMetadata;
-import eu.semagrow.stack.modules.querydecomp.SourceSelector;
-import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
+import eu.semagrow.stack.modules.api.source.SourceMetadata;
+import eu.semagrow.stack.modules.api.source.SourceSelector;
+import eu.semagrow.stack.modules.api.estimator.CostEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.BindJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;

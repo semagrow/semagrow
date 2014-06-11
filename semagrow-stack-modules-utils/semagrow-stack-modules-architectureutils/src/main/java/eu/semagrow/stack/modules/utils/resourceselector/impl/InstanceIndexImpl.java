@@ -8,7 +8,7 @@ import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 import eu.semagrow.stack.modules.utils.resourceselector.InstanceIndex;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 
 import java.util.ArrayList;
 import java.util.List;

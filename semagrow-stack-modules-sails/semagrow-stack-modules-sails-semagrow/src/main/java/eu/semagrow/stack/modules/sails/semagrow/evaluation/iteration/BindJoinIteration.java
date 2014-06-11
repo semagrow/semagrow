@@ -1,6 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration;
 
-import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategy;
+import eu.semagrow.stack.modules.api.evaluation.EvaluationStrategy;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;

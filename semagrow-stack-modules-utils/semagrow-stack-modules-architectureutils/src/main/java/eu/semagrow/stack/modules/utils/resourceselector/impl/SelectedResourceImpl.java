@@ -5,13 +5,13 @@ package eu.semagrow.stack.modules.utils.resourceselector.impl;
 
 import org.openrdf.model.URI;
 
-import eu.semagrow.stack.modules.api.Measurement;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.Measurement;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 
 import java.util.List;
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.api.SelectedResource
+ * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource
  */
 public class SelectedResourceImpl implements SelectedResource {
 	
@@ -39,105 +39,105 @@ public class SelectedResourceImpl implements SelectedResource {
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getEndpoint()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getEndpoint()
 	 */
 	public URI getEndpoint() {
 		return endpoint;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getVol()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getVol()
 	 */
 	public int getVol() {
 		return vol;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getVar()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getVar()
 	 */
 	public int getVar() {
 		return var;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getSubject()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getSubject()
 	 */
 	public URI getSubject() {
 		return subject;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#setSubject(org.openrdf.model.URI)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#setSubject(org.openrdf.model.URI)
 	 */
 	public void setSubject(URI subject) {
 		this.subject = subject;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getSubjectProximity()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getSubjectProximity()
 	 */
 	public int getSubjectProximity() {
 		return subjectProximity;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#setSubjectProximity(int)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#setSubjectProximity(int)
 	 */
 	public void setSubjectProximity(int subjectProximity) {
 		this.subjectProximity = subjectProximity;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getPredicate()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getPredicate()
 	 */
 	public URI getPredicate() {
 		return predicate;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#setPredicate(org.openrdf.model.URI)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#setPredicate(org.openrdf.model.URI)
 	 */
 	public void setPredicate(URI predicate) {
 		this.predicate = predicate;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getPredicateProximity()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getPredicateProximity()
 	 */
 	public int getPredicateProximity() {
 		return predicateProximity;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#setPredicateProximity(int)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#setPredicateProximity(int)
 	 */
 	public void setPredicateProximity(int predicateProximity) {
 		this.predicateProximity = predicateProximity;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getObject()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getObject()
 	 */
 	public URI getObject() {
 		return object;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#setObject(org.openrdf.model.URI)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#setObject(org.openrdf.model.URI)
 	 */
 	public void setObject(URI object) {
 		this.object = object;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#getObjectProximity()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#getObjectProximity()
 	 */
 	public int getObjectProximity() {
 		return objectProximity;
 	}
 	
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#setObjectProximity(int)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#setObjectProximity(int)
 	 */
 	public void setObjectProximity(int objectProximity) {
 		this.objectProximity = objectProximity;
@@ -152,7 +152,7 @@ public class SelectedResourceImpl implements SelectedResource {
 	}
 
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#setLoadInfo(java.util.List)
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#setLoadInfo(java.util.List)
 	 */
 	public void setLoadInfo(List<Measurement> loadInfo) {
 		this.loadInfo = loadInfo;
@@ -162,7 +162,7 @@ public class SelectedResourceImpl implements SelectedResource {
 	 * @see java.lang.Object#toString()
 	 */
 	/* (non-Javadoc)
-	 * @see eu.semagrow.stack.modules.api.SelectedResource#toString()
+	 * @see eu.semagrow.stack.modules.utils.resourceselector.SelectedResource#toString()
 	 */
 /*	@Override
 	public String toString() {

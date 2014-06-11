@@ -7,7 +7,7 @@ package eu.semagrow.stack.modules.utils.queryDecomposition.impl;
 import eu.semagrow.stack.modules.utils.ReactivityParameters;
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
 import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecomposition;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 
 import java.util.HashMap;
 import java.util.List;

@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.querydecomp;
+package eu.semagrow.stack.modules.api.source;
 
 import org.openrdf.query.algebra.StatementPattern;
 import java.util.List;

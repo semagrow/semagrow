@@ -2,7 +2,7 @@ package eu.semagrow.stack.modules.utils.resourceselector;
 
 import java.util.List;
 
-import eu.semagrow.stack.modules.api.EquivalentURI;
+import eu.semagrow.stack.modules.api.transformation.EquivalentURI;
 import org.openrdf.query.algebra.StatementPattern;
 
 /**

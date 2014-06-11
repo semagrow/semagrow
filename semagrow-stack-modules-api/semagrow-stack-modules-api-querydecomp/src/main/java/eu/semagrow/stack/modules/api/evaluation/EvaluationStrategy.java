@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.sails.semagrow.evaluation;
+package eu.semagrow.stack.modules.api.evaluation;
 
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.query.BindingSet;

@@ -1,9 +1,9 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
-import eu.semagrow.stack.modules.querydecomp.SourceSelector;
-import eu.semagrow.stack.modules.querydecomp.Statistics;
-import eu.semagrow.stack.modules.querydecomp.estimator.CardinalityEstimator;
-import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
+import eu.semagrow.stack.modules.api.source.SourceSelector;
+import eu.semagrow.stack.modules.api.Statistics;
+import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
+import eu.semagrow.stack.modules.api.estimator.CostEstimator;
 import eu.semagrow.stack.modules.querydecomp.selector.*;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;

@@ -1,20 +1,13 @@
 package eu.semagrow.stack.modules.querydecomp.selector;
 
-import eu.semagrow.stack.modules.querydecomp.Statistics;
-import eu.semagrow.stack.modules.vocabulary.VOID;
+import eu.semagrow.stack.modules.api.Statistics;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.query.*;
 import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.Var;
 import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 
 import java.util.*;
-
-import static org.openrdf.query.QueryLanguage.SPARQL;
 
 /**
  * Created by angel on 4/30/14.

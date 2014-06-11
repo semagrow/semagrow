@@ -27,8 +27,8 @@ import eu.semagrow.stack.modules.utils.queryDecomposition.AlternativeDecompositi
 import eu.semagrow.stack.modules.utils.queryDecomposition.DataSourceSelector;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecomposer;
 import eu.semagrow.stack.modules.utils.queryDecomposition.QueryDecompositionComponent;
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.ResourceSelectorImpl;
 import java.net.URI;
 import java.util.ArrayList;

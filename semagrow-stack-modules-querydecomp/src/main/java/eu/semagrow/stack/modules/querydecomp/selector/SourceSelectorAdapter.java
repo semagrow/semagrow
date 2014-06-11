@@ -1,9 +1,9 @@
 package eu.semagrow.stack.modules.querydecomp.selector;
 
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.api.SelectedResource;
-import eu.semagrow.stack.modules.querydecomp.SourceMetadata;
-import eu.semagrow.stack.modules.querydecomp.SourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
+import eu.semagrow.stack.modules.api.source.SourceMetadata;
+import eu.semagrow.stack.modules.api.source.SourceSelector;
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.StatementPattern;
 

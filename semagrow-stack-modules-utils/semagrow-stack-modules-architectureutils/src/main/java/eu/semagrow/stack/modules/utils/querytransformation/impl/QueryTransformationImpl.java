@@ -19,12 +19,12 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
-import eu.semagrow.stack.modules.api.QueryTranformation;
-import eu.semagrow.stack.modules.api.EquivalentURI;
+import eu.semagrow.stack.modules.api.transformation.QueryTranformation;
+import eu.semagrow.stack.modules.api.transformation.EquivalentURI;
 import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
 
 /* (non-Javadoc)
- * @see eu.semagrow.stack.modules.api.QueryTranformation
+ * @see eu.semagrow.stack.modules.api.transformation.QueryTranformation
  */	
 public class QueryTransformationImpl implements QueryTranformation {
     private URI uri;

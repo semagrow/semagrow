@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.querydecomp.estimator;
+package eu.semagrow.stack.modules.api.estimator;
 
 import org.openrdf.query.algebra.TupleExpr;
 

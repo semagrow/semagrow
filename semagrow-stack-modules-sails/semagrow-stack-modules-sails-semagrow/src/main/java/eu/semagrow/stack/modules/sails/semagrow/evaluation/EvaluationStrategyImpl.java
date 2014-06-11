@@ -1,23 +1,21 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
+import eu.semagrow.stack.modules.api.evaluation.EvaluationStrategy;
+import eu.semagrow.stack.modules.api.evaluation.QueryExecutor;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.*;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.*;
 import info.aduna.iteration.*;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.Join;
 import org.openrdf.query.algebra.Projection;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UnaryTupleOperator;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
-import org.openrdf.query.algebra.evaluation.iterator.BottomUpJoinIterator;
 import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
-import org.openrdf.query.algebra.evaluation.iterator.ProjectionIterator;
 import org.openrdf.query.impl.EmptyBindingSet;
 
 import java.util.ArrayList;

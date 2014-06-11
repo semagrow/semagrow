@@ -1,6 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow.config;
 
-import eu.semagrow.stack.modules.sails.semagrow.SemagrowRepository;
+import eu.semagrow.stack.modules.sails.semagrow.SemagrowSailRepository;
 import eu.semagrow.stack.modules.sails.semagrow.SemagrowSail;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.config.RepositoryConfigException;
@@ -34,7 +34,7 @@ public class SemagrowRepositoryFactory implements RepositoryFactory {
         SailFactory sailFactory = SailRegistry.getInstance().get(config.getSemagrowSailConfig().getType());
         try {
             SemagrowSail sail = (SemagrowSail) sailFactory.getSail(config.getSemagrowSailConfig());
-            return new SemagrowRepository(sail);
+            return new SemagrowSailRepository(sail);
         } catch (SailConfigException e) {
             throw new RepositoryConfigException(e);
         }

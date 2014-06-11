@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.openrdf.model.URI;
 
-import eu.semagrow.stack.modules.api.EquivalentURI;
+import eu.semagrow.stack.modules.api.transformation.EquivalentURI;
 
 /**
  * For a {@link URI} get equivalent URIs aligned with a certain confidence with the initial URI and belonging to a specific schema.

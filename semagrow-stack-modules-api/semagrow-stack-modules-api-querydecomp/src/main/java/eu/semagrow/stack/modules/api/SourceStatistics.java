@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.querydecomp;
+package eu.semagrow.stack.modules.api;
 
 import org.openrdf.model.URI;
 
