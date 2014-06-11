@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -16,8 +17,6 @@ import org.openrdf.sail.helpers.SailConnectionBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.Closeable;
-
 /**
  * A Semagrow Readonly Connection
  * @author acharal@iit.demokritos.gr
@@ -26,11 +25,9 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
     private final Logger logger = LoggerFactory.getLogger(SemagrowSailConnection.class);
 
-    private QueryOptimizer optimizer;
-
-    private EvaluationStrategy evaluationStrategy;
-
     private SailConnection metadataConnection;
+
+    private SemagrowSail semagrowSail;
 
     private static final URI METADATA_GRAPH = ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
 
@@ -39,8 +36,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
         super(sail);
         ValueFactory vf = sail.getValueFactory();
         metadataConnection = baseConn;
-        optimizer = sail.getOptimizer();
-        evaluationStrategy = sail.getEvaluationStrategy();
+        this.semagrowSail = sail;
     }
 
     @Override
@@ -64,6 +60,60 @@ public class SemagrowSailConnection extends SailConnectionBase {
                                     BindingSet bindings,
                                     boolean b) throws SailException {
 
+        return evaluateInternal(tupleExpr, dataset, bindings, b, false);
+    }
+
+
+
+    public final CloseableIteration<? extends BindingSet, QueryEvaluationException> evaluate(
+            TupleExpr tupleExpr, Dataset dataset, BindingSet bindings, boolean includeInferred, boolean includeProvenance)
+            throws SailException
+    {
+
+        //FIXME: flushPendingUpdates();
+        connectionLock.readLock().lock();
+        try {
+            verifyIsOpen();
+            boolean registered = false;
+            CloseableIteration<? extends BindingSet, QueryEvaluationException> iteration = evaluateInternal(
+                    tupleExpr, dataset, bindings, includeInferred, includeProvenance);
+            try {
+                CloseableIteration<? extends BindingSet, QueryEvaluationException> registeredIteration =
+                        registerIteration(iteration);
+                registered = true;
+                return registeredIteration;
+            }
+            finally {
+                if (!registered) {
+                    try {
+                        iteration.close();
+                    }
+                    catch (QueryEvaluationException e) {
+                        throw new SailException(e);
+                    }
+                }
+            }
+        }
+        finally {
+            connectionLock.readLock().unlock();
+        }
+    }
+
+    /**
+     * Evaluates a query represented as TupleExpr
+     * @param tupleExpr the tuple expression to evaluate
+     * @param dataset
+     * @param bindings
+     * @param b include inferred
+     * @param p include provenance
+     * @return the resultset as a closable iteration
+     * @throws SailException
+     */
+    protected CloseableIteration<? extends BindingSet, QueryEvaluationException>
+        evaluateInternal(TupleExpr tupleExpr,
+                         Dataset dataset,
+                         BindingSet bindings,
+                         boolean b, boolean p) throws SailException {
 
         if (redirectToBase(tupleExpr, dataset, bindings, b))
             return metadataConnection.evaluate(tupleExpr, null, bindings, b);
@@ -75,8 +125,14 @@ public class SemagrowSailConnection extends SailConnectionBase {
         try {
 
             logger.info("Query evaluation started.");
+            EvaluationStrategy evaluationStrategy = semagrowSail.getEvaluationStrategy();
+            if (evaluationStrategy instanceof EvaluationStrategyImpl) {
+                ((EvaluationStrategyImpl)evaluationStrategy).setIncludeProvenance(p);
+            }
+
             CloseableIteration<BindingSet,QueryEvaluationException> result =
-                   evaluationStrategy.evaluate(decomposed,bindings);
+                    evaluationStrategy.evaluate(decomposed,bindings);
+
             logger.info("Query evaluation completed.");
             return result;
 
@@ -85,9 +141,11 @@ public class SemagrowSailConnection extends SailConnectionBase {
         }
     }
 
+
     public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {
 
         if (!redirectToBase(tupleExpr, dataset, bindings, false)) {
+            QueryOptimizer optimizer = semagrowSail.getOptimizer();
             optimizer.optimize(tupleExpr, dataset, bindings);
         }
         return tupleExpr;
