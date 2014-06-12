@@ -1,19 +1,16 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.api.source.SourceSelector;
-import eu.semagrow.stack.modules.api.Statistics;
+import eu.semagrow.stack.modules.api.statistics.Statistics;
 import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
 import eu.semagrow.stack.modules.api.estimator.CostEstimator;
 import eu.semagrow.stack.modules.querydecomp.selector.*;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
-import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
-import eu.semagrow.stack.modules.sails.semagrow.evaluation.QueryExecutorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingOptimizer;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.evaluation.impl.CompareOptimizer;
 import org.openrdf.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
@@ -94,10 +91,6 @@ public class SemagrowSail extends SailBase implements StackableSail {
         );
 
         return optimizer;
-    }
-
-    public EvaluationStrategy getEvaluationStrategy() {
-        return new EvaluationStrategyImpl(new QueryExecutorImpl());
     }
 
     private SourceSelector getSourceSelector() {

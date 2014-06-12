@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.QueryExecutorImpl;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -8,7 +9,6 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
@@ -125,10 +125,11 @@ public class SemagrowSailConnection extends SailConnectionBase {
         try {
 
             logger.info("Query evaluation started.");
-            EvaluationStrategy evaluationStrategy = semagrowSail.getEvaluationStrategy();
-            if (evaluationStrategy instanceof EvaluationStrategyImpl) {
-                ((EvaluationStrategyImpl)evaluationStrategy).setIncludeProvenance(p);
-            }
+
+            EvaluationStrategyImpl evaluationStrategy =
+                    new EvaluationStrategyImpl(new QueryExecutorImpl());
+
+            evaluationStrategy.setIncludeProvenance(p);
 
             CloseableIteration<BindingSet,QueryEvaluationException> result =
                     evaluationStrategy.evaluate(decomposed,bindings);
