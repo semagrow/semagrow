@@ -13,4 +13,6 @@ public interface EvaluationStrategy extends org.openrdf.query.algebra.evaluation
     CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(TupleExpr tupleExpr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException;
+
+    void setIncludeProvenance(boolean includeProvenance);
 }

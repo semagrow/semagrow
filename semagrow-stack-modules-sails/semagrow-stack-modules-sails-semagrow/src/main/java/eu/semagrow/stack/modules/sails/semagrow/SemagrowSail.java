@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
+import eu.semagrow.stack.modules.api.evaluation.QueryEvaluation;
 import eu.semagrow.stack.modules.api.source.SourceSelector;
 import eu.semagrow.stack.modules.api.statistics.Statistics;
 import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
@@ -7,6 +8,7 @@ import eu.semagrow.stack.modules.api.estimator.CostEstimator;
 import eu.semagrow.stack.modules.querydecomp.selector.*;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.QueryEvaluationImpl;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingOptimizer;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
 import org.openrdf.model.ValueFactory;
@@ -41,6 +43,7 @@ import org.openrdf.sail.helpers.SailBase;
 public class SemagrowSail extends SailBase implements StackableSail {
 
     private Sail metadataSail;
+    private QueryEvaluation queryEvaluation;
 
     public SemagrowSail() { }
 
@@ -116,5 +119,13 @@ public class SemagrowSail extends SailBase implements StackableSail {
     private Repository getMetadataAsRepository() {
         assert metadataSail != null;
         return new SailRepository(metadataSail);
+    }
+
+    public QueryEvaluation getQueryEvaluation() {
+
+        if (queryEvaluation == null)
+            queryEvaluation = new QueryEvaluationImpl();
+
+        return queryEvaluation;
     }
 }

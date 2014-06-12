@@ -1,7 +1,5 @@
 package eu.semagrow.stack.modules.sails.semagrow.config;
 
-import eu.semagrow.stack.modules.sails.VOID.VOIDInferencer;
-import eu.semagrow.stack.modules.sails.memory.FileReloadingMemoryStore;
 import eu.semagrow.stack.modules.sails.semagrow.SemagrowSail;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
@@ -9,11 +7,9 @@ import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailRepository;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.NotifyingSail;
 import org.openrdf.sail.Sail;
 import org.openrdf.sail.StackableSail;
 import org.openrdf.sail.config.*;
-import org.openrdf.sail.memory.MemoryStore;
 
 import java.io.File;
 import java.io.IOException;
