@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.api;
+package eu.semagrow.stack.modules.api.statistics;
 
 import org.openrdf.model.URI;
 

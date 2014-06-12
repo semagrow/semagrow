@@ -1,15 +1,14 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.querydecomp.SourceSelector;
-import eu.semagrow.stack.modules.querydecomp.Statistics;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.api.source.SourceSelector;
+import eu.semagrow.stack.modules.api.statistics.Statistics;
 import eu.semagrow.stack.modules.querydecomp.selector.SourceSelectorAdapter;
 import eu.semagrow.stack.modules.querydecomp.selector.VOIDStatistics;
+import eu.semagrow.stack.modules.sails.semagrow.TrivialResourceSelector;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
-import eu.semagrow.stack.modules.querydecomp.estimator.CostEstimator;
+import eu.semagrow.stack.modules.api.estimator.CostEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
-import eu.semagrow.stack.modules.querydecomp.selector.mock.TrivialResourceSelector;
-import info.aduna.iteration.CloseableIteration;
 import junit.framework.TestCase;
 import org.junit.Before;
 import org.openrdf.query.BindingSet;

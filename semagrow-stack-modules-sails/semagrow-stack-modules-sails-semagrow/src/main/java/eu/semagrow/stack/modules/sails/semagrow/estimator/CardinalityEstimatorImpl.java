@@ -1,6 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow.estimator;
 
-import eu.semagrow.stack.modules.api.Statistics;
+import eu.semagrow.stack.modules.api.statistics.Statistics;
 import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
 import org.openrdf.model.URI;

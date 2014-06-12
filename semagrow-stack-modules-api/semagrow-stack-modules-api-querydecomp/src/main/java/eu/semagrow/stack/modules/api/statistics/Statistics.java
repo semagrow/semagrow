@@ -1,4 +1,4 @@
-package eu.semagrow.stack.modules.api;
+package eu.semagrow.stack.modules.api.statistics;
 
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.StatementPattern;

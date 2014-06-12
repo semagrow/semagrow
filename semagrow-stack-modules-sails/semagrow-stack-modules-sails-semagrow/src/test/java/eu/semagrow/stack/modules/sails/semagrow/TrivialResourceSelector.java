@@ -1,8 +1,8 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
-import eu.semagrow.stack.modules.api.Measurement;
-import eu.semagrow.stack.modules.api.ResourceSelector;
-import eu.semagrow.stack.modules.api.SelectedResource;
+import eu.semagrow.stack.modules.utils.resourceselector.Measurement;
+import eu.semagrow.stack.modules.utils.resourceselector.ResourceSelector;
+import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.algebra.StatementPattern;

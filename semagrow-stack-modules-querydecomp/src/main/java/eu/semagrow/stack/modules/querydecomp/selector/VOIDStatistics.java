@@ -1,6 +1,6 @@
 package eu.semagrow.stack.modules.querydecomp.selector;
 
-import eu.semagrow.stack.modules.api.Statistics;
+import eu.semagrow.stack.modules.api.statistics.Statistics;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
