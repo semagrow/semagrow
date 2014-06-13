@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.api.repository.SemagrowRepositoryConnection;
+import eu.semagrow.stack.modules.sails.semagrow.query.SemagrowSailBooleanQuery;
 import eu.semagrow.stack.modules.sails.semagrow.query.SemagrowSailTupleQuery;
 import org.openrdf.query.MalformedQueryException;
 import org.openrdf.query.QueryLanguage;
@@ -17,14 +18,23 @@ public class SemagrowSailRepositoryConnection extends SailRepositoryConnection
         super(repository, sailConnection);
     }
 
-    public SemagrowSailTupleQuery prepareTupleQuery(QueryLanguage ql, String queryString) throws MalformedQueryException {
-
-        return prepareTupleQuery(ql, queryString, null);
-    }
-
     public SemagrowSailTupleQuery prepareTupleQuery(QueryLanguage ql, String queryString, String baseURI)
             throws MalformedQueryException {
         SailTupleQuery q = super.prepareTupleQuery(ql, queryString,baseURI);
         return new SemagrowSailTupleQuery(q.getParsedQuery(), this);
+    }
+
+    public SemagrowSailBooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString, String baseURI)
+            throws MalformedQueryException {
+        SailBooleanQuery q = super.prepareBooleanQuery(ql, queryString, baseURI);
+        return new SemagrowSailBooleanQuery(q.getParsedQuery(), this);
+    }
+
+    public SemagrowSailTupleQuery prepareTupleQuery(QueryLanguage ql, String queryString) throws MalformedQueryException {
+        return prepareTupleQuery(ql, queryString, null);
+    }
+
+    public SemagrowSailBooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString) throws MalformedQueryException {
+        return prepareBooleanQuery(ql, queryString, null);
     }
 }
