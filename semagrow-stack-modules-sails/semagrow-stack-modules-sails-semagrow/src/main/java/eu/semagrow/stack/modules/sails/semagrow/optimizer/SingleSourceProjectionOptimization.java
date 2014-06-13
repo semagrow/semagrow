@@ -19,6 +19,7 @@ import java.util.Set;
  * and thus the bandwidth used.
  * @author acharal@iit.demokritos.gr
  */
+@Deprecated
 public class SingleSourceProjectionOptimization implements QueryOptimizer {
 
     public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {
@@ -81,7 +82,8 @@ public class SingleSourceProjectionOptimization implements QueryOptimizer {
             for (String v : vars) {
                 projectionList.addElement(new ProjectionElem(v));
             }
-            Projection projection = new Projection(expr, projectionList);
+            TupleExpr expr1 = expr.clone();
+            Projection projection = new Projection(expr1, projectionList);
             //expr.replaceWith(projection);
             expr.replaceWith(projection);
         }
