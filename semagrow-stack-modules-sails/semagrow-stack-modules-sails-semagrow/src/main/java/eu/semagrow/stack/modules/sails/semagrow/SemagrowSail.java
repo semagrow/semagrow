@@ -89,8 +89,8 @@ public class SemagrowSail extends SailBase implements StackableSail {
                 new ConjunctiveConstraintSplitter(),
                 new CompareOptimizer(),
                 new SameTermFilterOptimizer(),
-                new DynamicProgrammingOptimizer(costEstimator,selector),
-                new SingleSourceProjectionOptimization()
+                new DynamicProgrammingOptimizer(costEstimator,selector)
+                //new SingleSourceProjectionOptimization()
         );
 
         return optimizer;
