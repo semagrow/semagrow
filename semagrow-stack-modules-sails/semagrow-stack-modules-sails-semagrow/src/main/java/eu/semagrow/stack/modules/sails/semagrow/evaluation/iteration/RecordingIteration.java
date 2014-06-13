@@ -14,10 +14,17 @@ public abstract class RecordingIteration<E,X extends Exception> extends Iteratio
 
     public abstract void record(E e);
 
+    public abstract void record(X x);
+
     @Override
     public E next() throws X {
-        E item = super.next();
-        record(item);
-        return item;
+        try {
+            E item = super.next();
+            record(item);
+            return item;
+        } catch (Exception exception) {
+            record((X)exception);
+            throw (X)exception;
+        }
     }
 }
