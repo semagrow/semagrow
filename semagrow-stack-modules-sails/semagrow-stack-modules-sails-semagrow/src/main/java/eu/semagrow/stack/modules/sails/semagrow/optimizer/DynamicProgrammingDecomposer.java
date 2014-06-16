@@ -181,8 +181,8 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         expr = new HashJoin(e1,e2);
         plans.add(expr);
 
-        expr = new Join(e2, e1);
-        plans.add(expr);
+        //expr = new Join(e2, e1);
+        //plans.add(expr);
 
         return plans;
     }
