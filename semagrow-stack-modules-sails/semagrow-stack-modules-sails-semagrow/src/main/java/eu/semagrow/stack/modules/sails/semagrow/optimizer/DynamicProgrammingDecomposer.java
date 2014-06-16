@@ -1,5 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
+import eu.semagrow.stack.modules.api.decomposer.QueryDecomposer;
+import eu.semagrow.stack.modules.api.decomposer.QueryDecompositionException;
 import eu.semagrow.stack.modules.api.source.SourceMetadata;
 import eu.semagrow.stack.modules.api.source.SourceSelector;
 import eu.semagrow.stack.modules.api.estimator.CostEstimator;
@@ -14,7 +16,6 @@ import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,15 +26,15 @@ import java.util.*;
 /**
  * Created by angel on 3/13/14.
  */
-public class DynamicProgrammingOptimizer implements QueryOptimizer {
+public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
     private CostEstimator costEstimator;
 
     private SourceSelector sourceSelector;
 
-    final private Logger logger = LoggerFactory.getLogger(DynamicProgrammingOptimizer.class);
+    final private Logger logger = LoggerFactory.getLogger(DynamicProgrammingDecomposer.class);
 
-    public DynamicProgrammingOptimizer(CostEstimator estimator, SourceSelector selector) {
+    public DynamicProgrammingDecomposer(CostEstimator estimator, SourceSelector selector) {
         costEstimator = estimator;
         sourceSelector = selector;
     }
@@ -46,10 +47,10 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
      * @param expr
      * @return a list of access plans.
      */
-    protected PlanCollection accessPlans(TupleExpr expr, Collection<ValueExpr> filterConditions) {
+    protected PlanCollection accessPlans(TupleExpr expr, Collection<ValueExpr> filterConditions)
+        throws QueryDecompositionException {
 
         PlanCollection plans = new PlanCollection();
-
 
         // extract the statement patterns
         List<StatementPattern> statementPatterns = StatementPatternCollector.process(expr);
@@ -66,7 +67,12 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
             Set<TupleExpr> exprLabel =  new HashSet<TupleExpr>();
             exprLabel.add(e);
 
+            if (sources.isEmpty())
+                throw new QueryDecompositionException("No suitable sources found for statement pattern " + pattern.toString());
+
+
             // create alternative SourceQuery for each filtered-statementpattern
+            // FIXME: this is wrong for completeness
             for (SourceMetadata sourceMetadata : sources) {
                 // TODO: Use alternative mirror data sources and not just the first
                 // TODO: Transformation and semantic proximity
@@ -116,7 +122,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
         logger.info("Pruned " + (planSize - plans.size()) + " suboptimal plans of " + planSize + " plans");
     }
 
-    private boolean isPlanComparable(TupleExpr plan1, TupleExpr plan2) {
+    protected boolean isPlanComparable(TupleExpr plan1, TupleExpr plan2) {
         return true;
     }
 
@@ -175,8 +181,8 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
         expr = new HashJoin(e1,e2);
         plans.add(expr);
 
-        //expr = new Join(e2, e1);
-        //plans.add(expr);
+        expr = new Join(e2, e1);
+        plans.add(expr);
 
         return plans;
     }
@@ -185,15 +191,17 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
 
     }
 
-    public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {
+    public void decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings)
+        throws QueryDecompositionException {
 
         Collection<TupleExpr> basicGraphPatterns = BPGCollector.process(tupleExpr);
 
         for (TupleExpr bgp : basicGraphPatterns)
-            optimizebgp(bgp);
+            decomposebgp(bgp);
     }
 
-    public void optimizebgp(TupleExpr bgp) {
+    public void decomposebgp(TupleExpr bgp)
+            throws QueryDecompositionException {
 
         Collection<ValueExpr> filterConditions = FilterCollector.process(bgp);
 
@@ -232,7 +240,7 @@ public class DynamicProgrammingOptimizer implements QueryOptimizer {
             }
         }
         Collection<TupleExpr> fullPlans = optPlans.get(r);
-        //finalizePlans(fullPlans,filterConditions)
+        finalizePlans(fullPlans);
 
         if (!fullPlans.isEmpty()) {
             logger.info("Found " + fullPlans.size()+" complete optimal plans");

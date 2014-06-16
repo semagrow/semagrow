@@ -51,12 +51,12 @@ public class DynamicProgrammingOptimizerTest extends TestCase {
         ParsedQuery query = parser.parseQuery(q, null);
 
         SourceSelector selector = new SourceSelectorAdapter(new TrivialResourceSelector());
-        DynamicProgrammingOptimizer optimizer =
-                new DynamicProgrammingOptimizer(costEstimator, selector);
+        DynamicProgrammingDecomposer optimizer =
+                new DynamicProgrammingDecomposer(costEstimator, selector);
         TupleExpr expr = query.getTupleExpr();
         System.out.println(expr);
         new ConjunctiveConstraintSplitter().optimize(expr, query.getDataset(), null);
-        optimizer.optimize(expr, query.getDataset(), null);
+        optimizer.decompose(expr, query.getDataset(), null);
 
         System.out.println(expr);
 

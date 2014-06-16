@@ -1,5 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
+import eu.semagrow.stack.modules.api.decomposer.QueryDecomposer;
+import eu.semagrow.stack.modules.api.decomposer.QueryDecompositionException;
 import eu.semagrow.stack.modules.api.evaluation.EvaluationStrategy;
 import eu.semagrow.stack.modules.api.evaluation.QueryEvaluation;
 import eu.semagrow.stack.modules.api.evaluation.QueryEvaluationSession;
@@ -125,7 +127,13 @@ public class SemagrowSailConnection extends SailConnectionBase {
             return metadataConnection.evaluate(tupleExpr, null, bindings, b);
 
         logger.debug("Starting decomposition of " + tupleExpr.toString());
-        TupleExpr decomposed = decompose(tupleExpr, dataset, bindings);
+
+        TupleExpr decomposed = null;
+        try {
+            decomposed = decompose(tupleExpr, dataset, bindings);
+        } catch (QueryDecompositionException e) {
+            throw new SailException(e);
+        }
         logger.debug("Query decomposed to " + decomposed.toString());
 
         try {
@@ -151,11 +159,13 @@ public class SemagrowSailConnection extends SailConnectionBase {
     }
 
 
-    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {
+    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) throws QueryDecompositionException {
 
         if (!redirectToBase(tupleExpr, dataset, bindings, false)) {
             QueryOptimizer optimizer = semagrowSail.getOptimizer();
             optimizer.optimize(tupleExpr, dataset, bindings);
+            QueryDecomposer decomposer = semagrowSail.getDecomposer();
+            decomposer.decompose(tupleExpr, dataset, bindings);
         }
         return tupleExpr;
     }

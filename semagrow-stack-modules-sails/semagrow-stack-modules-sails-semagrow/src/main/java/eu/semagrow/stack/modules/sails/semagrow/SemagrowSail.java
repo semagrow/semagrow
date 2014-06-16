@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
+import eu.semagrow.stack.modules.api.decomposer.QueryDecomposer;
 import eu.semagrow.stack.modules.api.evaluation.QueryEvaluation;
 import eu.semagrow.stack.modules.api.source.SourceSelector;
 import eu.semagrow.stack.modules.api.statistics.Statistics;
@@ -9,8 +10,7 @@ import eu.semagrow.stack.modules.querydecomp.selector.*;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.QueryEvaluationImpl;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingOptimizer;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.SingleSourceProjectionOptimization;
+import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingDecomposer;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
@@ -88,12 +88,16 @@ public class SemagrowSail extends SailBase implements StackableSail {
         QueryOptimizerList optimizer = new QueryOptimizerList(
                 new ConjunctiveConstraintSplitter(),
                 new CompareOptimizer(),
-                new SameTermFilterOptimizer(),
-                new DynamicProgrammingOptimizer(costEstimator,selector)
-                //new SingleSourceProjectionOptimization()
+                new SameTermFilterOptimizer()
         );
 
         return optimizer;
+    }
+
+    public QueryDecomposer getDecomposer() {
+        SourceSelector selector = getSourceSelector();
+        CostEstimator costEstimator = getCostEstimator();
+        return new DynamicProgrammingDecomposer(costEstimator,selector);
     }
 
     private SourceSelector getSourceSelector() {
