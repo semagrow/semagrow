@@ -4,12 +4,11 @@ import eu.semagrow.stack.modules.api.query.SemagrowTupleQuery;
 import eu.semagrow.stack.modules.sails.semagrow.SemagrowSailRepositoryConnection;
 import eu.semagrow.stack.modules.sails.semagrow.SemagrowSailConnection;
 import info.aduna.iteration.CloseableIteration;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQueryResult;
+import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.impl.TupleQueryResultImpl;
 import org.openrdf.query.parser.ParsedTupleQuery;
+import org.openrdf.repository.sail.SailQuery;
 import org.openrdf.repository.sail.SailTupleQuery;
 import org.openrdf.sail.SailException;
 
@@ -18,7 +17,7 @@ import java.util.ArrayList;
 /**
  * Created by angel on 6/9/14.
  */
-public class SemagrowSailTupleQuery extends SailTupleQuery implements SemagrowTupleQuery {
+public class SemagrowSailTupleQuery extends SemagrowSailQuery implements SemagrowTupleQuery {
 
     private boolean includeProvenanceData = false;
 
@@ -27,7 +26,6 @@ public class SemagrowSailTupleQuery extends SailTupleQuery implements SemagrowTu
         super(query,connection);
     }
 
-    @Override
     public TupleQueryResult evaluate() throws QueryEvaluationException {
 
         TupleExpr tupleExpr = getParsedQuery().getTupleExpr();
@@ -47,6 +45,13 @@ public class SemagrowSailTupleQuery extends SailTupleQuery implements SemagrowTu
         catch (SailException e) {
             throw new QueryEvaluationException(e.getMessage(), e);
         }
+    }
+
+    public void evaluate(TupleQueryResultHandler handler)
+            throws QueryEvaluationException, TupleQueryResultHandlerException {
+
+        TupleQueryResult queryResult = evaluate();
+        QueryResults.report(queryResult, handler);
     }
 
     public void setIncludeProvenanceData(boolean includeProvenance) {
