@@ -15,5 +15,6 @@
     <module>semagrow-stack-modules-architectureutils</module>
     <module>semagrow-stack-modules-sparqlutils</module>
     <module>semagrow-stack-modules-rioutils</module>
+    <module>semagrow-stack-modules-fileutils</module>
   </modules>
 </project>
