@@ -11,6 +11,7 @@ import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.Var;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
+import org.openrdf.query.algebra.evaluation.federation.ServiceCrossProductIteration;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -105,16 +106,6 @@ public class QueryExecutorImpl implements QueryExecutor {
         }
     }
 
-    private BindingSet filterRelevant(BindingSet bindings, List<String> relevant) {
-        QueryBindingSet newBindings = new QueryBindingSet();
-        for (Binding b : bindings) {
-            if (relevant.contains(b.getName())) {
-                newBindings.setBinding(b);
-            }
-        }
-        return newBindings;
-    }
-
     public CloseableIteration<BindingSet, QueryEvaluationException>
         evaluate(URI endpoint, TupleExpr expr,
                  CloseableIteration<BindingSet, QueryEvaluationException> bindingIter)
@@ -168,9 +159,22 @@ public class QueryExecutorImpl implements QueryExecutor {
 
         result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
 
-        result = new InsertValuesBindingsIteration(result, bindings);
+        if (relevant.isEmpty())
+            result = new InsertValuesBindingsIteration(result, bindings);
+        else
+            result = new ServiceCrossProductIteration(result, bindings);
 
         return result;
+    }
+
+    private BindingSet filterRelevant(BindingSet bindings, List<String> relevant) {
+        QueryBindingSet newBindings = new QueryBindingSet();
+        for (Binding b : bindings) {
+            if (relevant.contains(b.getName())) {
+                newBindings.setBinding(b);
+            }
+        }
+        return newBindings;
     }
 
     private List<String> getRelevantBindingNames(List<BindingSet> bindings, Set<String> exprVars) {
@@ -212,7 +216,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         return res;
     }
 
-    private CloseableIteration<BindingSet, QueryEvaluationException>
+    protected CloseableIteration<BindingSet, QueryEvaluationException>
         sendTupleQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
@@ -226,7 +230,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         return query.evaluate();
     }
 
-    private boolean
+    protected boolean
         sendBooleanQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
@@ -255,6 +259,9 @@ public class QueryExecutorImpl implements QueryExecutor {
     private String buildVALUESClause(List<BindingSet> bindings, List<String> relevantBindingNames)
             throws QueryEvaluationException
     {
+
+        if (relevantBindingNames.isEmpty())
+            return "";
 
         StringBuilder sb = new StringBuilder();
         sb.append(" VALUES (?"+ InsertValuesBindingsIteration.INDEX_BINDING_NAME);
