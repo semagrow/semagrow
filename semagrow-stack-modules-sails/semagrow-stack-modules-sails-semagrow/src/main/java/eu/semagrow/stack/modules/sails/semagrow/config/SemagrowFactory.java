@@ -36,40 +36,32 @@ public class SemagrowFactory implements SailFactory {
         SemagrowSail sail = new SemagrowSail();
         Sail metadataSail = getMetadataSail(((SemagrowConfig) sailImplConfig).getMetadataConfig());
 
-        initializeMetadata(metadataSail, ((SemagrowConfig) sailImplConfig).getMetadataFilename());
-        sail.setBaseSail(metadataSail);
-
-        return sail;
+        try {
+            initializeMetadata(metadataSail, ((SemagrowConfig) sailImplConfig).getMetadataFile());
+            sail.setBaseSail(metadataSail);
+            return sail;
+        } catch (Exception e) {
+            throw new SailConfigException(e);
+        }
     }
 
     public Sail getMetadataSail(SailImplConfig sailImplConfig) throws SailConfigException {
         return createSailStack(sailImplConfig);
     }
 
-    public void initializeMetadata(Sail metadata, String filename) {
+    public void initializeMetadata(Sail metadata, File file)
+            throws RepositoryException, IOException, RDFParseException {
         Repository repository = new SailRepository(metadata);
         RepositoryConnection conn = null;
 
-            try {
-                repository.initialize();
-                conn = repository.getConnection();
-                File file = new File(filename);
-                conn.add(file, "file://" + file.getAbsoluteFile(), RDFFormat.TURTLE);
-            } catch (RepositoryException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            } catch (RDFParseException e) {
-                e.printStackTrace();
-            } finally {
-                if (conn != null) {
-                    try {
-                        conn.close();
-                    } catch (RepositoryException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
+        try {
+            repository.initialize();
+            conn = repository.getConnection();
+            conn.add(file, "file://" + file.getAbsoluteFile(), RDFFormat.TURTLE);
+        } finally {
+            if (conn != null)
+                conn.close();
+        }
     }
 
     public Sail createSailStack(SailImplConfig sailImplConfig) throws SailConfigException {

@@ -16,7 +16,7 @@
     <dependencies>
         <dependency>
             <groupId>eu.semagrow.stack.modules</groupId>
-            <artifactId>semagrow-stack-modules-architectureutils</artifactId>
+            <artifactId>semagrow-stack-modules-fileutils</artifactId>
             <version>1.0.0-rc1</version>
         </dependency>
         <dependency>
