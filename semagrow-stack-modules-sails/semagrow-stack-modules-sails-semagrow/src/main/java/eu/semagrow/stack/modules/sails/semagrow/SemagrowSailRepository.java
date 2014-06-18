@@ -2,25 +2,23 @@ package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.api.repository.SemagrowRepository;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.base.RepositoryWrapper;
 import org.openrdf.repository.sail.SailRepository;
 
 /**
  * Created by angel on 6/10/14.
  */
-public class SemagrowSailRepository extends SailRepository implements SemagrowRepository {
+public class SemagrowSailRepository extends RepositoryWrapper implements SemagrowRepository {
 
     private SemagrowSail semagrowSail;
 
     public SemagrowSailRepository(SemagrowSail sail) {
-        super(sail);
+        super(new SailRepository(sail));
         semagrowSail = sail;
     }
 
+    @Override
     public SemagrowSailRepositoryConnection getConnection() throws RepositoryException {
-        try {
-            return new SemagrowSailRepositoryConnection(this, (SemagrowSailConnection) semagrowSail.getConnection());
-        } catch(Exception e) {
-            throw new RepositoryException(e);
-        }
+        return new SemagrowSailRepositoryConnection(this, super.getConnection());
     }
 }

@@ -8,7 +8,9 @@ import org.openrdf.model.URI;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailQuery;
+import org.openrdf.repository.sail.SailRepositoryConnection;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -19,10 +21,10 @@ import java.util.Set;
  */
 public class SemagrowSailQuery extends SailQuery implements SemagrowQuery {
 
-    Set<URI> excludedSources;
-    Set<URI> includeOnlySources;
+    private Set<URI> excludedSources;
+    private Set<URI> includeOnlySources;
 
-    protected SemagrowSailQuery(ParsedQuery parsedQuery, SemagrowSailRepositoryConnection con) {
+    protected SemagrowSailQuery(ParsedQuery parsedQuery, SailRepositoryConnection con) {
         super(parsedQuery, con);
         excludedSources = new HashSet<URI>();
         includeOnlySources = new HashSet<URI>();

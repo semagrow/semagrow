@@ -10,7 +10,9 @@ import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.impl.TupleQueryResultImpl;
 import org.openrdf.query.parser.ParsedTupleQuery;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sail.SailQuery;
+import org.openrdf.repository.sail.SailRepositoryConnection;
 import org.openrdf.repository.sail.SailTupleQuery;
 import org.openrdf.sail.SailException;
 
@@ -22,19 +24,12 @@ import java.util.Set;
 /**
  * Created by angel on 6/9/14.
  */
-public class SemagrowSailTupleQuery extends SailTupleQuery implements SemagrowTupleQuery {
+public class SemagrowSailTupleQuery extends SemagrowSailQuery implements SemagrowTupleQuery {
 
     private boolean includeProvenanceData = false;
 
-    private Set<URI> excludedSources;
-    private Set<URI> includeOnlySources;
-
-
-    public SemagrowSailTupleQuery(ParsedTupleQuery query, SemagrowSailRepositoryConnection connection)
-    {
+    public SemagrowSailTupleQuery(ParsedTupleQuery query, SailRepositoryConnection connection) {
         super(query,connection);
-        excludedSources = new HashSet<URI>();
-        includeOnlySources = new HashSet<URI>();
     }
 
     public TupleQueryResult evaluate() throws QueryEvaluationException {
@@ -58,36 +53,17 @@ public class SemagrowSailTupleQuery extends SailTupleQuery implements SemagrowTu
         }
     }
 
+    public void evaluate(TupleQueryResultHandler handler)
+            throws QueryEvaluationException, TupleQueryResultHandlerException
+    {
+        TupleQueryResult queryResult = evaluate();
+        QueryResults.report(queryResult, handler);
+    }
+
     public void setIncludeProvenanceData(boolean includeProvenance) {
         includeProvenanceData = includeProvenance;
     }
 
     public boolean getIncludeProvenanceData() { return includeProvenanceData; }
 
-    @Override
-    public SemagrowSailRepositoryConnection getConnection() {
-        return (SemagrowSailRepositoryConnection) super.getConnection();
-    }
-
-    public TupleExpr getDecomposedQuery() throws QueryDecompositionException {
-
-        SemagrowSailConnection conn = (SemagrowSailConnection) getConnection().getSailConnection();
-        TupleExpr initialExpr = getParsedQuery().getTupleExpr();
-        TupleExpr expr = initialExpr.clone();
-        Dataset dataset = getDataset();
-
-        if (dataset == null) {
-            // No external dataset specified, use query's own dataset (if any)
-            dataset = getParsedQuery().getDataset();
-        }
-        return conn.decompose(expr, dataset, getBindings());
-    }
-
-    public void addExcludedSource(URI source) { excludedSources.add(source); }
-
-    public void addIncludedSource(URI source) { includeOnlySources.add(source); }
-
-    public Collection<URI> getExcludedSources() { return excludedSources; }
-
-    public Collection<URI> getIncludedSources() { return includeOnlySources; }
 }
