@@ -16,4 +16,5 @@ public interface SourceSelector {
      */
     List<SourceMetadata> getSources(StatementPattern pattern);
 
+    //List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings, boolean includeApprox);
 }
