@@ -4,7 +4,7 @@
 
     <groupId>eu.semagrow.stack.modules</groupId>
     <artifactId>semagrow-stack-modules</artifactId>
-    <version>1.0.0-rc1</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
     <name>semagrow-stack-modules</name>
     <url>http://semagrow.eu</url>
