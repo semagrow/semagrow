@@ -11,6 +11,10 @@ import org.openrdf.query.algebra.TupleExpr;
  */
 public interface QueryExecutor {
 
+    void initialize();
+
+    void shutdown();
+
     CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(URI endpoint, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException;

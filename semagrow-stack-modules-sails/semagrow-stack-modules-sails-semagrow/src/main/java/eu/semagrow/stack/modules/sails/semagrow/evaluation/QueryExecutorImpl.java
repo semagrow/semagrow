@@ -37,6 +37,10 @@ public class QueryExecutorImpl implements QueryExecutor {
 
     private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
 
+    public void initialize() { }
+
+    public void shutdown() { }
+
     public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
         Repository repo = null;
 

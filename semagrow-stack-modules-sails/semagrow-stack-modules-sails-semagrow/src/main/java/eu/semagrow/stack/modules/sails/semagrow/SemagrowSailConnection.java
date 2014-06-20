@@ -74,7 +74,8 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
 
     public final CloseableIteration<? extends BindingSet, QueryEvaluationException> evaluate(
-            TupleExpr tupleExpr, Dataset dataset, BindingSet bindings, boolean includeInferred, boolean includeProvenance)
+            TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
+            boolean includeInferred, boolean includeProvenance)
             throws SailException
     {
 
@@ -136,28 +137,34 @@ public class SemagrowSailConnection extends SailConnectionBase {
         }
         logger.debug("Query decomposed to " + decomposed.toString());
 
-        try {
+        return evaluateOnly(decomposed, dataset, bindings, b, p);
+    }
 
+    public CloseableIteration<? extends BindingSet, QueryEvaluationException>
+        evaluateOnly(TupleExpr tupleExpr,
+                         Dataset dataset,
+                         BindingSet bindings,
+                         boolean b, boolean p) throws SailException {
+
+        try {
             logger.info("Query evaluation started.");
 
-            QueryEvaluationSession session = queryEvaluation.createSession();
+            QueryEvaluationSession session = queryEvaluation.createSession(tupleExpr, dataset, bindings);
 
             EvaluationStrategy evaluationStrategy = session.getEvaluationStrategy();
 
             evaluationStrategy.setIncludeProvenance(p);
 
             CloseableIteration<BindingSet,QueryEvaluationException> result =
-                    evaluationStrategy.evaluate(decomposed,bindings);
+                    evaluationStrategy.evaluate(tupleExpr, bindings);
 
             logger.info("Query evaluation completed.");
 
             return result;
-
         } catch (QueryEvaluationException e) {
             throw new SailException(e);
         }
     }
-
 
     public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) throws QueryDecompositionException {
 
