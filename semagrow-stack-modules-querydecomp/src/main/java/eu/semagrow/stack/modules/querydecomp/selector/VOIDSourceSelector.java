@@ -5,7 +5,11 @@ import eu.semagrow.stack.modules.api.source.SourceSelector;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.StatementPattern;
+import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 import org.openrdf.repository.Repository;
 
 import java.util.*;
@@ -25,8 +29,26 @@ public class VOIDSourceSelector extends VOIDBase
         super(voidRepository);
     }
 
-    public List<SourceMetadata> getSources(StatementPattern pattern) {
-        return new LinkedList(datasetsToSourceMetadata(getDatasets(pattern)));
+    public List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
+
+        if (!pattern.getSubjectVar().hasValue() &&
+            !pattern.getPredicateVar().hasValue() &&
+            !pattern.getObjectVar().hasValue())
+            return new LinkedList(uritoSourceMetadata(pattern, getEndpoints()));
+        else
+            return new LinkedList(datasetsToSourceMetadata(pattern, getDatasets(pattern)));
+    }
+
+    public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
+        if (expr instanceof StatementPattern)
+            return getSources((StatementPattern)expr, dataset, bindings);
+
+        List<StatementPattern> patterns = StatementPatternCollector.process(expr);
+        List<SourceMetadata> metadata = new LinkedList<SourceMetadata>();
+        for (StatementPattern pattern : patterns) {
+            metadata.addAll(getSources(pattern, dataset, bindings));
+        }
+        return metadata;
     }
 
     /**
@@ -50,7 +72,7 @@ public class VOIDSourceSelector extends VOIDBase
         return datasets;
     }
 
-    private Collection<SourceMetadata> datasetsToSourceMetadata(
+    private Collection<SourceMetadata> datasetsToSourceMetadata(StatementPattern pattern,
             Collection<Resource> datasets) {
 
         Set<URI> endpoints = new HashSet<URI>();
@@ -63,13 +85,21 @@ public class VOIDSourceSelector extends VOIDBase
 
         Collection<SourceMetadata> metadata = new LinkedList<SourceMetadata>();
         for (URI endpoint : endpoints) {
-            metadata.add(createSourceMetadata(endpoint));
+            metadata.add(createSourceMetadata(pattern, endpoint));
         }
 
         return metadata;
     }
 
-    private SourceMetadata createSourceMetadata(final URI endpoint) {
+    private Collection<SourceMetadata> uritoSourceMetadata(StatementPattern pattern, Collection<URI> endpoints) {
+        Collection<SourceMetadata> metadata = new LinkedList<SourceMetadata>();
+        for (URI e : endpoints) {
+            metadata.add(createSourceMetadata(pattern, e));
+        }
+        return metadata;
+    }
+
+    private SourceMetadata createSourceMetadata(final StatementPattern pattern, final URI endpoint) {
         return new SourceMetadata() {
             public List<URI> getEndpoints() {
                 List<URI> endpoints = new ArrayList<URI>(1);
@@ -78,7 +108,7 @@ public class VOIDSourceSelector extends VOIDBase
             }
 
             public StatementPattern originalPattern() {
-                return null;
+                return pattern;
             }
 
             public boolean requiresTransform() {

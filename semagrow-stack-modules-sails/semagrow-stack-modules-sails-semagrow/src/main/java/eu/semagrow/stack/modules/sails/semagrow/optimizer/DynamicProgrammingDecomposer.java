@@ -47,7 +47,8 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
      * @param expr
      * @return a list of access plans.
      */
-    protected PlanCollection accessPlans(TupleExpr expr, Collection<ValueExpr> filterConditions)
+    protected PlanCollection accessPlans(TupleExpr expr, Dataset dataset, BindingSet bindings,
+                                         Collection<ValueExpr> filterConditions)
         throws QueryDecompositionException {
 
         PlanCollection plans = new PlanCollection();
@@ -59,7 +60,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
         for (StatementPattern pattern : statementPatterns) {
             // get sources for each pattern
-            List<SourceMetadata> sources = sourceSelector.getSources(pattern);
+            List<SourceMetadata> sources = sourceSelector.getSources(pattern,dataset,bindings);
 
             // apply filters that can be applied to the statementpattern
             TupleExpr e = FilterUtils.applyRemainingFilters(pattern, filterConditions);
@@ -77,7 +78,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
                 // TODO: Use alternative mirror data sources and not just the first
                 // TODO: Transformation and semantic proximity
                 if (sourceMetadata.getEndpoints().size() > 0)
-                    plans.add(exprLabel, new SourceQuery(e, sourceMetadata.getEndpoints().get(0)));
+                    plans.add(exprLabel, new SourceQuery(e.clone(), sourceMetadata.getEndpoints().get(0)));
             }
         }
 
@@ -197,17 +198,17 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         Collection<TupleExpr> basicGraphPatterns = BPGCollector.process(tupleExpr);
 
         for (TupleExpr bgp : basicGraphPatterns)
-            decomposebgp(bgp);
+            decomposebgp(bgp, dataset, bindings);
     }
 
-    public void decomposebgp(TupleExpr bgp)
+    public void decomposebgp(TupleExpr bgp, Dataset dataset, BindingSet bindings)
             throws QueryDecompositionException {
 
         Collection<ValueExpr> filterConditions = FilterCollector.process(bgp);
 
         // optPlans is a function from (Set of Expressions) to (Set of Plans)
 
-        PlanCollection optPlans = accessPlans(bgp, filterConditions);
+        PlanCollection optPlans = accessPlans(bgp, dataset, bindings, filterConditions);
 
         // plans.getExpressions() get basic expressions
         // subsets S of size i

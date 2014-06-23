@@ -5,7 +5,10 @@ import eu.semagrow.stack.modules.utils.resourceselector.SelectedResource;
 import eu.semagrow.stack.modules.api.source.SourceMetadata;
 import eu.semagrow.stack.modules.api.source.SourceSelector;
 import org.openrdf.model.URI;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.StatementPattern;
+import org.openrdf.query.algebra.TupleExpr;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -15,7 +18,7 @@ import java.util.List;
  * Created by angel on 5/27/14.
  */
 @Deprecated
-public class SourceSelectorAdapter implements SourceSelector{
+public class SourceSelectorAdapter implements SourceSelector {
 
     private ResourceSelector resourceSelector;
 
@@ -24,13 +27,20 @@ public class SourceSelectorAdapter implements SourceSelector{
     }
 
 
-    public List<SourceMetadata> getSources(StatementPattern pattern) {
+    public List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
         List<SourceMetadata> list = new LinkedList<SourceMetadata>();
         for (SelectedResource r : resourceSelector.getSelectedResources(pattern,0)) {
             list.add(convert(pattern, r));
         }
 
         return list;
+    }
+
+    public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
+        if (expr instanceof StatementPattern)
+            return getSources((StatementPattern)expr, dataset, bindings);
+
+        return null;
     }
 
     private SourceMetadata convert(final StatementPattern pattern, final SelectedResource resource) {

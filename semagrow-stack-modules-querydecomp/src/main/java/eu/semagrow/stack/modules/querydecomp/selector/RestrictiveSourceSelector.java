@@ -3,7 +3,11 @@ package eu.semagrow.stack.modules.querydecomp.selector;
 import eu.semagrow.stack.modules.api.source.SourceMetadata;
 import eu.semagrow.stack.modules.api.source.SourceSelector;
 import org.openrdf.model.URI;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.StatementPattern;
+import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 
 import java.util.*;
 
@@ -42,9 +46,22 @@ public class RestrictiveSourceSelector extends SourceSelectorWrapper {
     public boolean isRestrictive() { return !(includeOnly.isEmpty() && exclude.isEmpty()); }
 
     @Override
-    public List<SourceMetadata> getSources(StatementPattern pattern) {
-        List<SourceMetadata> list = super.getSources(pattern);
+    public List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
+        List<SourceMetadata> list = super.getSources(pattern, dataset, bindings);
         return isRestrictive() ? restrictSourceList(list) : list;
+    }
+
+    @Override
+    public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
+        if (expr instanceof StatementPattern)
+            return getSources((StatementPattern)expr, dataset, bindings);
+
+        List<StatementPattern> patterns  = StatementPatternCollector.process(expr);
+        List<SourceMetadata> list = new LinkedList<SourceMetadata>();
+        for (StatementPattern pattern : patterns) {
+            list.addAll(this.getSources(pattern, dataset, bindings));
+        }
+        return list;
     }
 
     private List<SourceMetadata> restrictSourceList(List<SourceMetadata> list) {

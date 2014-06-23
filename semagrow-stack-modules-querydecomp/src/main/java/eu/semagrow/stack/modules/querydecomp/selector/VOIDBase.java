@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.querydecomp.selector;
 
 import eu.semagrow.stack.modules.vocabulary.VOID;
+import info.aduna.iteration.Iterations;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -84,6 +85,35 @@ public abstract class VOIDBase {
                 return null;
             else
                 return (URI)r.next().getBinding("endpoint").getValue();
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            if (conn != null)
+                try { conn.close(); }catch(Exception e){ }
+        }
+        return null;
+    }
+
+    protected Set<URI> getEndpoints() {
+        String qStr = "SELECT DISTINCT ?endpoint { ?dataset <" + VOID.SPARQLENDPOINT + "> ?endpoint }";
+        RepositoryConnection conn = null;
+
+        Set<URI> endpoints = new HashSet<URI>();
+
+        try {
+            conn = voidRepository.getConnection();
+            TupleQuery q = conn.prepareTupleQuery(QueryLanguage.SPARQL, qStr);
+            //q.setIncludeInferred(true);
+            //q.setBinding("dataset", dataset);
+            TupleQueryResult r = q.evaluate();
+
+            while (r.hasNext()) {
+                URI e = (URI)r.next().getBinding("endpoint").getValue();
+                if (e != null) {
+                    endpoints.add(e);
+                }
+            }
+            return endpoints;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
