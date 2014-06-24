@@ -41,7 +41,7 @@ public class SemagrowSailQuery extends SailQuery implements SemagrowQuery {
             // No external dataset specified, use query's own dataset (if any)
             dataset = getParsedQuery().getDataset();
         }
-        return conn.decompose(expr, dataset, getBindings());
+        return conn.decompose(expr, dataset, getBindings(), getIncludedSources(), getExcludedSources());
     }
 
     public void addExcludedSource(URI source) { excludedSources.add(source); }

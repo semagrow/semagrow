@@ -11,6 +11,7 @@ import eu.semagrow.stack.modules.sails.semagrow.estimator.CardinalityEstimatorIm
 import eu.semagrow.stack.modules.sails.semagrow.estimator.CostEstimatorImpl;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.QueryEvaluationImpl;
 import eu.semagrow.stack.modules.sails.semagrow.optimizer.DynamicProgrammingDecomposer;
+import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
@@ -25,6 +26,8 @@ import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 import org.openrdf.sail.StackableSail;
 import org.openrdf.sail.helpers.SailBase;
+
+import java.util.Collection;
 
 /**
  * Semagrow Sail implementation.
@@ -94,8 +97,9 @@ public class SemagrowSail extends SailBase implements StackableSail {
         return optimizer;
     }
 
-    public QueryDecomposer getDecomposer() {
+    public QueryDecomposer getDecomposer(Collection<URI> includeOnly, Collection<URI> exclude) {
         SourceSelector selector = getSourceSelector();
+        selector = new RestrictiveSourceSelector(selector, includeOnly, exclude);
         CostEstimator costEstimator = getCostEstimator();
         return new DynamicProgrammingDecomposer(costEstimator,selector);
     }

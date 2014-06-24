@@ -22,6 +22,9 @@ import org.openrdf.sail.helpers.SailConnectionBase;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Collections;
+
 /**
  * A Semagrow Readonly Connection
  * @author acharal@iit.demokritos.gr
@@ -68,14 +71,16 @@ public class SemagrowSailConnection extends SailConnectionBase {
                                     BindingSet bindings,
                                     boolean b) throws SailException {
 
-        return evaluateInternal(tupleExpr, dataset, bindings, b, false);
+        return evaluateInternal(tupleExpr, dataset, bindings, b, false,
+                Collections.<URI>emptySet(), Collections.<URI>emptySet());
     }
 
 
 
     public final CloseableIteration<? extends BindingSet, QueryEvaluationException> evaluate(
             TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
-            boolean includeInferred, boolean includeProvenance)
+            boolean includeInferred, boolean includeProvenance,
+            Collection<URI> includeOnlySources, Collection<URI> excludeSources)
             throws SailException
     {
 
@@ -84,8 +89,10 @@ public class SemagrowSailConnection extends SailConnectionBase {
         try {
             verifyIsOpen();
             boolean registered = false;
-            CloseableIteration<? extends BindingSet, QueryEvaluationException> iteration = evaluateInternal(
-                    tupleExpr, dataset, bindings, includeInferred, includeProvenance);
+            CloseableIteration<? extends BindingSet, QueryEvaluationException> iteration =
+                    evaluateInternal(tupleExpr, dataset, bindings,
+                            includeInferred, includeProvenance,
+                            includeOnlySources, excludeSources);
             try {
                 CloseableIteration<? extends BindingSet, QueryEvaluationException> registeredIteration =
                         registerIteration(iteration);
@@ -122,7 +129,10 @@ public class SemagrowSailConnection extends SailConnectionBase {
         evaluateInternal(TupleExpr tupleExpr,
                          Dataset dataset,
                          BindingSet bindings,
-                         boolean b, boolean p) throws SailException {
+                         boolean b, boolean p,
+                         Collection<URI> includeOnlySources,
+                         Collection<URI> excludeSources)
+            throws SailException {
 
         if (redirectToBase(tupleExpr, dataset, bindings, b))
             return metadataConnection.evaluate(tupleExpr, null, bindings, b);
@@ -131,7 +141,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
         TupleExpr decomposed = null;
         try {
-            decomposed = decompose(tupleExpr, dataset, bindings);
+            decomposed = decompose(tupleExpr, dataset, bindings, includeOnlySources, excludeSources);
         } catch (QueryDecompositionException e) {
             throw new SailException(e);
         }
@@ -166,12 +176,21 @@ public class SemagrowSailConnection extends SailConnectionBase {
         }
     }
 
-    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) throws QueryDecompositionException {
+    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings)
+            throws QueryDecompositionException
+    {
+        return decompose(tupleExpr, dataset, bindings,
+                Collections.<URI>emptySet(), Collections.<URI>emptySet());
+    }
+
+    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
+                               Collection<URI> includeOnlySources, Collection<URI> excludeSources)
+            throws QueryDecompositionException {
 
         if (!redirectToBase(tupleExpr, dataset, bindings, false)) {
             QueryOptimizer optimizer = semagrowSail.getOptimizer();
             optimizer.optimize(tupleExpr, dataset, bindings);
-            QueryDecomposer decomposer = semagrowSail.getDecomposer();
+            QueryDecomposer decomposer = semagrowSail.getDecomposer(includeOnlySources, excludeSources);
             decomposer.decompose(tupleExpr, dataset, bindings);
         }
         return tupleExpr;

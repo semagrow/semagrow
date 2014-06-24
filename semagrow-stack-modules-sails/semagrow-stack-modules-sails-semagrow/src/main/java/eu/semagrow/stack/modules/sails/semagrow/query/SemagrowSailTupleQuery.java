@@ -42,7 +42,8 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
             SemagrowSailConnection sailCon = (SemagrowSailConnection) getConnection().getSailConnection();
 
             bindingsIter = sailCon.evaluate(tupleExpr, getActiveDataset(), getBindings(),
-                    getIncludeInferred(), getIncludeProvenanceData());
+                    getIncludeInferred(), getIncludeProvenanceData(),
+                    getIncludedSources(), getExcludedSources());
 
             bindingsIter = enforceMaxQueryTime(bindingsIter);
 

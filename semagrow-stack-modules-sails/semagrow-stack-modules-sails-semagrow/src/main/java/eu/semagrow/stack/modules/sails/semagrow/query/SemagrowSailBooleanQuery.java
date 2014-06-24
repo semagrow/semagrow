@@ -50,10 +50,11 @@ public class SemagrowSailBooleanQuery extends SemagrowSailQuery
         }
 
         try {
-            SailConnection sailCon = getConnection().getSailConnection();
+            SemagrowSailConnection sailCon = (SemagrowSailConnection) getConnection().getSailConnection();
 
             CloseableIteration<? extends BindingSet, QueryEvaluationException> bindingsIter;
-            bindingsIter = sailCon.evaluate(tupleExpr, dataset, getBindings(), getIncludeInferred());
+            bindingsIter = sailCon.evaluate(tupleExpr, dataset, getBindings(), getIncludeInferred(), false,
+                    getIncludedSources(), getExcludedSources());
 
             bindingsIter = enforceMaxQueryTime(bindingsIter);
 

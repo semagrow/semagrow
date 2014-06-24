@@ -1,6 +1,5 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
-import eu.semagrow.stack.modules.sails.semagrow.algebra.SingleSourceExpr;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;
@@ -171,9 +170,6 @@ public class FilterOptimizer implements QueryOptimizer {
 
         @Override
         public void meetOther(QueryModelNode node) {
-            if (node instanceof SingleSourceExpr)
-                ((SingleSourceExpr) node).getArg().visit(this);
-            else
                 meetNode(node);
         }
 
