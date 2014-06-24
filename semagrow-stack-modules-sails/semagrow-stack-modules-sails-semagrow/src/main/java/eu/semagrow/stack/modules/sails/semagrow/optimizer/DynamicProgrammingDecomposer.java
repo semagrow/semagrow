@@ -73,13 +73,13 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
 
             // create alternative SourceQuery for each filtered-statementpattern
-            // FIXME: this is wrong for completeness
+            List<URI> endpoints = new LinkedList<URI>();
             for (SourceMetadata sourceMetadata : sources) {
-                // TODO: Use alternative mirror data sources and not just the first
-                // TODO: Transformation and semantic proximity
                 if (sourceMetadata.getEndpoints().size() > 0)
-                    plans.add(exprLabel, new SourceQuery(e.clone(), sourceMetadata.getEndpoints().get(0)));
+                    endpoints.add(sourceMetadata.getEndpoints().get(0));
             }
+
+            plans.add(exprLabel, new SourceQuery(e.clone(), endpoints));
         }
 
         // SPLENDID also cluster statementpatterns of the same source.

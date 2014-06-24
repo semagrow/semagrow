@@ -18,7 +18,10 @@ import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
 import org.openrdf.query.impl.EmptyBindingSet;
 
+import javax.management.QueryEval;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Overrides the behavior of the default evaluation strategy implementation.
@@ -86,7 +89,42 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
     public CloseableIteration<BindingSet,QueryEvaluationException>
         evaluate(SourceQuery expr, BindingSet bindings) throws QueryEvaluationException {
 
-        URI endpoint = expr.getSources().get(0);
+        TupleExpr innerExpr = expr.getArg();
+
+        List<CloseableIteration<BindingSet,QueryEvaluationException>> results =
+                new LinkedList<CloseableIteration<BindingSet, QueryEvaluationException>>();
+
+        if (expr.getSources().size() == 0)
+            return new EmptyIteration<BindingSet, QueryEvaluationException>();
+
+        if (expr.getSources().size() == 1)
+            return evaluateSource(expr.getSources().get(0), innerExpr, bindings);
+
+        for (URI endpoint : expr.getSources()) {
+            CloseableIteration<BindingSet,QueryEvaluationException> iter =
+                    evaluateSourceDelayed(endpoint, innerExpr, bindings);
+             results.add(iter);
+        }
+
+        return new UnionIteration<BindingSet, QueryEvaluationException>(results);
+    }
+
+    private CloseableIteration<BindingSet,QueryEvaluationException>
+        evaluateSourceDelayed(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+            throws QueryEvaluationException {
+
+        return new DelayedIteration<BindingSet, QueryEvaluationException>() {
+            @Override
+            protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration()
+                    throws QueryEvaluationException {
+                return evaluateSource(endpoint, expr, bindings);
+            }
+        };
+    }
+
+    private CloseableIteration<BindingSet,QueryEvaluationException>
+        evaluateSource(URI endpoint, TupleExpr expr, BindingSet bindings)
+            throws QueryEvaluationException {
 
         CloseableIteration<BindingSet,QueryEvaluationException> result =
                 queryExecutor.evaluate(endpoint, expr, bindings);
