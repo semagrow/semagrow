@@ -60,7 +60,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
         for (StatementPattern pattern : statementPatterns) {
             // get sources for each pattern
-            List<SourceMetadata> sources = sourceSelector.getSources(pattern,dataset,bindings);
+            Collection<SourceMetadata> sources = getSources(pattern,dataset,bindings);
 
             // apply filters that can be applied to the statementpattern
             TupleExpr e = FilterUtils.applyRemainingFilters(pattern, filterConditions);
@@ -154,6 +154,10 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         List<URI> commonURIs = new LinkedList<URI>(e1.getSources());
         commonURIs.retainAll(e2.getSources());
         return commonURIs;
+    }
+
+    protected Collection<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
+        return sourceSelector.getSources(pattern,dataset,bindings);
     }
 
     private TupleExpr pushJoinRemote(TupleExpr e1, TupleExpr e2, Collection<ValueExpr> filterConditions) {
