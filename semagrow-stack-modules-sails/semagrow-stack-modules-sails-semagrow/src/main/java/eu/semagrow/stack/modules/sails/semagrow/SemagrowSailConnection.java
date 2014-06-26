@@ -13,6 +13,7 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.algebra.QueryRoot;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.sail.SailConnection;
@@ -191,6 +192,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
             QueryOptimizer optimizer = semagrowSail.getOptimizer();
             optimizer.optimize(tupleExpr, dataset, bindings);
             QueryDecomposer decomposer = semagrowSail.getDecomposer(includeOnlySources, excludeSources);
+            tupleExpr = new QueryRoot(tupleExpr);
             decomposer.decompose(tupleExpr, dataset, bindings);
         }
         return tupleExpr;

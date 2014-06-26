@@ -16,6 +16,7 @@ import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;
+import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,6 +204,9 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
         for (TupleExpr bgp : basicGraphPatterns)
             decomposebgp(bgp, dataset, bindings);
+
+        QueryOptimizer finalizeOptimizers = new LimitPushDownOptimizer();
+        finalizeOptimizers.optimize(tupleExpr, dataset, bindings);
     }
 
     public void decomposebgp(TupleExpr bgp, Dataset dataset, BindingSet bindings)
