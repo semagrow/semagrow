@@ -7,13 +7,13 @@ import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.*;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.Var;
+import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.evaluation.federation.ServiceCrossProductIteration;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
+import org.openrdf.query.parser.ParsedBooleanQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
 import org.openrdf.queryrender.sparql.SparqlTupleExprRenderer;
@@ -297,31 +297,34 @@ public class QueryExecutorImpl implements QueryExecutor {
             return buildSelectSPARQLQuery(expr, projection);
     }
 
-    private String buildSelectSPARQLQuery(TupleExpr expr, Collection<String> projection) throws Exception {
-        SparqlTupleExprRenderer renderer = new SparqlTupleExprRenderer();
-        StringBuilder sb = new StringBuilder();
-        sb.append("select ");
-        if (projection == null)
-            sb.append("*");
-        else if (projection.isEmpty()) {
+    private String buildSelectSPARQLQuery(TupleExpr expr, Collection<String> projection)
+            throws Exception {
 
-        } else {
-            for (String projVar : projection)
-                    sb.append(" ?" + projVar);
+
+        TupleExpr body = expr.clone();
+
+        if (projection != null) {
+            Projection proj = new Projection();
+            ProjectionElemList elemList = new ProjectionElemList();
+
+            for (String var : projection)
+                elemList.addElement(new ProjectionElem(var));
+
+            proj.setProjectionElemList(elemList);
+
+            proj.setArg(body);
+            body = proj;
         }
-        sb.append(" where { ");
-        sb.append(renderer.render(expr));
-        sb.append(" }");
-        return sb.toString();
+
+        ParsedTupleQuery query = new ParsedTupleQuery(body);
+
+        return new SPARQLQueryRenderer().render(query);
     }
 
-    private String buildAskSPARQLQuery(TupleExpr expr) throws Exception {
-        SparqlTupleExprRenderer renderer = new SparqlTupleExprRenderer();
-        StringBuilder sb = new StringBuilder();
-        sb.append("ask { ");
-        sb.append(renderer.render(expr));
-        sb.append(" }");
-        return sb.toString();
+    private String buildAskSPARQLQuery(TupleExpr expr)
+            throws Exception {
+        ParsedBooleanQuery query = new ParsedBooleanQuery(expr);
+        return new SPARQLQueryRenderer().render(query);
     }
 
     private String buildSPARQLQueryVALUES(TupleExpr expr, List<BindingSet> bindings, List<String> relevantBindingNames)
