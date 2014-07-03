@@ -74,7 +74,7 @@ public class HTMLTableWriterTest {
                     QueryLanguage.SPARQL,
                     "SELECT * WHERE { ?s ?p ?o }")
                     .evaluate(new HTMLTableWriter(baos));            
-            assertEquals(370,baos.size());
+            assertEquals(378,baos.size());
         } finally {
             if(baos!=null){ baos.close(); }
             if(repCon!=null){repCon.close();}
