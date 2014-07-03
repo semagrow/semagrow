@@ -88,7 +88,7 @@ public class HTMLTableWriter extends QueryResultWriterBase implements TupleQuery
 
     public void endQueryResult() throws TupleQueryResultHandlerException {
         try {            
-            writer.append("</body></html>");
+            writer.append("</table></body></html>");
             writer.flush();
         } catch (IOException e) {
             throw new TupleQueryResultHandlerException(e);
@@ -100,8 +100,9 @@ public class HTMLTableWriter extends QueryResultWriterBase implements TupleQuery
             writer.append("<tr>");
             for(String binding : this.bindingsNames){
                 writer.append("<td>");
-                writer.append(bs.getValue(binding).stringValue());
-                writer.append("</td>");            
+                if (bs.getValue(binding) != null)
+                    writer.append(bs.getValue(binding).stringValue());
+                writer.append("</td>");
             }
             writer.append("</tr>");
         } catch (IOException ex) {
