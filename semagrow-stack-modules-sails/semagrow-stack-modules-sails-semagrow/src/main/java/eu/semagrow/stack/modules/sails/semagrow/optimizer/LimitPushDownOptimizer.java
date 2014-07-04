@@ -70,7 +70,18 @@ public class LimitPushDownOptimizer implements QueryOptimizer {
         @Override
         public void meet(Order order) { order.getArg().visit(this); }
 
-        public void meet(SourceQuery query) { relocate(slice, query.getArg()); }
+        public void meet(SourceQuery query) {
+            Slice pushedSlice = slice;
+
+            if (query.getSources().size() > 1) {
+                // this will be a hidden union at runtime
+                // so we must also retain the slice outside the query
+                pushedSlice = new Slice();
+                pushedSlice.setLimit(slice.getLimit());
+                pushedSlice.setOffset(slice.getOffset());
+            }
+            relocate(pushedSlice, query.getArg());
+        }
 
         @Override
         public void meetOther(QueryModelNode node) {
