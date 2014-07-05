@@ -187,7 +187,7 @@ public class VOIDStatistics extends VOIDBase implements Statistics {
         boolean realData = false;
         for (Resource dataset : datasets) {
             Long t = getTriples(dataset);
-            if (t != null && triples < t.longValue()) {
+            if (t != null && triples <= t.longValue()) {
                 realData = true;
                 triples = t.longValue();
             }
