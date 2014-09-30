@@ -166,8 +166,7 @@ public class MergeJoinIteration extends LookAheadIteration<BindingSet, QueryEval
         return result;
     }
 
-
-    public class CrossProductIteration extends LookAheadIteration<BindingSet, QueryEvaluationException> {
+    protected class CrossProductIteration extends LookAheadIteration<BindingSet, QueryEvaluationException> {
 
         protected final Iterable<BindingSet> inputBindings;
         protected final Iterable<BindingSet> resultIterable;
