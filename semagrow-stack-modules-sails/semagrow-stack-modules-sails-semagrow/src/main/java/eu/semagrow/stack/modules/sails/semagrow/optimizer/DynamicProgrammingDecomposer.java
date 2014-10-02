@@ -52,11 +52,11 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
      * @param expr
      * @return a list of access plans.
      */
-    protected PlanCollection accessPlans(TupleExpr expr, Dataset dataset, BindingSet bindings,
+    protected Collection<Plan> accessPlans(TupleExpr expr, Dataset dataset, BindingSet bindings,
                                          Collection<ValueExpr> filterConditions)
         throws QueryDecompositionException {
 
-        PlanCollection plans = new PlanCollection();
+        Collection<Plan> plans = new LinkedList<Plan>();
 
         // extract the statement patterns
         List<StatementPattern> statementPatterns = StatementPatternCollector.process(expr);
@@ -76,7 +76,6 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
             if (sources.isEmpty())
                 throw new QueryDecompositionException("No suitable sources found for statement pattern " + pattern.toString());
 
-
             // create alternative SourceQuery for each filtered-statementpattern
             List<URI> endpoints = new LinkedList<URI>();
             for (SourceMetadata sourceMetadata : sources) {
@@ -84,11 +83,8 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
                     endpoints.add(sourceMetadata.getEndpoints().get(0));
             }
 
-            e = new SourceQuery(e.clone(), endpoints);
-            Plan p = new Plan(exprLabel, e);
-            p.setCost(costEstimator.getCost(e));
-            p.setCardinality(cardinalityEstimator.getCardinality(e));
-            plans.addPlan(p);
+            Plan p = createPlan(exprLabel, new SourceQuery(e.clone(), endpoints));
+            plans.add(p);
         }
 
         // SPLENDID also cluster statementpatterns of the same source.
@@ -96,26 +92,30 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         return plans;
     }
 
+    /**
+     * Prune suboptimal plans
+     * @param plans
+     */
     protected void prunePlans(Collection<Plan> plans) {
         // group equivalent plans
         // get the minimum-cost plan for each equivalence class
 
         Collection<Plan> bestPlans = new ArrayList<Plan>();
 
-        boolean inComparable = true;
+        boolean inComparable;
 
         for (Plan candidatePlan : plans) {
             inComparable = true;
-            double cost1 = candidatePlan.getCost();
 
             for (Plan plan : bestPlans) {
-                if (isPlanComparable(candidatePlan, plan)) {
+                int plan_comp = comparePlan(candidatePlan, plan);
+
+                if (plan_comp != 0)
                     inComparable = false;
-                    double cost2 = plan.getCost();
-                    if (cost1 < cost2) {
-                        bestPlans.remove(plan);
-                        bestPlans.add(candidatePlan);
-                    }
+
+                if (plan_comp == -1) {
+                    bestPlans.remove(plan);
+                    bestPlans.add(candidatePlan);
                 }
             }
             // check if plan is incomparable with all best plans yet discovered.
@@ -128,10 +128,36 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         logger.info("Pruned " + (planSize - plans.size()) + " suboptimal plans of " + planSize + " plans");
     }
 
-    protected boolean isPlanComparable(Plan plan1, Plan plan2) {
+    /**
+     * Compare two plans; can be partial order of plans.
+     * In order to be compared, both cost and properties of the plans
+     * must be comparable.
+     * @param plan1
+     * @param plan2
+     * @return 0 if plan are equal or uncomparable
+     *         -1 if plan1 is better than plan2
+     *         1  if plan2 is better than plan1
+     */
+    private int comparePlan(Plan plan1, Plan plan2) {
+        if (isPlanComparable(plan1, plan2)) {
+            return plan1.getCost() < plan2.getCost() ? -1 : 1;
+        } else {
+            return 0;
+        }
+    }
+
+    private boolean isPlanComparable(Plan plan1, Plan plan2) {
+        // FIXME: take plan properties into account
         return true;
     }
 
+    /**
+     * Create all the ways that to join two plans
+     * @param plan1
+     * @param plan2
+     * @param filterConditions
+     * @return
+     */
     protected Collection<Plan> joinPlans(Collection<Plan> plan1, Collection<Plan> plan2,
                                               Collection<ValueExpr> filterConditions) {
 
@@ -146,22 +172,37 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
                 for (TupleExpr plan : joins) {
                     TupleExpr e = FilterUtils.applyRemainingFilters(plan, filterConditions);
-                    Plan p = new Plan(s,e);
-                    p.setCost(costEstimator.getCost(e));
-                    p.setCardinality(cardinalityEstimator.getCardinality(e));
+                    Plan p = createPlan(s,e);
                     plans.add(p);
                 }
 
                 TupleExpr expr = pushJoinRemote(p1, p2, filterConditions);
                 if (expr != null) {
-                    Plan p = new Plan(s,expr);
-                    p.setCost(costEstimator.getCost(expr));
-                    p.setCardinality(cardinalityEstimator.getCardinality(expr));
+                    Plan p = createPlan(s,expr);
                     plans.add(p);
                 }
             }
         }
         return plans;
+    }
+
+    /**
+     * Update the properties of a plan
+     * @param plan
+     */
+    protected void updatePlan(Plan plan) {
+        TupleExpr innerExpr = plan.getArg();
+
+        plan.setCost(costEstimator.getCost(innerExpr));
+        plan.setCardinality(cardinalityEstimator.getCardinality(innerExpr));
+
+        //FIXME: update ordering, limit, distinct, group by
+    }
+
+    protected Plan createPlan(Set<TupleExpr> planId, TupleExpr innerExpr) {
+        Plan p = new Plan(planId, innerExpr);
+        updatePlan(p);
+        return p;
     }
 
     private List<URI> commonSources(SourceQuery e1, SourceQuery e2) {
@@ -228,8 +269,11 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         Collection<ValueExpr> filterConditions = FilterCollector.process(bgp);
 
         // optPlans is a function from (Set of Expressions) to (Set of Plans)
+        PlanCollection optPlans = new PlanCollection();
 
-        PlanCollection optPlans = accessPlans(bgp, dataset, bindings, filterConditions);
+        Collection<Plan> accessPlans = accessPlans(bgp, dataset, bindings, filterConditions);
+
+        optPlans.addPlan(accessPlans);
 
         // plans.getExpressions() get basic expressions
         // subsets S of size i
@@ -266,10 +310,29 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
         if (!fullPlans.isEmpty()) {
             logger.info("Found " + fullPlans.size()+" complete optimal plans");
-            TupleExpr bestPlan = fullPlans.iterator().next();
+            TupleExpr bestPlan = getBestPlan(fullPlans);
             bgp.replaceWith(bestPlan);
         }
     }
+
+    /**
+     * Choose one of the plans as best
+     * @param plans
+     * @return
+     */
+    private TupleExpr getBestPlan(Collection<Plan> plans) {
+        if (plans.isEmpty())
+            return null;
+
+        Plan bestPlan = plans.iterator().next();
+
+        for (Plan p : plans)
+            if (p.getCost() < bestPlan.getCost())
+                bestPlan = p;
+
+        return bestPlan;
+    }
+
 
     private static <T> Iterable<Set<T>> subsetsOf(Set<T> s, int k) {
         return new CombinationIterator<T>(k, s);
