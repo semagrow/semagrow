@@ -1,8 +1,10 @@
 package eu.semagrow.stack.modules.sails.semagrow.estimator;
 
+import eu.semagrow.stack.modules.api.estimator.SelectivityEstimator;
 import eu.semagrow.stack.modules.api.statistics.Statistics;
 import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
+import eu.semagrow.stack.modules.sails.semagrow.optimizer.Plan;
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.VarNameCollector;
@@ -12,7 +14,7 @@ import java.util.Set;
 /**
  * Created by angel on 4/28/14.
  */
-public class CardinalityEstimatorImpl implements CardinalityEstimator {
+public class CardinalityEstimatorImpl implements CardinalityEstimator, SelectivityEstimator {
 
     private Statistics statistics;
 
@@ -42,6 +44,8 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
             return getCardinality((LeftJoin)expr, source);
         else if (expr instanceof SourceQuery)
             return getCardinality((SourceQuery)expr, source);
+        else if (expr instanceof Plan)
+            return ((Plan)expr).getCardinality();
 
         return 0;
     }
@@ -59,7 +63,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
     }
 
     public long getCardinality(Filter filter, URI source) {
-        double sel = getConditionSelectivity(filter.getCondition(), source);
+        double sel = getConditionSelectivity(filter.getCondition(), filter.getArg(), source);
         return (long) (getCardinality(filter.getArg(), source) * sel);
     }
 
@@ -74,29 +78,23 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
     }
 
     public long getCardinality(Join join, URI source){
-        Set<String> varNames = getCommonVariables(join.getLeftArg(), join.getRightArg());
+
         long card1 = getCardinality(join.getLeftArg(), source);
         long card2 = getCardinality(join.getRightArg(), source);
 
-        // TODO: check if calculation of selectivity of multiple variables is correct.
-        // TODO: consult page 6 of http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.129.3162&rep=rep1&type=pdf
-        double sel = 1;
-        for (String var : varNames)
-            sel *= getVarSelectivity(var, join, source);
+        double sel = getJoinSelectivity(join, source);
 
         return (long)(card1 * card2 * sel);
     }
 
     public long getCardinality(LeftJoin join, URI source) {
-        Set<String> varNames = getCommonVariables(join.getLeftArg(), join.getRightArg());
         long card1 = getCardinality(join.getLeftArg(), source);
         long card2 = getCardinality(join.getRightArg(), source);
 
-        // TODO: check if calculation of selectivity of multiple variables is correct.
-        // TODO: consult page 6 of http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.129.3162&rep=rep1&type=pdf
-        double sel = 1;
-        for (String var : varNames)
-            sel *= getVarSelectivity(var, join, source);
+        // A left join B is semantically equiv to (A join B) union (A - B)
+
+        Join dummyJoin = new Join(join.getLeftArg().clone(), join.getRightArg().clone());
+        double sel = getJoinSelectivity(dummyJoin, source);
 
         // TODO: check the second half of the equation
         return (long)(card1 * card2 * sel) + (long)(card1 * (1/sel));
@@ -109,7 +107,42 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
         return card;
     }
 
-    private double getConditionSelectivity(ValueExpr condition, URI source) {
+    /**
+     * Estimate the join selectivity factor *sel* of a join, such that
+     * join cardinality = cross product cardinality * sel.
+     * @param join the join expression
+     * @param source a referring data source
+     * @return the selectivity factor
+     */
+    public double getJoinSelectivity(Join join, URI source) {
+
+        Set<String> varNames = getCommonVariables(join.getLeftArg(), join.getRightArg());
+        // TODO: check if calculation of selectivity of multiple variables is correct.
+        // TODO: consult page 6 of http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.129.3162&rep=rep1&type=pdf
+        double sel = 1;
+        for (String var : varNames)
+            sel *= getVarSelectivity(var, join, source);
+
+        return sel;
+    }
+
+    public double getJoinSelectivity(Join join) {
+        return getJoinSelectivity(join, null);
+    }
+
+    /**
+     * Compute the reduction factor if a condition is applied in the expression, i.e.
+     * cardinality after the condition application = cardinality before the condition application * reduction factor.
+     * @param condition
+     * @param expr
+     * @param source
+     * @return
+     */
+    public double getConditionSelectivity(ValueExpr condition, TupleExpr expr, URI source) {
+        return 0.5;
+    }
+
+    public double getConditionSelectivity(ValueExpr condition, TupleExpr expr) {
         return 0.5;
     }
 
@@ -130,23 +163,8 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
     }
 
     public double getVarSelectivity(String varName, StatementPattern pattern, URI source) {
-        Var sVar = pattern.getSubjectVar();
-        Var pVar = pattern.getPredicateVar();
-        Var oVar = pattern.getObjectVar();
 
-        //long count = statistics.getPatternCount(pattern, source);
-        long distinct = 1;
-        if (sVar.getName().equals(varName) && !sVar.hasValue()) {
-            distinct = statistics.getDistinctSubjects(pattern, source);
-        }
-
-        if (pVar.getName().equals(varName) && !pVar.hasValue()) {
-            distinct = statistics.getDistinctPredicates(pattern, source);
-        }
-
-        if (oVar.getName().equals(varName) && !oVar.hasValue()) {
-            distinct = statistics.getDistinctObjects(pattern, source);
-        }
+        long distinct = getVarCardinality(varName, pattern, source);
 
         return ((double)1/distinct);
     }
@@ -168,9 +186,57 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator {
 
     public double getVarSelectivity(String varName, BinaryTupleOperator expr, URI source) {
         double leftSel = getVarSelectivity(varName, expr.getLeftArg(), source);
-        double rightSel = getVarSelectivity(varName, expr.getLeftArg(), source);
+        double rightSel = getVarSelectivity(varName, expr.getRightArg(), source);
         return Math.min(leftSel, rightSel);
     }
+
+    /**
+     * Estimate the number of distinct values of a given variable.
+     * @param varName the name of the variable
+     * @param pattern the triple pattern
+     * @param source a potential referring data source
+     * @return the estimated number of distinct values of a variable.
+     */
+    public long getVarCardinality(String varName, StatementPattern pattern, URI source) {
+
+        Var sVar = pattern.getSubjectVar();
+        Var pVar = pattern.getPredicateVar();
+        Var oVar = pattern.getObjectVar();
+        long distinct = 0;
+
+        if (sVar.getName().equals(varName) && !sVar.hasValue()) {
+            distinct = statistics.getDistinctSubjects(pattern, source);
+        }
+
+        if (pVar.getName().equals(varName) && !pVar.hasValue()) {
+            distinct = statistics.getDistinctPredicates(pattern, source);
+        }
+
+        if (oVar.getName().equals(varName) && !oVar.hasValue()) {
+            distinct = statistics.getDistinctObjects(pattern, source);
+        }
+
+        return distinct;
+    }
+
+    /*
+    public long getVarCardinality(String varName, Union union, URI source) {
+        long card1 = getVarCardinality(varName, union.getLeftArg(), source);
+        long card2 = getVarCardinality(varName, union.getRightArg(), source);
+        // if (subset) then max else if (disjoint) sum else something in between
+        return Math.max(card1,card2);
+    }
+
+    public long getVarCardinality(String varName, Join join, URI source) {
+        long card1 = getVarCardinality(varName, join.getLeftArg(), source);
+        long card2 = getVarCardinality(varName, join.getRightArg(), source);
+        // if joined variable then
+        // if (subset) then min else if (disjoint) 0 else something in between
+        // if not joined variable then
+        // if in left arg ->
+
+    }
+    */
 
     // helper
     private Set<String> getCommonVariables(TupleExpr expr1, TupleExpr expr2) {

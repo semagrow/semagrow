@@ -101,7 +101,8 @@ public class SemagrowSail extends SailBase implements StackableSail {
         SourceSelector selector = getSourceSelector();
         selector = new RestrictiveSourceSelector(selector, includeOnly, exclude);
         CostEstimator costEstimator = getCostEstimator();
-        return new DynamicProgrammingDecomposer(costEstimator,selector);
+        CardinalityEstimator cardinalityEstimator = getCardinalityEstimator();
+        return new DynamicProgrammingDecomposer(costEstimator, cardinalityEstimator, selector);
     }
 
     private SourceSelector getSourceSelector() {

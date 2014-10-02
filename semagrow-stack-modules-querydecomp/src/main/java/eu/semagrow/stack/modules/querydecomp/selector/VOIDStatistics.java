@@ -71,12 +71,12 @@ public class VOIDStatistics extends VOIDBase implements Statistics {
         Set<Resource> pDatasets = new HashSet<Resource>(datasets);
 
         if (pVal != null && pVal instanceof URI)
-            pDatasets.retainAll(getMatchingDatasetsOfSubject((URI)pVal));
+            pDatasets.retainAll(getMatchingDatasetsOfPredicate((URI)pVal));
 
         //TODO: check datasets that must subject uriRegexPattern
         //
 
-        if (sVal != null && !pDatasets.isEmpty()) {
+        if (!pDatasets.isEmpty()) {
             return getDistinctSubjects(pDatasets);
         }else{
             return getDistinctSubjects(datasets);
