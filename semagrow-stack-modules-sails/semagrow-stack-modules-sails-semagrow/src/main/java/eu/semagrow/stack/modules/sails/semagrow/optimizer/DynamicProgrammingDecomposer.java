@@ -205,27 +205,27 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         return p;
     }
 
-    private List<URI> commonSources(SourceQuery e1, SourceQuery e2) {
-        List<URI> commonURIs = new LinkedList<URI>(e1.getSources());
-        commonURIs.retainAll(e2.getSources());
-        return commonURIs;
-    }
-
     protected Collection<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
         return sourceSelector.getSources(pattern,dataset,bindings);
     }
 
     private TupleExpr pushJoinRemote(Plan e1, Plan e2, Collection<ValueExpr> filterConditions) {
+
         if (e1.getArg() instanceof SourceQuery &&
-                e2.getArg() instanceof SourceQuery) {
+            e2.getArg() instanceof SourceQuery) {
 
             SourceQuery q1 = (SourceQuery) e1.getArg();
             SourceQuery q2 = (SourceQuery) e2.getArg();
-            List<URI> sources = commonSources(q1, q2);
-            if (!sources.isEmpty()) {
+            //List<URI> sources = commonSources(q1, q2);
+
+            if (q1.getSources().size() == 1 && q2.getSources().size() == 1 &&
+                q1.getSources().containsAll(q2.getSources())) {
+
                 TupleExpr expr = FilterUtils.applyRemainingFilters(new Join(q1.getArg(), q2.getArg()), filterConditions);
-                return new SourceQuery(expr, sources);
+                return new SourceQuery(expr, q1.getSources());
             }
+
+            //FIXME: push down joins if we can guarantee that datasets are not joinable.
         }
 
         return null;
