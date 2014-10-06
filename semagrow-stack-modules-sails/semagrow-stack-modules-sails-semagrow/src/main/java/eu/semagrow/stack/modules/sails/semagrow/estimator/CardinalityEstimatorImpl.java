@@ -139,11 +139,41 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
      * @return
      */
     public double getConditionSelectivity(ValueExpr condition, TupleExpr expr, URI source) {
+        if (condition instanceof And) {
+            return getConditionSelectivity((And)condition, expr, source);
+        } else if (condition instanceof Or) {
+            return getConditionSelectivity((Or)condition, expr, source);
+        } else if (condition instanceof Not) {
+            return getConditionSelectivity((Not)condition, expr, source);
+        }
+        // else identify ranges?
+        return 0.5;
+    }
+
+    public double getConditionSelectivity(And valueExpr, TupleExpr expr, URI source) {
+        double sel1 = getConditionSelectivity(valueExpr.getLeftArg(), expr, source);
+        double sel2 = getConditionSelectivity(valueExpr.getRightArg(), expr, source);
+        return sel1 * sel2;
+    }
+
+    public double getConditionSelectivity(Or valueExpr, TupleExpr expr, URI source) {
+        double sel1 = getConditionSelectivity(valueExpr.getLeftArg(), expr, source);
+        double sel2 = getConditionSelectivity(valueExpr.getRightArg(), expr, source);
+        return sel1 + sel2 - sel1 * sel2;
+    }
+
+    public double getConditionSelectivity(Not valueExpr, TupleExpr expr, URI source) {
+        double sel = getConditionSelectivity(valueExpr.getArg(), expr, source);
+        return 1 - sel;
+    }
+
+    public double getConditionSelectivity(Compare valueExpr, TupleExpr expr, URI source) {
+        Compare.CompareOp op = valueExpr.getOperator();
         return 0.5;
     }
 
     public double getConditionSelectivity(ValueExpr condition, TupleExpr expr) {
-        return 0.5;
+        return getConditionSelectivity(condition, expr, null);
     }
 
     public double getVarSelectivity(String varName, TupleExpr expr, URI source) {
