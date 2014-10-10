@@ -69,6 +69,9 @@ public class VOIDSourceSelector extends VOIDBase
         if (sVal != null && sVal instanceof URI)
             datasets.addAll(getMatchingDatasetsOfSubject((URI)sVal));
 
+        if (oVal != null && oVal instanceof URI)
+            datasets.addAll(getMatchingDatasetsOfObject((URI)oVal));
+
         return datasets;
     }
 

@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.querydecomp.selector;
 
+import eu.semagrow.stack.modules.vocabulary.SEVOD;
 import eu.semagrow.stack.modules.vocabulary.VOID;
 import info.aduna.iteration.Iterations;
 import org.openrdf.model.Resource;
@@ -41,7 +42,16 @@ public abstract class VOIDBase {
     }
 
     protected Set<Resource> getMatchingDatasetsOfSubject(URI subject) {
-        String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(?subject, ?pattern). }";
+        //String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
+        String q = "SELECT ?dataset { ?dataset <" + SEVOD.SUBJECTREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
+        QueryBindingSet bindings = new QueryBindingSet();
+        bindings.addBinding("subject", subject);
+        return evalQuerySet(q, bindings, "dataset");
+    }
+
+    protected Set<Resource> getMatchingDatasetsOfObject(URI subject) {
+        //String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
+        String q = "SELECT ?dataset { ?dataset <" + SEVOD.OBJECTREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("subject", subject);
         return evalQuerySet(q, bindings, "dataset");
