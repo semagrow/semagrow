@@ -58,7 +58,7 @@ public class VOIDSourceSelector extends VOIDBase
      */
     private Set<Resource> getDatasets(StatementPattern pattern) {
         Value sVal = pattern.getSubjectVar().getValue();
-        Value oVal = pattern.getSubjectVar().getValue();
+        Value oVal = pattern.getObjectVar().getValue();
         Value pVal = pattern.getPredicateVar().getValue();
 
         Set<Resource> datasets = new HashSet<Resource>();
