@@ -44,6 +44,8 @@ public class LimitPushDownOptimizer implements QueryOptimizer {
 
             if (node instanceof SourceQuery) {
                 meet((SourceQuery) node);
+            } else if (node instanceof Plan) {
+                meet((Plan)node);
             } else {
                 relocate(slice, (TupleExpr) node);
             }
@@ -69,6 +71,8 @@ public class LimitPushDownOptimizer implements QueryOptimizer {
 
         @Override
         public void meet(Order order) { order.getArg().visit(this); }
+
+        public void meet(Plan p) { p.getArg().visit(this); }
 
         public void meet(SourceQuery query) {
             Slice pushedSlice = slice;
