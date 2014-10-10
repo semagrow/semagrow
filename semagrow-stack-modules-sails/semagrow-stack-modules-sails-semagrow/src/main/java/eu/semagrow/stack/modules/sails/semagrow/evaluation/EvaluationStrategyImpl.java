@@ -4,6 +4,7 @@ import eu.semagrow.stack.modules.api.evaluation.EvaluationStrategy;
 import eu.semagrow.stack.modules.api.evaluation.QueryExecutor;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.*;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.*;
+import eu.semagrow.stack.modules.sails.semagrow.optimizer.Plan;
 import info.aduna.iteration.*;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -70,6 +71,8 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
             return this.evaluate((SourceQuery) expr, bindings);
         } else if (expr instanceof Transform) {
             return this.evaluate((Transform) expr, bindings);
+        } else if (expr instanceof Plan) {
+            return this.evaluate(((Plan)expr).getArg(), bindings);
         } else {
             return super.evaluate(expr, bindings);
         }
