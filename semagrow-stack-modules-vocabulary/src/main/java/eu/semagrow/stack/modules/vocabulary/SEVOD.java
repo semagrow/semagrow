@@ -25,11 +25,20 @@ public final class SEVOD {
 
     public final static URI OBJECTCLASS;
 
+    public final static URI INTINTERVAL;
+    public final static URI DATEINTERVAL;
+    public final static URI FROM;
+    public final static URI TO;
+
     static {
         ValueFactory factory = ValueFactoryImpl.getInstance();
         SUBJECTREGEXPATTERN = factory.createURI(SEVOD.NAMESPACE, "subjectRegexPattern");
         OBJECTREGEXPATTERN = factory.createURI(SEVOD.NAMESPACE, "objectRegexPattern");
         OBJECTCLASS = factory.createURI(SEVOD.NAMESPACE, "objectClass");
         SUBJECTCLASS = factory.createURI(SEVOD.NAMESPACE, "subjectClass");
+        INTINTERVAL = factory.createURI(SEVOD.NAMESPACE, "intInterval");
+        DATEINTERVAL = factory.createURI(SEVOD.NAMESPACE, "dateInterval");
+        FROM = factory.createURI(SEVOD.NAMESPACE, "from");
+        TO = factory.createURI(SEVOD.NAMESPACE, "to");
     }
 }

@@ -9,7 +9,8 @@ import org.openrdf.model.impl.ValueFactoryImpl;
  * @author http://www.turnguard.com/turnguard
  */
 public final class SEMAGROW {
-    public static final String NAMESPACE = "http://schema.semagrow.eu/";    
+
+    public static final String NAMESPACE = "http://schema.semagrow.eu/";
     
     public static final class SYSTEM {
         
