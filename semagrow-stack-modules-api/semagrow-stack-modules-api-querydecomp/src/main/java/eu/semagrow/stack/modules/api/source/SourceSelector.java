@@ -20,6 +20,8 @@ public interface SourceSelector {
      */
     List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings);
 
+    List<SourceMetadata> getSources(Iterable<StatementPattern> patterns, Dataset dataset, BindingSet bindings);
+
     List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings);
 
 }

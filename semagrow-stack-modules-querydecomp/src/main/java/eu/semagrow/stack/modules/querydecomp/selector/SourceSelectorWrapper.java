@@ -27,6 +27,10 @@ public class SourceSelectorWrapper  implements SourceSelector {
         return getWrappedSelector().getSources(pattern, dataset, bindings);
     }
 
+    public List<SourceMetadata> getSources(Iterable<StatementPattern> patterns, Dataset dataset, BindingSet bindings) {
+        return getWrappedSelector().getSources(patterns, dataset, bindings);
+    }
+
     public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
         return getWrappedSelector().getSources(expr, dataset, bindings);
     }

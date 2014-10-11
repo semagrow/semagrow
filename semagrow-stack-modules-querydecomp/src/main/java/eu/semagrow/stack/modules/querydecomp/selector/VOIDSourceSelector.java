@@ -34,16 +34,21 @@ public class VOIDSourceSelector extends VOIDBase
         if (!pattern.getSubjectVar().hasValue() &&
             !pattern.getPredicateVar().hasValue() &&
             !pattern.getObjectVar().hasValue())
-            return new LinkedList(uritoSourceMetadata(pattern, getEndpoints()));
+            return new LinkedList<SourceMetadata>(uritoSourceMetadata(pattern, getEndpoints()));
         else
-            return new LinkedList(datasetsToSourceMetadata(pattern, getDatasets(pattern)));
+            return new LinkedList<SourceMetadata>(datasetsToSourceMetadata(pattern, getDatasets(pattern)));
     }
 
     public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
+
         if (expr instanceof StatementPattern)
             return getSources((StatementPattern)expr, dataset, bindings);
 
         List<StatementPattern> patterns = StatementPatternCollector.process(expr);
+        return getSources(patterns, dataset, bindings);
+    }
+
+    public List<SourceMetadata> getSources(Iterable<StatementPattern> patterns, Dataset dataset, BindingSet bindings) {
         List<SourceMetadata> metadata = new LinkedList<SourceMetadata>();
         for (StatementPattern pattern : patterns) {
             metadata.addAll(getSources(pattern, dataset, bindings));
