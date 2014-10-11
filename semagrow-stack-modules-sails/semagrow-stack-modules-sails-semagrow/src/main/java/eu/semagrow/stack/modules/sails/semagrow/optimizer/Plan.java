@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
 import org.openrdf.model.URI;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.algebra.QueryModelVisitor;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UnaryTupleOperator;
@@ -12,6 +13,8 @@ import java.util.Set;
  */
 public class Plan extends UnaryTupleOperator {
 
+    static public URI LOCAL = ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/");
+
     // expected cardinality
     private long card;
 
@@ -20,6 +23,10 @@ public class Plan extends UnaryTupleOperator {
 
     private Set<TupleExpr> id;
 
+    private Ordering ordering;
+
+    private URI site;
+
     public Plan(TupleExpr arg) {
         super(arg);
     }
@@ -27,14 +34,12 @@ public class Plan extends UnaryTupleOperator {
     public Plan(Set<TupleExpr> id, TupleExpr arg) {
         super(arg);
         this.id = id;
+        this.ordering = Ordering.NoOrdering();
+        this.site = LOCAL;
     }
 
     public Set<TupleExpr> getPlanId() {
         return this.id;
-    }
-
-    public TupleExpr getExpression() {
-        return null;
     }
 
     public long getCardinality() { return card; }
@@ -44,6 +49,14 @@ public class Plan extends UnaryTupleOperator {
     public double getCost() { return cost; }
 
     public void setCost(double cost) { this.cost = cost; }
+
+    public URI getSite() { return site; }
+
+    public void setSite(URI site) { this.site = site; }
+
+    public Ordering getOrdering() { return ordering; }
+
+    public void setOrdering(Ordering ordering) { this.ordering = ordering; }
 
     public Iterable<Object> getProperties() { return null; }
 
@@ -63,6 +76,8 @@ public class Plan extends UnaryTupleOperator {
         sb.append(cost);
         sb.append(", card = ");
         sb.append(card);
+        sb.append(", source = ");
+        sb.append(site.toString());
         sb.append(")");
 
         return sb.toString();

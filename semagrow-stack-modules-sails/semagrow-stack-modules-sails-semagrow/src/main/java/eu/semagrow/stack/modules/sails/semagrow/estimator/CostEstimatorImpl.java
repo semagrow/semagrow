@@ -29,21 +29,24 @@ public class CostEstimatorImpl implements CostEstimator {
      * @return
      */
     public double getCost(TupleExpr expr) {
+        return getCost(expr, null);
+    }
 
+    public double getCost(TupleExpr expr, URI source) {
         // just favor remote queries.
         if (expr instanceof SourceQuery)
-            return getCost((SourceQuery)expr);
+            return getCost((SourceQuery)expr, source);
         else if (expr instanceof Join)
-            return getCost((Join)expr);
+            return getCost((Join)expr, source);
         else if (expr instanceof Order)
-            return getCost((Order)expr);
+            return getCost((Order)expr, source);
         else if (expr instanceof Plan)
             return ((Plan)expr).getCost();
         else
-            return 1;
+            return cardinalityEstimator.getCardinality(expr, source);
     }
 
-    public double getCost(SourceQuery expr) {
+    public double getCost(SourceQuery expr, URI source) {
 
         // cardinality on a specific endpoint.
         // communication cost of the endpoint * cardinality
@@ -53,14 +56,15 @@ public class CostEstimatorImpl implements CostEstimator {
 
         //totalCost = processingCost(subexpr) + communicationCost(count, source) + initializationCostOfQuery;
 
-        double cost = 0;
-        for (URI src : expr.getSources()) {
-            cost += cardinalityEstimator.getCardinality(expr) * C_TRANSFER_TUPLE + C_TRANSFER_QUERY;
-        }
+        double communCost = C_TRANSFER_QUERY +
+                cardinalityEstimator.getCardinality(expr.getArg()) * C_TRANSFER_TUPLE;
+
+        double cost = getCost(expr.getArg()) + communCost;
+
         return cost;
     }
 
-    public double getCost(BindJoin join) {
+    public double getCost(BindJoin join, URI source) {
         // long cardinalityOfLeft = cardinalityEstimator.getCardinality(join.getLeftArg());
         // long costLeftArgument = estimateCost(join.getLeftArg());
         // long cardinalityAll = cardinalityEstimator.getCardinality(join);
@@ -68,13 +72,13 @@ public class CostEstimatorImpl implements CostEstimator {
         // long resultsPerQuery = cardinalityAll / queries;
         // totalCost = costLeftArgument + queries * costOfRightArgumentWithBinding
 
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long joinCard = cardinalityEstimator.getCardinality(join);
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg(), source);
+        long joinCard = cardinalityEstimator.getCardinality(join, source);
 
-        return getCost(join.getLeftArg()) + leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE) + joinCard * C_TRANSFER_TUPLE;
+        return getCost(join.getLeftArg(), source) + leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE) + joinCard * C_TRANSFER_TUPLE;
     }
 
-    public double getCost(HashJoin join) {
+    public double getCost(HashJoin join, URI source) {
         long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
         long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
 
@@ -82,36 +86,36 @@ public class CostEstimatorImpl implements CostEstimator {
         return getCost(join.getLeftArg()) + getCost(join.getRightArg()) + leftCard + rightCard;
     }
 
-    public double getCost(MergeJoin join) {
-        double cost1 = getCost(join.getLeftArg());
-        double cost2 = getCost(join.getRightArg());
+    public double getCost(MergeJoin join, URI source) {
+        double cost1 = getCost(join.getLeftArg(), source);
+        double cost2 = getCost(join.getRightArg(), source);
         return cost1 + cost2;
     }
 
-    public double getCost(Join join) {
+    public double getCost(Join join, URI source) {
         if (join instanceof BindJoin)
-            return getCost((BindJoin)join);
+            return getCost((BindJoin)join, source);
         else if (join instanceof HashJoin)
-            return getCost((HashJoin)join);
+            return getCost((HashJoin)join, source);
         else if (join instanceof MergeJoin)
-            return getCost((MergeJoin)join);
+            return getCost((MergeJoin)join, source);
 
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg(), source);
+        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg(), source);
 
         return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
     }
 
-    public double getCost(Order order){
-        long card = cardinalityEstimator.getCardinality(order.getArg());
-        return getCost(order.getArg()) + card * Math.log(card);
+    public double getCost(Order order, URI source){
+        long card = cardinalityEstimator.getCardinality(order.getArg(), source);
+        return getCost(order.getArg(), source) + card * Math.log(card);
     }
 
-    public double getCost(UnaryTupleOperator expr) {
-        return getCost(expr.getArg());
+    public double getCost(UnaryTupleOperator expr, URI source) {
+        return getCost(expr.getArg(), source);
     }
 
-    public double getCost(BinaryTupleOperator expr) {
-        return getCost(expr.getLeftArg()) + getCost(expr.getRightArg());
+    public double getCost(BinaryTupleOperator expr, URI source) {
+        return getCost(expr.getLeftArg(), source) + getCost(expr.getRightArg(), source);
     }
 }

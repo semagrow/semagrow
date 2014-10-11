@@ -207,10 +207,16 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return sel;
     }
 
+    public double getVarSelectivity(String varName, Plan p, URI source) {
+        return getVarSelectivity(varName, p.getArg(), p.getSite());
+    }
+
     public double getVarSelectivity(String varName, UnaryTupleOperator expr, URI source) {
         if (expr instanceof SourceQuery)
             return getVarSelectivity(varName, (SourceQuery)expr, source);
-        else
+        else if (expr instanceof Plan) {
+            return getVarSelectivity(varName, (Plan)expr, source);
+        } else
             return getVarSelectivity(varName, expr.getArg(), source);
     }
 

@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.api.estimator;
 
+import org.openrdf.model.URI;
 import org.openrdf.query.algebra.TupleExpr;
 
 /**
@@ -8,4 +9,7 @@ import org.openrdf.query.algebra.TupleExpr;
 public interface CostEstimator {
 
     public double getCost(TupleExpr expr);
+
+    public double getCost(TupleExpr expr, URI source);
+
 }
