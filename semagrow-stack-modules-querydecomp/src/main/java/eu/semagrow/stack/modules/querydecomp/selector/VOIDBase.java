@@ -34,7 +34,8 @@ public abstract class VOIDBase {
     }
 
     protected Set<Resource> getMatchingDatasetsOfPredicate(URI pred) {
-        String q = "SELECT ?dataset { ?dataset <" + VOID.PROPERTY + "> ?prop. }";
+        String q = "SELECT ?dataset { ?dataset <" + VOID.PROPERTY + "> ?prop. \n" +
+                          "?dataset <"+ VOID.TRIPLES + "> ?triples. FILTER (?triples > 0) .  }";
         //String q = "SELECT ?dataset { ?dataset ?p ?p1. }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("prop", pred);
@@ -43,7 +44,8 @@ public abstract class VOIDBase {
 
     protected Set<Resource> getMatchingDatasetsOfSubject(URI subject) {
         //String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
-        String q = "SELECT ?dataset { ?dataset <" + SEVOD.SUBJECTREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
+        String q = "SELECT ?dataset { ?dataset <" + SEVOD.SUBJECTREGEXPATTERN + "> ?pattern .\n" +
+                           "?dataset <"+ VOID.TRIPLES + "> ?triples. FILTER (?triples > 0) . FILTER regex(str(?subject), str(?pattern)). }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("subject", subject);
         return evalQuerySet(q, bindings, "dataset");
@@ -51,7 +53,8 @@ public abstract class VOIDBase {
 
     protected Set<Resource> getMatchingDatasetsOfObject(URI subject) {
         //String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
-        String q = "SELECT ?dataset { ?dataset <" + SEVOD.OBJECTREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
+        String q = "SELECT ?dataset { ?dataset <" + SEVOD.OBJECTREGEXPATTERN + "> ?pattern . "+
+                "?dataset <"+ VOID.TRIPLES + "> ?triples. FILTER (?triples > 0) . FILTER regex(str(?subject), str(?pattern)). }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("subject", subject);
         return evalQuerySet(q, bindings, "dataset");
