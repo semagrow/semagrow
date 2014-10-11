@@ -107,8 +107,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
         while (it.hasNext()) {
             Plan i = it.next();
-            // enforce i's site to be semagrow.
-            p = createPlan(p.getPlanId(), new Union(p, i), ctx);
+            p = createPlan(p.getPlanId(), new Union(enforceLocalSite(p,ctx), enforceLocalSite(i,ctx)), ctx);
         }
 
         return p;
@@ -128,7 +127,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         for (Plan p1 : plan1) {
             for (Plan p2 : plan2) {
 
-                Collection<TupleExpr> joins = createPhysicalJoins(p1, p2);
+                Collection<TupleExpr> joins = createPhysicalJoins(p1, p2, ctx);
                 Set<TupleExpr> s = new HashSet<TupleExpr>(p1.getPlanId());
                 s.addAll(p2.getPlanId());
 
@@ -197,7 +196,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         plans.addAll(modified);
     }
 
-    private Collection<TupleExpr> createPhysicalJoins(Plan e1, Plan e2) {
+    private Collection<TupleExpr> createPhysicalJoins(Plan e1, Plan e2, DecomposerContext ctx) {
         Collection<TupleExpr> plans = new LinkedList<TupleExpr>();
 
         TupleExpr expr;
@@ -208,7 +207,8 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
             plans.add(expr);
         }
 
-        expr = new HashJoin(e1,e2);
+
+        expr = new HashJoin(enforceLocalSite(e1, ctx), enforceLocalSite(e2, ctx));
         plans.add(expr);
 
         //expr = new Join(e2, e1);
@@ -219,24 +219,13 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
     private TupleExpr pushJoinRemote(Plan e1, Plan e2, DecomposerContext ctx) {
 
-        // FIXME
+        URI site1 = e1.getSite();
+        URI site2 = e2.getSite();
 
-        if (e1.getArg() instanceof SourceQuery &&
-                e2.getArg() instanceof SourceQuery) {
-
-            SourceQuery q1 = (SourceQuery) e1.getArg();
-            SourceQuery q2 = (SourceQuery) e2.getArg();
-            //List<URI> sources = commonSources(q1, q2);
-
-            if (q1.getSources().size() == 1 && q2.getSources().size() == 1 &&
-                    q1.getSources().containsAll(q2.getSources())) {
-
-                TupleExpr expr = applyRemainingFilters(new Join(q1.getArg(), q2.getArg()), ctx.filters);
-
-                return new SourceQuery(expr, q1.getSources());
-            }
-
-            //FIXME: push down joins if we can guarantee that datasets are not joinable.
+        if (site1.equals(site2) && site1 != Plan.LOCAL) {
+            Set<TupleExpr> planid = new HashSet<TupleExpr>(e1.getPlanId());
+            planid.addAll(e2.getPlanId());
+            return createPlan(planid, new Join(e1,e2), site1, ctx);
         }
 
         return null;
