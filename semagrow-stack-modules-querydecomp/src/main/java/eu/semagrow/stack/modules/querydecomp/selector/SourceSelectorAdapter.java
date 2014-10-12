@@ -26,7 +26,6 @@ public class SourceSelectorAdapter implements SourceSelector {
         this.resourceSelector = resourceSelector;
     }
 
-
     public List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
         List<SourceMetadata> list = new LinkedList<SourceMetadata>();
         for (SelectedResource r : resourceSelector.getSelectedResources(pattern,0)) {
@@ -34,6 +33,10 @@ public class SourceSelectorAdapter implements SourceSelector {
         }
 
         return list;
+    }
+
+    public List<SourceMetadata> getSources(Iterable<StatementPattern> patterns, Dataset dataset, BindingSet bindings){
+        return null;
     }
 
     public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
