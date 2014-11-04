@@ -202,7 +202,9 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         TupleExpr expr;
 
         //TupleExpr expr = new Join(e1, e2);
-        if (!e2.getSite().equals(Plan.LOCAL)) {
+        //if (!e2.getSite().equals(Plan.LOCAL)) {
+        // FIXME
+        if (e2.getPlanId().size() == 1) {
             expr = new BindJoin(e1, e2);
             plans.add(expr);
         }

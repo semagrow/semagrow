@@ -20,6 +20,9 @@ public class CostEstimatorImpl implements CostEstimator {
     private static int C_TRANSFER_TUPLE = 1;
     private static int C_TRANSFER_QUERY = 5;
 
+    private static int C_PROBE_TUPLE = 1;   //cost to probe a tuple against a hash table
+    private static int C_HASH_TUPLE = 3;    //cost to hash a tuple to a hash table
+
     public CostEstimatorImpl(CardinalityEstimator cardinalityEstimator) {
         this.cardinalityEstimator = cardinalityEstimator;
     }
@@ -83,7 +86,8 @@ public class CostEstimatorImpl implements CostEstimator {
         long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
 
         //return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
-        return getCost(join.getLeftArg()) + getCost(join.getRightArg()) + leftCard + rightCard;
+        return getCost(join.getLeftArg()) + getCost(join.getRightArg())
+                + C_HASH_TUPLE*leftCard + C_PROBE_TUPLE*rightCard;
     }
 
     public double getCost(MergeJoin join, URI source) {

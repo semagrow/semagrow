@@ -84,7 +84,9 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
 
         double sel = getJoinSelectivity(join, source);
 
-        return (long)(card1 * card2 * sel);
+        double t = card1 * card2 * sel;
+        long tt = (long)t;
+        return tt;
     }
 
     public long getCardinality(LeftJoin join, URI source) {
