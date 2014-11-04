@@ -10,10 +10,7 @@ import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.Projection;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
+import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
@@ -179,6 +176,62 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         return new BatchingIteration(bIter, expr, batchSize);
     }
 
+
+    protected CloseableIteration<BindingSet, QueryEvaluationException>
+        evaluateInternal(TupleExpr expr, Iterable<BindingSet> iterable)
+        throws QueryEvaluationException
+    {
+        if (expr instanceof Union) {
+            return evaluateInternal((Union) expr, iterable);
+        } else if (expr instanceof Plan) {
+            return evaluateInternal((Plan) expr, iterable);
+        } else {
+
+            CloseableIteration<BindingSet, QueryEvaluationException> bIter =
+                    new IterationWrapper<BindingSet, QueryEvaluationException>(
+                        new IteratorIteration<BindingSet, QueryEvaluationException>(iterable.iterator()));
+
+            return evaluateInternal(expr, bIter);
+        }
+    }
+
+    protected CloseableIteration<BindingSet, QueryEvaluationException>
+        evaluateInternal(final Union union, final Iterable<BindingSet> iterable)
+            throws QueryEvaluationException
+    {
+
+        Iteration<BindingSet, QueryEvaluationException> leftArg, rightArg;
+
+        leftArg = new DelayedIteration<BindingSet, QueryEvaluationException>() {
+
+            @Override
+            protected Iteration<BindingSet, QueryEvaluationException> createIteration()
+                    throws QueryEvaluationException
+            {
+                return evaluateInternal(union.getLeftArg(), iterable);
+            }
+        };
+
+        rightArg = new DelayedIteration<BindingSet, QueryEvaluationException>() {
+
+            @Override
+            protected Iteration<BindingSet, QueryEvaluationException> createIteration()
+                    throws QueryEvaluationException
+            {
+                return evaluateInternal(union.getRightArg(), iterable);
+            }
+        };
+
+        return new UnionIteration<BindingSet, QueryEvaluationException>(leftArg, rightArg);
+    }
+
+    protected CloseableIteration<BindingSet, QueryEvaluationException>
+        evaluateInternal(final Plan plan, final Iterable<BindingSet> iterable)
+            throws QueryEvaluationException
+    {
+        return evaluateInternal(plan.getArg(), iterable);
+    }
+
     protected CloseableIteration<BindingSet,QueryEvaluationException>
         evaluateInternal(TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException
@@ -222,7 +275,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         evaluateInternalDefault(TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException {
 
-        return new BatchingIteration(bIter, expr, 1);
+        return new BatchingIteration(bIter, expr, 20);
     }
 
     protected class BatchingIteration extends JoinExecutorBase<BindingSet> {
@@ -248,9 +301,10 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
                     addResult(evaluate(expr, leftIter.next()));
                     continue;
                 } else {
-                    CloseableIteration<BindingSet, QueryEvaluationException>
-                            materializedIter = createBatchIter(leftIter, blockSize);
-                    addResult(evaluateInternal(expr,materializedIter));
+                    //CloseableIteration<BindingSet, QueryEvaluationException>
+                    //        materializedIter = createBatchIter(leftIter, blockSize);
+                    Iterable<BindingSet> iterable = createIterable(leftIter, blockSize);
+                    addResult(evaluateInternal(expr,iterable));
                 }
             }
         }
@@ -271,6 +325,18 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
                     new CollectionIteration<BindingSet, QueryEvaluationException>(blockBindings);
 
             return materializedIter;
+        }
+
+        protected Iterable<BindingSet> createIterable(CloseableIteration<BindingSet, QueryEvaluationException> iter, int blockSize)
+            throws QueryEvaluationException
+        {
+            ArrayList<BindingSet> blockBindings = new ArrayList<BindingSet>(blockSize);
+            for (int i = 0; i < blockSize; i++) {
+                if (!iter.hasNext())
+                    break;
+                blockBindings.add(iter.next());
+            }
+            return blockBindings;
         }
 
     }
