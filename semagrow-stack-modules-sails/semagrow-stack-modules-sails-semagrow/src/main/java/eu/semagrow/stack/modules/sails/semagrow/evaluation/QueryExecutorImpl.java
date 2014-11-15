@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
 import eu.semagrow.stack.modules.api.evaluation.QueryExecutor;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.HashJoinIteration;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.InsertValuesBindingsIteration;
 import info.aduna.iteration.*;
 import org.openrdf.model.Literal;
@@ -11,6 +12,7 @@ import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.evaluation.federation.ServiceCrossProductIteration;
+import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedBooleanQuery;
@@ -36,6 +38,8 @@ public class QueryExecutorImpl implements QueryExecutor {
     private final Logger logger = LoggerFactory.getLogger(QueryExecutorImpl.class);
 
     private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
+
+    private boolean rowIdOpt = false;
 
     public void initialize() { }
 
@@ -128,17 +132,21 @@ public class QueryExecutorImpl implements QueryExecutor {
                 return result;
             }
 
+
             try {
                 result = evaluateInternal(endpoint, expr, bindings);
                 return result;
             } catch(QueryEvaluationException e) {
+                logger.debug("Failover to sequential iteration", e);
                 return new SequentialQueryIteration(endpoint, expr, bindings);
             }
 
-        } catch (MalformedQueryException e) {
+            //return new SequentialQueryIteration(endpoint, expr, bindings);
+
+        } /*catch (MalformedQueryException e) {
                 // this exception must not be silenced, bug in our code
                 throw new QueryEvaluationException(e);
-        }
+        }*/
         catch (QueryEvaluationException e) {
             Iterations.closeCloseable(result);
             throw e;
@@ -163,8 +171,16 @@ public class QueryExecutorImpl implements QueryExecutor {
 
         result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
 
-        if (relevant.isEmpty())
-            result = new InsertValuesBindingsIteration(result, bindings);
+        if (!relevant.isEmpty()) {
+            if (rowIdOpt)
+                result = new InsertValuesBindingsIteration(result, bindings);
+            else {
+                result = new HashJoinIteration(
+                                new CollectionIteration<BindingSet, QueryEvaluationException>(bindings),
+                                result,
+                                new HashSet<String>(relevant));
+            }
+        }
         else
             result = new ServiceCrossProductIteration(result, bindings);
 
@@ -230,7 +246,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.info("Sending to " + endpoint.stringValue() + " query " + sparqlQuery);
+        logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
         return query.evaluate();
     }
 
@@ -244,7 +260,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.info("Sending to " + endpoint.stringValue() + " query " + sparqlQuery);
+        logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
         return query.evaluate();
     }
 
@@ -268,7 +284,10 @@ public class QueryExecutorImpl implements QueryExecutor {
             return "";
 
         StringBuilder sb = new StringBuilder();
-        sb.append(" VALUES (?"+ InsertValuesBindingsIteration.INDEX_BINDING_NAME);
+        sb.append(" VALUES (");
+
+        if (rowIdOpt)
+            sb.append(" ?"+ InsertValuesBindingsIteration.INDEX_BINDING_NAME);
 
         for (String bName : relevantBindingNames) {
             sb.append(" ?").append(bName);
@@ -279,7 +298,11 @@ public class QueryExecutorImpl implements QueryExecutor {
         int rowIdx = 0;
         for (BindingSet b : bindings) {
             sb.append(" (");
-            sb.append("\"").append(rowIdx++).append("\" "); // identification of the row for post processing
+
+            if (rowIdOpt) {
+                sb.append("\"").append(rowIdx++).append("\" "); // identification of the row for post processing
+            }
+
             for (String bName : relevantBindingNames) {
                 appendValueAsString(sb, b.getValue(bName)).append(" ");
             }
@@ -331,8 +354,12 @@ public class QueryExecutorImpl implements QueryExecutor {
             throws Exception {
 
         Set<String> freeVars = computeVars(expr);
-        freeVars.add(InsertValuesBindingsIteration.INDEX_BINDING_NAME);
-        freeVars.removeAll(relevantBindingNames);
+
+        if (rowIdOpt)
+            freeVars.add(InsertValuesBindingsIteration.INDEX_BINDING_NAME);
+
+        //freeVars.removeAll(relevantBindingNames);
+
         return buildSPARQLQuery(expr,freeVars) + buildVALUESClause(bindings,relevantBindingNames);
     }
 

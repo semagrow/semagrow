@@ -14,8 +14,6 @@ import org.openrdf.query.algebra.TupleExpr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.management.QueryEval;
-
 /**
  * Created by angel on 6/11/14.
  */
@@ -56,9 +54,21 @@ public class QueryEvaluationImpl implements QueryEvaluation {
 
         protected class RateIterationImpl extends RateIteration<BindingSet,QueryEvaluationException> {
 
+
             public RateIterationImpl(Iteration<BindingSet, QueryEvaluationException> iter) {
                 super(iter);
             }
+
+
+            /*
+        @Override
+        protected Collection<QueryExecutionInterceptor> getQueryExecutorInterceptors() {
+        	Collection<QueryExecutionInterceptor> interceptors = super.getQueryExecutorInterceptors();
+        	//interceptors.add(new ObservingInterceptor());
+            //interceptors.add(new QueryLogInterceptor(QueryLogRecordFactoryImpl.getInstance(), getQFRHandler(), this.getMaterializationManager()));
+        	return interceptors;
+        }
+        */
 
             @Override
             public void handleClose() throws QueryEvaluationException {

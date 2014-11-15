@@ -1,5 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration;
 
+import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.ProvenanceValue;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
 import info.aduna.iteration.CloseableIteration;
@@ -56,6 +57,17 @@ public class HashJoinIteration extends LookAheadIteration<BindingSet, QueryEvalu
 
         joinAttributes = join.getLeftArg().getBindingNames();
         joinAttributes.retainAll(join.getRightArg().getBindingNames());
+
+        hashTable = null;
+    }
+
+    public HashJoinIteration(CloseableIteration<BindingSet, QueryEvaluationException> leftIter,
+                             CloseableIteration<BindingSet, QueryEvaluationException> rightIter,
+                             Set<String> attributes) {
+
+        this.leftIter = leftIter;
+        this.rightIter = rightIter;
+        this.joinAttributes = attributes;
 
         hashTable = null;
     }

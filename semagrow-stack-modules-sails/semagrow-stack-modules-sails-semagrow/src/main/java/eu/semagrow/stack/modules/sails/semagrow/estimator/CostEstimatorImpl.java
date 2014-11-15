@@ -76,9 +76,14 @@ public class CostEstimatorImpl implements CostEstimator {
         // totalCost = costLeftArgument + queries * costOfRightArgumentWithBinding
 
         long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg(), source);
+        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg(), source);
         long joinCard = cardinalityEstimator.getCardinality(join, source);
 
-        return getCost(join.getLeftArg(), source) + leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE) + joinCard * C_TRANSFER_TUPLE;
+        double commuCost =
+                leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE)
+                + joinCard * C_TRANSFER_TUPLE;
+
+        return getCost(join.getLeftArg(), source) + getCost(join.getRightArg(), source)  + commuCost;
     }
 
     public double getCost(HashJoin join, URI source) {

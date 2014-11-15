@@ -137,10 +137,11 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
                     plans.add(p);
                 }
 
-                TupleExpr expr = pushJoinRemote(p1, p2, ctx);
+                Plan expr = pushJoinRemote(p1, p2, ctx);
                 if (expr != null) {
-                    Plan p = createPlan(s,expr,ctx);
-                    plans.add(p);
+                    //Plan p = createPlan(s,expr,ctx);
+                    //plans.add(p);
+                    plans.add(expr);
                 }
             }
         }
@@ -155,24 +156,29 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         // group equivalent plans
         // get the minimum-cost plan for each equivalence class
 
-        Collection<Plan> bestPlans = new ArrayList<Plan>();
+        List<Plan> bestPlans = new ArrayList<Plan>();
 
         boolean inComparable;
 
         for (Plan candidatePlan : plans) {
             inComparable = true;
 
-            for (Plan plan : bestPlans) {
+
+            ListIterator<Plan> pIter = bestPlans.listIterator();
+            while (pIter.hasNext()) {
+                Plan plan = pIter.next();
+
                 int plan_comp = comparePlan(candidatePlan, plan);
 
                 if (plan_comp != 0)
                     inComparable = false;
 
                 if (plan_comp == -1) {
-                    bestPlans.remove(plan);
-                    bestPlans.add(candidatePlan);
+                    pIter.remove();
+                    pIter.add(candidatePlan);
                 }
             }
+
             // check if plan is incomparable with all best plans yet discovered.
             if (inComparable)
                 bestPlans.add(candidatePlan);
@@ -205,8 +211,15 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         //if (!e2.getSite().equals(Plan.LOCAL)) {
         // FIXME
         if (e2.getPlanId().size() == 1) {
-            expr = new BindJoin(e1, e2);
+
+            if (e1.getPlanId().size() == 2 && !e1.getSite().equals(Plan.LOCAL)) {
+                int i = 0;
+                i++;
+            }
+
+            expr = new BindJoin(enforceLocalSite(e1, ctx), enforceLocalSite(e2, ctx));
             plans.add(expr);
+
         }
 
 
@@ -219,12 +232,12 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         return plans;
     }
 
-    private TupleExpr pushJoinRemote(Plan e1, Plan e2, DecomposerContext ctx) {
+    private Plan pushJoinRemote(Plan e1, Plan e2, DecomposerContext ctx) {
 
         URI site1 = e1.getSite();
         URI site2 = e2.getSite();
 
-        if (site1.equals(site2) && site1 != Plan.LOCAL) {
+        if (site1.equals(site2) && !site1.equals(Plan.LOCAL)) {
             Set<TupleExpr> planid = new HashSet<TupleExpr>(e1.getPlanId());
             planid.addAll(e2.getPlanId());
             return createPlan(planid, new Join(e1,e2), site1, ctx);
@@ -270,7 +283,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
 
     private boolean isPlanComparable(Plan plan1, Plan plan2) {
         // FIXME: take plan properties into account
-        return true;
+        return plan1.getSite().equals(plan2.getSite());
     }
 
     /**
