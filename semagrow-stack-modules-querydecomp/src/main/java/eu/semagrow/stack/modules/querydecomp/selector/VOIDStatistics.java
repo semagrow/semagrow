@@ -198,7 +198,7 @@ public class VOIDStatistics extends VOIDBase implements Statistics {
         if (realData)
             return triples;
         else
-            return null;
+            return (long)0;
     }
 
     private Long getDistinctSubjects(Collection<Resource> datasets) {
