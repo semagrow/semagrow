@@ -8,8 +8,10 @@ import org.openrdf.repository.sail.SailRepository;
 /**
  * Created by angel on 6/10/14.
  */
-public class SemagrowSailRepository extends RepositoryWrapper implements SemagrowRepository {
-
+public class SemagrowSailRepository
+        extends RepositoryWrapper
+        implements SemagrowRepository
+{
     private SemagrowSail semagrowSail;
 
     public SemagrowSailRepository(SemagrowSail sail) {

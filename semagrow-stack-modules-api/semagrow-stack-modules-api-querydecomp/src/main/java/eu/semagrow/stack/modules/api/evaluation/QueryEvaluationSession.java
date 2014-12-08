@@ -6,6 +6,8 @@ package eu.semagrow.stack.modules.api.evaluation;
  */
 public interface QueryEvaluationSession {
 
+    SessionId getSessionId();
+
     EvaluationStrategy getEvaluationStrategy();
 
 }

@@ -1,6 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
-import eu.semagrow.stack.modules.api.evaluation.EvaluationStrategy;
+import eu.semagrow.stack.modules.api.evaluation.FederatedEvaluationStrategy;
 import eu.semagrow.stack.modules.api.evaluation.QueryExecutor;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.*;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.*;
@@ -16,18 +16,20 @@ import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
 import org.openrdf.query.impl.EmptyBindingSet;
 
-import javax.management.QueryEval;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Overrides the behavior of the default evaluation strategy implementation.
  * Functionality will be added for (potential) custom operators of the execution plan.
  * @author acharal@iit.demokritos.gr
  */
-public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl
-    implements EvaluationStrategy {
+public class EvaluationStrategyImpl
+    extends  org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl
+    implements FederatedEvaluationStrategy {
 
     private int batchSize = 10;
 
@@ -37,7 +39,9 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
 
     private QueryExecutor queryExecutor;
 
-    public EvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
+    private ExecutorService executor;
+
+    public EvaluationStrategyImpl(QueryExecutor queryExecutor, final ExecutorService executor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
             getStatements(Resource resource, URI uri, Value value, Resource... resources) throws QueryEvaluationException {
@@ -48,18 +52,25 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
                 return vf;
             }
         });
-        this.queryExecutor = queryExecutor;
+        setQueryExecutor(queryExecutor);
+        this.executor = executor;
     }
 
-    public EvaluationStrategyImpl(QueryExecutor queryExecutor)
+    public EvaluationStrategyImpl(QueryExecutor queryExecutor, final ExecutorService executor)
     {
-
-        this(queryExecutor,ValueFactoryImpl.getInstance());
+        this(queryExecutor, executor, ValueFactoryImpl.getInstance());
     }
 
     public void setIncludeProvenance(boolean includeProvenance) { this.includeProvenance = includeProvenance; }
 
     public boolean getIncludeProvenance() { return this.includeProvenance; }
+
+    public void setQueryExecutor(QueryExecutor executor) {
+        assert executor != null;
+        queryExecutor = executor;
+    }
+
+    public QueryExecutor getQueryExecutor() { return queryExecutor; }
 
     @Override
     public CloseableIteration<BindingSet, QueryEvaluationException>
@@ -102,7 +113,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
 
         for (URI endpoint : expr.getSources()) {
             CloseableIteration<BindingSet,QueryEvaluationException> iter =
-                    evaluateSourceDelayed(endpoint, innerExpr, bindings);
+                    evaluateSourceAsync(endpoint, innerExpr, bindings);
              results.add(iter);
         }
 
@@ -116,6 +127,20 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         return new DelayedIteration<BindingSet, QueryEvaluationException>() {
             @Override
             protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration()
+                    throws QueryEvaluationException {
+                return evaluateSource(endpoint, expr, bindings);
+            }
+        };
+    }
+
+
+    private CloseableIteration<BindingSet,QueryEvaluationException>
+        evaluateSourceAsync(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+            throws QueryEvaluationException {
+
+        return new AsyncCursor<BindingSet, QueryEvaluationException>(executor) {
+            @Override
+            protected Iteration<BindingSet, QueryEvaluationException> createIteration()
                     throws QueryEvaluationException {
                 return evaluateSource(endpoint, expr, bindings);
             }
@@ -141,7 +166,8 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
 
         // transform bindings to evaluate expr and then transform back the result.
         BindingSet bindingsT = bindings;
-        return new TransformIteration(this.evaluate(expr.getArg(), bindingsT));
+        //return new TransformIteration(this.evaluate(expr.getArg(), bindingsT));
+        return this.evaluate(expr.getArg(), bindingsT);
     }
 
     public CloseableIteration<BindingSet,QueryEvaluationException>
@@ -173,7 +199,10 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         evaluate(TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException
     {
-        return new BatchingIteration(bIter, expr, batchSize);
+        BatchingIteration iter = new BatchingIteration(bIter, expr, batchSize);
+        executor.execute(iter);
+        return iter;
+        //return new BatchingIteration(bIter, expr, batchSize);
     }
 
 
@@ -202,7 +231,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
 
         Iteration<BindingSet, QueryEvaluationException> leftArg, rightArg;
 
-        leftArg = new DelayedIteration<BindingSet, QueryEvaluationException>() {
+        leftArg = new AsyncCursor<BindingSet, QueryEvaluationException>(executor) {
 
             @Override
             protected Iteration<BindingSet, QueryEvaluationException> createIteration()
@@ -212,7 +241,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
             }
         };
 
-        rightArg = new DelayedIteration<BindingSet, QueryEvaluationException>() {
+        rightArg = new AsyncCursor<BindingSet, QueryEvaluationException>(executor) {
 
             @Override
             protected Iteration<BindingSet, QueryEvaluationException> createIteration()
@@ -265,20 +294,24 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
         evaluateInternal(Transform transform, CloseableIteration<BindingSet,QueryEvaluationException> bIter)
             throws QueryEvaluationException {
 
-        CloseableIteration<BindingSet,QueryEvaluationException> bIterT =
-                new TransformIteration(bIter);
+        //CloseableIteration<BindingSet,QueryEvaluationException> bIterT =
+//                new TransformIteration(bIter);
 
-        return new TransformIteration(evaluateInternal(transform.getArg(), bIterT));
+  //      return new TransformIteration(evaluateInternal(transform.getArg(), bIterT));
+        return bIter;
     }
 
     protected CloseableIteration<BindingSet,QueryEvaluationException>
         evaluateInternalDefault(TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException {
 
-        return new BatchingIteration(bIter, expr, 20);
+        BatchingIteration iter = new BatchingIteration(bIter, expr, batchSize);
+        executor.execute(iter);
+        return iter;
+        //return new BatchingIteration(bIter, expr, 20);
     }
 
-    protected class BatchingIteration extends JoinExecutorBase<BindingSet> {
+    protected class BatchingIteration extends JoinExecutorBase<BindingSet> implements Runnable {
 
         private final int blockSize;
         private TupleExpr expr;
@@ -290,7 +323,7 @@ public class EvaluationStrategyImpl extends org.openrdf.query.algebra.evaluation
 
             this.expr = expr;
             this.blockSize = blockSize;
-            run();
+            //run();
         }
 
         @Override

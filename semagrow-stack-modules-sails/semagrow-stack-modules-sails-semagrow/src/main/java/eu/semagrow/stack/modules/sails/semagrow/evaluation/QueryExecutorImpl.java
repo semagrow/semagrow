@@ -18,7 +18,6 @@ import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedBooleanQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
-import org.openrdf.queryrender.sparql.SparqlTupleExprRenderer;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -78,6 +77,8 @@ public class QueryExecutorImpl implements QueryExecutor {
 
                 final String sparqlQuery = buildSPARQLQuery(expr, freeVars);
 
+                result = askToIteration(endpoint, sparqlQuery, bindings, relevantBindings);
+                /*
                 result = new DelayedIteration<BindingSet, QueryEvaluationException>() {
                     @Override
                     protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration()
@@ -96,6 +97,7 @@ public class QueryExecutorImpl implements QueryExecutor {
                         }
                     }
                 };
+                */
 
             } else {
                 String sparqlQuery = buildSPARQLQuery(expr, freeVars);
@@ -110,6 +112,24 @@ public class QueryExecutorImpl implements QueryExecutor {
             throw e;
         } catch (Exception e) {
             Iterations.closeCloseable(result);
+            throw new QueryEvaluationException(e);
+        }
+    }
+
+    private CloseableIteration<BindingSet, QueryEvaluationException>
+        askToIteration(URI endpoint, String sparqlQuery, BindingSet bindings, BindingSet relevantBindings)
+        throws QueryEvaluationException
+    {
+        try {
+            boolean askAnswer = sendBooleanQuery(endpoint, sparqlQuery, relevantBindings);
+            if (askAnswer) {
+                return new SingletonIteration<BindingSet, QueryEvaluationException>(bindings);
+            } else {
+                return new EmptyIteration<BindingSet, QueryEvaluationException>();
+            }
+        } catch (QueryEvaluationException e) {
+            throw e;
+        } catch (Exception e) {
             throw new QueryEvaluationException(e);
         }
     }
@@ -132,7 +152,7 @@ public class QueryExecutorImpl implements QueryExecutor {
                 return result;
             }
 
-
+            /*
             try {
                 result = evaluateInternal(endpoint, expr, bindings);
                 return result;
@@ -140,18 +160,20 @@ public class QueryExecutorImpl implements QueryExecutor {
                 logger.debug("Failover to sequential iteration", e);
                 return new SequentialQueryIteration(endpoint, expr, bindings);
             }
-
-            //return new SequentialQueryIteration(endpoint, expr, bindings);
+            */
+            return new SequentialQueryIteration(endpoint, expr, bindings);
 
         } /*catch (MalformedQueryException e) {
                 // this exception must not be silenced, bug in our code
                 throw new QueryEvaluationException(e);
         }*/
         catch (QueryEvaluationException e) {
-            Iterations.closeCloseable(result);
+            if (result != null)
+                Iterations.closeCloseable(result);
             throw e;
         } catch (Exception e) {
-            Iterations.closeCloseable(result);
+            if (result != null)
+                Iterations.closeCloseable(result);
             throw new QueryEvaluationException(e);
         }
     }

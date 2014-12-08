@@ -1,0 +1,69 @@
+package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.base;
+
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.ParallelEvaluator;
+import info.aduna.iteration.CloseableIteration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import org.openrdf.query.BindingSet;
+import org.openrdf.query.QueryEvaluationException;
+import org.openrdf.query.algebra.BinaryTupleOperator;
+import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
+
+/**
+ *
+ * @author http://www.turnguard.com/turnguard
+ * @param <T>
+ */
+public class ParallelEvaluatorBase<T extends BinaryTupleOperator> implements ParallelEvaluator {
+
+    CompletableFuture<CloseableIteration<BindingSet,QueryEvaluationException>> cfLeft, cfRight = null;
+    CloseableIteration<BindingSet,QueryEvaluationException> leftArg, rightArg = null;
+    
+    public ParallelEvaluatorBase(EvaluationStrategy strategy, BindingSet bindings, T expr) throws QueryEvaluationException{ 
+        long s = System.currentTimeMillis();
+        System.out.println("ParallelEvaluatorBase left start at " + s);
+        cfLeft = CompletableFuture.supplyAsync(() ->  {
+            try {
+                return strategy.evaluate(expr.getLeftArg(), bindings);
+            } catch(QueryEvaluationException e){ 
+                return null;
+            }
+           }
+        );
+        System.out.println("ParallelEvaluatorBase left " + (System.currentTimeMillis()-s));
+        s = System.currentTimeMillis(); 
+        System.out.println("ParallelEvaluatorBase right start at " + s);
+        cfRight = CompletableFuture.supplyAsync(() ->  {  
+            try {
+                return strategy.evaluate(expr.getRightArg(), bindings);
+            } catch(QueryEvaluationException e){ 
+                cfRight.completeExceptionally(e); 
+                return null;
+            }
+           }
+        );   
+        System.out.println("ParallelEvaluatorBase right " + (System.currentTimeMillis()-s));                
+    }
+    
+
+    @Override
+    public CompletableFuture<CloseableIteration<BindingSet,QueryEvaluationException>> getLeftArgCompletableFuture(){
+        return this.cfLeft;
+    }
+    
+    @Override
+    public CompletableFuture<CloseableIteration<BindingSet,QueryEvaluationException>> getRightArgCompletableFuture(){
+        return this.cfRight;
+    }    
+    
+    @Override
+    public CloseableIteration<BindingSet,QueryEvaluationException> getLeftArg() throws InterruptedException, ExecutionException {
+        return this.cfLeft.get();
+    }
+
+    @Override
+    public CloseableIteration<BindingSet,QueryEvaluationException> getRightArg() throws InterruptedException, ExecutionException {
+        return this.cfRight.get();
+    }
+
+}

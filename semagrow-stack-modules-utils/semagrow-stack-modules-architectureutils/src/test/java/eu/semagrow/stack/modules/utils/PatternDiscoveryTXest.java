@@ -8,13 +8,13 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+import eu.semagrow.stack.modules.utils.patterndiscovery.impl.EquivalentURIImpl;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 
 import eu.semagrow.stack.modules.utils.patterndiscovery.PatternDiscovery;
 import eu.semagrow.stack.modules.utils.patterndiscovery.impl.PatternDiscoveryImpl;
 import eu.semagrow.stack.modules.api.transformation.EquivalentURI;
-import eu.semagrow.stack.modules.utils.resourceselector.impl.EquivalentURIImpl;
 
 /**
  * @author Giannis Mouchakis

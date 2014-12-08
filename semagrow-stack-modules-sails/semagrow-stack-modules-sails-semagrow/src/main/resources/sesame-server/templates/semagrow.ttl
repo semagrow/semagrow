@@ -1,0 +1,13 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix rep: <http://www.openrdf.org/config/repository#>.
+@prefix sr: <http://www.openrdf.org/config/repository/sail#>.
+@prefix sail: <http://www.openrdf.org/config/sail#>.
+
+
+
+[] a rep:Repository ;
+    rep:repositoryId "{%Repository Id|semagrow%};
+    rdfs:label "%{Repository title|Semagrow Repository}%";
+    rep:repositoryImpl [
+        rep:repositoryType "semagrow:SemagrowRepository" ;
+    ].

@@ -6,7 +6,7 @@ import org.openrdf.query.algebra.QueryModelVisitor;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.UnaryTupleOperator;
 
-import java.util.Set;
+import java.util.*;
 
 /**
  * Created by angel on 9/30/14.
@@ -26,6 +26,8 @@ public class Plan extends UnaryTupleOperator {
     private Ordering ordering;
 
     private URI site;
+
+    private Map<String, Collection<URI>> schemas = new HashMap<String, Collection<URI>>();
 
     public Plan(TupleExpr arg) {
         super(arg);
@@ -53,6 +55,17 @@ public class Plan extends UnaryTupleOperator {
     public URI getSite() { return site; }
 
     public void setSite(URI site) { this.site = site; }
+
+    public Collection<URI> getSchemas(String var) {
+        if (schemas.containsKey(var))
+            return schemas.get(var);
+
+        return Collections.emptySet();
+    }
+
+    public void setSchemas(String var, Collection<URI> varSchemas) {
+        this.schemas.put(var, varSchemas);
+    }
 
     public Ordering getOrdering() { return ordering; }
 

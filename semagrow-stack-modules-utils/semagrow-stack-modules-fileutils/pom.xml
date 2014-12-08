@@ -4,12 +4,12 @@
   <parent>
     <artifactId>semagrow-stack-modules-utils</artifactId>
     <groupId>eu.semagrow.stack.modules</groupId>
-    <version>1.0.0</version>
+    <version>1.3.0</version>
   </parent>
 
   <groupId>eu.semagrow.stack.modules</groupId>
   <artifactId>semagrow-stack-modules-fileutils</artifactId>
-  <version>1.0.0</version>
+  <version>1.3.0</version>
   <packaging>jar</packaging>
 
   <name>semagrow-stack-modules-fileutils</name>

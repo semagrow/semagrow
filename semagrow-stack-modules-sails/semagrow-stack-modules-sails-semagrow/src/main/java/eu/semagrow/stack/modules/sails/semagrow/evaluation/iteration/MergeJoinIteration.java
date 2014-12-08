@@ -2,6 +2,8 @@ package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration;
 
 import eu.semagrow.stack.modules.sails.semagrow.algebra.ProvenanceValue;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
+//import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.ParallelEvaluator;
+//import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.base.ParallelEvaluatorBase;
 import info.aduna.iteration.CloseableIteration;
 import info.aduna.iteration.EmptyIteration;
 import info.aduna.iteration.LookAheadIteration;
@@ -13,6 +15,8 @@ import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Created by angel on 9/26/14.
@@ -37,18 +41,30 @@ public class MergeJoinIteration extends LookAheadIteration<BindingSet, QueryEval
 
     private CloseableIteration<BindingSet,QueryEvaluationException> bufIter;
 
+    //private ParallelEvaluator evaluator = null;
+    
     public MergeJoinIteration(Comparator<BindingSet> comparator,
                               EvaluationStrategy evaluationStrategy,
                               Join join, BindingSet bindings)
             throws QueryEvaluationException {
 
         this.comparator = comparator;
-
-        leftIter  = evaluationStrategy.evaluate(join.getLeftArg(), bindings);
+        /*
+        evaluator = new ParallelEvaluatorBase(evaluationStrategy, bindings, join);        
+        CompletableFuture cfLeft = evaluator.getLeftArgCompletableFuture();
+        CompletableFuture cfRight = evaluator.getRightArgCompletableFuture();
+        CompletableFuture.allOf(cfLeft,cfRight).thenRun(()->{
+            joinAttributes = join.getLeftArg().getBindingNames();
+            joinAttributes.retainAll(join.getRightArg().getBindingNames());
+            try {
+                leftIter = (CloseableIteration<BindingSet, QueryEvaluationException>) cfLeft.get();
+                rightIter = (CloseableIteration<BindingSet, QueryEvaluationException>) cfRight.get();                
+            } catch ( InterruptedException | ExecutionException ex) {}
+        });
+        */
+        leftIter = evaluationStrategy.evaluate(join.getLeftArg(), bindings);
         rightIter = evaluationStrategy.evaluate(join.getRightArg(), bindings);
         bufIter = new EmptyIteration<BindingSet, QueryEvaluationException>();
-        joinAttributes = join.getLeftArg().getBindingNames();
-        joinAttributes.retainAll(join.getRightArg().getBindingNames());
 
         leftBuf = new LinkedList<BindingSet>();
         rightBuf = new LinkedList<BindingSet>();

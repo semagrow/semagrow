@@ -3,6 +3,8 @@ package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.ProvenanceValue;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
+//import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.ParallelEvaluator;
+//import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.base.ParallelEvaluatorBase;
 import info.aduna.iteration.CloseableIteration;
 import info.aduna.iteration.LookAheadIteration;
 import org.openrdf.query.Binding;
@@ -18,6 +20,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+//import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 /**
  * Reimplementation of the BottomUpIterator that is provenance-aware
@@ -29,7 +33,7 @@ public class HashJoinIteration extends LookAheadIteration<BindingSet, QueryEvalu
 	 * Variables *
 	 *-----------*/
 
-    private final CloseableIteration<BindingSet, QueryEvaluationException> leftIter;
+    private CloseableIteration<BindingSet, QueryEvaluationException> leftIter;
 
     private volatile CloseableIteration<BindingSet, QueryEvaluationException> rightIter;
 
@@ -45,6 +49,8 @@ public class HashJoinIteration extends LookAheadIteration<BindingSet, QueryEvalu
 
     private List<BindingSet> hashTableValues;
 
+    //private ParallelEvaluator evaluator = null;
+    
 	/*--------------*
 	 * Constructors *
 	 *--------------*/
@@ -52,12 +58,11 @@ public class HashJoinIteration extends LookAheadIteration<BindingSet, QueryEvalu
     public HashJoinIteration(EvaluationStrategy strategy, Join join, BindingSet bindings)
             throws QueryEvaluationException
     {
+        //evaluator = new ParallelEvaluatorBase(strategy, bindings, join);
         leftIter = strategy.evaluate(join.getLeftArg(), bindings);
         rightIter = strategy.evaluate(join.getRightArg(), bindings);
-
         joinAttributes = join.getLeftArg().getBindingNames();
-        joinAttributes.retainAll(join.getRightArg().getBindingNames());
-
+        joinAttributes.retainAll(join.getRightArg().getBindingNames());        
         hashTable = null;
     }
 
@@ -81,6 +86,15 @@ public class HashJoinIteration extends LookAheadIteration<BindingSet, QueryEvalu
             throws QueryEvaluationException
     {
         if (hashTable == null) {
+            /*
+            if (leftIter == null || rightIter == null) {
+                try {
+                    leftIter = (CloseableIteration<BindingSet, QueryEvaluationException>) evaluator.getLeftArg();
+                    rightIter = (CloseableIteration<BindingSet, QueryEvaluationException>) evaluator.getRightArg();
+                } catch (InterruptedException | ExecutionException ex) {
+                }
+            }
+            */
             setupHashTable();
         }
 

@@ -9,4 +9,12 @@ import org.openrdf.repository.RepositoryException;
 public interface SemagrowRepository extends Repository {
 
     SemagrowRepositoryConnection getConnection() throws RepositoryException;
+
+    /*
+    void setSourceSelector(SourceSelector sourceSelector);
+
+    SourceSelector getSourceSelector();
+
+    void setQueryEvaluation(FederatedQueryEvaluation queryEvaluation);
+    */
 }

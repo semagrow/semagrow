@@ -111,9 +111,13 @@ public class RestrictiveSourceSelector extends SourceSelectorWrapper {
             return l;
         }
 
-        public StatementPattern originalPattern() { return metadata.originalPattern(); }
+        public StatementPattern original() { return metadata.original(); }
 
-        public boolean requiresTransform() { return metadata.requiresTransform(); }
+        public StatementPattern target() { return metadata.target(); }
+
+        public Collection<URI> getSchema(String var) { return metadata.getSchema(var); }
+
+        public boolean isTransformed() { return metadata.isTransformed(); }
 
         public double getSemanticProximity() { return metadata.getSemanticProximity(); }
     }

@@ -27,6 +27,7 @@ public class CONSTANTS {
         public static final String PARAM_QUERY = "query";
         public static final String PARAM_QUERY_TXT = "query_txt";
         public static final String PARAM_ACCEPT = "accept";
+        public static final String PARAM_TEMPLATE = "template";
         
         public static class ROLES {
             public static final String ROLE_SEMAGROW_ADMIN = "SemaGrowAdmin";

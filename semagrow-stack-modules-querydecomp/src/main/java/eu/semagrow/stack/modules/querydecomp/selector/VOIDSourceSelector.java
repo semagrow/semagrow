@@ -108,24 +108,46 @@ public class VOIDSourceSelector extends VOIDBase
     }
 
     private SourceMetadata createSourceMetadata(final StatementPattern pattern, final URI endpoint) {
-        return new SourceMetadata() {
-            public List<URI> getEndpoints() {
-                List<URI> endpoints = new ArrayList<URI>(1);
-                endpoints.add(endpoint);
-                return endpoints;
-            }
 
-            public StatementPattern originalPattern() {
-                return pattern;
-            }
+        return new SourceMetadataImpl(pattern, endpoint);
+    }
 
-            public boolean requiresTransform() {
-                return false;
-            }
 
-            public double getSemanticProximity() {
-                return 0;
+    private class SourceMetadataImpl implements SourceMetadata {
+
+        private List<URI> endpoints = new LinkedList<URI>();
+
+        private StatementPattern pattern;
+
+        private Map<String, Collection<URI>> schemaMappings;
+
+        public SourceMetadataImpl(StatementPattern pattern, URI endpoint) {
+            this.pattern = pattern;
+            endpoints.add(endpoint);
+            schemaMappings = new HashMap<String, Collection<URI>>();
+        }
+
+        public List<URI> getEndpoints() { return endpoints; }
+
+        public StatementPattern original() {
+            return pattern;
+        }
+
+        public StatementPattern target() { return pattern; }
+
+        public boolean isTransformed() {
+            return false;
+        }
+
+        public double getSemanticProximity() {
+            return 1.0;
+        }
+
+        public Collection<URI> getSchema(String var) {
+            if (schemaMappings.containsKey(var)) {
+                return schemaMappings.get(var);
             }
-        };
+            return Collections.emptySet();
+        }
     }
 }

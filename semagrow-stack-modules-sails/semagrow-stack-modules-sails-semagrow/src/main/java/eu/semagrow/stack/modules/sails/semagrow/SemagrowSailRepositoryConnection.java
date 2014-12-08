@@ -19,7 +19,8 @@ public class SemagrowSailRepositoryConnection extends RepositoryConnectionWrappe
         implements SemagrowRepositoryConnection {
 
     public SemagrowSailRepositoryConnection(SemagrowSailRepository repository,
-                                            RepositoryConnection baseConnection) {
+                                            RepositoryConnection baseConnection)
+    {
         super(repository, baseConnection);
     }
 

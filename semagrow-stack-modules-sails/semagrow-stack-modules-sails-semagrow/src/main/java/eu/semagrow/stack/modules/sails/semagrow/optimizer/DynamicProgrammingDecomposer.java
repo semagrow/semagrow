@@ -80,9 +80,10 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
             List<Plan> sourcePlans = new LinkedList<Plan>();
 
             for (SourceMetadata sourceMetadata : sources) {
-                URI source = sourceMetadata.getEndpoints().get(0);
+                //URI source = sourceMetadata.getEndpoints().get(0);
+                //Plan p1 = createPlan(exprLabel, sourceMetadata.target(), source, ctx);
                 // FIXME: Don't use always the first source.
-                Plan p1 = createPlan(exprLabel, e.clone(), source, ctx);
+                Plan p1 = createPlan(exprLabel, sourceMetadata.target().clone(), sourceMetadata, ctx);
                 sourcePlans.add(p1);
             }
 
@@ -217,6 +218,7 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
                 i++;
             }
 
+
             expr = new BindJoin(enforceLocalSite(e1, ctx), enforceLocalSite(e2, ctx));
             plans.add(expr);
 
@@ -280,6 +282,25 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         updatePlan(p, ctx);
         return p;
     }
+
+    protected Plan createPlan(Set<TupleExpr> planId, TupleExpr innerExpr,
+                              SourceMetadata metadata, DecomposerContext ctx)
+    {
+        URI source = metadata.getEndpoints().get(0);
+        Plan p = new Plan(planId, innerExpr);
+        p.setSite(source);
+
+        Set<String> varNames = innerExpr.getBindingNames();
+        for (String varName : varNames) {
+            Collection<URI> schemas = metadata.getSchema(varName);
+            if (!schemas.isEmpty())
+                p.setSchemas(varName, schemas);
+        }
+
+        updatePlan(p, ctx);
+        return p;
+    }
+
 
     private boolean isPlanComparable(Plan plan1, Plan plan2) {
         // FIXME: take plan properties into account

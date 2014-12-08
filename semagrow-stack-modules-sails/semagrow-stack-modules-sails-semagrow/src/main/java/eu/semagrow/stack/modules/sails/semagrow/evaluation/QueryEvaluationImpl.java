@@ -1,15 +1,19 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation;
 
-import eu.semagrow.stack.modules.api.evaluation.EvaluationStrategy;
-import eu.semagrow.stack.modules.api.evaluation.QueryEvaluation;
-import eu.semagrow.stack.modules.api.evaluation.QueryEvaluationSession;
-import eu.semagrow.stack.modules.api.evaluation.QueryExecutor;
-import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.RateIteration;
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.Iteration;
+import java.util.Collection;
+import java.util.concurrent.ExecutorService;
+
+import eu.semagrow.stack.modules.api.evaluation.*;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.base.FederatedQueryEvaluationSessionImplBase;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.file.MaterializationManager;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.interceptors.InterceptingQueryExecutorWrapper;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.interceptors.QueryExecutionInterceptor;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.monitoring.querylog.QueryLogHandler;
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.monitoring.querylog.QueryLogInterceptor;
+
+import eu.semagrow.stack.modules.sails.semagrow.evaluation.monitoring.querylog.impl.QueryLogRecordFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
-import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.TupleExpr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,50 +21,71 @@ import org.slf4j.LoggerFactory;
 /**
  * Created by angel on 6/11/14.
  */
-public class QueryEvaluationImpl implements QueryEvaluation {
+public class QueryEvaluationImpl implements FederatedQueryEvaluation {
 
     protected final Logger logger = LoggerFactory.getLogger(QueryEvaluationImpl.class);
 
-    public QueryEvaluationSession createSession(TupleExpr expr, Dataset dataset, BindingSet bindings) {
-        return new QueryEvaluationSessionImpl();
+    private MaterializationManager materializationManager;
+
+    private QueryLogHandler queryLogHandler;
+
+    private ExecutorService executorService;
+
+    public QueryEvaluationImpl(MaterializationManager manager,
+                               QueryLogHandler queryLogHandler,
+                               ExecutorService executor) {
+        this.materializationManager = manager;
+        this.queryLogHandler = queryLogHandler;
+        this.executorService = executor;
     }
 
-    protected class QueryEvaluationSessionImpl extends QueryEvaluationSessionImplBase {
+    public MaterializationManager getMaterializationManager() {
+        return materializationManager;
+    }
 
-        protected EvaluationStrategy getEvaluationStrategyInternal() {
-            QueryExecutor queryExecutor = getQueryExecutor();
-            EvaluationStrategy evaluationStrategy = new EvaluationStrategyImpl(queryExecutor);
-            evaluationStrategy = new MonitoringEvaluationStrategy(evaluationStrategy);
-            return evaluationStrategy;
+    public QueryLogHandler getQFRHandler() {
+        return queryLogHandler;
+    }
+
+
+    public FederatedQueryEvaluationSession
+        createSession(TupleExpr expr, Dataset dataset, BindingSet bindings)
+    {
+        return new FederatedQueryEvaluationSessionImpl(executorService);
+    }
+
+    /**
+     * Handles the lifetime of EvaluationStrategy and QueryExecutor
+     * Also handles the injection of available interceptors
+     */
+    protected class FederatedQueryEvaluationSessionImpl
+            extends FederatedQueryEvaluationSessionImplBase {
+
+
+        private ExecutorService executor;
+
+        public FederatedQueryEvaluationSessionImpl(ExecutorService executor) {
+            this.executor = executor;
         }
 
-        protected QueryExecutor getQueryExecutor() { return new QueryExecutorImpl(); }
-
-        protected class MonitoringEvaluationStrategy extends EvaluationStrategyWrapper {
-
-            public MonitoringEvaluationStrategy(EvaluationStrategy wrapped) {
-                super(wrapped);
-            }
-
-            @Override
-            public CloseableIteration<BindingSet,QueryEvaluationException>
-                evaluate(TupleExpr expr, BindingSet bindings)
-                    throws QueryEvaluationException {
-
-                CloseableIteration<BindingSet,QueryEvaluationException> result = super.evaluate(expr,bindings);
-                return new RateIterationImpl(result);
-            }
+        protected FederatedEvaluationStrategy getEvaluationStrategyInternal() {
+            return new InterceptingEvaluationStrategyImpl(getQueryExecutor(), getExecutor());
         }
 
-        protected class RateIterationImpl extends RateIteration<BindingSet,QueryEvaluationException> {
+        protected QueryExecutor getQueryExecutorInternal() {
+            return new InterceptingQueryExecutorWrapper(new QueryExecutorImpl());
+        }
 
+        protected ExecutorService getExecutor() { return executor; }
 
-            public RateIterationImpl(Iteration<BindingSet, QueryEvaluationException> iter) {
-                super(iter);
-            }
+        protected MaterializationManager getMaterializationManager() {
+            return QueryEvaluationImpl.this.getMaterializationManager();
+        }
 
-
-            /*
+        protected QueryLogHandler getQFRHandler() {
+            return QueryEvaluationImpl.this.getQFRHandler();
+        }
+        
         @Override
         protected Collection<QueryExecutionInterceptor> getQueryExecutorInterceptors() {
         	Collection<QueryExecutionInterceptor> interceptors = super.getQueryExecutorInterceptors();
@@ -68,16 +93,11 @@ public class QueryEvaluationImpl implements QueryEvaluation {
             //interceptors.add(new QueryLogInterceptor(QueryLogRecordFactoryImpl.getInstance(), getQFRHandler(), this.getMaterializationManager()));
         	return interceptors;
         }
-        */
 
-            @Override
-            public void handleClose() throws QueryEvaluationException {
-                super.handleClose();
-                logger.info("Total rows: {}", this.getCount());
-                logger.info("Total execution time: {}", this.getRunningTime());
-                logger.info("Average consumption rate: {}", this.getAverageConsumedRate());
-                logger.info("Average production  rate: {}", this.getAverageProducedRate());
-            }
+        @Override
+        public void closeSession(){
+            logger.debug("Session " + getSessionId() + " closed");
+
         }
     }
 }

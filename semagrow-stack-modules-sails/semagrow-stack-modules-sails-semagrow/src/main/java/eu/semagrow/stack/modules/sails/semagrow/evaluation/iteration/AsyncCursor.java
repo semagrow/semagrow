@@ -1,37 +1,49 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration;
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.LookAheadIteration;
+import info.aduna.iteration.*;
 import org.openrdf.query.QueryEvaluationException;
 
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 /**
  * Created by angel on 6/5/14.
  */
-public class AsyncCursor<E> extends LookAheadIteration<E,QueryEvaluationException> {
+public abstract class AsyncCursor<E,X extends Exception> extends CloseableIterationBase<E,X> {
 
-    protected Future<CloseableIteration<E, QueryEvaluationException>> future;
-    protected CloseableIteration<E, QueryEvaluationException> result;
+    protected Future<Iteration<E, X>> future;
 
-    public AsyncCursor(Future<CloseableIteration<E, QueryEvaluationException>> future) {
-        this.future = future;
+    private Iteration<? extends E, ? extends X> iter;
+
+    //public AsyncCursor(Future<CloseableIteration<E, QueryEvaluationException>> future) {
+    //    this.future = future;
+    //}
+
+    public AsyncCursor(ExecutorService executorService) {
+
+        future = executorService.submit(new Callable<Iteration<E, X>>() {
+            @Override
+            public Iteration<E,X> call() throws Exception {
+                return createIteration();
+            }
+        });
+
     }
 
+    protected abstract Iteration<E, X>
+        createIteration() throws X;
+
     @Override
-    protected void handleClose() throws QueryEvaluationException {
-        if (result != null)
-            result.close();
+    protected void handleClose() throws X {
+        if (iter != null)
+            Iterations.closeCloseable(iter);
         else
             future.cancel(true);
     }
 
-    @Override
-    protected E getNextElement() throws QueryEvaluationException {
+    public boolean hasNext() throws X {
         try {
-            if (result == null)
-                result = future.get();
+            if (iter == null)
+                iter = future.get();
 
         } catch (InterruptedException e) {
             e.printStackTrace();
@@ -39,9 +51,35 @@ public class AsyncCursor<E> extends LookAheadIteration<E,QueryEvaluationExceptio
             e.printStackTrace();
         }
 
-        if (result != null && result.hasNext())
-            return result.next();
+        if (iter != null)
+            return iter.hasNext();
+
+        return false;
+    }
+
+    public E next() throws X {
+        try {
+            if (iter == null)
+                iter = future.get();
+
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+
+        if (iter != null && iter.hasNext())
+            return iter.next();
         else
             return null;
+    }
+
+    public void remove() throws X {
+
+        if (iter == null || isClosed()) {
+            throw new IllegalStateException();
+        }
+
+        iter.remove();
     }
 }

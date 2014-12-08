@@ -2,9 +2,7 @@ package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.api.decomposer.QueryDecomposer;
 import eu.semagrow.stack.modules.api.decomposer.QueryDecompositionException;
-import eu.semagrow.stack.modules.api.evaluation.EvaluationStrategy;
-import eu.semagrow.stack.modules.api.evaluation.QueryEvaluation;
-import eu.semagrow.stack.modules.api.evaluation.QueryEvaluationSession;
+import eu.semagrow.stack.modules.api.evaluation.*;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.EvaluationStrategyImpl;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.QueryExecutorImpl;
 import info.aduna.iteration.CloseableIteration;
@@ -34,26 +32,23 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
     private final Logger logger = LoggerFactory.getLogger(SemagrowSailConnection.class);
 
-    private SailConnection metadataConnection;
-
     private SemagrowSail semagrowSail;
 
-    private QueryEvaluation queryEvaluation;
+    private FederatedQueryEvaluation queryEvaluation;
 
-    private static final URI METADATA_GRAPH = ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
+    private static final URI METADATA_GRAPH =
+            ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
 
-    public SemagrowSailConnection(SemagrowSail sail, SailConnection baseConn)
+    public SemagrowSailConnection(SemagrowSail sail)
     {
         super(sail);
-        ValueFactory vf = sail.getValueFactory();
-        metadataConnection = baseConn;
         queryEvaluation = sail.getQueryEvaluation();
         this.semagrowSail = sail;
     }
 
     @Override
     protected void closeInternal() throws SailException {
-        metadataConnection.close();
+
     }
 
     /**
@@ -135,9 +130,6 @@ public class SemagrowSailConnection extends SailConnectionBase {
                          Collection<URI> excludeSources)
             throws SailException {
 
-        if (redirectToBase(tupleExpr, dataset, bindings, b))
-            return metadataConnection.evaluate(tupleExpr, null, bindings, b);
-
         logger.debug("Starting decomposition of " + tupleExpr.toString());
 
         TupleExpr decomposed = null;
@@ -147,6 +139,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
             throw new SailException(e);
         }
         logger.debug("Query decomposed to " + decomposed.toString());
+        logger.info("Decomposed query: " + decomposed.toString());
 
         return evaluateOnly(decomposed, dataset, bindings, b, p);
     }
@@ -160,9 +153,9 @@ public class SemagrowSailConnection extends SailConnectionBase {
         try {
             logger.info("Query evaluation started.");
 
-            QueryEvaluationSession session = queryEvaluation.createSession(tupleExpr, dataset, bindings);
+            FederatedQueryEvaluationSession session = queryEvaluation.createSession(tupleExpr, dataset, bindings);
 
-            EvaluationStrategy evaluationStrategy = session.getEvaluationStrategy();
+            FederatedEvaluationStrategy evaluationStrategy = session.getEvaluationStrategy();
 
             evaluationStrategy.setIncludeProvenance(p);
 
@@ -188,25 +181,13 @@ public class SemagrowSailConnection extends SailConnectionBase {
                                Collection<URI> includeOnlySources, Collection<URI> excludeSources)
             throws QueryDecompositionException {
 
-        if (!redirectToBase(tupleExpr, dataset, bindings, false)) {
-            QueryOptimizer optimizer = semagrowSail.getOptimizer();
-            optimizer.optimize(tupleExpr, dataset, bindings);
-            QueryDecomposer decomposer = semagrowSail.getDecomposer(includeOnlySources, excludeSources);
-            tupleExpr = new QueryRoot(tupleExpr);
-            decomposer.decompose(tupleExpr, dataset, bindings);
-        }
+        QueryOptimizer optimizer = semagrowSail.getOptimizer();
+        optimizer.optimize(tupleExpr, dataset, bindings);
+        QueryDecomposer decomposer = semagrowSail.getDecomposer(includeOnlySources, excludeSources);
+        tupleExpr = new QueryRoot(tupleExpr);
+        decomposer.decompose(tupleExpr, dataset, bindings);
+
         return tupleExpr;
-    }
-
-    protected boolean redirectToBase(TupleExpr tupleExpr,
-                               Dataset dataset,
-                               BindingSet bindings,
-                               boolean b) {
-
-        if (dataset != null && dataset.getDefaultGraphs() != null) {
-            return dataset.getDefaultGraphs().contains(METADATA_GRAPH);
-        }
-        return false;
     }
 
     @Override
@@ -242,6 +223,16 @@ public class SemagrowSailConnection extends SailConnectionBase {
     }
 
     @Override
+    protected void addStatementInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+
+    }
+
+    @Override
+    protected void removeStatementsInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+
+    }
+
+    @Override
     protected CloseableIteration<? extends Namespace, SailException> getNamespacesInternal() throws SailException {
         return null;
     }
@@ -249,19 +240,6 @@ public class SemagrowSailConnection extends SailConnectionBase {
     @Override
     protected String getNamespaceInternal(String s) throws SailException {
         return null;
-    }
-
-
-    @Override
-    protected void addStatementInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
-        //throw new SailReadOnlyException("");
-        metadataConnection.addStatement(resource,uri,value,resources);
-    }
-
-    @Override
-    protected void removeStatementsInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
-        //throw new SailReadOnlyException("");
-        metadataConnection.removeStatements(resource,uri,value,resources);
     }
 
     @Override

@@ -5,11 +5,11 @@
   <parent>
     <groupId>eu.semagrow.stack.modules</groupId>
     <artifactId>semagrow-stack-modules-sails</artifactId>
-    <version>1.0.0</version>
+    <version>1.3.0</version>
   </parent>
   <groupId>eu.semagrow.stack.modules</groupId>
   <artifactId>semagrow-stack-modules-sails-powder</artifactId>
-  <version>1.0.0</version>
+  <version>1.3.0</version>
   <name>semagrow-stack-modules-sails-powder</name>
 
 
@@ -17,7 +17,7 @@
       <dependency>
           <groupId>eu.semagrow.stack.modules</groupId>
           <artifactId>semagrow-stack-modules-vocabulary</artifactId>
-          <version>1.0.0</version>
+          <version>1.3.0</version>
       </dependency>
   </dependencies>
 </project>
