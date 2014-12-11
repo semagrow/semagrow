@@ -60,6 +60,7 @@ public class SourceSelectorWithQueryTransform extends SourceSelectorWrapper {
                 for (FuzzyEntry<Var> oVar1 : transformVar(oVar)) {
                     StatementPattern p = new StatementPattern(sVar1.getElem(), pVar1.getElem(), oVar1.getElem());
                     if (!p.equals(pattern)) {
+
                         double prox = Math.min(Math.min(sVar1.getProximity(), pVar1.getProximity()), oVar1.getProximity());
                         transformedPatterns.add(new FuzzyEntry<StatementPattern>(p, prox));
                     }
