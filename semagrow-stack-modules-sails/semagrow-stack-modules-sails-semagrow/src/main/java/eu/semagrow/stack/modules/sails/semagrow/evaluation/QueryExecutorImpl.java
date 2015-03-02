@@ -269,7 +269,11 @@ public class QueryExecutorImpl implements QueryExecutor {
             query.setBinding(b.getName(), b.getValue());
 
         logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
-        return query.evaluate();
+        return closeConnAfter(conn, query.evaluate());
+    }
+
+    private static <E,X extends Exception> CloseableIteration<E,X> closeConnAfter(RepositoryConnection conn, CloseableIteration<E,X> iter) {
+        return new CloseConnAfterIteration<E,X>(conn,iter);
     }
 
     protected boolean
@@ -283,7 +287,9 @@ public class QueryExecutorImpl implements QueryExecutor {
             query.setBinding(b.getName(), b.getValue());
 
         logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
-        return query.evaluate();
+        boolean answer = query.evaluate();
+        conn.close();
+        return answer;
     }
 
     /**
@@ -467,4 +473,31 @@ public class QueryExecutorImpl implements QueryExecutor {
             }
         }
     }
+
+
+
+    private static class CloseConnAfterIteration<E,X extends Exception> extends IterationWrapper<E,X> {
+
+        private RepositoryConnection conn;
+
+        public CloseConnAfterIteration(RepositoryConnection conn, Iteration<? extends E, ? extends X> iter) {
+            super(iter);
+            assert conn != null;
+            this.conn = conn;
+        }
+
+        @Override
+        public void handleClose() throws X {
+            super.handleClose();
+
+            try {
+                if (conn != null && conn.isOpen())
+                    conn.close();
+            } catch (RepositoryException e) {
+
+            }
+        }
+    }
+
+
 }
