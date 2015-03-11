@@ -60,7 +60,7 @@ public class QueryExecutorImpl implements QueryExecutor {
             repo.initialize();
 
         RepositoryConnection conn = repo.getConnection();
-        logger.debug("Connection %s started, currently open %d", conn.toString(), countconn);
+        logger.debug("Connection " + conn.toString() +" started, currently open " + countconn);
         countconn++;
         return conn;
     }
@@ -500,7 +500,8 @@ public class QueryExecutorImpl implements QueryExecutor {
             try {
                 if (conn != null && conn.isOpen()) {
                     conn.close();
-                    impl.logger.debug("Connection %s closed, currently open = %d", conn.toString(), impl.countconn);
+                    impl.logger.debug("Connection " + conn.toString() + " closed, currently open "+ impl.countconn);
+                    impl.countconn--;
                 }
             } catch (RepositoryException e) {
 
