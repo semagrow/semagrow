@@ -40,6 +40,8 @@ public class QueryExecutorImpl implements QueryExecutor {
 
     private boolean rowIdOpt = false;
 
+    private int countconn = 0;
+
     public void initialize() { }
 
     public void shutdown() { }
@@ -57,7 +59,10 @@ public class QueryExecutorImpl implements QueryExecutor {
         if (!repo.isInitialized())
             repo.initialize();
 
-        return repo.getConnection();
+        RepositoryConnection conn = repo.getConnection();
+        logger.debug("Connection %s started, currently open %d", conn.toString(), countconn);
+        countconn++;
+        return conn;
     }
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
@@ -269,11 +274,11 @@ public class QueryExecutorImpl implements QueryExecutor {
             query.setBinding(b.getName(), b.getValue());
 
         logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
-        return closeConnAfter(conn, query.evaluate());
+        return closeConnAfter(this, conn, query.evaluate());
     }
 
-    private static <E,X extends Exception> CloseableIteration<E,X> closeConnAfter(RepositoryConnection conn, CloseableIteration<E,X> iter) {
-        return new CloseConnAfterIteration<E,X>(conn,iter);
+    private static <E,X extends Exception> CloseableIteration<E,X> closeConnAfter(QueryExecutorImpl t, RepositoryConnection conn, CloseableIteration<E,X> iter) {
+        return new CloseConnAfterIteration<E,X>(t, conn,iter);
     }
 
     protected boolean
@@ -479,11 +484,13 @@ public class QueryExecutorImpl implements QueryExecutor {
     private static class CloseConnAfterIteration<E,X extends Exception> extends IterationWrapper<E,X> {
 
         private RepositoryConnection conn;
+        private QueryExecutorImpl impl;
 
-        public CloseConnAfterIteration(RepositoryConnection conn, Iteration<? extends E, ? extends X> iter) {
+        public CloseConnAfterIteration(QueryExecutorImpl impl, RepositoryConnection conn, Iteration<? extends E, ? extends X> iter) {
             super(iter);
             assert conn != null;
             this.conn = conn;
+            this.impl = impl;
         }
 
         @Override
@@ -491,8 +498,10 @@ public class QueryExecutorImpl implements QueryExecutor {
             super.handleClose();
 
             try {
-                if (conn != null && conn.isOpen())
+                if (conn != null && conn.isOpen()) {
                     conn.close();
+                    impl.logger.debug("Connection %s closed, currently open = %d", conn.toString(), impl.countconn);
+                }
             } catch (RepositoryException e) {
 
             }
