@@ -294,6 +294,8 @@ public class QueryExecutorImpl implements QueryExecutor {
         logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
         boolean answer = query.evaluate();
         conn.close();
+        logger.debug("Connection " + conn.toString() + " closed, currently open "+ countconn);
+        countconn--;
         return answer;
     }
 
@@ -472,7 +474,14 @@ public class QueryExecutorImpl implements QueryExecutor {
 
         @Override
         protected void handleBindings() throws QueryEvaluationException {
-            for (BindingSet b : bindings) {
+            for (final BindingSet b : bindings) {
+                /*
+                CloseableIteration<BindingSet,QueryEvaluationException> result = new DelayedIteration<BindingSet, QueryEvaluationException>() {
+                    @Override
+                    protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration() throws QueryEvaluationException {
+                        return evaluate(endpoint, expr, b);
+                    }
+                };*/
                 CloseableIteration<BindingSet,QueryEvaluationException> result = evaluate(endpoint, expr, b);
                 addResult(result);
             }

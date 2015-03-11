@@ -336,8 +336,16 @@ public class EvaluationStrategyImpl
                 } else {
                     //CloseableIteration<BindingSet, QueryEvaluationException>
                     //        materializedIter = createBatchIter(leftIter, blockSize);
-                    Iterable<BindingSet> iterable = createIterable(leftIter, blockSize);
-                    addResult(evaluateInternal(expr,iterable));
+                    final Iterable<BindingSet> iterable = createIterable(leftIter, blockSize);
+                    addResult(new DelayedIteration<BindingSet, QueryEvaluationException>() {
+                        @Override
+                        protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration()
+                                throws QueryEvaluationException
+                        {
+
+                            return evaluateInternal(expr,iterable);
+                        }
+                    });
                 }
             }
         }
