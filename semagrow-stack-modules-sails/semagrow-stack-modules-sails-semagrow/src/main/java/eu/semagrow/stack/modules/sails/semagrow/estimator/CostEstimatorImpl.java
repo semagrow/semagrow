@@ -17,11 +17,11 @@ public class CostEstimatorImpl implements CostEstimator {
 
     private CardinalityEstimator cardinalityEstimator;
 
-    private static int C_TRANSFER_TUPLE = 1;
-    private static int C_TRANSFER_QUERY = 5;
+    private static double C_TRANSFER_TUPLE = 0.001;
+    private static double C_TRANSFER_QUERY = 0.005;
 
-    private static int C_PROBE_TUPLE = 1;   //cost to probe a tuple against a hash table
-    private static int C_HASH_TUPLE = 3;    //cost to hash a tuple to a hash table
+    private static double C_PROBE_TUPLE = 0.001;   //cost to probe a tuple against a hash table
+    private static double C_HASH_TUPLE = 0.003;    //cost to hash a tuple to a hash table
 
     public CostEstimatorImpl(CardinalityEstimator cardinalityEstimator) {
         this.cardinalityEstimator = cardinalityEstimator;
@@ -46,7 +46,7 @@ public class CostEstimatorImpl implements CostEstimator {
         else if (expr instanceof Plan)
             return ((Plan)expr).getCost();
         else
-            return cardinalityEstimator.getCardinality(expr, source);
+            return cardinalityEstimator.getCardinality(expr, source)/1000;
     }
 
     public double getCost(SourceQuery expr, URI source) {

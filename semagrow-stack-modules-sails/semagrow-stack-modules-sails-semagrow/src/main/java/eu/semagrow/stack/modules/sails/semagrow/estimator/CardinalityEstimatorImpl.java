@@ -86,6 +86,9 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
 
         double t = card1 * card2 * sel;
         long tt = (long)t;
+        if (tt < 0)
+            return 0;
+
         return tt;
     }
 

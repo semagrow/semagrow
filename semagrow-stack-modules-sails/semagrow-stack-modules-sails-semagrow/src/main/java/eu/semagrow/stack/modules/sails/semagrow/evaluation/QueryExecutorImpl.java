@@ -273,7 +273,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
+        logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' ')+ " with bindings " + bindings.toString());
         return closeConnAfter(this, conn, query.evaluate());
     }
 
@@ -291,7 +291,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' '));
+        logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' ') + " with bindings " + bindings.toString());
         boolean answer = query.evaluate();
         conn.close();
         logger.debug("Connection " + conn.toString() + " closed, currently open "+ countconn);

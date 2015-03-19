@@ -128,6 +128,13 @@ public class DynamicProgrammingDecomposer implements QueryDecomposer {
         for (Plan p1 : plan1) {
             for (Plan p2 : plan2) {
 
+                Set<String> s1 = p1.getBindingNames();
+                Set<String> s2 = p2.getBindingNames();
+                s1.retainAll(s2);
+
+                if (s1.isEmpty())
+                    break;
+
                 Collection<TupleExpr> joins = createPhysicalJoins(p1, p2, ctx);
                 Set<TupleExpr> s = new HashSet<TupleExpr>(p1.getPlanId());
                 s.addAll(p2.getPlanId());
