@@ -26,6 +26,7 @@ public class BindJoinIteration extends JoinExecutorBase<BindingSet> {
 
     @Override
     protected void handleBindings() throws Exception {
-        addResult(evaluationStrategy.evaluate(rightArg,leftIter));
+        addResult(evaluationStrategy.evaluate(rightArg,
+                new BNodeFilteringIteration<QueryEvaluationException>(rightArg.getBindingNames(),leftIter)));
     }
 }
