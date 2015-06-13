@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow.optimizer;
 
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
+import eu.semagrow.stack.modules.sails.semagrow.planner.Plan;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;

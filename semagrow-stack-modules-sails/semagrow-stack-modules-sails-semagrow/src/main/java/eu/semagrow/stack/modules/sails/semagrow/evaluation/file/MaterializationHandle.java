@@ -3,6 +3,8 @@ package eu.semagrow.stack.modules.sails.semagrow.evaluation.file;
 import org.openrdf.model.URI;
 import org.openrdf.query.QueryResultHandler;
 
+import java.io.IOException;
+
 /**
  * A QueryResultHandler that is used as materialization point
  * The results are passed to the handler using the handleSolution
@@ -14,5 +16,5 @@ public interface MaterializationHandle extends QueryResultHandler {
 
     public URI getId();
 
-    public void destroy();
+    public void destroy() throws IOException;
 }

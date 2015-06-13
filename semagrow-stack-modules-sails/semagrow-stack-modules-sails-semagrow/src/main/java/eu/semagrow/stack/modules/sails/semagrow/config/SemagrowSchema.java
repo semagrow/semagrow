@@ -20,6 +20,8 @@ public class SemagrowSchema {
 
     public static final URI METADATAINIT;
 
+    public static final URI EXECUTORBATCHSIZE;
+
     public static final URI QUERYTRANSFORMDB;
     public static final URI QUERYTRANSFORMUSER;
     public static final URI QUERYTRANSFORMPASSWORD;
@@ -34,6 +36,7 @@ public class SemagrowSchema {
     static  {
         ValueFactory vf = ValueFactoryImpl.getInstance();
         METADATAINIT = vf.createURI(NAMESPACE, "metadataInit");
+        EXECUTORBATCHSIZE = vf.createURI(NAMESPACE, "executorBatchSize");
         QUERYTRANSFORMDB = vf.createURI(NAMESPACE, "queryTransformDB");
         QUERYTRANSFORMUSER = vf.createURI(NAMESPACE, "queryTransformUser");
         QUERYTRANSFORMPASSWORD = vf.createURI(NAMESPACE, "queryTransformPass");

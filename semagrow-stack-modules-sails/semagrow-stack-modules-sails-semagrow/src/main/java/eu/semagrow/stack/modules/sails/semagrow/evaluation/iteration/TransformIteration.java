@@ -1,6 +1,6 @@
 package eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration;
 
-import eu.semagrow.stack.modules.alignment.Transformer;
+import eu.semagrow.stack.modules.sails.semagrow.alignment.Transformer;
 import info.aduna.iteration.ConvertingIteration;
 import info.aduna.iteration.Iteration;
 import org.openrdf.model.URI;

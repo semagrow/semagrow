@@ -14,6 +14,8 @@ public interface SelectivityEstimator {
 
     double getJoinSelectivity(Join expr);
 
+    double getVarSelectivity(String varName, TupleExpr expr, URI source);
+
     double getConditionSelectivity(ValueExpr condition, TupleExpr expr, URI source);
 
     double getConditionSelectivity(ValueExpr condition, TupleExpr expr);

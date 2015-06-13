@@ -17,4 +17,6 @@ public interface SemagrowRepository extends Repository {
 
     void setQueryEvaluation(FederatedQueryEvaluation queryEvaluation);
     */
+
+    Repository getMetadataRepository();
 }

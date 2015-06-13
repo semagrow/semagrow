@@ -7,10 +7,13 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.QueryResultHandler;
+import org.openrdf.query.TupleQueryResultHandlerException;
 import org.openrdf.query.resultio.*;
 
 import java.io.*;
 import java.net.URISyntaxException;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
 
 /**
  * Created by angel on 10/20/14.
@@ -19,9 +22,17 @@ public class FileManager implements MaterializationManager {
 
     private TupleQueryResultWriterFactory writerFactory;
 
-    private String filePrefix = "qfr";
+    private String filePrefix = "result";
 
     private File baseDir;
+
+    private ExecutorService executor;
+
+    public FileManager(File baseDir, TupleQueryResultWriterFactory writerFactory, ExecutorService executorService) {
+        this.writerFactory = writerFactory;
+        this.baseDir = baseDir;
+        this.executor = executorService;
+    }
 
     public FileManager(File baseDir, TupleQueryResultWriterFactory writerFactory) {
         this.writerFactory = writerFactory;
@@ -39,8 +50,10 @@ public class FileManager implements MaterializationManager {
             TupleQueryResultParserFactory factory = registry.get(ff);
             TupleQueryResultParser parser = factory.getParser();
             InputStream in = new FileInputStream(f);
-            return new BackgroundTupleResult(parser, in, null);
-            //return new BackgroundTupleResult(parser, in);
+            BackgroundTupleResult result = new BackgroundTupleResult(parser, in, null);
+
+           // execute(result);
+            return result;
         } catch (URISyntaxException | FileNotFoundException e) {
             throw new QueryEvaluationException(e);
         }
@@ -52,12 +65,16 @@ public class FileManager implements MaterializationManager {
         try {
             File file = getNewFile();
             URI storeId = convertURI(file.toURI());
-            OutputStream out = new FileOutputStream(file);
+            OutputStream out = new FileOutputStream(file, true);
             TupleQueryResultWriter writer = writerFactory.getWriter(out);
-            return new StoreHandler(storeId, writer);
+            return new StoreHandler(storeId, writer, out);
         } catch (IOException e) {
             throw new QueryEvaluationException(e);
         }
+    }
+
+    public void execute(Runnable runnable) {
+        executor.execute(runnable);
     }
 
     private File getNewFile() throws IOException
@@ -79,17 +96,57 @@ public class FileManager implements MaterializationManager {
             implements MaterializationHandle
     {
         private URI id;
+        private boolean started = false;
+        private OutputStream out;
 
-        public StoreHandler(URI id, QueryResultHandler handler) {
+        public StoreHandler(URI id, QueryResultHandler handler, OutputStream out) {
             super(handler);
             this.id = id;
+            this.out = out;
         }
 
         public URI getId() { return id; }
 
-        public void handleException(Exception e) { }
+        public void handleException(Exception e) {
+            try {
+                this.destroy();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+        }
 
-        public void destroy() { }
+        @Override
+        public void startQueryResult(List<String> bindingNames) throws TupleQueryResultHandlerException {
+            super.startQueryResult(bindingNames);
+            started = true;
+        }
+
+        @Override
+        public void endQueryResult() throws TupleQueryResultHandlerException {
+            if (started) {
+                super.endQueryResult();
+            }
+
+            try {
+                out.close();
+            }catch(IOException e) {
+                throw new TupleQueryResultHandlerException(e);
+            }
+        }
+
+        public void destroy() throws IOException {
+
+            try {
+
+                endQueryResult();
+
+                File f = null;
+                f = new File(convertbackURI(id));
+                f.delete();
+            } catch (Exception e) {
+                throw new IOException(e);
+            }
+        }
     }
 
 

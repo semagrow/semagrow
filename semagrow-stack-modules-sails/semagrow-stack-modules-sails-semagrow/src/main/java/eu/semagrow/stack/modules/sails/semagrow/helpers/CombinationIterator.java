@@ -1,6 +1,10 @@
 package eu.semagrow.stack.modules.sails.semagrow.helpers;
 import java.util.*;
 
+/**
+ * An iterator that enumerates all the @number combinations of a set.
+ * @param <E>
+ */
 public class CombinationIterator<E> implements Iterator<Set<E>>, Iterable<Set<E>> {
 
     private int[] indices;

@@ -1,6 +1,7 @@
 package eu.semagrow.stack.modules.sails.semagrow;
 
 import eu.semagrow.stack.modules.api.repository.SemagrowRepository;
+import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.base.RepositoryWrapper;
 import org.openrdf.repository.sail.SailRepository;
@@ -23,4 +24,6 @@ public class SemagrowSailRepository
     public SemagrowSailRepositoryConnection getConnection() throws RepositoryException {
         return new SemagrowSailRepositoryConnection(this, super.getConnection());
     }
+
+    public Repository getMetadataRepository() { return semagrowSail.getMetadataRepository(); }
 }

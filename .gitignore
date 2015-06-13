@@ -5,3 +5,5 @@
 .project
 .classpath
 .settings/
+*.versionsBackup
+.DS_Store

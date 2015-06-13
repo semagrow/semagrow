@@ -5,6 +5,11 @@ import eu.semagrow.stack.modules.sails.config.SEVODInferencerConfig;
 import org.openrdf.model.*;
 import org.openrdf.model.util.GraphUtil;
 import org.openrdf.model.util.GraphUtilException;
+import org.openrdf.model.Graph;
+import org.openrdf.model.Resource;
+import org.openrdf.model.Statement;
+import org.openrdf.model.Value;
+import org.openrdf.model.util.GraphUtil;
 import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.sail.config.SailRepositoryConfig;
 import org.openrdf.sail.config.SailConfigException;
@@ -27,6 +32,7 @@ public class SemagrowSailConfig extends SailImplConfigBase {
     private String metadataRepoId = "semagrow_metadata";
 
     private List<String> filenames = new LinkedList<String>();
+    private int executorBatchSize = 10;
 
     private String queryTransformationUser;
     private String queryTransformationPassword;
@@ -69,6 +75,14 @@ public class SemagrowSailConfig extends SailImplConfigBase {
 
     public void setInitialFiles(List<String> files) { filenames = new LinkedList<String>(files); }
 
+    public void setExecutorBatchSize(int b) {
+        executorBatchSize = b;
+    }
+
+    public int getExecutorBatchSize() {
+        return executorBatchSize;
+    }
+
     @Override
     public Resource export(Graph graph) {
         Resource implNode = super.export(graph);
@@ -93,6 +107,11 @@ public class SemagrowSailConfig extends SailImplConfigBase {
             filenames.add(o.stringValue());
         }
 
+        for (Value o : GraphUtil.getObjects(graph, node, SemagrowSchema.EXECUTORBATCHSIZE)) {
+            executorBatchSize = Integer.parseInt(o.stringValue());
+        }
+
+        /*
         try {
             Literal dbLit = GraphUtil.getOptionalObjectLiteral(graph, node, SemagrowSchema.QUERYTRANSFORMDB);
             Literal dbUser = GraphUtil.getOptionalObjectLiteral(graph, node, SemagrowSchema.QUERYTRANSFORMUSER);
@@ -100,10 +119,11 @@ public class SemagrowSailConfig extends SailImplConfigBase {
 
             setQueryTransformationDB(dbLit.stringValue());
             setQueryTransformationAuth(dbUser.stringValue(), dbPass.stringValue());
+
         } catch (GraphUtilException e) {
             e.printStackTrace();
         }
-
+        */
         super.parse(graph, node);
     }
 

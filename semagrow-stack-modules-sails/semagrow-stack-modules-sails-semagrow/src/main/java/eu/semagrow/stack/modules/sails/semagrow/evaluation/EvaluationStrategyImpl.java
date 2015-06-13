@@ -4,7 +4,7 @@ import eu.semagrow.stack.modules.api.evaluation.FederatedEvaluationStrategy;
 import eu.semagrow.stack.modules.api.evaluation.QueryExecutor;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.*;
 import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.*;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.Plan;
+import eu.semagrow.stack.modules.sails.semagrow.planner.Plan;
 import info.aduna.iteration.*;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -16,6 +16,7 @@ import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
 import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
 import org.openrdf.query.impl.EmptyBindingSet;
 
+import javax.management.QueryEval;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
@@ -337,13 +338,11 @@ public class EvaluationStrategyImpl
                     //CloseableIteration<BindingSet, QueryEvaluationException>
                     //        materializedIter = createBatchIter(leftIter, blockSize);
                     final Iterable<BindingSet> iterable = createIterable(leftIter, blockSize);
+
                     addResult(new DelayedIteration<BindingSet, QueryEvaluationException>() {
                         @Override
-                        protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration()
-                                throws QueryEvaluationException
-                        {
-
-                            return evaluateInternal(expr,iterable);
+                        protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration() throws QueryEvaluationException {
+                            return evaluateInternal(expr, iterable);
                         }
                     });
                 }

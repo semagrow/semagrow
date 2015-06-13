@@ -1,12 +1,13 @@
 package eu.semagrow.stack.modules.sails.semagrow.estimator;
 
 import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
-import eu.semagrow.stack.modules.api.estimator.CostEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.BindJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.HashJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.MergeJoin;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.Plan;
+import eu.semagrow.stack.modules.sails.semagrow.planner.Cost;
+import eu.semagrow.stack.modules.sails.semagrow.planner.Plan;
+import eu.semagrow.stack.modules.sails.semagrow.planner.Site;
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.*;
 
@@ -17,8 +18,8 @@ public class CostEstimatorImpl implements CostEstimator {
 
     private CardinalityEstimator cardinalityEstimator;
 
-    private static double C_TRANSFER_TUPLE = 0.001;
-    private static double C_TRANSFER_QUERY = 0.005;
+    private static double C_TRANSFER_TUPLE = 0.1;
+    private static double C_TRANSFER_QUERY = 50;
 
     private static double C_PROBE_TUPLE = 0.001;   //cost to probe a tuple against a hash table
     private static double C_HASH_TUPLE = 0.003;    //cost to hash a tuple to a hash table
@@ -31,11 +32,15 @@ public class CostEstimatorImpl implements CostEstimator {
      * @param expr
      * @return
      */
-    public double getCost(TupleExpr expr) {
-        return getCost(expr, null);
+    public Cost getCost(TupleExpr expr) {
+        return getCost(expr, Site.LOCAL);
     }
 
-    public double getCost(TupleExpr expr, URI source) {
+    public Cost getCost(TupleExpr expr, Site site) {
+        return getCost(expr, site.getURI());
+    }
+
+    public Cost getCost(TupleExpr expr, URI source) {
         // just favor remote queries.
         if (expr instanceof SourceQuery)
             return getCost((SourceQuery)expr, source);
@@ -44,12 +49,12 @@ public class CostEstimatorImpl implements CostEstimator {
         else if (expr instanceof Order)
             return getCost((Order)expr, source);
         else if (expr instanceof Plan)
-            return ((Plan)expr).getCost();
+            return ((Plan)expr).getProperties().getCost();
         else
-            return cardinalityEstimator.getCardinality(expr, source)/1000;
+            return new Cost(cardinalityEstimator.getCardinality(expr, source));
     }
 
-    public double getCost(SourceQuery expr, URI source) {
+    public Cost getCost(SourceQuery expr, URI source) {
 
         // cardinality on a specific endpoint.
         // communication cost of the endpoint * cardinality
@@ -62,12 +67,12 @@ public class CostEstimatorImpl implements CostEstimator {
         double communCost = C_TRANSFER_QUERY +
                 cardinalityEstimator.getCardinality(expr.getArg()) * C_TRANSFER_TUPLE;
 
-        double cost = getCost(expr.getArg()) + communCost;
+        Cost cost = getCost(expr.getArg()).add(new Cost(communCost));
 
         return cost;
     }
 
-    public double getCost(BindJoin join, URI source) {
+    public Cost getCost(BindJoin join, URI source) {
         // long cardinalityOfLeft = cardinalityEstimator.getCardinality(join.getLeftArg());
         // long costLeftArgument = estimateCost(join.getLeftArg());
         // long cardinalityAll = cardinalityEstimator.getCardinality(join);
@@ -79,29 +84,28 @@ public class CostEstimatorImpl implements CostEstimator {
         long rightCard = cardinalityEstimator.getCardinality(join.getRightArg(), source);
         long joinCard = cardinalityEstimator.getCardinality(join, source);
 
-        double commuCost =
+        double commuCost = C_TRANSFER_QUERY +
                 leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE)
                 + joinCard * C_TRANSFER_TUPLE;
 
-        return getCost(join.getLeftArg(), source) + getCost(join.getRightArg(), source)  + commuCost;
+        return getCost(join.getLeftArg()).add(new Cost(commuCost));
     }
 
-    public double getCost(HashJoin join, URI source) {
+    public Cost getCost(HashJoin join, URI source) {
         long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
         long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
 
         //return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
-        return getCost(join.getLeftArg()) + getCost(join.getRightArg())
-                + C_HASH_TUPLE*leftCard + C_PROBE_TUPLE*rightCard;
+        return Cost.cpuCost(C_HASH_TUPLE*leftCard + C_PROBE_TUPLE*rightCard);
     }
 
-    public double getCost(MergeJoin join, URI source) {
-        double cost1 = getCost(join.getLeftArg(), source);
-        double cost2 = getCost(join.getRightArg(), source);
-        return cost1 + cost2;
+    public Cost getCost(MergeJoin join, URI source) {
+        Cost cost1 = getCost(join.getLeftArg(), source);
+        Cost cost2 = getCost(join.getRightArg(), source);
+        return cost1.add(cost2);
     }
 
-    public double getCost(Join join, URI source) {
+    public Cost getCost(Join join, URI source) {
         if (join instanceof BindJoin)
             return getCost((BindJoin)join, source);
         else if (join instanceof HashJoin)
@@ -112,19 +116,19 @@ public class CostEstimatorImpl implements CostEstimator {
         long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg(), source);
         long rightCard = cardinalityEstimator.getCardinality(join.getRightArg(), source);
 
-        return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
+        return new Cost((leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY);
     }
 
-    public double getCost(Order order, URI source){
+    public Cost getCost(Order order, URI source){
         long card = cardinalityEstimator.getCardinality(order.getArg(), source);
-        return getCost(order.getArg(), source) + card * Math.log(card);
+        return getCost(order.getArg(), source).add(Cost.cpuCost(card * Math.log(card)));
     }
 
-    public double getCost(UnaryTupleOperator expr, URI source) {
+    public Cost getCost(UnaryTupleOperator expr, URI source) {
         return getCost(expr.getArg(), source);
     }
 
-    public double getCost(BinaryTupleOperator expr, URI source) {
-        return getCost(expr.getLeftArg(), source) + getCost(expr.getRightArg(), source);
+    public Cost getCost(BinaryTupleOperator expr, URI source) {
+        return getCost(expr.getLeftArg(), source).add(getCost(expr.getRightArg(), source));
     }
 }

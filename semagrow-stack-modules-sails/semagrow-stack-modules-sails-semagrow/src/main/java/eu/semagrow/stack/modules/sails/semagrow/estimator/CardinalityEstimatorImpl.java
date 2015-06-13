@@ -2,12 +2,14 @@ package eu.semagrow.stack.modules.sails.semagrow.estimator;
 
 import eu.semagrow.stack.modules.api.estimator.SelectivityEstimator;
 import eu.semagrow.stack.modules.api.statistics.Statistics;
+import eu.semagrow.stack.modules.api.statistics.StatisticsProvider;
 import eu.semagrow.stack.modules.api.estimator.CardinalityEstimator;
 import eu.semagrow.stack.modules.sails.semagrow.algebra.SourceQuery;
-import eu.semagrow.stack.modules.sails.semagrow.optimizer.Plan;
+import eu.semagrow.stack.modules.sails.semagrow.planner.Plan;
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.VarNameCollector;
+import org.openrdf.query.impl.EmptyBindingSet;
 
 import java.util.Set;
 
@@ -16,18 +18,19 @@ import java.util.Set;
  */
 public class CardinalityEstimatorImpl implements CardinalityEstimator, SelectivityEstimator {
 
-    private Statistics statistics;
+    private StatisticsProvider statistics;
 
-    public CardinalityEstimatorImpl(Statistics statistics) {
+    public CardinalityEstimatorImpl(StatisticsProvider statistics) {
         this.statistics = statistics;
     }
 
-    public long getCardinality(TupleExpr expr) {
-
+    public long getCardinality(TupleExpr expr)
+    {
         return getCardinality(expr, null);
     }
 
-    public long getCardinality(TupleExpr expr, URI source) {
+    public long getCardinality(TupleExpr expr, URI source)  {
+
         if (expr instanceof StatementPattern)
             return getCardinality((StatementPattern)expr, source);
         else if (expr instanceof Union)
@@ -44,17 +47,22 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
             return getCardinality((LeftJoin)expr, source);
         else if (expr instanceof SourceQuery)
             return getCardinality((SourceQuery)expr, source);
+        else if (expr instanceof EmptySet)
+            return getCardinality((EmptySet)expr, source);
         else if (expr instanceof Plan)
-            return ((Plan)expr).getCardinality();
+            return ((Plan)expr).getProperties().getCardinality();
 
         return 0;
+
     }
 
     public long getCardinality(StatementPattern pattern, URI source) {
+
         if (source != null)
-            return statistics.getPatternCount(pattern, source);
+            return statistics.getStats(pattern, EmptyBindingSet.getInstance(), source).getCardinality();
         else
             return 0;
+
     }
 
     public long getCardinality(Union union, URI source) {
@@ -80,12 +88,14 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
     public long getCardinality(Join join, URI source){
 
         long card1 = getCardinality(join.getLeftArg(), source);
+
         long card2 = getCardinality(join.getRightArg(), source);
 
         double sel = getJoinSelectivity(join, source);
 
         double t = card1 * card2 * sel;
-        long tt = (long)t;
+        long tt = (long)Math.ceil(t);
+
         if (tt < 0)
             return 0;
 
@@ -110,6 +120,10 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         for (URI src : query.getSources())
             card += getCardinality(query.getArg(), src);
         return card;
+    }
+
+    public long getCardinality(EmptySet set, URI source) {
+        return 0;
     }
 
     /**
@@ -213,7 +227,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
     }
 
     public double getVarSelectivity(String varName, Plan p, URI source) {
-        return getVarSelectivity(varName, p.getArg(), p.getSite());
+        return getVarSelectivity(varName, p.getArg(), p.getProperties().getSite().getURI());
     }
 
     public double getVarSelectivity(String varName, UnaryTupleOperator expr, URI source) {
@@ -240,24 +254,9 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
      */
     public long getVarCardinality(String varName, StatementPattern pattern, URI source) {
 
-        Var sVar = pattern.getSubjectVar();
-        Var pVar = pattern.getPredicateVar();
-        Var oVar = pattern.getObjectVar();
-        long distinct = 0;
+        Statistics stats = statistics.getStats(pattern, EmptyBindingSet.getInstance(), source);
 
-        if (sVar.getName().equals(varName) && !sVar.hasValue()) {
-            distinct = statistics.getDistinctSubjects(pattern, source);
-        }
-
-        if (pVar.getName().equals(varName) && !pVar.hasValue()) {
-            distinct = statistics.getDistinctPredicates(pattern, source);
-        }
-
-        if (oVar.getName().equals(varName) && !oVar.hasValue()) {
-            distinct = statistics.getDistinctObjects(pattern, source);
-        }
-
-        return distinct;
+        return stats.getVarCardinality(varName);
     }
 
     /*
@@ -275,7 +274,6 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         // if (subset) then min else if (disjoint) 0 else something in between
         // if not joined variable then
         // if in left arg ->
-
     }
     */
 
@@ -286,5 +284,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         set1.retainAll(set2);
         return set1;
     }
+
+
 }
 
