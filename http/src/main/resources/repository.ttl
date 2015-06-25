@@ -1,0 +1,26 @@
+################################################################################
+# Sesame configuration for SemaGrow
+#
+# ATTENTION: the Sail implementing the sail:sailType must be published
+#            in META-INF/services/org.openrdf.sail.SailFactory
+################################################################################
+@prefix void: <http://rdfs.org/ns/void#>.
+@prefix rep:  <http://www.openrdf.org/config/repository#>.
+@prefix sr:   <http://www.openrdf.org/config/repository/sail#>.
+@prefix sail: <http://www.openrdf.org/config/sail#>.
+@prefix semagrow: <http://schema.semagrow.eu/>.
+
+[] a rep:Repository ;
+   rep:repositoryTitle "SemaGrow Repository" ;
+   rep:repositoryID "semagrow" ;
+   rep:repositoryImpl [
+      rep:repositoryType "semagrow:SemagrowRepository" ;
+      sr:sailImpl [
+         sail:sailType "semagrow:SemagrowSail" ;
+         semagrow:metadataInit "/etc/default/semagrow/metadata.ttl" ;
+         semagrow:queryTransformDB "jdbc:postgresql://localhost:5432/alignmentDB"  ;
+         semagrow:queryTransformUser "postgres" ;
+         semagrow:queryTransformPass "postgres"
+      ]
+   ] .
+

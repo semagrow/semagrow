@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <author>Jürgen Jakobitsch</author>
+        <title>SemaGrow-Stack-Webapp - Building</title>
+    </properties>
+    <meta name="keyword" content="semagrow, build"/>
+    <body>
+        <section name="Building">
+            <p>   
+                This page contains information on how to build and customize
+                the SemaGrow-Stack-Webapp.
+            </p>
+            <p>
+                <ol>
+                    <li>Notes</li>
+                    <li>System requirements</li>                    
+                    <li>Building the SemaGrow-Stack-Webapp as a war file (default)</li>
+                    <li>Building the SemaGrow-Stack-Webapp preinstalled in a tomcat</li>
+                    <li>Generating the maven-site documentation</li>
+                    <li>Customizing a local installation using build properties</li>                    
+                </ol>
+            </p>
+        </section>   
+        <section name="Notes">
+            <ul>
+                <li>The following build instructions and customizations are for development only.</li>
+                <li>
+                    Installation of the SemaGrow-Stack-Webapp on production systems should be done 
+                    using the available package manager (debian/rpm).
+                </li>
+            </ul>
+        </section>     
+        <section name="System requirements">
+            To be able to build the SemaGrow-Stack-Webapp it is necessary that the following
+            components are installed.
+            <ol>
+                <li>git<br/>
+                    git is necessary to clone all repositories. All builds have been tested with
+                    git version 1.8.1.4. To check the installed version enter the following command
+                    in a terminal
+                    <br/>
+<source>
+    git --version
+</source>
+                    <br/>
+                </li>
+                <li>JDK<br/>
+                    A JDK (Java Development Kit) is necessary to compile all java-components. All builds
+                    have been tested with java version 1.6.0_39. Please note that a JRE is not sufficient.
+                    To check the installed version enter the following command in a terminal
+                    <br/>
+<source>
+    java -version
+</source>
+                    <br/>
+                </li>
+                <li>Maven<br/>
+                    Maven is necessary to build and assemble all components. All builds have
+                    been tested with Apache Maven 3.0.3. Please make sure that mvn also uses the runtime
+                    from the JDK and not from JRE. To check the installed version enter the following command
+                    in a terminal
+                    <br/>
+<source>
+    mvn --version
+</source>
+                    <br/>
+                </li>
+            </ol>
+        </section>
+        <section name="Build Lifecycle bindings">
+            <ol>
+                <li>package
+                    <ol>
+                        <li>validate
+                            <ol>
+                                <li>Read build.properties file</li>
+                                <li>Read tomcat.properties file</li>
+                            </ol>                        
+                        </li>
+                        <li>initialize
+                            <ol>
+                                <li>Download tomcat to target directory</li>
+                                <li>copy src/script/* files to target</li>
+                            </ol>
+                        </li>
+                        <li>package
+                            <ol>
+                                <li>Create tomcat-distribution</li>                                
+                            </ol>
+                        </li>
+                    </ol>
+                </li>
+                <li>package
+                    <ol>
+                        <li>validate
+                            <ol>
+                                <li>Read build.properties file</li>
+                                <li>Read tomcat.properties file</li>
+                            </ol>                        
+                        </li>
+                        <li>initialize
+                            <ol>
+                                <li>Download tomcat to target directory</li>
+                                <li>copy src/script/* files to target</li>
+                            </ol>
+                        </li>
+                        <li>package
+                            <ol>
+                                <li>Create tomcat-distribution</li>                                
+                            </ol>
+                        </li>
+                        <li>deploy
+                            <ol>
+                                <li>Deploy according to distribution.mvn settings, see below</li>                                
+                            </ol>
+                        </li>                        
+                    </ol>
+                </li>                
+            </ol>
+        </section>        
+        <section name="Building the SemaGrow-Stack-Webapp as a war file (default)">
+            To build the SemaGrow-Stack-Webapp war file simply cd into ${semagrow-stack-webapp.root}
+            and issue the following command
+            <br/>
+<source>
+    mvn clean install
+</source>
+            <br/>
+            This will result in a deployable war file in ${semagrow-stack-webapp.root}/target.
+            Please note that there might be requirements for tomcat (ie. a JNDI datasource) that must be
+            taken care of individually when only building the webapp.<br/>
+            It is recommended to use this build only in case you have tomcat installed ready to use the
+            SemaGrow-Stack-Webapp and only want to update the webapp for testing purposes.
+        </section>
+        <section name="Building the SemaGrow-Stack-Webapp preinstalled in a tomcat">
+            To build a fully functional tomcat with the SemaGrow-Stack-Webapp preinstalled cd into
+            ${semagrow-stack-webapp.root} and issue the following command
+            <br/>
+<source>                
+    mvn clean package -Psemagrow-stack-webapp-distribution
+</source>
+            <br/>
+            This will result in a zip file in ${semagrow-stack-webapp.root}/target containing a fully equipped
+            tomcat (in version 7.0.42 as of writing). This tomcat is configured with all dependencies (lib, JNDI) that are needed to run the 
+            SemaGrow-Stack-Webapp. Please note that external dependencies need to be setup individually.
+            For example a the Postgres database needs to be installed and run separately.
+            In order to run SemaGrow uncompress the generated zip, copy the files from the "resources" folder 
+            to /etc/default/semagrow and run the .startup.sh script located in the "bin" folder. 
+            If you do not have permissions to create directories under /etc/default then copy 
+             the files from the "resources" folder to /tmp  and in the resources/repository.ttl file edit line 
+            "semagrow:metadataInit "/etc/default/semagrow/metadata.ttl" ;" to semagrow:metadataInit "/tmp/metadata.ttl" ;".
+            Now you can run the .startup.sh script. 
+            SemaGrow webapp can be accessed at http://localhost:8080/SemaGrow/ .
+        </section>
+        <section name="Generating the maven-site documentation">
+            SemaGrow-Stack-Webapp includes an automatically generated documentation including of
+            dependency and license reports as well as javadoc and highlighted source code.
+            To preview the generated documentation issue the following command in a terminal
+            <br/>
+<source>
+    mvn site:run -P semagrow-stack-webapp-documentation
+</source>
+            <br/>
+            This will run the documentation page on a local jetty at port 8080. The documentation
+            page will be accessible via http://localhost:8080. Please note that normal site deployment
+            is determined by the settings in pom.xml, see below.
+        </section>        
+        <section name="Customizing a local installation using build properties">
+            SemaGrow-Stack-Webapp uses three property files with properties that can be overriden.
+            <ul>
+                <li>build.properties<br/>
+                General build properties.                    
+                </li>
+                <li>tomcat.properties<br/>
+                Properties with which the tomcat distribution is customized.
+                </li>
+                <li>distribution.mvn<br/>
+                Property concerning the target of the deploy goal on a local machine.
+                </li>
+                <li>distribution.site<br/>
+                Property concerning the target of the site-deploy goal on a local machine.
+                </li>                
+            </ul>
+            <subsection name="build.properties">
+                <ul>
+                    <li>distribution.mvn<br/>
+                    The properties file is empty as of writing but reserved for future use.
+                    </li>
+                </ul>
+            </subsection>
+            <subsection name="tomcat.properties">
+                <ul>
+                    <li>tomcat.version<br/>
+                    This property determines the version of the tomcat to be used for the distribution.
+                    </li>
+                </ul>
+            </subsection>                              
+            <subsection name="Overriding property files">
+                To override above property files create an own properties file (either the build or the tomcat) 
+                outside of ${semagrow-stack-webapp.root} and let maven use these properties instead
+                of the default ones.
+                To do so a settings.xml must be created, if it doesn't already exist, in the local maven repository
+                which is usually in ~/.m2 (= /home/${username}/.m2 .
+                see <a href="http://maven.apache.org/settings.html" target="_blank">here</a> for an empty settings.xml template.
+                In the profiles section of the settings.xml create a new profile for the semagrow-stack-webapp build environment
+                and mark it as active in the activeProfiles section.
+<source>
+    &lt;profiles&gt;
+        &lt;profile&gt;
+            &lt;id&gt;semagrow-stack-webapp&lt;/id&gt;
+            &lt;properties&gt;
+                &lt;tomcat.properties>/path/to/custom/tomcat.properties&lt;/tomcat.properties&gt;
+            &lt;/properties&gt;
+        &lt;/profile&gt;
+    &lt;/profiles&gt;
+    &lt;activeProfiles&gt;
+        &lt;activeProfile&gt;semagrow-stack-webapp&lt;/activeProfile&gt;
+    &lt;/activeProfiles&gt;
+</source>
+            </subsection>  
+            <subsection name="Overriding distribution properties">
+                To change the maven distribution (site distribution) target of a local installation either add the property distribution.mvn 
+                (distribution.site) to an active profile in a local settings.xml (see above) or start the build with another system parameter
+                using the -D option, for example
+<source>
+  mvn clean deploy -Psemagrow-stack-webapp-distribution -Ddistribution.mvn=/path/to/some/maven/repo
+</source>                                
+            This will install the war file along with the distribution zip file to the given maven repo.
+<source>
+  mvn clean site-deploy -Psemagrow-stack-webapp-distribution -Ddistribution.site=/path/to/some/maven/site
+</source>                                
+            This will install the documentation files to the given maven directory.
+            </subsection>              
+        </section>
+    </body>
+</document>

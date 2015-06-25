@@ -1,0 +1,82 @@
+html, body {
+    margin: 0px;
+    padding: 0px;
+    font-family: Verdana, sans-serif;
+    font-size: 76%;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+    line-height: 170%; 
+    background-image: initial;
+    background-position-x: initial;
+    background-position-y: initial;
+    background-size: initial;    
+    background-attachment: initial;
+    background-origin: initial;
+    background-clip: initial;
+    background-color: rgb(238, 244, 240);    
+}
+#header {
+    background: #eef4f0 url(../images/body.png) repeat-x 50% 0;
+    height:125px;
+}
+#header #auth {
+    float:right; 
+    margin-top: 95px; 
+    margin-right: 5px; 
+}
+#header #auth input, #header #auth button {
+    background-color: rgb(238, 244, 240);
+    border-width: 1px;
+    border-color: #a3a3a3;
+    border-style: solid;
+    width:100px;
+}
+
+#logo {
+    padding-top: 20px;
+}
+#content {
+    padding-top: 5px;
+}
+
+
+
+/* YUI FIXES */
+.yui-navset .yui-content .yui-hidden {
+    opacity: 0;
+    display: none;
+}
+
+/* TAB SPARQL */
+div #sparqlContent {
+    
+}
+div #sparqlContent textarea {
+    height: 200px;
+    width: 550px;
+}
+
+div #sparqlContent textarea#prefixes {
+    height: 70px !important;  
+    margin-bottom: 5px;
+}
+
+div #sparqlContent #sparqlContentLeft {
+    float:left;
+    width:40%;
+}
+
+div #sparqlContent #sparqlContentRight {
+    float:right;
+    width: 60%;
+}
+
+div #sparqlContent #sparqlContentRight #sparqlResponse {
+    overflow: auto;
+}
+
+div #sparqlContent #sparqlContentRight #sparqlResponse pre {
+    font-size: 1.5em;
+}
+

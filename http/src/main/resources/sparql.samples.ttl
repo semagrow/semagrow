@@ -1,0 +1,6 @@
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix semagrow: <http://schema.semagrow.eu/system/1.0.0/samples/> .
+<urn:xxx> a semagrow:SparqlSample;
+          semagrow:sparqlSampleText "SELECT * WHERE { ?s ?p ?o }";
+          dcterms:title "BigMamaQuery";
+          dcterms:description "SELECT ALL" .

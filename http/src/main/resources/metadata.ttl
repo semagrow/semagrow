@@ -1,0 +1,25 @@
+@prefix void: <http://rdfs.org/ns/void#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> . 
+@prefix dc: <http://purl.org/dc/elements/1.1/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+
+_:DatasetRoot rdf:type void:Dataset .
+
+_:Dataset1
+     rdf:type void:Dataset ; 
+     void:sparqlEndpoint <http://dbpedia.org/sparql> ; 
+     void:triples 10000 ; 
+     void:distinctSubjects 200 ; 
+     void:distinctObjects  1000 ; 
+     void:properties 5 ;
+     void:propertyPartition [ 
+          void:property <http://localhost/my> ; 
+          void:triples 100 ; 
+          void:distinctSubjects 10 ; 
+          void:distinctObjects 10 ] ; 
+     void:propertyPartition [ 
+          void:property <http://rdf.iit.demokritos.gr/2014/my#pred> ; 
+          void:triples 100 ; 
+          void:distinctSubjects 5 ] ;
+     void:subset _:DatasetRoot .

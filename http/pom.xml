@@ -1,0 +1,317 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>semagrow</artifactId>
+        <groupId>eu.semagrow</groupId>
+        <version>1.4.1</version>
+    </parent>
+
+    <artifactId>semagrow-http</artifactId>
+    <name>semagrow-http</name>
+    <packaging>war</packaging>
+    <url>http://semagrow.eu</url>
+    
+    <properties>   
+        <build.properties>src/properties/build.properties</build.properties>
+        <tomcat.properties>src/properties/tomcat.properties</tomcat.properties>
+        <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>        
+        <distribution.mvn>/var/www/mvn</distribution.mvn>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+        
+    <organization>
+        <name>SemaGrow - FP7</name>
+        <url>http://www.semagrow.eu</url>
+    </organization>
+    
+    <licenses>
+        <license>            
+            <name>Apache 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+        </license>
+    </licenses>
+    
+    <developers>
+        <developer>
+            <id>acharal</id>
+            <name>Angelos Charalambidis</name>
+            <email>acharal@iit.demokritos.gr</email>
+        </developer>
+        <developer>
+            <id>turnguard</id>
+            <name>Jürgen W. Jakobitsch</name>
+            <url>http://www.turnguard.com/turnguard</url>
+        </developer>
+        <developer>
+            <id>cmader</id>
+            <name>Christian Mader</name>
+            <url>http://company.semantic-web.at/person/christian_mader</url>
+        </developer>        
+    </developers>
+    
+    <contributors>
+        <contributor>
+            <name>Christian Blaschke</name>
+            <url>http://company.semantic-web.at/person/christian_blaschke</url>
+        </contributor>
+    </contributors>
+    
+    <mailingLists>
+        <mailingList>            
+            <name>public-semagrow</name>
+            <subscribe>subscribe@semagrow_list@googlegroups.com</subscribe>
+            <unsubscribe>unsubscribe@semagrow_list@googlegroups.com</unsubscribe>
+            <post>semagrow_list@googlegroups.com</post>
+        </mailingList>
+    </mailingLists>
+      
+    <!-- REPOSITORIES -->
+    <repositories>
+        <repository>
+            <id>swc-semagrow</id>
+            <name>SWC SemaGrow Repository</name>
+            <url>http://semagrow.semantic-web.at/mvn/</url>          
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>maven-central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>        
+    </repositories>
+    
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven.tinyjee.org</id>
+            <url>http://maven.tinyjee.org</url>
+        </pluginRepository>
+    </pluginRepositories>
+              
+    <scm>
+        <connection>scm:git:git://github.com/semagrow/semagrow-stack-webapp.git</connection>    
+        <url>https://github.com/semagrow/semagrow-stack-webapp</url>
+        
+    </scm>
+           
+    <distributionManagement>
+        <site>
+            <id>online-site-repository</id>
+            <url>file://${distribution.site}</url>
+        </site>        
+        <repository>
+            <id>online-mvn-repository</id>
+            <url>file://${distribution.mvn}</url>
+        </repository>                
+    </distributionManagement>
+                       
+    <dependencies>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.4.3</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>servlet-api</artifactId>
+            <version>2.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet.jsp</groupId>
+            <artifactId>jsp-api</artifactId>
+            <version>2.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>eu.semagrow</groupId>
+            <artifactId>semagrow-commons</artifactId>
+            <version>${project.version}</version>
+            <!-- <scope>provided</scope> -->
+        </dependency>
+        <dependency>
+            <groupId>eu.semagrow</groupId>
+            <artifactId>semagrow-sail</artifactId>
+            <version>${project.version}</version>
+            <!-- <scope>provided</scope> -->
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>openrdf-sesame</artifactId>
+            <version>${sesame.version}</version>
+            <classifier>onejar</classifier>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-webmvc</artifactId>
+            <version>3.2.3.RELEASE</version>
+            <exclusions>
+                <exclusion>
+                    <artifactId>commons-logging</artifactId>
+                    <groupId>commons-logging</groupId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>commons-lang</groupId>
+            <artifactId>commons-lang</artifactId>
+            <version>2.6</version>
+        </dependency>
+
+    </dependencies>
+    
+    <profiles>       
+        <profile>
+            <id>semagrow-stack-webapp-documentation</id>
+            <build>               
+                <pluginManagement>
+                    <plugins>
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-site-plugin</artifactId>
+                            <version>3.3</version>
+                        </plugin>                                
+                    </plugins>
+                </pluginManagement>                
+            </build>            
+            <reporting>                       
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-javadoc-plugin</artifactId>
+                        <version>2.9.1</version>
+                        <configuration>                            
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-jxr-plugin</artifactId>
+                        <version>2.1</version>
+                    </plugin>
+
+                    <!-- SUREFIRE -->
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-report-plugin</artifactId>
+                        <version>2.0</version>
+                        <configuration>
+                        </configuration>
+                    </plugin>                     
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-project-info-reports-plugin</artifactId>
+                        <version>2.4</version>
+                        <reportSets>
+                            <reportSet>
+                                <reports>                                    
+                                    <report>summary</report>
+                                    <report>project-team</report>
+                                    <report>mailing-list</report>
+                                    <report>license</report>
+                                    <report>scm</report>
+                                    <report>issue-tracking</report>
+                                    <report>dependencies</report>
+                                </reports>
+                            </reportSet>
+                        </reportSets>
+                    </plugin>                                                                              
+                </plugins>
+            </reporting>
+        </profile>
+        <profile>
+            <id>semagrow-stack-webapp-distribution</id>
+            <build>                
+                <plugins>                                                            
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <version>2.6</version>
+                        <executions>
+                            <execution>
+                                <id>unpack-tomcat</id>
+                                <phase>initialize</phase>
+                                <goals>
+                                    <goal>unpack</goal>
+                                </goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>org.apache.tomcat</groupId>
+                                            <artifactId>tomcat</artifactId>
+                                            <version>${tomcat.version}</version>
+                                            <type>tar.gz</type>
+                                            <overWrite>false</overWrite>
+                                            <outputDirectory>${project.build.directory}/</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-assembly-plugin</artifactId>
+                        <version>2.4</version>
+                        <executions>
+                            <execution>
+                                <phase>package</phase>
+                                <goals>
+                                    <goal>single</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <descriptors>
+                                <descriptor>src/assembly/tomcat-distribution.xml</descriptor>
+                            </descriptors>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>  
+  
+    <build>                 
+        <plugins>                 
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>properties-maven-plugin</artifactId>
+                <version>1.0-alpha-2</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>read-project-properties</goal>
+                        </goals>
+                        <configuration>                            
+                            <files>                                                                
+                                <file>${build.properties}</file>                                        
+                                <file>${tomcat.properties}</file>                                                                                
+                            </files>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>                 
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>                   
+                </configuration>
+            </plugin>      
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.1.1</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <warName>SemaGrow</warName>
+                </configuration>                
+            </plugin>                 
+        </plugins>        
+    </build>    
+</project>
