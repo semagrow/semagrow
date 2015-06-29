@@ -5,7 +5,7 @@
 ## System Requirements
 
 1. git >= 1.8.1.4
-2. java >= 1.6.0_39
+2. java >= 1.8
 3. maven >= 3.0.3
 
 ### Building the Semagrow as jar/war distribution
