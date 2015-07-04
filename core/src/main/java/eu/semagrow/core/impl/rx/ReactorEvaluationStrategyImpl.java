@@ -1,7 +1,11 @@
 package eu.semagrow.core.impl.rx;
 
 import info.aduna.iteration.Iteration;
+import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
+import org.openrdf.model.ValueFactory;
+import org.openrdf.model.datatypes.XMLDatatypeUtil;
+import org.openrdf.model.vocabulary.XMLSchema;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
@@ -12,12 +16,15 @@ import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.ValueExprEvaluationException;
 import org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl;
 import org.openrdf.query.algebra.evaluation.impl.ExternalSet;
+import org.openrdf.query.algebra.evaluation.iterator.GroupIterator;
+import org.openrdf.query.algebra.evaluation.util.MathUtil;
 import org.openrdf.query.algebra.evaluation.util.OrderComparator;
 import org.openrdf.query.algebra.evaluation.util.ValueComparator;
 import org.openrdf.util.iterators.Iterators;
 import org.reactivestreams.Publisher;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
+import reactor.rx.stream.GroupedStream;
 
 import java.util.*;
 
@@ -29,12 +36,20 @@ public class ReactorEvaluationStrategyImpl
         extends EvaluationStrategyImpl
         implements ReactiveEvaluationStrategy {
 
+    private ValueFactory vf;
+
     public ReactorEvaluationStrategyImpl(TripleSource tripleSource) {
         super(tripleSource);
+        vf = tripleSource.getValueFactory();
     }
 
     public ReactorEvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
         super(tripleSource, dataset);
+        vf = tripleSource.getValueFactory();
+    }
+
+    public Value evaluateValue(ValueExpr expr, BindingSet bindings) throws ValueExprEvaluationException, QueryEvaluationException {
+        return evaluate(expr, bindings);
     }
 
     @Override
@@ -215,12 +230,13 @@ public class ReactorEvaluationStrategyImpl
         QueryBindingSet scopeBindings = new QueryBindingSet(bindings);
 
         return evaluateReactorInternal(expr.getArg(), bindings)
-                .filter((b) ->  {
+                .filter((b) -> {
                     try {
                         return this.isTrue(expr.getCondition(), scopeBindings);
-                    }catch(QueryEvaluationException /*| ValueExprEvaluationException */ e) {
+                    } catch (QueryEvaluationException /*| ValueExprEvaluationException */ e) {
                         return false;
-                    } });
+                    }
+                });
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Projection expr, BindingSet bindings)
@@ -255,10 +271,13 @@ public class ReactorEvaluationStrategyImpl
             throws QueryEvaluationException
     {
         return evaluateReactorInternal(expr.getLeftArg(), bindings)
-                .concatMap( (b) -> {
+                .concatMap((b) -> {
                     try {
                         return this.evaluateReactorInternal(expr.getRightArg(), b);
-                    } catch (Exception e) { return Streams.fail(e); } });
+                    } catch (Exception e) {
+                        return Streams.fail(e);
+                    }
+                });
     }
 
     public Stream<BindingSet> evaluateReactorInternal(LeftJoin expr, BindingSet bindings)
@@ -270,18 +289,48 @@ public class ReactorEvaluationStrategyImpl
         joinAttributes.retainAll(expr.getRightArg().getBindingNames());
 
         return evaluateReactorInternal(expr.getLeftArg(), bindings)
-                .concatMap( (b) -> {
+                .concatMap((b) -> {
                     try {
                         return this.evaluateReactorInternal(expr.getRightArg(), b).defaultIfEmpty(b);
                     } catch (Exception e) {
-                        return Streams.fail(e); }
+                        return Streams.fail(e);
+                    }
                 });
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Group expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return null;
+        Set<String> groupByBindings = expr.getGroupBindingNames();
+
+        Stream<BindingSet> s = evaluateReactorInternal(expr.getArg(), bindings);
+
+        Stream<GroupedStream<BindingSet, BindingSet>> g = s.groupBy((b) -> projectSet(groupByBindings, b, bindings));
+
+        //return g.flatMap((gs) -> Streams.just(gs.key()));
+        return g.flatMap((gs) -> aggregate(gs, expr, bindings));
+    }
+
+    public Stream<BindingSet> aggregate(GroupedStream<BindingSet, BindingSet> g, Group expr, BindingSet parentBindings) {
+        BindingSet k = g.key();
+
+        try {
+            Entry e = new Entry(k, parentBindings, expr);
+            Stream<Entry> s = g.reduce( e, (e1, b) -> { try { e1.addSolution(b); return e1; } catch(Exception x) { return null; } });
+            return s.flatMap( (ee) -> {
+                QueryBindingSet b = new QueryBindingSet(k);
+                try {
+                    ee.bindSolution(b);
+                    return Streams.just(b);
+                } catch(Exception x) {
+                    return Streams.fail(x);
+                }
+            });
+
+        }catch(QueryEvaluationException e)
+        {
+            return Streams.fail(e);
+        }
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Order expr, BindingSet bindings)
@@ -322,28 +371,24 @@ public class ReactorEvaluationStrategyImpl
     }
 
     public Stream<BindingSet> evaluateReactorInternal(DescribeOperator expr, BindingSet bindings)
-            throws QueryEvaluationException
-    {
+            throws QueryEvaluationException {
         return fromIteration(this.evaluate(expr, bindings));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Intersection expr, BindingSet bindings)
-            throws QueryEvaluationException
-    {
+            throws QueryEvaluationException {
         return fromIteration(this.evaluate(expr, bindings));
     }
 
 
     public Stream<BindingSet> evaluateReactorInternal(Difference expr, BindingSet bindings)
-            throws QueryEvaluationException
-    {
+            throws QueryEvaluationException {
         return fromIteration(this.evaluate(expr, bindings));
     }
 
 
     public Stream<BindingSet> evaluateReactorInternal(Service expr, BindingSet bindings)
-            throws QueryEvaluationException
-    {
+            throws QueryEvaluationException {
         return fromIteration(this.evaluate(expr, bindings));
     }
 
@@ -367,6 +412,25 @@ public class ReactorEvaluationStrategyImpl
 
         return resultBindings;
     }
+
+
+    public static BindingSet projectSet(Set<String> projElemList,
+                                     BindingSet sourceBindings,
+                                     BindingSet parentBindings)
+    {
+        QueryBindingSet resultBindings = new QueryBindingSet(parentBindings);
+
+        for (String pe : projElemList) {
+            Value targetValue = sourceBindings.getValue(pe);
+            if (targetValue != null) {
+                // Potentially overwrites bindings from super
+                resultBindings.setBinding(pe, targetValue);
+            }
+        }
+
+        return resultBindings;
+    }
+
 
     public BindingSet extend(Collection<ExtensionElem> extElems, BindingSet sourceBindings)
             throws QueryEvaluationException
@@ -422,5 +486,340 @@ public class ReactorEvaluationStrategyImpl
             }
         }
         return q;
+    }
+
+
+
+    private class ConcatAggregate extends Aggregate {
+        private StringBuilder concatenated = new StringBuilder();
+        private String separator = " ";
+
+        public ConcatAggregate(GroupConcat groupConcatOp, BindingSet parentBindings)
+                throws ValueExprEvaluationException, QueryEvaluationException {
+            super(groupConcatOp);
+            ValueExpr separatorExpr = groupConcatOp.getSeparator();
+            if(separatorExpr != null) {
+                Value separatorValue = evaluateValue(separatorExpr, parentBindings);
+                this.separator = separatorValue.stringValue();
+            }
+
+        }
+
+        public void processAggregate(BindingSet s) throws QueryEvaluationException {
+            Value v = this.evaluate(s);
+            if(v != null && this.distinctValue(v)) {
+                this.concatenated.append(v.stringValue());
+                this.concatenated.append(this.separator);
+            }
+
+        }
+
+        public Value getValue() {
+            if(this.concatenated.length() == 0) {
+                return vf.createLiteral("");
+            } else {
+                int len = this.concatenated.length() - this.separator.length();
+                return vf.createLiteral(this.concatenated.substring(0, len));
+            }
+        }
+    }
+
+    private class SampleAggregate extends Aggregate {
+        private Value sample = null;
+        private Random random = new Random(System.currentTimeMillis());
+
+        public SampleAggregate(Sample operator) {
+            super(operator);
+        }
+
+        public void processAggregate(BindingSet s) throws QueryEvaluationException {
+            if(this.sample == null || this.random.nextFloat() < 0.5F) {
+                this.sample = this.evaluate(s);
+            }
+
+        }
+
+        public Value getValue() {
+            return this.sample;
+        }
+    }
+
+    private class AvgAggregate extends Aggregate {
+        private long count = 0L;
+        private Literal sum;
+        private ValueExprEvaluationException typeError;
+
+        public AvgAggregate(Avg operator) {
+            super(operator);
+            this.sum = vf.createLiteral("0", XMLSchema.INTEGER);
+            this.typeError = null;
+        }
+
+        public void processAggregate(BindingSet s) throws QueryEvaluationException {
+            if(this.typeError == null) {
+                Value v = this.evaluate(s);
+                if(this.distinctValue(v)) {
+                    if(v instanceof Literal) {
+                        Literal nextLiteral = (Literal)v;
+                        if(nextLiteral.getDatatype() != null && XMLDatatypeUtil.isNumericDatatype(nextLiteral.getDatatype())) {
+                            this.sum = MathUtil.compute(this.sum, nextLiteral, MathExpr.MathOp.PLUS);
+                        } else {
+                            this.typeError = new ValueExprEvaluationException("not a number: " + v);
+                        }
+
+                        ++this.count;
+                    } else if(v != null) {
+                        this.typeError = new ValueExprEvaluationException("not a number: " + v);
+                    }
+                }
+
+            }
+        }
+
+        public Value getValue() throws ValueExprEvaluationException {
+            if(this.typeError != null) {
+                throw this.typeError;
+            } else if(this.count == 0L) {
+                return vf.createLiteral(0.0D);
+            } else {
+                Literal sizeLit = vf.createLiteral(this.count);
+                return MathUtil.compute(this.sum, sizeLit, MathExpr.MathOp.DIVIDE);
+            }
+        }
+    }
+
+    private class SumAggregate extends Aggregate {
+        private Literal sum;
+        private ValueExprEvaluationException typeError;
+
+        public SumAggregate(Sum operator) {
+            super(operator);
+            this.sum = vf.createLiteral("0", XMLSchema.INTEGER);
+            this.typeError = null;
+        }
+
+        public void processAggregate(BindingSet s) throws QueryEvaluationException {
+            if(this.typeError == null) {
+                Value v = this.evaluate(s);
+                if(this.distinctValue(v)) {
+                    if(v instanceof Literal) {
+                        Literal nextLiteral = (Literal)v;
+                        if(nextLiteral.getDatatype() != null && XMLDatatypeUtil.isNumericDatatype(nextLiteral.getDatatype())) {
+                            this.sum = MathUtil.compute(this.sum, nextLiteral, MathExpr.MathOp.PLUS);
+                        } else {
+                            this.typeError = new ValueExprEvaluationException("not a number: " + v);
+                        }
+                    } else if(v != null) {
+                        this.typeError = new ValueExprEvaluationException("not a number: " + v);
+                    }
+                }
+
+            }
+        }
+
+        public Value getValue() throws ValueExprEvaluationException {
+            if(this.typeError != null) {
+                throw this.typeError;
+            } else {
+                return this.sum;
+            }
+        }
+    }
+
+    private class MaxAggregate extends Aggregate {
+        private final ValueComparator comparator = new ValueComparator();
+        private Value max = null;
+
+        public MaxAggregate(Max operator) {
+            super(operator);
+        }
+
+        public void processAggregate(BindingSet s) throws QueryEvaluationException {
+            Value v = this.evaluate(s);
+            if(this.distinctValue(v)) {
+                if(this.max == null) {
+                    this.max = v;
+                } else if(this.comparator.compare(v, this.max) > 0) {
+                    this.max = v;
+                }
+            }
+
+        }
+
+        public Value getValue() {
+            return this.max;
+        }
+    }
+
+    private class MinAggregate extends Aggregate {
+        private final ValueComparator comparator = new ValueComparator();
+        private Value min = null;
+
+        public MinAggregate(Min operator) {
+            super(operator);
+        }
+
+        public void processAggregate(BindingSet s) throws QueryEvaluationException {
+            Value v = this.evaluate(s);
+            if(this.distinctValue(v)) {
+                if(this.min == null) {
+                    this.min = v;
+                } else if(this.comparator.compare(v, this.min) < 0) {
+                    this.min = v;
+                }
+            }
+
+        }
+
+        public Value getValue() {
+            return this.min;
+        }
+    }
+
+    private class CountAggregate extends Aggregate {
+        private long count = 0L;
+        private final Set<BindingSet> distinctBindingSets;
+
+        public CountAggregate(Count operator) {
+            super(operator);
+            if(operator.isDistinct() && this.getArg() == null) {
+                this.distinctBindingSets = new HashSet();
+            } else {
+                this.distinctBindingSets = null;
+            }
+
+        }
+
+        public void processAggregate(BindingSet s) throws QueryEvaluationException {
+            if(this.getArg() != null) {
+                Value value = this.evaluate(s);
+                if(value != null && this.distinctValue(value)) {
+                    ++this.count;
+                }
+            } else if(this.distinctBindingSet(s)) {
+                ++this.count;
+            }
+
+        }
+
+        protected boolean distinctBindingSet(BindingSet s) {
+            return this.distinctBindingSets == null || this.distinctBindingSets.add(s);
+        }
+
+        public Value getValue() {
+            return vf.createLiteral(Long.toString(this.count), XMLSchema.INTEGER);
+        }
+    }
+
+    private abstract class Aggregate {
+        private final Set<Value> distinctValues;
+        private final ValueExpr arg;
+
+        public Aggregate(AggregateOperatorBase operator) {
+            this.arg = operator.getArg();
+            if(operator.isDistinct()) {
+                this.distinctValues = new HashSet();
+            } else {
+                this.distinctValues = null;
+            }
+
+        }
+
+        public abstract Value getValue() throws ValueExprEvaluationException;
+
+        public abstract void processAggregate(BindingSet var1) throws QueryEvaluationException;
+
+        protected boolean distinctValue(Value value) {
+            return this.distinctValues == null || this.distinctValues.add(value);
+        }
+
+        protected ValueExpr getArg() {
+            return this.arg;
+        }
+
+        protected Value evaluate(BindingSet s) throws QueryEvaluationException {
+            try {
+                return evaluateValue(getArg(), s);
+            } catch (ValueExprEvaluationException var3) {
+                return null;
+            }
+        }
+    }
+
+    private class Entry {
+        private BindingSet prototype;
+        private BindingSet parentBindings;
+        private Map<String, Aggregate> aggregates;
+
+        public Entry(BindingSet prototype, BindingSet parentBindings, Group group)
+                throws ValueExprEvaluationException, QueryEvaluationException
+        {
+            this.prototype = prototype;
+            this.parentBindings = parentBindings;
+            this.aggregates = new LinkedHashMap();
+            Iterator i$ = group.getGroupElements().iterator();
+
+            while(i$.hasNext()) {
+                GroupElem ge = (GroupElem)i$.next();
+                Aggregate create = this.create(ge.getOperator());
+                if(create != null) {
+                    this.aggregates.put(ge.getName(), create);
+                }
+            }
+
+        }
+
+        public BindingSet getPrototype() {
+            return this.prototype;
+        }
+
+        public void addSolution(BindingSet bindingSet) throws QueryEvaluationException {
+            Iterator i$ = this.aggregates.values().iterator();
+
+            while(i$.hasNext()) {
+                Aggregate aggregate = (Aggregate)i$.next();
+                aggregate.processAggregate(bindingSet);
+            }
+
+        }
+
+        public void bindSolution(QueryBindingSet sol) throws QueryEvaluationException {
+            Iterator i$ = this.aggregates.keySet().iterator();
+
+            while(i$.hasNext()) {
+                String name = (String)i$.next();
+
+                try {
+                    Value ex = ((Aggregate)this.aggregates.get(name)).getValue();
+                    if(ex != null) {
+                        sol.setBinding(name, ex);
+                    }
+                } catch (ValueExprEvaluationException var5) {
+                    ;
+                }
+            }
+
+        }
+
+        private Aggregate create(AggregateOperator operator)
+                throws QueryEvaluationException
+        {
+            if (operator instanceof Count)
+                return new CountAggregate((Count)operator);
+            else if (operator instanceof Min)
+                return new MinAggregate((Min)operator);
+            else if (operator instanceof Max)
+                return new MaxAggregate((Max)operator);
+            else if (operator instanceof Sum)
+                return new SumAggregate((Sum)operator);
+            else if (operator instanceof Avg)
+                return new AvgAggregate((Avg)operator);
+            else if (operator instanceof Sample)
+                return new SampleAggregate((Sample)operator);
+            else if (operator instanceof GroupConcat)
+                return new ConcatAggregate((GroupConcat)operator, parentBindings);
+            else
+                return null;
+        }
     }
 }

@@ -1,4 +1,4 @@
-<%@page import="eu.semagrow.stack.modules.commons.CONSTANTS"%>
+<%@page import="eu.semagrow.commons.CONSTANTS"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
 

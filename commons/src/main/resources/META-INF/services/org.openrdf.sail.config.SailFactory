@@ -1,0 +1,3 @@
+eu.semagrow.commons.voidinfer.config.FileReloadingMemoryStoreFactory
+eu.semagrow.commons.voidinfer.config.VOIDInferencerFactory
+eu.semagrow.commons.voidinfer.config.SEVODInferencerFactory

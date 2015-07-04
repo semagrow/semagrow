@@ -1,4 +1,4 @@
-<%@page import="eu.semagrow.stack.modules.vocabulary.SEMAGROW"%>
+<%@page import="eu.semagrow.commons.vocabulary.SEMAGROW"%>
 <%@page import="org.openrdf.model.vocabulary.DCTERMS"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="java.util.HashMap"%>
@@ -9,7 +9,7 @@
 <%@page import="org.openrdf.query.impl.MutableTupleQueryResult"%>
 <%@page import="org.openrdf.query.TupleQueryResult"%>
 <%@page import="eu.semagrow.stack.webapp.controllers.SparqlSamplesController"%>
-<%@page import="eu.semagrow.stack.modules.commons.CONSTANTS"%>
+<%@page import="eu.semagrow.commons.CONSTANTS"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 
     <table id="sparqlSamples">

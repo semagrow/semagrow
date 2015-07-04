@@ -87,13 +87,10 @@ public class OnSubscribeTupleResultsReactor implements Publisher {
         @Override
         public void endQueryResult() throws TupleQueryResultHandlerException {
             subscriber.onComplete();
-            System.out.println("completed");
         }
 
         @Override
         public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
-            logger.debug(bindingSet.toString());
-            System.out.println(bindingSet);
             subscriber.onNext(bindingSet);
         }
 
