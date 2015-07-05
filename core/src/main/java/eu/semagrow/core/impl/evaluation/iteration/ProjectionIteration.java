@@ -1,6 +1,5 @@
 package eu.semagrow.core.impl.evaluation.iteration;
 
-import eu.semagrow.core.impl.evaluation.EvaluationStrategyImpl;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;

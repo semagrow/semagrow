@@ -1,7 +1,8 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx.reactor;
 
 import eu.semagrow.core.impl.algebra.*;
 import eu.semagrow.core.impl.planner.Plan;
+import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -21,11 +22,11 @@ import java.util.List;
 /**
  * Created by antonis on 26/3/2015.
  */
-public class FederatedReactorEvaluationStrategyImpl extends ReactorEvaluationStrategyImpl {
+public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
-    public ReactiveQueryExecutor queryExecutor;
+    public QueryExecutor queryExecutor;
 
-    public FederatedReactorEvaluationStrategyImpl(ReactiveQueryExecutor queryExecutor, final ValueFactory vf) {
+    public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
             getStatements(Resource resource, URI uri, Value value, Resource... resources) throws QueryEvaluationException {
@@ -41,7 +42,7 @@ public class FederatedReactorEvaluationStrategyImpl extends ReactorEvaluationStr
             Environment.initialize();
     }
 
-    public FederatedReactorEvaluationStrategyImpl(ReactiveQueryExecutor queryExecutor) {
+    public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor) {
         this(queryExecutor, ValueFactoryImpl.getInstance());
     }
 
@@ -169,7 +170,7 @@ public class FederatedReactorEvaluationStrategyImpl extends ReactorEvaluationStr
     public Stream<BindingSet> evaluateSourceReactive(URI source, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        Publisher<BindingSet> result = queryExecutor.evaluateReactive(source, expr, bindings);
+        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
         return Streams.wrap(result).dispatchOn(Environment.cachedDispatcher());
     }
 
@@ -178,7 +179,7 @@ public class FederatedReactorEvaluationStrategyImpl extends ReactorEvaluationStr
     {
         Publisher<BindingSet> publisherOfBindings = Streams.from(bindings);
 
-        Publisher<BindingSet> result = queryExecutor.evaluateReactive(source, expr, publisherOfBindings);
+        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, publisherOfBindings);
 
         return Streams.wrap(result).dispatchOn(Environment.cachedDispatcher());
     }

@@ -30,7 +30,8 @@ public class QueryExecutorWrapper implements QueryExecutor {
         return getWrappedExecutor().evaluate(endpoint, expr, bindings);
     }
 
-    public CloseableIteration<BindingSet, QueryEvaluationException> evaluate(URI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter) throws QueryEvaluationException {
+    public CloseableIteration<BindingSet, QueryEvaluationException>
+        evaluate(URI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter) throws QueryEvaluationException {
         return getWrappedExecutor().evaluate(endpoint,expr,bindingIter);
     }
 }

@@ -1,14 +1,20 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx.reactor;
 
-import eu.semagrow.core.impl.evaluation.QueryExecutorImpl;
+import eu.semagrow.core.impl.evaluation.SPARQLQueryStringUtils;
+import eu.semagrow.core.impl.evaluation.rx.OnSubscribeTupleResultsReactor;
+import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
+import eu.semagrow.core.impl.evaluation.rx.rxjava.FederatedEvaluationStrategyImpl;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.Var;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
+import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sparql.SPARQLRepository;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,18 +27,38 @@ import java.util.*;
  * Created by antonis on 7/4/2015.
  */
 
-public class ReactorQueryExecutorImpl
-        extends QueryExecutorImpl
-        implements ReactiveQueryExecutor
+public class QueryExecutorImpl implements QueryExecutor
 {
 
-    private final Logger logger = LoggerFactory.getLogger(ReactiveQueryExecutorImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(eu.semagrow.core.impl.evaluation.rx.rxjava.QueryExecutorImpl.class);
 
     private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
 
     private boolean rowIdOpt = false;
 
     private int batchSize = 1;
+
+    private int countconn = 0;
+
+
+    public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
+        Repository repo = null;
+
+        if (!repoMap.containsKey(endpoint)) {
+            repo = new SPARQLRepository(endpoint.stringValue());
+            repoMap.put(endpoint,repo);
+        } else {
+            repo = repoMap.get(endpoint);
+        }
+
+        if (!repo.isInitialized())
+            repo.initialize();
+
+        RepositoryConnection conn = repo.getConnection();
+        logger.debug("Connection " + conn.toString() +" started, currently open " + countconn);
+        countconn++;
+        return conn;
+    }
 
     public void setBatchSize(int b) {
         batchSize = b;
@@ -42,23 +68,24 @@ public class ReactorQueryExecutorImpl
         return batchSize;
     }
 
-    public Publisher<BindingSet> evaluateReactive(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+    public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException
     {
         return evaluateReactorImpl(endpoint, expr, bindings);
     }
 
-    public Publisher<BindingSet> evaluateReactive(final URI endpoint, final TupleExpr expr, final Publisher<BindingSet> bindings)
+    public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final Publisher<BindingSet> bindings)
             throws QueryEvaluationException
     {
         return evaluateReactorImpl(endpoint, expr, Streams.wrap(bindings));
     }
 
     public Stream<BindingSet>
-    evaluateReactorImpl(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
-            throws QueryEvaluationException {
-
+        evaluateReactorImpl(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+            throws QueryEvaluationException
+    {
         Stream<BindingSet> result = null;
+
         try {
             Set<String> freeVars = computeVars(expr);
 
@@ -69,7 +96,7 @@ public class ReactorQueryExecutorImpl
 
             if (freeVars.isEmpty()) {
 
-                final String sparqlQuery = buildSPARQLQuery(expr, freeVars);
+                final String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQuery(expr, freeVars);
 
                 /*
                 result = new DelayedIteration<BindingSet, QueryEvaluationException>() {
@@ -93,7 +120,7 @@ public class ReactorQueryExecutorImpl
                 */
                 result = Streams.just(bindings).flatMap(b -> {
                     try {
-                        if (sendBooleanQuery(endpoint, sparqlQuery, relevantBindings))
+                        if (sendBooleanQueryReactor(endpoint, sparqlQuery, relevantBindings))
                             return Streams.just(b);
                         else
                             return Streams.empty();
@@ -104,11 +131,11 @@ public class ReactorQueryExecutorImpl
 
                 return result;
             } else {
-                String sparqlQuery = buildSPARQLQuery(expr, freeVars);
+                String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQuery(expr, freeVars);
                 //result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings);
                 //result = new InsertBindingSetCursor(result, bindings);
                 result = sendTupleQueryReactor(endpoint, sparqlQuery, relevantBindings)
-                        .map(b -> FederatedReactiveEvaluationStrategyImpl.joinBindings(bindings, b));
+                        .map(b -> FederatedEvaluationStrategyImpl.joinBindings(bindings, b));
             }
 
             return result;
@@ -121,10 +148,9 @@ public class ReactorQueryExecutorImpl
     }
 
     public Stream<BindingSet>
-    evaluateReactorImpl(URI endpoint, TupleExpr expr,
-                         Stream<BindingSet> bindingIter)
-            throws QueryEvaluationException {
-
+        evaluateReactorImpl(URI endpoint, TupleExpr expr, Stream<BindingSet> bindingIter)
+            throws QueryEvaluationException
+    {
         //Stream<BindingSet> result = null;
 
         try {
@@ -136,7 +162,6 @@ public class ReactorQueryExecutorImpl
                     } catch (Exception e) {
                         return Streams.fail(e);
                     } });
-
 
             /*
             return bindingIter.flatMap(b -> {
@@ -168,7 +193,7 @@ public class ReactorQueryExecutorImpl
 
         Set<String> relevant = new HashSet<String>(getRelevantBindingNames(bindings, exprVars));
 
-        String sparqlQuery = buildSPARQLQueryUNION(expr, bindings, relevant);
+        String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQueryUNION(expr, bindings, relevant);
 
         result = sendTupleQueryReactor(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
 
@@ -235,7 +260,7 @@ public class ReactorQueryExecutorImpl
     }
 
     protected Stream<BindingSet>
-    sendTupleQueryReactor(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendTupleQueryReactor(URI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);
@@ -259,7 +284,7 @@ public class ReactorQueryExecutorImpl
     }
 
     protected boolean
-    sendBooleanQueryReactor(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendBooleanQueryReactor(URI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);
@@ -270,5 +295,57 @@ public class ReactorQueryExecutorImpl
 
         logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' ') + " with " + query.getBindings());
         return query.evaluate();
+    }
+
+
+    protected BindingSet filterRelevant(BindingSet bindings, Collection<String> relevant) {
+        QueryBindingSet newBindings = new QueryBindingSet();
+        for (Binding b : bindings) {
+            if (relevant.contains(b.getName())) {
+                newBindings.setBinding(b);
+            }
+        }
+        return newBindings;
+    }
+
+    protected Set<String> getRelevantBindingNames(List<BindingSet> bindings, Set<String> exprVars) {
+
+        if (bindings.isEmpty())
+            return Collections.emptySet();
+
+        return getRelevantBindingNames(bindings.get(0), exprVars);
+    }
+
+    protected Set<String> getRelevantBindingNames(BindingSet bindings, Set<String> exprVars){
+        Set<String> relevantBindingNames = new HashSet<String>(5);
+        for (String bName : bindings.getBindingNames()) {
+            if (exprVars.contains(bName))
+                relevantBindingNames.add(bName);
+        }
+
+        return relevantBindingNames;
+    }
+
+    /**
+     * Compute the variable names occurring in the service expression using tree
+     * traversal, since these are necessary for building the SPARQL query.
+     *
+     * @return the set of variable names in the given service expression
+     */
+    protected Set<String> computeVars(TupleExpr serviceExpression) {
+        final Set<String> res = new HashSet<String>();
+        serviceExpression.visit(new QueryModelVisitorBase<RuntimeException>() {
+
+            @Override
+            public void meet(Var node)
+                    throws RuntimeException {
+                // take only real vars, i.e. ignore blank nodes
+                if (!node.hasValue() && !node.isAnonymous())
+                    res.add(node.getName());
+            }
+            // TODO maybe stop tree traversal in nested SERVICE?
+            // TODO special case handling for BIND
+        });
+        return res;
     }
 }

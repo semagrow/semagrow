@@ -11,6 +11,7 @@ import eu.semagrow.core.impl.evaluation.base.FederatedQueryEvaluationSessionImpl
 import eu.semagrow.core.impl.evaluation.interceptors.InterceptingQueryExecutorWrapper;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.core.impl.evaluation.interceptors.QueryExecutionInterceptor;
+import eu.semagrow.core.impl.evaluation.iteration.QueryExecutorImpl;
 import eu.semagrow.querylog.api.QueryLogHandler;
 import eu.semagrow.core.impl.evaluation.monitoring.QueryLogInterceptor;
 

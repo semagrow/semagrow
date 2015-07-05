@@ -1,7 +1,8 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
 import eu.semagrow.core.impl.algebra.*;
 import eu.semagrow.core.impl.planner.Plan;
+import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -20,11 +21,11 @@ import java.util.Set;
 /**
  * Created by angel on 11/26/14.
  */
-public class FederatedReactiveEvaluationStrategyImpl extends ReactiveEvaluationStrategyImpl {
+public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
-    public ReactiveQueryExecutor queryExecutor;
+    public QueryExecutor queryExecutor;
 
-    public FederatedReactiveEvaluationStrategyImpl(ReactiveQueryExecutor queryExecutor, final ValueFactory vf) {
+    public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
             getStatements(Resource resource, URI uri, Value value, Resource... resources) throws QueryEvaluationException {
@@ -38,7 +39,7 @@ public class FederatedReactiveEvaluationStrategyImpl extends ReactiveEvaluationS
         this.queryExecutor = queryExecutor;
     }
 
-    public FederatedReactiveEvaluationStrategyImpl(ReactiveQueryExecutor queryExecutor) {
+    public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor) {
         this(queryExecutor, ValueFactoryImpl.getInstance());
     }
 
@@ -103,7 +104,7 @@ public class FederatedReactiveEvaluationStrategyImpl extends ReactiveEvaluationS
                                              .join(Observable.just(b),
                                                      b1 -> Observable.never(),
                                                      b1 -> Observable.never(),
-                                                     FederatedReactiveEvaluationStrategyImpl::joinBindings);
+                                                     FederatedEvaluationStrategyImpl::joinBindings);
                     })
                 );
     }
@@ -118,7 +119,7 @@ public class FederatedReactiveEvaluationStrategyImpl extends ReactiveEvaluationS
                                         .join(Observable.just(b),
                                                 b1 -> Observable.never(),
                                                 b1 -> Observable.never(),
-                                                FederatedReactiveEvaluationStrategyImpl::joinBindings);
+                                                FederatedEvaluationStrategyImpl::joinBindings);
                         })
                 );
     }
@@ -158,7 +159,7 @@ public class FederatedReactiveEvaluationStrategyImpl extends ReactiveEvaluationS
     public Observable<BindingSet> evaluateSourceReactive(URI source, TupleExpr expr, BindingSet bindings)
         throws QueryEvaluationException
     {
-        Publisher<BindingSet> result = queryExecutor.evaluateReactive(source, expr, bindings);
+        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
 
         return RxReactiveStreams.toObservable(result).subscribeOn(Schedulers.io());
     }
@@ -168,7 +169,7 @@ public class FederatedReactiveEvaluationStrategyImpl extends ReactiveEvaluationS
     {
         Publisher<BindingSet> publisherOfBindings = RxReactiveStreams.toPublisher(Observable.from(bindings));
 
-        Publisher<BindingSet> result = queryExecutor.evaluateReactive(source, expr, publisherOfBindings);
+        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, publisherOfBindings);
 
         return RxReactiveStreams.toObservable(result).subscribeOn(Schedulers.io());
     }

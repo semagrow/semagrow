@@ -3,6 +3,7 @@ package eu.semagrow.core.impl.evaluation;
 import eu.semagrow.core.evaluation.QueryExecutor;
 import eu.semagrow.core.impl.evaluation.interceptors.QueryEvaluationInterceptor;
 import eu.semagrow.core.impl.evaluation.interceptors.InterceptingEvaluationStrategy;
+import eu.semagrow.core.impl.evaluation.iteration.EvaluationStrategyImpl;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.query.BindingSet;
