@@ -191,14 +191,19 @@ public class SPARQLQueryStringUtils {
         String where = query.substring(query.indexOf('{'));
         StringBuilder sb = new StringBuilder();
         int i = 1;
+        boolean flag1 = false;
         for (BindingSet b : bindings) {
+            if (flag1) {
+                sb.append(" UNION ");
+            }
+            flag1 = true;
             String tmpStr = where;
             for (String name : relevantBindingNames) {
                 String pattern = "[\\?\\$]" + name + "(?=\\W)";
                 String replacement = "?" + name + "_" + i;
                 tmpStr = tmpStr.replaceAll(pattern, Matcher.quoteReplacement(replacement));
             }
-            tmpStr = tmpStr.substring(1,tmpStr.lastIndexOf('}'));
+            tmpStr = tmpStr.substring(0,tmpStr.lastIndexOf('}'));
             sb.append(tmpStr);
             sb.append(" FILTER (");
             boolean flag = false;
@@ -210,17 +215,17 @@ public class SPARQLQueryStringUtils {
                 sb.append("?"+name + "_" + i +"=");
                 appendValueAsString(sb, b.getValue(name));
             }
-            sb.append(") } UNION {");
+            sb.append(") }");
             i++;
         }
-        sb.append("} }");
+        sb.append(" }");
         String pr = "SELECT ";
         for (int j=1; j<i; j++) {
             for (String name : relevantBindingNames) {
                 pr = pr + "?" + name + "_" + j + " ";
             }
         }
-        pr = pr + "\nWHERE { { ";
+        pr = pr + "\nWHERE { ";
         return (pr + sb.toString());
     }
     ////////////////////////////////////////////////////////////////////////////////////
