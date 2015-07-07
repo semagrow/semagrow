@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.evaluation.base;
+package eu.semagrow.core.impl.evaluation;
 
 import eu.semagrow.core.evaluation.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;

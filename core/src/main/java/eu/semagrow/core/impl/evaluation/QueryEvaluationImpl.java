@@ -7,7 +7,6 @@ import eu.semagrow.core.evaluation.FederatedEvaluationStrategy;
 import eu.semagrow.core.evaluation.FederatedQueryEvaluation;
 import eu.semagrow.core.evaluation.FederatedQueryEvaluationSession;
 import eu.semagrow.core.evaluation.QueryExecutor;
-import eu.semagrow.core.impl.evaluation.base.FederatedQueryEvaluationSessionImplBase;
 import eu.semagrow.core.impl.evaluation.interceptors.InterceptingQueryExecutorWrapper;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.core.impl.evaluation.interceptors.QueryExecutionInterceptor;

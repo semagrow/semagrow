@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation.interceptors;
 
 import eu.semagrow.core.evaluation.FederatedEvaluationStrategy;
-import eu.semagrow.core.impl.evaluation.base.FederatedEvaluationStrategyWrapper;
+import eu.semagrow.core.impl.evaluation.FederatedEvaluationStrategyWrapper;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
