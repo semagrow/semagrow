@@ -146,10 +146,12 @@ public class SemagrowSailConnection extends SailConnectionBase {
     }
 
     public  Publisher<? extends BindingSet>
-        evaluateReactive(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings, boolean b, boolean p)
+        evaluateReactive(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings, boolean b, boolean p,
+                         Collection<URI> includeOnlySources,
+                         Collection<URI> excludeSources)
             throws SailException
     {
-        return evaluateInternalReactive(tupleExpr, dataset, bindings, b, p, Collections.emptySet(), Collections.emptySet());
+        return evaluateInternalReactive(tupleExpr, dataset, bindings, b, p, includeOnlySources, excludeSources);
     }
 
     protected Publisher<? extends BindingSet>
