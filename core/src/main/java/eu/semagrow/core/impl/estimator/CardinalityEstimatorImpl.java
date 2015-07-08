@@ -166,7 +166,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
             return getConditionSelectivity((Not)condition, expr, source);
         }
         // else identify ranges?
-        return 0.5;
+        return 0.0001;
     }
 
     public double getConditionSelectivity(And valueExpr, TupleExpr expr, URI source) {

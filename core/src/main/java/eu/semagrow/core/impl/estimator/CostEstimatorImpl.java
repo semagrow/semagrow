@@ -52,6 +52,10 @@ public class CostEstimatorImpl implements CostEstimator {
             return ((Plan)expr).getProperties().getCost();
         else if (expr instanceof Filter)
             return getCost((Filter)expr, source);
+        else if (expr instanceof UnaryTupleOperator)
+            return getCost((UnaryTupleOperator)expr, source);
+        else if (expr instanceof BinaryTupleOperator)
+            return getCost((BinaryTupleOperator)expr, source);
         else
             return new Cost(cardinalityEstimator.getCardinality(expr, source));
     }
@@ -75,7 +79,7 @@ public class CostEstimatorImpl implements CostEstimator {
     }
 
     public Cost getCost(Filter filter, URI source) {
-        return getCost(filter.getArg());
+        return getCost(filter.getArg(), source);
     }
 
     public Cost getCost(BindJoin join, URI source) {
