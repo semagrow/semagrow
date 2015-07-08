@@ -78,7 +78,8 @@ public class PlanGeneratorImpl implements PlanGenerator {
     protected Plan createPlan(Set<TupleExpr> planId, TupleExpr innerExpr)
     {
         Plan p = new Plan(planId, innerExpr);
-        updatePlanProperties(p);
+        //updatePlanProperties(p);
+        updatePlan(p);
         return p;
     }
 
@@ -146,6 +147,9 @@ public class PlanGeneratorImpl implements PlanGenerator {
         }
 
         // SPLENDID also cluster statementpatterns of the same source.
+        if (plans.size() == 0) {
+            int i = 0;
+        }
 
         return plans;
     }

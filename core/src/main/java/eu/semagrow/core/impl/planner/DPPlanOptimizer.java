@@ -110,6 +110,7 @@ public class DPPlanOptimizer implements PlanOptimizer {
 
         Collection<Plan> fullPlans = optPlans.get(r);
         fullPlans = planGenerator.finalizePlans(fullPlans, properties);
+        prunePlans(fullPlans);
 
         if (!fullPlans.isEmpty()) {
             logger.info("Found " + fullPlans.size() + " complete optimal plans");

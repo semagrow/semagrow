@@ -50,6 +50,8 @@ public class CostEstimatorImpl implements CostEstimator {
             return getCost((Order)expr, source);
         else if (expr instanceof Plan)
             return ((Plan)expr).getProperties().getCost();
+        else if (expr instanceof Filter)
+            return getCost((Filter)expr, source);
         else
             return new Cost(cardinalityEstimator.getCardinality(expr, source));
     }
@@ -70,6 +72,10 @@ public class CostEstimatorImpl implements CostEstimator {
         Cost cost = getCost(expr.getArg()).add(new Cost(communCost));
         cost = new Cost(communCost);
         return cost;
+    }
+
+    public Cost getCost(Filter filter, URI source) {
+        return getCost(filter.getArg());
     }
 
     public Cost getCost(BindJoin join, URI source) {
