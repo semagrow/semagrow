@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx;
 
 import org.openrdf.query.*;
 import org.reactivestreams.Publisher;

@@ -1,5 +1,7 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
+import eu.semagrow.core.impl.evaluation.rx.EvaluationStrategy;
+import eu.semagrow.core.impl.evaluation.rx.PublisherFromIteration;
 import info.aduna.iteration.Iteration;
 import org.openrdf.model.Value;
 import org.openrdf.query.Binding;
@@ -10,7 +12,6 @@ import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.ValueExprEvaluationException;
-import org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl;
 import org.openrdf.query.algebra.evaluation.impl.ExternalSet;
 import org.openrdf.query.algebra.evaluation.util.OrderComparator;
 import org.openrdf.query.algebra.evaluation.util.ValueComparator;
@@ -24,24 +25,38 @@ import java.util.*;
 /**
  * Created by angel on 11/22/14.
  */
-public class ReactiveEvaluationStrategyImpl
-        extends EvaluationStrategyImpl
-        implements ReactiveEvaluationStrategy
+public class EvaluationStrategyImpl implements EvaluationStrategy
 {
 
+    private org.openrdf.query.algebra.evaluation.EvaluationStrategy evalStrategy;
 
-    public ReactiveEvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
-        super(tripleSource, dataset);
+    public EvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
+
+        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource, dataset);
     }
 
-    public ReactiveEvaluationStrategyImpl(TripleSource tripleSource) {
-        super(tripleSource);
+    public EvaluationStrategyImpl(TripleSource tripleSource) {
+
+        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource);
+
     }
 
-    public Publisher<BindingSet> evaluateReactive(TupleExpr expr, BindingSet bindings)
+    public Publisher<BindingSet> evaluate(TupleExpr expr, BindingSet bindings)
         throws QueryEvaluationException
     {
         return RxReactiveStreams.toPublisher(evaluateReactiveInternal(expr, bindings));
+    }
+
+    public boolean isTrue(ValueExpr expr, BindingSet bindings)
+            throws ValueExprEvaluationException, QueryEvaluationException
+    {
+        return evalStrategy.isTrue(expr, bindings);
+    }
+
+    public Value evaluate(ValueExpr expr, BindingSet bindings)
+            throws ValueExprEvaluationException, QueryEvaluationException
+    {
+        return evalStrategy.evaluate(expr, bindings);
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(TupleExpr expr, BindingSet bindings)
@@ -172,7 +187,7 @@ public class ReactiveEvaluationStrategyImpl
     public Observable<BindingSet> evaluateReactiveInternal(StatementPattern expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(BindingSetAssignment expr, BindingSet bindings)
@@ -180,7 +195,7 @@ public class ReactiveEvaluationStrategyImpl
     {
         final Iterator<BindingSet> iter = expr.getBindingSets().iterator();
 
-        final List<BindingSet> blist = new LinkedList();
+        final List<BindingSet> blist = new LinkedList<BindingSet>();
         Iterators.addAll(iter, blist);
 
         return Observable.from(blist)
@@ -201,14 +216,14 @@ public class ReactiveEvaluationStrategyImpl
     public Observable<BindingSet> evaluateReactiveInternal(ZeroLengthPath expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
     public Observable<BindingSet> evaluateReactiveInternal(ArbitraryLengthPath expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(Filter expr, BindingSet bindings)
@@ -217,12 +232,13 @@ public class ReactiveEvaluationStrategyImpl
         QueryBindingSet scopeBindings = new QueryBindingSet(bindings);
 
         return evaluateReactiveInternal(expr.getArg(), bindings)
-                    .filter((b) ->  {
+                    .filter((b) -> {
                         try {
                             return this.isTrue(expr.getCondition(), scopeBindings);
-                        }catch(QueryEvaluationException /*| ValueExprEvaluationException */ e) {
+                        } catch (QueryEvaluationException /*| ValueExprEvaluationException */ e) {
                             return false;
-                        } });
+                        }
+                    });
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(Projection expr, BindingSet bindings)
@@ -257,10 +273,13 @@ public class ReactiveEvaluationStrategyImpl
             throws QueryEvaluationException
     {
         return evaluateReactiveInternal(expr.getLeftArg(), bindings)
-                    .concatMap( (b) -> {
+                    .concatMap((b) -> {
                         try {
                             return this.evaluateReactiveInternal(expr.getRightArg(), b);
-                        } catch (Exception e) { return Observable.error(e); } });
+                        } catch (Exception e) {
+                            return Observable.error(e);
+                        }
+                    });
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(LeftJoin expr, BindingSet bindings)
@@ -272,11 +291,12 @@ public class ReactiveEvaluationStrategyImpl
         joinAttributes.retainAll(expr.getRightArg().getBindingNames());
 
         return evaluateReactiveInternal(expr.getLeftArg(), bindings)
-                .concatMap( (b) -> {
+                .concatMap((b) -> {
                     try {
                         return this.evaluateReactiveInternal(expr.getRightArg(), b).defaultIfEmpty(b);
                     } catch (Exception e) {
-                        return Observable.error(e); }
+                        return Observable.error(e);
+                    }
                 });
     }
 
@@ -290,7 +310,7 @@ public class ReactiveEvaluationStrategyImpl
             throws QueryEvaluationException
     {
         ValueComparator vcmp = new ValueComparator();
-        OrderComparator cmp = new OrderComparator(this, expr, vcmp);
+        OrderComparator cmp = new OrderComparator(evalStrategy, expr, vcmp);
         return evaluateReactiveInternal(expr.getArg(), bindings)
                 .toSortedList(cmp::compare)
                 .flatMap(Observable::from);
@@ -324,27 +344,27 @@ public class ReactiveEvaluationStrategyImpl
     public Observable<BindingSet> evaluateReactiveInternal(DescribeOperator expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(Intersection expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
     public Observable<BindingSet> evaluateReactiveInternal(Difference expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
     public Observable<BindingSet> evaluateReactiveInternal(Service expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     protected <T> Observable<T> fromIteration(Iteration<T, ? extends Exception> it) {

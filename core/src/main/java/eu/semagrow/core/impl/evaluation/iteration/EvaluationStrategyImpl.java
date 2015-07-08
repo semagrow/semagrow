@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.evaluation;
+package eu.semagrow.core.impl.evaluation.iteration;
 
 import eu.semagrow.core.evaluation.FederatedEvaluationStrategy;
 import eu.semagrow.core.evaluation.QueryExecutor;

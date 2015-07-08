@@ -1,7 +1,6 @@
 package eu.semagrow.core.impl.evaluation.iteration;
 
 import eu.semagrow.core.impl.algebra.ProvenanceValue;
-import eu.semagrow.core.impl.evaluation.EvaluationStrategyImpl;
 //import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.ParallelEvaluator;
 //import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.base.ParallelEvaluatorBase;
 import info.aduna.iteration.CloseableIteration;

@@ -1,5 +1,7 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx.reactor;
 
+import eu.semagrow.core.impl.evaluation.rx.EvaluationStrategy;
+import eu.semagrow.core.impl.evaluation.rx.PublisherFromIteration;
 import info.aduna.iteration.Iteration;
 import org.openrdf.model.Literal;
 import org.openrdf.model.Value;
@@ -14,9 +16,7 @@ import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.openrdf.query.algebra.evaluation.ValueExprEvaluationException;
-import org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl;
 import org.openrdf.query.algebra.evaluation.impl.ExternalSet;
-import org.openrdf.query.algebra.evaluation.iterator.GroupIterator;
 import org.openrdf.query.algebra.evaluation.util.MathUtil;
 import org.openrdf.query.algebra.evaluation.util.OrderComparator;
 import org.openrdf.query.algebra.evaluation.util.ValueComparator;
@@ -32,30 +32,45 @@ import java.util.*;
 /**
  * Created by antonis on 26/3/2015.
  */
-public class ReactorEvaluationStrategyImpl
-        extends EvaluationStrategyImpl
-        implements ReactiveEvaluationStrategy {
+public class EvaluationStrategyImpl implements EvaluationStrategy {
 
     private ValueFactory vf;
+    private org.openrdf.query.algebra.evaluation.EvaluationStrategy evalStrategy;
 
-    public ReactorEvaluationStrategyImpl(TripleSource tripleSource) {
-        super(tripleSource);
+
+    public EvaluationStrategyImpl(TripleSource tripleSource) {
         vf = tripleSource.getValueFactory();
+        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource);
     }
 
-    public ReactorEvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
-        super(tripleSource, dataset);
+    public EvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
         vf = tripleSource.getValueFactory();
+        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource,dataset);
     }
 
-    public Value evaluateValue(ValueExpr expr, BindingSet bindings) throws ValueExprEvaluationException, QueryEvaluationException {
-        return evaluate(expr, bindings);
-    }
-
-    @Override
-    public Publisher<BindingSet> evaluateReactive(TupleExpr expr, BindingSet bindings) throws QueryEvaluationException {
+    public Publisher<BindingSet> evaluate(TupleExpr expr, BindingSet bindings)
+            throws QueryEvaluationException
+    {
         //return RxReactiveStreams.toPublisher(evaluateReactorInternal(expr, bindings));;
         return evaluateReactorInternal(expr, bindings);
+    }
+
+    public boolean isTrue(ValueExpr expr, BindingSet bindings)
+            throws ValueExprEvaluationException, QueryEvaluationException
+    {
+        return evalStrategy.isTrue(expr, bindings);
+    }
+
+    public Value evaluate(ValueExpr expr, BindingSet bindings)
+            throws ValueExprEvaluationException, QueryEvaluationException
+    {
+        return evalStrategy.evaluate(expr, bindings);
+    }
+
+    public Value evaluateValue(ValueExpr expr, BindingSet bindings)
+            throws ValueExprEvaluationException, QueryEvaluationException
+    {
+        return evaluate(expr, bindings);
     }
 
     public Stream<BindingSet> evaluateReactorInternal(TupleExpr expr, BindingSet bindings)
@@ -185,7 +200,7 @@ public class ReactorEvaluationStrategyImpl
     public Stream<BindingSet> evaluateReactorInternal(StatementPattern expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(BindingSetAssignment expr, BindingSet bindings)
@@ -193,7 +208,7 @@ public class ReactorEvaluationStrategyImpl
     {
         final Iterator<BindingSet> iter = expr.getBindingSets().iterator();
 
-        final List<BindingSet> blist = new LinkedList();
+        final List<BindingSet> blist = new LinkedList<BindingSet>();
         Iterators.addAll(iter, blist);
 
         return Streams.from(blist)
@@ -207,21 +222,21 @@ public class ReactorEvaluationStrategyImpl
     public Stream<BindingSet> evaluateReactorInternal(ExternalSet expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(expr.evaluate(bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
     public Stream<BindingSet> evaluateReactorInternal(ZeroLengthPath expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
     public Stream<BindingSet> evaluateReactorInternal(ArbitraryLengthPath expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Filter expr, BindingSet bindings)
@@ -337,7 +352,7 @@ public class ReactorEvaluationStrategyImpl
             throws QueryEvaluationException
     {
         ValueComparator vcmp = new ValueComparator();
-        OrderComparator cmp = new OrderComparator(this, expr, vcmp);
+        OrderComparator cmp = new OrderComparator(evalStrategy, expr, vcmp);
         /*return evaluateReactorInternal(expr.getArg(), bindings)
                 .toSortedList(cmp::compare)
                 .flatMap(Streams::from);*/
@@ -372,24 +387,24 @@ public class ReactorEvaluationStrategyImpl
 
     public Stream<BindingSet> evaluateReactorInternal(DescribeOperator expr, BindingSet bindings)
             throws QueryEvaluationException {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Intersection expr, BindingSet bindings)
             throws QueryEvaluationException {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
     public Stream<BindingSet> evaluateReactorInternal(Difference expr, BindingSet bindings)
             throws QueryEvaluationException {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
     public Stream<BindingSet> evaluateReactorInternal(Service expr, BindingSet bindings)
             throws QueryEvaluationException {
-        return fromIteration(this.evaluate(expr, bindings));
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
     protected <T> Stream<T> fromIteration(Iteration<T, ? extends Exception> it) {

@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.evaluation.interceptors;
 
-import eu.semagrow.core.impl.evaluation.base.QueryExecutorWrapper;
+import eu.semagrow.core.impl.evaluation.QueryExecutorWrapper;
 import eu.semagrow.core.evaluation.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;
 

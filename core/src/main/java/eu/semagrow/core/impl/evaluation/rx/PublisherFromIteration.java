@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx;
 
 import info.aduna.iteration.Iteration;
 import info.aduna.iteration.Iterations;

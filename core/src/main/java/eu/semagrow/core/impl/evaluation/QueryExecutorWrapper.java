@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.evaluation.base;
+package eu.semagrow.core.impl.evaluation;
 
 import eu.semagrow.core.evaluation.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;
@@ -30,7 +30,8 @@ public class QueryExecutorWrapper implements QueryExecutor {
         return getWrappedExecutor().evaluate(endpoint, expr, bindings);
     }
 
-    public CloseableIteration<BindingSet, QueryEvaluationException> evaluate(URI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter) throws QueryEvaluationException {
+    public CloseableIteration<BindingSet, QueryEvaluationException>
+        evaluate(URI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter) throws QueryEvaluationException {
         return getWrappedExecutor().evaluate(endpoint,expr,bindingIter);
     }
 }

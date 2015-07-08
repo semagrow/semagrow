@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.rx;
+package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
 import org.openrdf.query.*;
 import org.slf4j.Logger;
