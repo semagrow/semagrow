@@ -13,7 +13,7 @@ import java.util.Collection;
 /**
  * Created by angel on 9/7/2015.
  */
-public class EvalUtils {
+public class QueryEvaluationUtil {
 
 
     public static BindingSet extend(EvaluationStrategy strategy, Collection<ExtensionElem> extElems, BindingSet sourceBindings)

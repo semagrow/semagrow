@@ -22,7 +22,6 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         this.query = query;
     }
 
-    @Override
     public void subscribe(Subscriber<? super BindingSet> subscriber) {
         subscriber.onSubscribe(new TupleQueryResultProducer(subscriber, query));
     }

@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
 import eu.semagrow.core.impl.algebra.*;
-import eu.semagrow.core.impl.evaluation.util.BindingSetUtils;
+import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;
@@ -106,32 +106,32 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
         joinAttributes.retainAll(expr.getRightArg().getBindingNames());
 
         return evaluateReactiveInternal(expr.getLeftArg(), bindings)
-                .toMultimap(b -> BindingSetUtils.project(joinAttributes, b), b1 -> b1)
+                .toMultimap(b -> BindingSetUtil.project(joinAttributes, b), b1 -> b1)
                 .flatMap((probe) ->
                     r.concatMap(b -> {
-                        if (!probe.containsKey(BindingSetUtils.project(joinAttributes, b)))
+                        if (!probe.containsKey(BindingSetUtil.project(joinAttributes, b)))
                             return Observable.empty();
                         else
-                            return Observable.from(probe.get(BindingSetUtils.project(joinAttributes, b)))
+                            return Observable.from(probe.get(BindingSetUtil.project(joinAttributes, b)))
                                              .join(Observable.just(b),
                                                      b1 -> Observable.never(),
                                                      b1 -> Observable.never(),
-                                                     BindingSetUtils::merge);
+                                                     BindingSetUtil::merge);
                     })
                 );
     }
 
     public static Observable<BindingSet> hashJoin(Observable<BindingSet> left, Observable<BindingSet> right, Set<String> joinAttributes) {
-        return left.toMultimap(b -> BindingSetUtils.project(joinAttributes, b), b1 -> b1)
+        return left.toMultimap(b -> BindingSetUtil.project(joinAttributes, b), b1 -> b1)
                 .flatMap((probe) -> right.concatMap(b -> {
-                            if (!probe.containsKey(BindingSetUtils.project(joinAttributes, b)))
+                            if (!probe.containsKey(BindingSetUtil.project(joinAttributes, b)))
                                 return Observable.empty();
                             else
-                                return Observable.from(probe.get(BindingSetUtils.project(joinAttributes, b)))
+                                return Observable.from(probe.get(BindingSetUtil.project(joinAttributes, b)))
                                         .join(Observable.just(b),
                                                 b1 -> Observable.never(),
                                                 b1 -> Observable.never(),
-                                                BindingSetUtils::merge);
+                                                BindingSetUtil::merge);
                         })
                 );
     }

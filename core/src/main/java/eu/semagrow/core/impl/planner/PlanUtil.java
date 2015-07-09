@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.planner;
 
-import eu.semagrow.core.impl.helpers.FilterCollector;
+import eu.semagrow.core.impl.util.FilterCollector;
 import org.openrdf.query.algebra.Filter;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.ValueExpr;
@@ -13,7 +13,7 @@ import java.util.Set;
 /**
  * Created by angel on 22/4/2015.
  */
-public class PlanUtils {
+public class PlanUtil {
 
 
     public static Collection<ValueExpr> getRelevantFiltersConditions(TupleExpr e, Collection<ValueExpr> filterConditions) {

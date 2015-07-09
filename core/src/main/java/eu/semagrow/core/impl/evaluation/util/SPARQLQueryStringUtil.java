@@ -21,7 +21,7 @@ import java.util.regex.Matcher;
 /**
  * Created by angel on 5/7/2015.
  */
-public class SPARQLQueryStringUtils {
+public class SPARQLQueryStringUtil {
 
 
     private static boolean rowIdOpt = false;
@@ -87,7 +87,8 @@ public class SPARQLQueryStringUtils {
     }
 
 
-    private static String buildSelectSPARQLQuery(TupleExpr expr, Collection<String> projection) throws Exception
+    private static String buildSelectSPARQLQuery(TupleExpr expr, Collection<String> projection)
+            throws Exception
     {
         TupleExpr body = expr.clone();
 
@@ -136,20 +137,24 @@ public class SPARQLQueryStringUtils {
 
     public static String buildSPARQLQueryUNION(TupleExpr expr,
                                            List<BindingSet> bindings,
-                                           Set<String> relevantBindingNames)
+                                           Collection<String> relevantBindingNames)
             throws Exception
     {
 
         Set<String> freeVars = computeVars(expr);
         freeVars.removeAll(relevantBindingNames);
+
         if (freeVars.isEmpty()) {
             return buildSPARQLQueryUNIONFILTER(expr, bindings, relevantBindingNames);
         }
+
         String query = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
         String where = query.substring(query.indexOf('{'));
         StringBuilder sb = new StringBuilder();
+
         int i = 1;
         boolean flag = false;
+        
         for (BindingSet b : bindings) {
             if (flag) {
                 sb.append(" UNION ");
@@ -184,7 +189,7 @@ public class SPARQLQueryStringUtils {
 
     private static String buildSPARQLQueryUNIONFILTER(TupleExpr expr,
                                                       List<BindingSet> bindings,
-                                                      Set<String> relevantBindingNames)
+                                                      Collection<String> relevantBindingNames)
             throws Exception
     {
         String query = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));

@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.helpers;
+package eu.semagrow.core.impl.util;
 import java.util.*;
 
 /**

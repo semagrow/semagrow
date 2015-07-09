@@ -1,7 +1,8 @@
 package eu.semagrow.core.impl.evaluation.iteration;
 
 import eu.semagrow.core.evaluation.QueryExecutor;
-import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtils;
+import eu.semagrow.core.impl.evaluation.ConnectionManager;
+import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
 import info.aduna.iteration.*;
 
 import org.openrdf.model.URI;
@@ -27,38 +28,10 @@ import java.util.*;
  * Created by angel on 6/6/14.
  */
 //FIXME: Shutdown connections and repositories properly
-public class QueryExecutorImpl implements QueryExecutor {
-
-    private final Logger logger = LoggerFactory.getLogger(QueryExecutorImpl.class);
-
-    private int countconn = 0;
-
-    private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
+public class QueryExecutorImpl extends ConnectionManager implements QueryExecutor {
 
     private boolean rowIdOpt = false;
 
-    public void initialize() { }
-
-    public void shutdown() { }
-
-    public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
-        Repository repo = null;
-
-        if (!repoMap.containsKey(endpoint)) {
-            repo = new SPARQLRepository(endpoint.stringValue());
-            repoMap.put(endpoint,repo);
-        } else {
-            repo = repoMap.get(endpoint);
-        }
-
-        if (!repo.isInitialized())
-            repo.initialize();
-
-        RepositoryConnection conn = repo.getConnection();
-        logger.debug("Connection " + conn.toString() +" started, currently open " + countconn);
-        countconn++;
-        return conn;
-    }
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
         evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
@@ -75,7 +48,7 @@ public class QueryExecutorImpl implements QueryExecutor {
 
             if (freeVars.isEmpty()) {
 
-                final String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQuery(expr, freeVars);
+                final String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
 
                 result = askToIteration(endpoint, sparqlQuery, bindings, relevantBindings);
                 /*
@@ -99,7 +72,7 @@ public class QueryExecutorImpl implements QueryExecutor {
                 };
                 */
             } else {
-                String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQuery(expr, freeVars);
+                String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
                 result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings);
                 result = new InsertBindingSetCursor(result, bindings);
             }
@@ -189,7 +162,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         Set<String> relevant = getRelevantBindingNames(bindings, exprVars);
 
         //String sparqlQuery = buildSPARQLQueryVALUES(expr, bindings, relevant);
-        String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQueryUNION(expr, bindings, relevant);
+        String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQueryUNION(expr, bindings, relevant);
 
         result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
 
@@ -278,7 +251,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         return closeConnAfter(conn, query.evaluate());
     }
 
-    private static <E,X extends Exception> CloseableIteration<E,X>
+    private  <E,X extends Exception> CloseableIteration<E,X>
         closeConnAfter(RepositoryConnection conn, CloseableIteration<E,X> iter) {
         return new CloseConnAfterIteration<E,X>(conn,iter);
     }
@@ -323,7 +296,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         }
     }
 
-    private static class CloseConnAfterIteration<E,X extends Exception> extends IterationWrapper<E,X> {
+    private class CloseConnAfterIteration<E,X extends Exception> extends IterationWrapper<E,X> {
 
         private RepositoryConnection conn;
 
@@ -337,12 +310,7 @@ public class QueryExecutorImpl implements QueryExecutor {
         public void handleClose() throws X {
             super.handleClose();
 
-            try {
-                if (conn != null && conn.isOpen())
-                    conn.close();
-            } catch (RepositoryException e) {
-
-            }
+            closeQuietly(conn);
         }
     }
 

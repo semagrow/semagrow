@@ -2,7 +2,7 @@ package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
 import eu.semagrow.core.impl.evaluation.rx.EvaluationStrategy;
 import eu.semagrow.core.impl.evaluation.rx.IterationPublisher;
-import eu.semagrow.core.impl.evaluation.util.EvalUtils;
+import eu.semagrow.core.impl.evaluation.util.QueryEvaluationUtil;
 import info.aduna.iteration.Iteration;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
@@ -245,7 +245,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy
             throws QueryEvaluationException
     {
         return evaluateReactiveInternal(expr.getArg(), bindings)
-                .map((b) -> EvalUtils.project(expr.getProjectionElemList(), b, bindings));
+                .map((b) -> QueryEvaluationUtil.project(expr.getProjectionElemList(), b, bindings));
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(Extension expr, BindingSet bindings)
@@ -254,7 +254,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy
         return evaluateReactiveInternal(expr.getArg(), bindings)
                 .concatMap((b) -> {
                     try {
-                        return Observable.just(EvalUtils.extend(this, expr.getElements(), b));
+                        return Observable.just(QueryEvaluationUtil.extend(this, expr.getElements(), b));
                     } catch (Exception e) {
                         return Observable.error(e);
                     }

@@ -1,7 +1,8 @@
 package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
-import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtils;
-import eu.semagrow.core.impl.evaluation.util.BindingSetUtils;
+import eu.semagrow.core.impl.evaluation.ConnectionManager;
+import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
+import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
@@ -9,13 +10,9 @@ import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sparql.SPARQLRepository;
 import org.reactivestreams.Publisher;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import rx.Observable;
@@ -25,35 +22,9 @@ import rx.RxReactiveStreams;
 /**
  * Created by angel on 11/25/14.
  */
-public class QueryExecutorImpl implements QueryExecutor
+public class QueryExecutorImpl extends ConnectionManager implements QueryExecutor
 {
-
-    private final Logger logger = LoggerFactory.getLogger(QueryExecutorImpl.class);
-
-    private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
-
     private boolean rowIdOpt = false;
-
-    private int countconn = 0;
-
-    public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
-        Repository repo = null;
-
-        if (!repoMap.containsKey(endpoint)) {
-            repo = new SPARQLRepository(endpoint.stringValue());
-            repoMap.put(endpoint,repo);
-        } else {
-            repo = repoMap.get(endpoint);
-        }
-
-        if (!repo.isInitialized())
-            repo.initialize();
-
-        RepositoryConnection conn = repo.getConnection();
-        logger.debug("Connection " + conn.toString() +" started, currently open " + countconn);
-        countconn++;
-        return conn;
-    }
 
     public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
         throws QueryEvaluationException
@@ -80,34 +51,14 @@ public class QueryExecutorImpl implements QueryExecutor
 
             //Collection<String> relevant = BindingSetUtils.projectNames(freeVars, bindings);
 
-            final BindingSet relevantBindings = BindingSetUtils.project(freeVars, bindings);
+            final BindingSet relevantBindings = BindingSetUtil.project(freeVars, bindings);
 
             freeVars.removeAll(bindings.getBindingNames());
 
             if (freeVars.isEmpty()) {
 
-                final String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQuery(expr, freeVars);
+                final String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
 
-                /*
-                result = new DelayedIteration<BindingSet, QueryEvaluationException>() {
-                    @Override
-                    protected Iteration<? extends BindingSet, ? extends QueryEvaluationException> createIteration()
-                            throws QueryEvaluationException {
-                        try {
-                            boolean askAnswer = sendBooleanQuery(endpoint, sparqlQuery, relevantBindings);
-                            if (askAnswer) {
-                                return new SingletonIteration<BindingSet, QueryEvaluationException>(bindings);
-                            } else {
-                                return new EmptyIteration<BindingSet, QueryEvaluationException>();
-                            }
-                        } catch (QueryEvaluationException e) {
-                            throw e;
-                        } catch (Exception e) {
-                            throw new QueryEvaluationException(e);
-                        }
-                    }
-                };
-                */
                 result = Observable.just(bindings).flatMap(b -> {
                     try {
                         if (sendBooleanQueryReactive(endpoint, sparqlQuery, relevantBindings))
@@ -121,11 +72,11 @@ public class QueryExecutorImpl implements QueryExecutor
 
                 return result;
             } else {
-                String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQuery(expr, freeVars);
+                String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
                 //result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings);
                 //result = new InsertBindingSetCursor(result, bindings);
                 result = sendTupleQueryReactive(endpoint, sparqlQuery, relevantBindings)
-                    .map(b -> BindingSetUtils.merge(bindings, b));
+                    .map(b -> BindingSetUtil.merge(bindings, b));
             }
 
             return result;
@@ -148,16 +99,6 @@ public class QueryExecutorImpl implements QueryExecutor
 
             return  evaluateReactiveInternal(endpoint, expr, bl);
 
-            /*
-            return bindingIter.flatMap(b -> {
-                try {
-                    return evaluateReactive(endpoint, expr, b);
-                } catch (QueryEvaluationException e2) {
-                    return Observable.error(e2);
-                }
-            });
-            */
-
         } catch (Exception e) {
             throw new QueryEvaluationException(e);
         }
@@ -178,39 +119,11 @@ public class QueryExecutorImpl implements QueryExecutor
 
         Set<String> relevant = new HashSet<String>(getRelevantBindingNames(bindings, exprVars));
 
-        String sparqlQuery = SPARQLQueryStringUtils.buildSPARQLQueryUNION(expr, bindings, relevant);
+        String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQueryUNION(expr, bindings, relevant);
 
         result = sendTupleQueryReactive(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
 
-        result = result.map(b -> convertUnionBindings(b, bindings, BindingSetUtils::merge));
-
-        /*if (!relevant.isEmpty()) {
-
-            final Observable<BindingSet> r = result;
-
-            result = Observable.from(bindings)
-                    .toMultimap(b -> FederatedReactiveEvaluationStrategyImpl.calcKey(b, relevant), b1 -> b1)
-                    .flatMap(probe ->
-                            r.concatMap(b -> {
-                                BindingSet k = FederatedReactiveEvaluationStrategyImpl.calcKey(b, relevant);
-                                if (!probe.containsKey(k))
-                                    return Observable.empty();
-                                else
-                                    return Observable.from(probe.get(k))
-                                            .merge(Observable.just(b),
-                                                    b1 -> Observable.never(),
-                                                    b1 -> Observable.never(),
-                                                     BindingSetUtils::merge);
-                            }));
-
-        }
-        else {
-
-            result = result.merge(Observable.from(bindings),
-                        (b) -> Observable.never(),
-                        (b) -> Observable.never(),
-                         BindingSetUtils::merge);
-        }*/
+        result = result.map(b -> convertUnionBindings(b, bindings, BindingSetUtil::merge));
 
         return result;
     }
@@ -295,16 +208,7 @@ public class QueryExecutorImpl implements QueryExecutor
             query.setBinding(b.getName(), b.getValue());
 
         return Observable.create(new OnSubscribeTupleResults(query)).onBackpressureBuffer()
-                .doOnCompleted(() -> {
-                    try {
-                        if (conn.isOpen()) {
-                            conn.close();
-                            logger.debug("Connection " + conn.toString() + " closed");
-                        }
-                    } catch (RepositoryException e) {
-                        logger.debug("Connection cannot be closed", e);
-                    }
-                });
+                .doOnCompleted(() -> closeQuietly(conn));
     }
 
     protected boolean
@@ -317,8 +221,11 @@ public class QueryExecutorImpl implements QueryExecutor
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.debug("Sending to " + endpoint.stringValue() + " query " + sparqlQuery.replace('\n', ' ') + " with " + query.getBindings());
-        return query.evaluate();
+        logger.debug("Sending to {} query {} with {}", endpoint.stringValue(), sparqlQuery.replace('\n', ' '), query.getBindings());
+
+        boolean answer = query.evaluate();
+        closeQuietly(conn);
+        return answer;
     }
 
 }

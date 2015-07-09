@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.planner;
 
-import eu.semagrow.core.impl.helpers.CombinationIterator;
+import eu.semagrow.core.impl.util.CombinationIterator;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.TupleExpr;

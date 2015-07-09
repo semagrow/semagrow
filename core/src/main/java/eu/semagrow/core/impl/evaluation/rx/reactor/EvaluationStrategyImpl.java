@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation.rx.reactor;
 
-import eu.semagrow.core.impl.evaluation.util.BindingSetUtils;
-import eu.semagrow.core.impl.evaluation.util.EvalUtils;
+import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
+import eu.semagrow.core.impl.evaluation.util.QueryEvaluationUtil;
 import eu.semagrow.core.impl.evaluation.rx.EvaluationStrategy;
 import eu.semagrow.core.impl.evaluation.rx.IterationPublisher;
 import info.aduna.iteration.Iteration;
@@ -259,7 +259,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
             throws QueryEvaluationException
     {
         return evaluateReactorInternal(expr.getArg(), bindings)
-                .map((b) -> EvalUtils.project(expr.getProjectionElemList(), b, bindings));
+                .map((b) -> QueryEvaluationUtil.project(expr.getProjectionElemList(), b, bindings));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Extension expr, BindingSet bindings)
@@ -268,7 +268,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         return evaluateReactorInternal(expr.getArg(), bindings)
                 .concatMap((b) -> {
                     try {
-                        return Streams.just(EvalUtils.extend(this, expr.getElements(), b));
+                        return Streams.just(QueryEvaluationUtil.extend(this, expr.getElements(), b));
                     } catch (Exception e) {
                         return Streams.fail(e);
                     }
@@ -321,7 +321,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
 
         Stream<BindingSet> s = evaluateReactorInternal(expr.getArg(), bindings);
 
-        Stream<GroupedStream<BindingSet, BindingSet>> g = s.groupBy((b) -> BindingSetUtils.project(groupByBindings, b, bindings));
+        Stream<GroupedStream<BindingSet, BindingSet>> g = s.groupBy((b) -> BindingSetUtil.project(groupByBindings, b, bindings));
 
         //return g.flatMap((gs) -> Streams.just(gs.key()));
         return g.flatMap((gs) -> aggregate(gs, expr, bindings));

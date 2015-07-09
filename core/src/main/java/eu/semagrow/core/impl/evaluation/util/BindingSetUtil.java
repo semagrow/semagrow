@@ -11,7 +11,7 @@ import java.util.Set;
 /**
  * Created by angel on 9/7/2015.
  */
-public class BindingSetUtils {
+public class BindingSetUtil {
 
 
     /**

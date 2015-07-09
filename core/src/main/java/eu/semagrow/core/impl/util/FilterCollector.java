@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.helpers;
+package eu.semagrow.core.impl.util;
 
 import org.openrdf.query.algebra.Filter;
 import org.openrdf.query.algebra.TupleExpr;

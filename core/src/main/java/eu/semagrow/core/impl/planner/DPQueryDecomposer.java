@@ -1,12 +1,11 @@
 package eu.semagrow.core.impl.planner;
 
 import eu.semagrow.core.decomposer.QueryDecomposer;
-import eu.semagrow.core.decomposer.QueryDecompositionException;
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.impl.estimator.CostEstimator;
-import eu.semagrow.core.impl.helpers.BPGCollector;
-import eu.semagrow.core.impl.helpers.FilterCollector;
+import eu.semagrow.core.impl.util.BPGCollector;
+import eu.semagrow.core.impl.util.FilterCollector;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.TupleExpr;
