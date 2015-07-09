@@ -12,28 +12,28 @@ import java.util.List;
 /**
  * Created by antonis on 9/4/2015.
  */
-public class OnSubscribeTupleResultsReactor implements Publisher {
+public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
-    private static final Logger logger = LoggerFactory.getLogger(OnSubscribeTupleResultsReactor.class);
+    private static final Logger logger = LoggerFactory.getLogger(TupleQueryResultPublisher.class);
 
     private TupleQuery query;
 
-    public OnSubscribeTupleResultsReactor(TupleQuery query) {
+    public TupleQueryResultPublisher(TupleQuery query) {
         this.query = query;
     }
 
     @Override
-    public void subscribe(Subscriber subscriber) {
-        subscriber.onSubscribe(new TupleQueryResultProducerReactor(subscriber, query));
+    public void subscribe(Subscriber<? super BindingSet> subscriber) {
+        subscriber.onSubscribe(new TupleQueryResultProducer(subscriber, query));
     }
 
-    public static final class TupleQueryResultProducerReactor implements Subscription, TupleQueryResultHandler {
+    public static final class TupleQueryResultProducer implements Subscription, TupleQueryResultHandler {
 
 
         private Subscriber<? super BindingSet> subscriber;
         private TupleQuery query;
 
-        public TupleQueryResultProducerReactor(Subscriber<? super BindingSet> o, TupleQuery query) {
+        public TupleQueryResultProducer(Subscriber<? super BindingSet> o, TupleQuery query) {
             this.subscriber = o;
             this.query = query;
 
@@ -43,19 +43,9 @@ public class OnSubscribeTupleResultsReactor implements Publisher {
 
         @Override
         public void request(long l) {
-            /*
-            if (REQUESTED_UPDATER.get(this) == Long.MAX_VALUE) {
-                // already started with fast-path
-                return;
-            }
-
-            if (subscriber.isUnsubscribed())
-                return;
-
-            REQUESTED_UPDATER.set(this, Long.MAX_VALUE); */
 
             try {
-                System.out.println("Sending query " + query.toString() + " with " + query.getBindings().toString());
+                logger.info("Sending query " + query.toString() + " with " + query.getBindings().toString());
                 query.evaluate(this);
             } catch (Exception e) {
                 subscriber.onError(e);

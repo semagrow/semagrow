@@ -1,6 +1,7 @@
 package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
 import eu.semagrow.core.impl.algebra.*;
+import eu.semagrow.core.impl.evaluation.util.BindingSetUtils;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;
@@ -25,6 +26,8 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
     public QueryExecutor queryExecutor;
 
+    private int batchSize = 10;
+
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
@@ -41,6 +44,15 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor) {
         this(queryExecutor, ValueFactoryImpl.getInstance());
+    }
+
+
+    public void setBatchSize(int b) {
+        batchSize = b;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
     }
 
     @Override
@@ -94,32 +106,32 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
         joinAttributes.retainAll(expr.getRightArg().getBindingNames());
 
         return evaluateReactiveInternal(expr.getLeftArg(), bindings)
-                .toMultimap(b -> calcKey(b, joinAttributes), b1 -> b1)
+                .toMultimap(b -> BindingSetUtils.project(joinAttributes, b), b1 -> b1)
                 .flatMap((probe) ->
                     r.concatMap(b -> {
-                        if (!probe.containsKey(calcKey(b, joinAttributes)))
+                        if (!probe.containsKey(BindingSetUtils.project(joinAttributes, b)))
                             return Observable.empty();
                         else
-                            return Observable.from(probe.get(calcKey(b, joinAttributes)))
+                            return Observable.from(probe.get(BindingSetUtils.project(joinAttributes, b)))
                                              .join(Observable.just(b),
                                                      b1 -> Observable.never(),
                                                      b1 -> Observable.never(),
-                                                     FederatedEvaluationStrategyImpl::joinBindings);
+                                                     BindingSetUtils::merge);
                     })
                 );
     }
 
     public static Observable<BindingSet> hashJoin(Observable<BindingSet> left, Observable<BindingSet> right, Set<String> joinAttributes) {
-        return left.toMultimap(b -> calcKey(b, joinAttributes), b1 -> b1)
+        return left.toMultimap(b -> BindingSetUtils.project(joinAttributes, b), b1 -> b1)
                 .flatMap((probe) -> right.concatMap(b -> {
-                            if (!probe.containsKey(calcKey(b, joinAttributes)))
+                            if (!probe.containsKey(BindingSetUtils.project(joinAttributes, b)))
                                 return Observable.empty();
                             else
-                                return Observable.from(probe.get(calcKey(b, joinAttributes)))
+                                return Observable.from(probe.get(BindingSetUtils.project(joinAttributes, b)))
                                         .join(Observable.just(b),
                                                 b1 -> Observable.never(),
                                                 b1 -> Observable.never(),
-                                                FederatedEvaluationStrategyImpl::joinBindings);
+                                                BindingSetUtils::merge);
                         })
                 );
     }
@@ -129,7 +141,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
         throws QueryEvaluationException
     {
         return this.evaluateReactiveInternal(expr.getLeftArg(), bindings)
-                .buffer(10)
+                .buffer(getBatchSize())
                 .flatMap((b) -> {
                     try {
                         return evaluateReactiveInternal(expr.getRightArg(), b);
@@ -167,9 +179,8 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Observable<BindingSet> evaluateSourceReactive(URI source, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
-        Publisher<BindingSet> publisherOfBindings = RxReactiveStreams.toPublisher(Observable.from(bindings));
 
-        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, publisherOfBindings);
+        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
 
         return RxReactiveStreams.toObservable(result).subscribeOn(Schedulers.io());
     }

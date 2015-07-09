@@ -26,7 +26,7 @@ public class BPGCollector extends QueryModelVisitorBase<RuntimeException> {
     // --------------------------------------------------------------
 
     /**
-     * Handles binary nodes with potential BGPs as children (e.g. union, left join).
+     * Handles binary nodes with potential BGPs as children (e.g. union, left merge).
      */
     @Override
     public void meetBinaryTupleOperator(BinaryTupleOperator node) throws RuntimeException {
@@ -80,11 +80,11 @@ public class BPGCollector extends QueryModelVisitorBase<RuntimeException> {
 
         boolean valid = true;
 
-        // visit join arguments and check that all are valid BGPS
+        // visit merge arguments and check that all are valid BGPS
         for (TupleExpr expr : new TupleExpr[] { join.getLeftArg(), join.getRightArg() }) {
             expr.visit(this);
             if (lastBGPNode == null) {
-                // child is not a BGP -> join is not a BGP
+                // child is not a BGP -> merge is not a BGP
                 valid = false;
             } else {
                 if (!valid) {

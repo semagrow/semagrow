@@ -5,6 +5,8 @@ import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.impl.alignment.QueryTransformationImpl;
 import eu.semagrow.core.impl.estimator.CostEstimator;
 import eu.semagrow.core.impl.selector.*;
+import eu.semagrow.core.impl.statistics.CachedStatisticsProvider;
+import eu.semagrow.core.impl.statistics.VOIDStatisticsProvider;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.statistics.StatisticsProvider;
 import eu.semagrow.core.transformation.QueryTransformation;

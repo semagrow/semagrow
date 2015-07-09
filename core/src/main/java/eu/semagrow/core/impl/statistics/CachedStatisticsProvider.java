@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.selector;
+package eu.semagrow.core.impl.statistics;
 
 import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;

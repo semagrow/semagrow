@@ -56,7 +56,7 @@ public class HashJoinIteration extends LookAheadIteration<BindingSet, QueryEvalu
     public HashJoinIteration(EvaluationStrategy strategy, Join join, BindingSet bindings)
             throws QueryEvaluationException
     {
-        //evaluator = new ParallelEvaluatorBase(strategy, bindings, join);
+        //evaluator = new ParallelEvaluatorBase(strategy, bindings, merge);
         leftIter = strategy.evaluate(join.getLeftArg(), bindings);
         rightIter = strategy.evaluate(join.getRightArg(), bindings);
         joinAttributes = join.getLeftArg().getBindingNames();
@@ -241,7 +241,7 @@ public class HashJoinIteration extends LookAheadIteration<BindingSet, QueryEvalu
             restIter = rightIter;
         }
 
-        // create the hash table for our join
+        // create the hash table for our merge
         for (BindingSet b : smallestResult) {
             BindingSet hashKey = calcKey(b, joinAttributes);
 

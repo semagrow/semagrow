@@ -26,6 +26,8 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
     public QueryExecutor queryExecutor;
 
+    private int batchSize = 10;
+
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
@@ -44,6 +46,15 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor) {
         this(queryExecutor, ValueFactoryImpl.getInstance());
+    }
+
+
+    public void setBatchSize(int b) {
+        batchSize = b;
+    }
+
+    public int getBatchSize() {
+        return batchSize;
     }
 
     @Override
@@ -110,7 +121,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                                         return Stream.empty();
                                     else
                                         return Stream.from(probe.get(calcKey(b, joinAttributes)))
-                                                .join(Stream.just(b),
+                                                .merge(Stream.just(b),
                                                         b1 -> Stream.never(),
                                                         b1 -> Stream.never(),
                                                         FederatedReactiveEvaluationStrategyImpl::joinBindings);
@@ -125,7 +136,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                                 return Streams.empty();
                             else
                                 return Streams.from(probe.get(calcKey(b, joinAttributes)))
-                                        .join(Streams.from(b),
+                                        .merge(Streams.from(b),
                                                 b1 -> Stream.never(),
                                                 b1 -> Stream.never(),
                                                 FederatedReactiveEvaluationStrategyImpl::joinBindings);
@@ -138,7 +149,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             throws QueryEvaluationException
     {
         return this.evaluateReactorInternal(expr.getLeftArg(), bindings)
-                .buffer(queryExecutor.getBatchSize())
+                .buffer(getBatchSize())
                 .flatMap((b) -> {
                     try {
                         return evaluateReactorInternal(expr.getRightArg(), b);
@@ -177,10 +188,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateSourceReactive(URI source, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
-        Publisher<BindingSet> publisherOfBindings = Streams.from(bindings);
-
-        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, publisherOfBindings);
-
+        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
         return Streams.wrap(result).dispatchOn(Environment.cachedDispatcher());
     }
 

@@ -9,11 +9,11 @@ import org.reactivestreams.Subscription;
 /**
  * Created by angel on 28/3/2015.
  */
-public class PublisherFromIteration<T> implements Publisher<T> {
+public class IterationPublisher<T> implements Publisher<T> {
 
     private final Iteration<T, ? extends Exception> iter;
 
-    public PublisherFromIteration(Iteration<T, ? extends Exception> iter){
+    public IterationPublisher(Iteration<T, ? extends Exception> iter){
         this.iter = iter;
     }
 

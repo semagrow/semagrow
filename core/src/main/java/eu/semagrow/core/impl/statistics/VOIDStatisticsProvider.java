@@ -1,5 +1,6 @@
-package eu.semagrow.core.impl.selector;
+package eu.semagrow.core.impl.statistics;
 
+import eu.semagrow.core.impl.selector.VOIDBase;
 import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;
 import org.openrdf.model.Resource;

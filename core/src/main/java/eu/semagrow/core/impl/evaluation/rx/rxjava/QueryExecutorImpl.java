@@ -1,6 +1,7 @@
 package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
-import eu.semagrow.core.impl.evaluation.SPARQLQueryStringUtils;
+import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtils;
+import eu.semagrow.core.impl.evaluation.util.BindingSetUtils;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
@@ -60,22 +61,13 @@ public class QueryExecutorImpl implements QueryExecutor
         return RxReactiveStreams.toPublisher(evaluateReactiveImpl(endpoint, expr, bindings));
     }
 
-    public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final Publisher<BindingSet> bindings)
+    public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final List<BindingSet> bindings)
             throws QueryEvaluationException
     {
-        Observable<BindingSet> observableBindings = RxReactiveStreams.toObservable(bindings);
-        return RxReactiveStreams.toPublisher(evaluateReactiveImpl(endpoint, expr, observableBindings));
+        //Observable<BindingSet> observableBindings = RxReactiveStreams.toObservable(bindings);
+        return RxReactiveStreams.toPublisher(evaluateReactiveImpl(endpoint, expr, bindings));
     }
 
-    @Override
-    public int getBatchSize() {
-        return 0;
-    }
-
-    @Override
-    public void setBatchSize(int b) {
-
-    }
 
     public Observable<BindingSet>
         evaluateReactiveImpl(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
@@ -83,10 +75,12 @@ public class QueryExecutorImpl implements QueryExecutor
 
         Observable<BindingSet> result = null;
         try {
+
             Set<String> freeVars = computeVars(expr);
 
-            Set<String> relevant = getRelevantBindingNames(bindings, freeVars);
-            final BindingSet relevantBindings = filterRelevant(bindings, relevant);
+            //Collection<String> relevant = BindingSetUtils.projectNames(freeVars, bindings);
+
+            final BindingSet relevantBindings = BindingSetUtils.project(freeVars, bindings);
 
             freeVars.removeAll(bindings.getBindingNames());
 
@@ -131,7 +125,7 @@ public class QueryExecutorImpl implements QueryExecutor
                 //result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings);
                 //result = new InsertBindingSetCursor(result, bindings);
                 result = sendTupleQueryReactive(endpoint, sparqlQuery, relevantBindings)
-                    .map(b -> FederatedEvaluationStrategyImpl.joinBindings(bindings, b));
+                    .map(b -> BindingSetUtils.merge(bindings, b));
             }
 
             return result;
@@ -145,21 +139,14 @@ public class QueryExecutorImpl implements QueryExecutor
 
     public Observable<BindingSet>
         evaluateReactiveImpl(URI endpoint, TupleExpr expr,
-             Observable<BindingSet> bindingIter)
+             List<BindingSet> bl)
             throws QueryEvaluationException {
 
         //Observable<BindingSet> result = null;
 
         try {
 
-
-            return bindingIter.buffer(10).concatMap(
-                     bl ->  { try {
-                         return evaluateReactiveInternal(endpoint, expr, bl);
-                     } catch (Exception e) {
-                            return Observable.error(e);
-                     } });
-
+            return  evaluateReactiveInternal(endpoint, expr, bl);
 
             /*
             return bindingIter.flatMap(b -> {
@@ -195,7 +182,7 @@ public class QueryExecutorImpl implements QueryExecutor
 
         result = sendTupleQueryReactive(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
 
-        result = result.map(b -> convertUnionBindings(b, bindings, FederatedEvaluationStrategyImpl::joinBindings));
+        result = result.map(b -> convertUnionBindings(b, bindings, BindingSetUtils::merge));
 
         /*if (!relevant.isEmpty()) {
 
@@ -210,34 +197,24 @@ public class QueryExecutorImpl implements QueryExecutor
                                     return Observable.empty();
                                 else
                                     return Observable.from(probe.get(k))
-                                            .join(Observable.just(b),
+                                            .merge(Observable.just(b),
                                                     b1 -> Observable.never(),
                                                     b1 -> Observable.never(),
-                                                    FederatedReactiveEvaluationStrategyImpl::joinBindings);
+                                                     BindingSetUtils::merge);
                             }));
 
         }
         else {
 
-            result = result.join(Observable.from(bindings),
+            result = result.merge(Observable.from(bindings),
                         (b) -> Observable.never(),
                         (b) -> Observable.never(),
-                        FederatedReactiveEvaluationStrategyImpl::joinBindings);
+                         BindingSetUtils::merge);
         }*/
 
         return result;
     }
 
-
-    protected BindingSet filterRelevant(BindingSet bindings, Collection<String> relevant) {
-        QueryBindingSet newBindings = new QueryBindingSet();
-        for (Binding b : bindings) {
-            if (relevant.contains(b.getName())) {
-                newBindings.setBinding(b);
-            }
-        }
-        return newBindings;
-    }
 
     protected Set<String> getRelevantBindingNames(List<BindingSet> bindings, Set<String> exprVars) {
 

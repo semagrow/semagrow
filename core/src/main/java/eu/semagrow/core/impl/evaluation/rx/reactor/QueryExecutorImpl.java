@@ -1,9 +1,9 @@
 package eu.semagrow.core.impl.evaluation.rx.reactor;
 
-import eu.semagrow.core.impl.evaluation.SPARQLQueryStringUtils;
-import eu.semagrow.core.impl.evaluation.rx.OnSubscribeTupleResultsReactor;
+import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtils;
+import eu.semagrow.core.impl.evaluation.util.BindingSetUtils;
+import eu.semagrow.core.impl.evaluation.rx.TupleQueryResultPublisher;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
-import eu.semagrow.core.impl.evaluation.rx.rxjava.FederatedEvaluationStrategyImpl;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
@@ -36,10 +36,7 @@ public class QueryExecutorImpl implements QueryExecutor
 
     private boolean rowIdOpt = false;
 
-    private int batchSize = 1;
-
     private int countconn = 0;
-
 
     public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
         Repository repo = null;
@@ -60,13 +57,6 @@ public class QueryExecutorImpl implements QueryExecutor
         return conn;
     }
 
-    public void setBatchSize(int b) {
-        batchSize = b;
-    }
-
-    public int getBatchSize() {
-        return batchSize;
-    }
 
     public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException
@@ -74,10 +64,18 @@ public class QueryExecutorImpl implements QueryExecutor
         return evaluateReactorImpl(endpoint, expr, bindings);
     }
 
-    public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final Publisher<BindingSet> bindings)
+    public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
-        return evaluateReactorImpl(endpoint, expr, Streams.wrap(bindings));
+        try {
+            return evaluateReactorImpl(endpoint, expr, bindingList);
+        }catch(QueryEvaluationException e)
+        {
+            throw e;
+        } catch (Exception e) {
+            throw new QueryEvaluationException(e);
+        }
+
     }
 
     public Stream<BindingSet>
@@ -89,8 +87,7 @@ public class QueryExecutorImpl implements QueryExecutor
         try {
             Set<String> freeVars = computeVars(expr);
 
-            Set<String> relevant = getRelevantBindingNames(bindings, freeVars);
-            final BindingSet relevantBindings = filterRelevant(bindings, relevant);
+            final BindingSet relevantBindings = BindingSetUtils.project(freeVars, bindings);
 
             freeVars.removeAll(bindings.getBindingNames());
 
@@ -135,7 +132,7 @@ public class QueryExecutorImpl implements QueryExecutor
                 //result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings);
                 //result = new InsertBindingSetCursor(result, bindings);
                 result = sendTupleQueryReactor(endpoint, sparqlQuery, relevantBindings)
-                        .map(b -> FederatedEvaluationStrategyImpl.joinBindings(bindings, b));
+                        .map(b -> BindingSetUtils.merge(bindings, b));
             }
 
             return result;
@@ -148,7 +145,7 @@ public class QueryExecutorImpl implements QueryExecutor
     }
 
     public Stream<BindingSet>
-        evaluateReactorImpl(URI endpoint, TupleExpr expr, Stream<BindingSet> bindingIter)
+        evaluateReactorImpl(URI endpoint, TupleExpr expr, List<BindingSet> bl)
             throws QueryEvaluationException
     {
         //Stream<BindingSet> result = null;
@@ -156,12 +153,7 @@ public class QueryExecutorImpl implements QueryExecutor
         try {
 
 
-            return bindingIter.buffer(batchSize).concatMap(
-                    bl ->  { try {
-                        return evaluateReactorInternal(endpoint, expr, bl);
-                    } catch (Exception e) {
-                        return Streams.fail(e);
-                    } });
+            return evaluateReactorInternal(endpoint, expr, bl);
 
             /*
             return bindingIter.flatMap(b -> {
@@ -218,7 +210,7 @@ public class QueryExecutorImpl implements QueryExecutor
                         if (!probe.containsKey(k))
                             return Streams.empty();
                         else
-                            return Streams.from(bb).map(bbb -> FederatedReactiveEvaluationStrategyImpl.joinBindings(b, bbb));
+                            return Streams.from(bb).map(bbb -> FederatedReactiveEvaluationStrategyImpl.merge(b, bbb));
                     }
             );
 
@@ -227,7 +219,7 @@ public class QueryExecutorImpl implements QueryExecutor
             final Stream<BindingSet> r = result;
 
             result = r.concatMap(b ->
-                     Streams.from(bindings).map(bbb -> FederatedReactiveEvaluationStrategyImpl.joinBindings(b, bbb))
+                     Streams.from(bindings).map(bbb -> FederatedReactiveEvaluationStrategyImpl.merge(b, bbb))
             );
         }*/
 
@@ -269,7 +261,7 @@ public class QueryExecutorImpl implements QueryExecutor
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        return Streams.wrap(new OnSubscribeTupleResultsReactor(query)) /* onBackpressureBuffer()
+        return Streams.wrap(new TupleQueryResultPublisher(query)) /* onBackpressureBuffer()
                 .doOnCompleted(() -> {
                     try {
                         if (conn.isOpen()) {
@@ -297,16 +289,6 @@ public class QueryExecutorImpl implements QueryExecutor
         return query.evaluate();
     }
 
-
-    protected BindingSet filterRelevant(BindingSet bindings, Collection<String> relevant) {
-        QueryBindingSet newBindings = new QueryBindingSet();
-        for (Binding b : bindings) {
-            if (relevant.contains(b.getName())) {
-                newBindings.setBinding(b);
-            }
-        }
-        return newBindings;
-    }
 
     protected Set<String> getRelevantBindingNames(List<BindingSet> bindings, Set<String> exprVars) {
 

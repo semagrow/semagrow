@@ -47,12 +47,12 @@ public class MergeJoinIteration extends LookAheadIteration<BindingSet, QueryEval
 
         this.comparator = comparator;
         /*
-        evaluator = new ParallelEvaluatorBase(evaluationStrategy, bindings, join);        
+        evaluator = new ParallelEvaluatorBase(evaluationStrategy, bindings, merge);
         CompletableFuture cfLeft = evaluator.getLeftArgCompletableFuture();
         CompletableFuture cfRight = evaluator.getRightArgCompletableFuture();
         CompletableFuture.allOf(cfLeft,cfRight).thenRun(()->{
-            joinAttributes = join.getLeftArg().getBindingNames();
-            joinAttributes.retainAll(join.getRightArg().getBindingNames());
+            joinAttributes = merge.getLeftArg().getBindingNames();
+            joinAttributes.retainAll(merge.getRightArg().getBindingNames());
             try {
                 leftIter = (CloseableIteration<BindingSet, QueryEvaluationException>) cfLeft.get();
                 rightIter = (CloseableIteration<BindingSet, QueryEvaluationException>) cfRight.get();                

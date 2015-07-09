@@ -1,10 +1,10 @@
 package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
 import eu.semagrow.core.impl.evaluation.rx.EvaluationStrategy;
-import eu.semagrow.core.impl.evaluation.rx.PublisherFromIteration;
+import eu.semagrow.core.impl.evaluation.rx.IterationPublisher;
+import eu.semagrow.core.impl.evaluation.util.EvalUtils;
 import info.aduna.iteration.Iteration;
 import org.openrdf.model.Value;
-import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.QueryEvaluationException;
@@ -245,7 +245,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy
             throws QueryEvaluationException
     {
         return evaluateReactiveInternal(expr.getArg(), bindings)
-                .map((b) -> project(expr.getProjectionElemList(), b, bindings));
+                .map((b) -> EvalUtils.project(expr.getProjectionElemList(), b, bindings));
     }
 
     public Observable<BindingSet> evaluateReactiveInternal(Extension expr, BindingSet bindings)
@@ -254,7 +254,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy
         return evaluateReactiveInternal(expr.getArg(), bindings)
                 .concatMap((b) -> {
                     try {
-                        return Observable.just(extend(expr.getElements(), b));
+                        return Observable.just(EvalUtils.extend(this, expr.getElements(), b));
                     } catch (Exception e) {
                         return Observable.error(e);
                     }
@@ -368,80 +368,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy
     }
 
     protected <T> Observable<T> fromIteration(Iteration<T, ? extends Exception> it) {
-        //return Observable.create(new OnSubscribeFromIteration<T>(it));
-        return RxReactiveStreams.toObservable(new PublisherFromIteration(it));
+        return RxReactiveStreams.toObservable(new IterationPublisher<T>(it));
     }
 
-
-    public static BindingSet project(ProjectionElemList projElemList, BindingSet sourceBindings,
-                                     BindingSet parentBindings)
-    {
-        QueryBindingSet resultBindings = new QueryBindingSet(parentBindings);
-
-        for (ProjectionElem pe : projElemList.getElements()) {
-            Value targetValue = sourceBindings.getValue(pe.getSourceName());
-            if (targetValue != null) {
-                // Potentially overwrites bindings from super
-                resultBindings.setBinding(pe.getTargetName(), targetValue);
-            }
-        }
-
-        return resultBindings;
-    }
-
-    public BindingSet extend(Collection<ExtensionElem> extElems, BindingSet sourceBindings)
-            throws QueryEvaluationException
-    {
-        QueryBindingSet targetBindings = new QueryBindingSet(sourceBindings);
-
-        for (ExtensionElem extElem : extElems) {
-            ValueExpr expr = extElem.getExpr();
-            if (!(expr instanceof AggregateOperator)) {
-                try {
-                    // we evaluate each extension element over the targetbindings, so that bindings from
-                    // a previous extension element in this same extension can be used by other extension elements.
-                    // e.g. if a projection contains (?a + ?b as ?c) (?c * 2 as ?d)
-                    Value targetValue = evaluate(extElem.getExpr(), targetBindings);
-
-                    if (targetValue != null) {
-                        // Potentially overwrites bindings from super
-                        targetBindings.setBinding(extElem.getName(), targetValue);
-                    }
-                } catch (ValueExprEvaluationException e) {
-                    // silently ignore type errors in extension arguments. They should not cause the
-                    // query to fail but just result in no additional binding.
-                }
-            }
-        }
-
-        return targetBindings;
-    }
-
-    public static BindingSet joinBindings(BindingSet b1, BindingSet b2) {
-        QueryBindingSet result = new QueryBindingSet();
-
-        for (Binding b : b1) {
-            if (!result.hasBinding(b.getName()))
-                result.addBinding(b);
-        }
-
-        for (String name : b2.getBindingNames()) {
-            Binding b = b2.getBinding(name);
-            if (!result.hasBinding(name)) {
-                result.addBinding(b);
-            }
-        }
-        return result;
-    }
-
-    public static BindingSet calcKey(BindingSet bindings, Set<String> commonVars) {
-        QueryBindingSet q = new QueryBindingSet();
-        for (String varName : commonVars) {
-            Binding b = bindings.getBinding(varName);
-            if (b != null) {
-                q.addBinding(b);
-            }
-        }
-        return q;
-    }
 }

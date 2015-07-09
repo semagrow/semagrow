@@ -206,8 +206,8 @@ public class SemagrowSailConnection extends SailConnectionBase {
     {
         try {
             QueryExecutorImpl executor = new QueryExecutorImpl();
-            EvaluationStrategy strategy = new FederatedEvaluationStrategyImpl(executor);
-            executor.setBatchSize(semagrowSail.getBatchSize());
+            FederatedEvaluationStrategyImpl strategy = new FederatedEvaluationStrategyImpl(executor);
+            strategy.setBatchSize(semagrowSail.getBatchSize());
             return strategy.evaluate(expr, bindings);
         } catch(QueryEvaluationException e) {
             throw new SailException(e);

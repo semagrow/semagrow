@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation.iteration;
 
 import eu.semagrow.core.evaluation.QueryExecutor;
-import eu.semagrow.core.impl.evaluation.SPARQLQueryStringUtils;
+import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtils;
 import info.aduna.iteration.*;
 
 import org.openrdf.model.URI;

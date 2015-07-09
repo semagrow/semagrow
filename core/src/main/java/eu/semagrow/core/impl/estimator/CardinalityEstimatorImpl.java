@@ -106,7 +106,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         long card1 = getCardinality(join.getLeftArg(), source);
         long card2 = getCardinality(join.getRightArg(), source);
 
-        // A left join B is semantically equiv to (A join B) union (A - B)
+        // A left merge B is semantically equiv to (A merge B) union (A - B)
 
         Join dummyJoin = new Join(join.getLeftArg().clone(), join.getRightArg().clone());
         double sel = getJoinSelectivity(dummyJoin, source);
@@ -127,9 +127,9 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
     }
 
     /**
-     * Estimate the join selectivity factor *sel* of a join, such that
-     * join cardinality = cross product cardinality * sel.
-     * @param join the join expression
+     * Estimate the merge selectivity factor *sel* of a merge, such that
+     * merge cardinality = cross product cardinality * sel.
+     * @param join the merge expression
      * @param source a referring data source
      * @return the selectivity factor
      */
@@ -267,9 +267,9 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return Math.max(card1,card2);
     }
 
-    public long getVarCardinality(String varName, Join join, URI source) {
-        long card1 = getVarCardinality(varName, join.getLeftArg(), source);
-        long card2 = getVarCardinality(varName, join.getRightArg(), source);
+    public long getVarCardinality(String varName, Join merge, URI source) {
+        long card1 = getVarCardinality(varName, merge.getLeftArg(), source);
+        long card2 = getVarCardinality(varName, merge.getRightArg(), source);
         // if joined variable then
         // if (subset) then min else if (disjoint) 0 else something in between
         // if not joined variable then

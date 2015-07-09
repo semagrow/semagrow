@@ -83,9 +83,9 @@ public class CostEstimatorImpl implements CostEstimator {
     }
 
     public Cost getCost(BindJoin join, URI source) {
-        // long cardinalityOfLeft = cardinalityEstimator.getCardinality(join.getLeftArg());
-        // long costLeftArgument = estimateCost(join.getLeftArg());
-        // long cardinalityAll = cardinalityEstimator.getCardinality(join);
+        // long cardinalityOfLeft = cardinalityEstimator.getCardinality(merge.getLeftArg());
+        // long costLeftArgument = estimateCost(merge.getLeftArg());
+        // long cardinalityAll = cardinalityEstimator.getCardinality(merge);
         // long queries = cardinalityOfLeft / bindingsPerQuery;
         // long resultsPerQuery = cardinalityAll / queries;
         // totalCost = costLeftArgument + queries * costOfRightArgumentWithBinding

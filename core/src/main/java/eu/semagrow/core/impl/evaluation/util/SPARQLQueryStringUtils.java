@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.evaluation;
+package eu.semagrow.core.impl.evaluation.util;
 
 import eu.semagrow.core.impl.evaluation.iteration.InsertValuesBindingsIteration;
 import org.openrdf.model.Literal;
