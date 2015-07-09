@@ -10,12 +10,11 @@ import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.core.impl.planner.DPQueryDecomposer;
 import eu.semagrow.core.impl.selector.RestrictiveSourceSelector;
 import eu.semagrow.core.source.SourceSelector;
-import eu.semagrow.querylog.QueryLogManager;
 import eu.semagrow.querylog.api.QueryLogException;
-import eu.semagrow.querylog.api.QueryLogFactory;
+import eu.semagrow.querylog.config.QueryLogFactory;
 import eu.semagrow.querylog.api.QueryLogWriter;
-import eu.semagrow.querylog.config.FileQueryLogConfig;
-import eu.semagrow.querylog.rdf.RDFQueryLogFactory;
+import eu.semagrow.querylog.impl.rdf.config.RDFQueryLogConfig;
+import eu.semagrow.querylog.impl.rdf.config.RDFQueryLogFactory;
 import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -29,8 +28,6 @@ import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
 import org.openrdf.query.resultio.TupleQueryResultWriterRegistry;
 import org.openrdf.repository.Repository;
 import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFWriterFactory;
-import org.openrdf.rio.RDFWriterRegistry;
 import org.openrdf.sail.SailConnection;
 import org.openrdf.sail.SailException;
 import org.openrdf.sail.helpers.SailBase;
@@ -45,24 +42,17 @@ import java.util.concurrent.Executors;
  * @author acharal@iit.demokritos.gr
  *
  * TODO list and other suggestions from the plenary meeting in Wageningen
- * TODO: define clean interfaces for sourceselector
- * TODO: rethink voID descriptions
  * TODO: estimate processing cost of subqueries to the sources (some sources may contain indexes etc
- * TODO: voID and configuration as sailbase and able to be SPARQL queried.
- * TODO: do transformation
  * TODO: geosparql
  */
 public class SemagrowSail extends SailBase {
 
     private FederatedQueryEvaluation queryEvaluation;
-    private final static String logDir = "/var/tmp/log/";
-
     private QueryLogWriter handler;
-    private final static String filePrefix = "qfr";
-    
     private SourceSelector sourceSelector;
     private CostEstimator costEstimator;
     private CardinalityEstimator cardinalityEstimator;
+    private MaterializationManager materializationManager;
 
     private int batchSize;
 
@@ -125,11 +115,9 @@ public class SemagrowSail extends SailBase {
     public FederatedQueryEvaluation getQueryEvaluation() {
 
         if (queryEvaluation == null) {
-            MaterializationManager manager = getManager();
             handler = getRecordLog();
-            queryEvaluation = new QueryEvaluationImpl(manager, handler, executor);
+            queryEvaluation = new QueryEvaluationImpl(getManager(), handler, executor);
         }
-
         return queryEvaluation;
     }
 
@@ -137,43 +125,29 @@ public class SemagrowSail extends SailBase {
         this.queryEvaluation = queryEvaluation;
     }
 
-
-
-    public MaterializationManager getManager() {
-        File baseDir = new File(logDir);
-        TupleQueryResultFormat resultFF = TupleQueryResultFormat.TSV;
-
-        TupleQueryResultWriterRegistry  registry = TupleQueryResultWriterRegistry.getInstance();
-        TupleQueryResultWriterFactory writerFactory = registry.get(resultFF);
-        MaterializationManager manager = new FileManager(baseDir, writerFactory);
-
-        return manager;
+    private MaterializationManager getManager() {
+        return materializationManager;
     }
 
     public QueryLogWriter getRecordLog() {
 
-        QueryLogWriter handler;
+        RDFQueryLogConfig config = new RDFQueryLogConfig();
+        QueryLogFactory factory = new RDFQueryLogFactory();
 
-        FileQueryLogConfig config = new FileQueryLogConfig();
-        QueryLogManager qfrManager = new QueryLogManager(logDir, filePrefix);
-        try {
-            config.setFilename(qfrManager.getLastFile());
-            config.setCounter(3);
-        } catch (QueryLogException e) {
-            e.printStackTrace();
-        }
+        config.setCounter(3);
+        config.setRdfFormat(RDFFormat.NTRIPLES);
 
-        RDFFormat rdfFF = RDFFormat.NTRIPLES;
+        File baseDir = new File(config.getLogDir());
+        TupleQueryResultFormat resultFF = TupleQueryResultFormat.TSV;
 
-        RDFWriterRegistry writerRegistry = RDFWriterRegistry.getInstance();
-        RDFWriterFactory rdfWriterFactory = writerRegistry.get(rdfFF);
-        QueryLogFactory factory = new RDFQueryLogFactory(rdfWriterFactory);
+        TupleQueryResultWriterRegistry  registry = TupleQueryResultWriterRegistry.getInstance();
+        TupleQueryResultWriterFactory writerFactory = registry.get(resultFF);
+        materializationManager = new FileManager(baseDir, writerFactory);
 
         try {
-            handler = factory.getQueryRecordLogger((FileQueryLogConfig) config);
-            return handler;
+            return factory.getQueryRecordLogger(config);
         } catch (QueryLogException e) {
-            e.printStackTrace();
+            logger.warn("Cannot initialize Query Log writer", e);
         }
         return null;
     }

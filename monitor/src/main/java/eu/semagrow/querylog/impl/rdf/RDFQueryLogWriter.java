@@ -1,9 +1,9 @@
-package eu.semagrow.querylog.rdf;
+package eu.semagrow.querylog.impl.rdf;
 
 import eu.semagrow.querylog.api.QueryLogException;
 import eu.semagrow.querylog.api.QueryLogRecord;
 import eu.semagrow.querylog.api.QueryLogWriter;
-import eu.semagrow.querylog.vocabulary.QFR;
+import eu.semagrow.querylog.impl.rdf.vocabulary.*;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;

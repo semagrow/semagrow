@@ -1,9 +1,13 @@
-package eu.semagrow.querylog.rdf;
+package eu.semagrow.querylog.impl.rdf.config;
 
 import eu.semagrow.querylog.api.*;
-import eu.semagrow.querylog.config.FileQueryLogConfig;
+import eu.semagrow.querylog.config.QueryLogFactory;
+import eu.semagrow.querylog.impl.rdf.QueryLogManager;
+import eu.semagrow.querylog.impl.rdf.RDFQueryLogWriter;
+import eu.semagrow.querylog.config.QueryLogConfig;
 import org.openrdf.rio.RDFWriter;
 import org.openrdf.rio.RDFWriterFactory;
+import org.openrdf.rio.RDFWriterRegistry;
 
 import java.io.*;
 
@@ -12,24 +16,25 @@ import java.io.*;
  */
 public class RDFQueryLogFactory implements QueryLogFactory {
 
-    private RDFWriterFactory writerFactory;
-    private FileQueryLogConfig config = null;
+    public RDFQueryLogFactory(){}
 
-
-    public RDFQueryLogFactory(RDFWriterFactory writerFactory) {
-        this.writerFactory = writerFactory;
+    public RDFWriterFactory getRDFWriterFactory(RDFQueryLogConfig config) {
+        RDFWriterRegistry writerRegistry = RDFWriterRegistry.getInstance();
+        RDFWriterFactory writerFactory = writerRegistry.get(config.getRdfFormat());
+        return writerFactory;
     }
 
     @Override
     public QueryLogWriter getQueryRecordLogger(QueryLogConfig config) throws QueryLogException {
 
-        if (config instanceof FileQueryLogConfig) {
-            this.config = (FileQueryLogConfig) config;
+        if (config instanceof RDFQueryLogConfig) {
+            RDFQueryLogConfig rdfConfig = (RDFQueryLogConfig) config;
 
+            RDFWriterFactory writerFactory = getRDFWriterFactory(rdfConfig);
 
-            if (this.config.rotate()) {
+            if (rdfConfig.rotate()) {
                 try {
-                    QueryLogWriter handler = new RotatingQueryLogWriter(this.config);
+                    QueryLogWriter handler = new RotatingQueryLogWriter(rdfConfig);
 
                     return handler;
                 } catch (QueryLogException e) {
@@ -37,7 +42,9 @@ public class RDFQueryLogFactory implements QueryLogFactory {
                 }
             } else {
                 try {
-                    return getQueryRecordLogger(this.config.getFilename());
+                    QueryLogManager qfrManager = new QueryLogManager(rdfConfig.getLogDir(), rdfConfig.getFilePrefix());
+                    String filename = qfrManager.getLastFile();
+                    return getQueryRecordLogger(writerFactory, filename);
                 } catch (FileNotFoundException e) {
                     throw new QueryLogException(e);
                 }
@@ -48,7 +55,7 @@ public class RDFQueryLogFactory implements QueryLogFactory {
 
     }
 
-    public QueryLogWriter getQueryRecordLogger(OutputStream out) {
+    private QueryLogWriter getQueryRecordLogger(RDFWriterFactory writerFactory, OutputStream out) {
 
         RDFWriter writer = writerFactory.getWriter(out);
 
@@ -62,23 +69,23 @@ public class RDFQueryLogFactory implements QueryLogFactory {
         return handler;
     }
 
-    public QueryLogWriter getQueryRecordLogger(String out) throws FileNotFoundException {
+    private QueryLogWriter getQueryRecordLogger(RDFWriterFactory writerFactory, String out) throws FileNotFoundException {
 
         FileOutputStream fileStream = new FileOutputStream(out, true);
 
-        return getQueryRecordLogger(fileStream);
+        return getQueryRecordLogger(writerFactory, fileStream);
     }
 
 
     /////
     private class RotatingQueryLogWriter implements QueryLogWriter
     {
-        private FileQueryLogConfig config;
+        private RDFQueryLogConfig config;
         private QueryLogWriter actualWriter;
         private int counter = 0;
         private long rotation = 0;
 
-        public RotatingQueryLogWriter(FileQueryLogConfig config) throws QueryLogException {
+        public RotatingQueryLogWriter(RDFQueryLogConfig config) throws QueryLogException {
             this.config = config;
 
             getLastRotation();
@@ -133,7 +140,8 @@ public class RDFQueryLogFactory implements QueryLogFactory {
             String filename = computeNextFilename();
 
             try {
-                QueryLogWriter handler = getQueryRecordLogger(filename);
+                RDFWriterFactory writerFactory  = getRDFWriterFactory(config);
+                QueryLogWriter handler = getQueryRecordLogger(writerFactory, filename);
                 return handler;
             }
             catch (FileNotFoundException e) {

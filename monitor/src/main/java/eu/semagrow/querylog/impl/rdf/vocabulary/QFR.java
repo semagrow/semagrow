@@ -1,4 +1,4 @@
-package eu.semagrow.querylog.vocabulary;
+package eu.semagrow.querylog.impl.rdf.vocabulary;
 
 import org.openrdf.model.Namespace;
 import org.openrdf.model.URI;

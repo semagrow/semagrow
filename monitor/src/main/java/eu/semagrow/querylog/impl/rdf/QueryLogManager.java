@@ -1,4 +1,4 @@
-package eu.semagrow.querylog;
+package eu.semagrow.querylog.impl.rdf;
 
 import eu.semagrow.querylog.api.QueryLogException;
 
