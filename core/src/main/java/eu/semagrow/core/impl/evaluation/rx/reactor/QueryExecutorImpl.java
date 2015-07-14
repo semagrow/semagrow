@@ -118,7 +118,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         try {
             String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQueryUNION(expr, bindings, relevant);
             result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
-            result = result.map(b -> convertUnionBindings(b, bindings));
+            result = result.concatMap(b -> convertUnionBindings(b, bindings));
             return result;
         } catch(QueryEvaluationException e)  {
             throw e;
@@ -127,8 +127,9 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         }
     }
 
-    private BindingSet convertUnionBindings(BindingSet rightBindings, List<BindingSet> leftBindings) {
+    private Stream<BindingSet> convertUnionBindings(BindingSet rightBindings, List<BindingSet> leftBindings) {
 
+        /*
         QueryBindingSet joinBindings = new QueryBindingSet();
 
         int i = -1;
@@ -149,7 +150,28 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         }
 
         return joinBindings;
+        */
 
+        SortedMap<Integer, QueryBindingSet> bmap = new TreeMap<Integer, QueryBindingSet>();
+
+        int i = -1;
+
+        for (Binding b : rightBindings) {
+            // get the relevant left binding
+            String bName = b.getName();
+            int splitPoint = bName.lastIndexOf("_");
+            i = Integer.parseInt(bName.substring(splitPoint+1)) - 1;
+            Integer y = i;
+
+            QueryBindingSet joinBindings = (bmap.containsKey(y)) ? bmap.get(y) : new QueryBindingSet();
+
+            // create new Binding
+            joinBindings.addBinding(bName.substring(0,splitPoint),b.getValue());
+            bmap.put(y, joinBindings);
+        }
+
+        return Streams.from(bmap.entrySet())
+                .map((join) -> BindingSetUtil.merge(join.getValue(), leftBindings.get(join.getKey())));
     }
 
     protected Stream<BindingSet>

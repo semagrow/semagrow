@@ -123,7 +123,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
         result = sendTupleQueryReactive(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
 
-        result = result.map(b -> convertUnionBindings(b, bindings, BindingSetUtil::merge));
+        result = result.concatMap(b -> convertUnionBindings(b, bindings));
 
         return result;
     }
@@ -170,11 +170,10 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         return res;
     }
 
-    private BindingSet convertUnionBindings(BindingSet rightBindings,
-                                            List<BindingSet> leftBindings,
-                                            Func2<? extends BindingSet, ? extends BindingSet, BindingSet> f) {
+    private Observable<BindingSet> convertUnionBindings(BindingSet rightBindings,
+                                            List<BindingSet> leftBindings) {
 
-        QueryBindingSet joinBindings = new QueryBindingSet();
+        SortedMap<Integer, QueryBindingSet> bmap = new TreeMap<Integer, QueryBindingSet>();
 
         int i = -1;
 
@@ -183,17 +182,17 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
             String bName = b.getName();
             int splitPoint = bName.lastIndexOf("_");
             i = Integer.parseInt(bName.substring(splitPoint+1)) - 1;
-            int y = i;
+            Integer y = i;
+
+            QueryBindingSet joinBindings = (bmap.containsKey(y)) ? bmap.get(y) : new QueryBindingSet();
+
             // create new Binding
             joinBindings.addBinding(bName.substring(0,splitPoint),b.getValue());
+            bmap.put(y, joinBindings);
         }
 
-        for (Binding b : leftBindings.get(i)) {
-            if (!joinBindings.hasBinding(b.getName()))
-                joinBindings.addBinding(b);
-        }
-
-        return joinBindings;
+        return Observable.from(bmap.entrySet())
+                .map((join) -> BindingSetUtil.merge(join.getValue(), leftBindings.get(join.getKey())));
 
     }
 
