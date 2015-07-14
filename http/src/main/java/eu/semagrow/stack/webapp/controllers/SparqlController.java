@@ -94,6 +94,7 @@ public class SparqlController {
         TupleQueryResultParserRegistry registry = TupleQueryResultParserRegistry.getInstance();
         registry.remove(registry.get(TupleQueryResultFormat.CSV));
         registry.remove(registry.get(TupleQueryResultFormat.TSV));
+        registry.remove(registry.get(TupleQueryResultFormat.JSON));
 
         BooleanQueryResultParserRegistry booleanRegistry = BooleanQueryResultParserRegistry.getInstance();
         booleanRegistry.remove(booleanRegistry.get(BooleanQueryResultFormat.JSON));
