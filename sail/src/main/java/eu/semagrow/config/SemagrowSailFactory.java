@@ -120,7 +120,7 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
             if (transformation != null)
                 selector = new SourceSelectorWithQueryTransform(selector, transformation);
 
-            //selector = new AskSourceSelector(selector);
+            selector = new AskSourceSelector(selector);
             selector = new CachedSourceSelector(selector);
 
             return selector;
