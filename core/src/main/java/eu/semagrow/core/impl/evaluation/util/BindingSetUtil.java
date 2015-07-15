@@ -61,7 +61,7 @@ public class BindingSetUtil {
                                      BindingSet bindings,
                                      BindingSet parent)
     {
-        QueryBindingSet result = new QueryBindingSet(parent);
+        BindingSet result = merge(bindings, parent);// new QueryBindingSet(parent);
         return project(vars, result);
     }
 
