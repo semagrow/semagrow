@@ -44,6 +44,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         public void request(long l) {
 
             try {
+                logger.debug("Requesting " + l + " results");
                 logger.info("Sending query " + query.toString() + " with " + query.getBindings().toString());
                 query.evaluate(this);
             } catch (Exception e) {

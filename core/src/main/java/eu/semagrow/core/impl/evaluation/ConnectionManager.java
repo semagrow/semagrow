@@ -57,6 +57,7 @@ public class ConnectionManager {
         try {
             if (conn.isOpen()) {
                 conn.close();
+                countconn--;
                 logger.debug("Connection {} closed", conn);
             }
         } catch (RepositoryException e) {
