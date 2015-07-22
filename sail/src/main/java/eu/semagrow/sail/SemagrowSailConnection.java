@@ -43,6 +43,8 @@ public class SemagrowSailConnection extends SailConnectionBase {
     private static final URI METADATA_GRAPH =
             ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
 
+    private static QueryExecutorImpl executor = new QueryExecutorImpl();
+
     public SemagrowSailConnection(SemagrowSail sail)
     {
         super(sail);
@@ -205,7 +207,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
             throws SailException
     {
         try {
-            QueryExecutorImpl executor = new QueryExecutorImpl();
+            //QueryExecutorImpl executor = new QueryExecutorImpl();
             FederatedEvaluationStrategyImpl strategy = new FederatedEvaluationStrategyImpl(executor);
             strategy.setBatchSize(semagrowSail.getBatchSize());
             return strategy.evaluate(expr, bindings);

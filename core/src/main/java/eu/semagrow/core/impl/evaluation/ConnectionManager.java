@@ -19,7 +19,7 @@ public class ConnectionManager {
 
     protected final Logger logger = LoggerFactory.getLogger(QueryExecutorImpl.class);
     private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
-    private int countconn = 0;
+    private Integer countconn = 0;
 
     public void initialize() { }
 
@@ -49,7 +49,7 @@ public class ConnectionManager {
 
         RepositoryConnection conn = repo.getConnection();
         logger.debug("Connection {} started, currently open {}", conn, countconn);
-        countconn++;
+        synchronized(this) { countconn++; }
         return conn;
     }
 
@@ -57,7 +57,7 @@ public class ConnectionManager {
         try {
             if (conn.isOpen()) {
                 conn.close();
-                countconn--;
+                synchronized (this) { countconn--; }
                 logger.debug("Connection {} closed", conn);
             }
         } catch (RepositoryException e) {
