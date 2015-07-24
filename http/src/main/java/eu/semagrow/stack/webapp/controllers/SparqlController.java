@@ -317,15 +317,16 @@ public class SparqlController {
                    TupleQueryResultHandlerException, RDFHandlerException, SemaGrowNotAcceptableException, SemaGrowTimeOutException, SemaGrowInternalException, SemaGrowExternalError, SemaGrowBadRequestException, Throwable {
         try {
             if(query instanceof TupleQuery){
-
+                CountDownLatch latch = new CountDownLatch(1);
                 if(accept.indexOf(CONSTANTS.MIMETYPES.SPARQLRESULTS_XML)!=-1){
-                    ((TupleQuery)query).evaluate(new SPARQLResultsXMLWriter(out));
+                    ((TupleQuery)query).evaluate(new SyncTupleResultHandler(new SPARQLResultsXMLWriter(out), latch));
                 } else
                 if(accept.indexOf(CONSTANTS.MIMETYPES.SPARQLRESULTS_JSON)!=-1){
-                    ((TupleQuery)query).evaluate(new SPARQLResultsJSONWriter(out));
+                    ((TupleQuery)query).evaluate(new SyncTupleResultHandler(new SPARQLResultsJSONWriter(out), latch));
                 } else {
-                    ((TupleQuery)query).evaluate(new HTMLTableWriter(out));
+                    ((TupleQuery)query).evaluate(new SyncTupleResultHandler(new HTMLTableWriter(out), latch));
                 }
+                latch.await();
             } else
             if(query instanceof GraphQuery){
                 if(accept.indexOf(CONSTANTS.MIMETYPES.RDF_RDFXML)!=-1){
