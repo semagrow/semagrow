@@ -182,14 +182,14 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             throws QueryEvaluationException
     {
         Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-        return Streams.wrap(result).subscribeOn(Environment.workDispatcher());
+        return Streams.wrap(result).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public Stream<BindingSet> evaluateSourceReactive(URI source, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
         Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-        return Streams.wrap(result).subscribeOn(Environment.workDispatcher());
+        return Streams.wrap(result).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Transform expr, BindingSet bindings)
