@@ -23,6 +23,7 @@ import org.openrdf.query.algebra.evaluation.util.OrderComparator;
 import org.openrdf.query.algebra.evaluation.util.ValueComparator;
 import org.openrdf.util.iterators.Iterators;
 import org.reactivestreams.Publisher;
+import reactor.Environment;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 import reactor.rx.stream.GroupedStream;
@@ -53,7 +54,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
             throws QueryEvaluationException
     {
         //return RxReactiveStreams.toPublisher(evaluateReactorInternal(expr, bindings));;
-        return evaluateReactorInternal(expr, bindings);
+        return evaluateReactorInternal(expr, bindings).subscribeOn(Environment.cachedDispatcher());
     }
 
     public boolean isTrue(ValueExpr expr, BindingSet bindings)
