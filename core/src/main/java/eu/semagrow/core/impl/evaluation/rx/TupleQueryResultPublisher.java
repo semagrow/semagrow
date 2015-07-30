@@ -31,6 +31,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
         private Subscriber<? super BindingSet> subscriber;
         private TupleQuery query;
+        private boolean isEvaluating = false;
 
         public TupleQueryResultProducer(Subscriber<? super BindingSet> o, TupleQuery query) {
             this.subscriber = o;
@@ -43,18 +44,21 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         @Override
         public void request(long l) {
 
-            try {
-                logger.debug("Requesting " + l + " results");
-                logger.info("Sending query " + query.toString() + " with " + query.getBindings().toString());
-                query.evaluate(this);
-            } catch (Exception e) {
-                subscriber.onError(e);
+            if (!isEvaluating) {
+                try {
+                    logger.debug("Requesting " + l + " results");
+                    logger.info("Sending query " + query.toString() + " with " + query.getBindings().toString());
+                    isEvaluating = true;
+                    query.evaluate(this);
+                } catch (Exception e) {
+                    subscriber.onError(e);
+                }
             }
         }
 
         @Override
         public void cancel() {
-
+            isEvaluating = false;
         }
 
         //////////////////////////
