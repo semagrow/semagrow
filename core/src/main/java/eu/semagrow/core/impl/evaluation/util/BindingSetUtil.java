@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.evaluation.util;
 
+import org.openrdf.model.BNode;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
@@ -79,6 +80,16 @@ public class BindingSetUtil {
                 names.add(varName);
         }
         return names;
+    }
+
+    public static boolean hasBNode(BindingSet bindings) {
+
+        for (Binding b : bindings) {
+            if (b.getValue() instanceof BNode) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

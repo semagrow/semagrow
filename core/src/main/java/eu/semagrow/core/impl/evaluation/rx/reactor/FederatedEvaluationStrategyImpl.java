@@ -1,6 +1,7 @@
 package eu.semagrow.core.impl.evaluation.rx.reactor;
 
 import eu.semagrow.core.impl.algebra.*;
+import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 import info.aduna.iteration.CloseableIteration;
@@ -149,6 +150,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             throws QueryEvaluationException
     {
         return this.evaluateReactorInternal(expr.getLeftArg(), bindings)
+                .filter(BindingSetUtil::hasBNode)
                 .buffer(getBatchSize())
                 .flatMap((b) -> {
                     try {
