@@ -19,6 +19,7 @@ import reactor.rx.Stream;
 import reactor.rx.Streams;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * Created by antonis on 26/3/2015.
@@ -150,7 +151,6 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             throws QueryEvaluationException
     {
         return this.evaluateReactorInternal(expr.getLeftArg(), bindings)
-                .filter((b) -> !BindingSetUtil.hasBNode(b))
                 .buffer(getBatchSize())
                 .flatMap((b) -> {
                     try {
@@ -183,15 +183,37 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateSourceReactive(URI source, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-        return Streams.wrap(result).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
+        Set<String> free = expr.getBindingNames();
+        BindingSet relevant = BindingSetUtil.project(free, bindings);
+        
+        if (BindingSetUtil.hasBNode(relevant))
+            return Streams.empty();
+        else {
+            Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
+            return Streams.wrap(result).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
+        }
     }
 
     public Stream<BindingSet> evaluateSourceReactive(URI source, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
-        Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-        return Streams.wrap(result).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
+        Set<String> free = expr.getBindingNames();
+
+        return Streams.from(bindings)
+                .filter((b) -> !BindingSetUtil.hasBNode(BindingSetUtil.project(free, b)))
+                .buffer()
+                .flatMap((bl) -> {
+                    Publisher<BindingSet> result = null;
+                    if (bl.isEmpty())
+                        return Streams.empty();
+                    try {
+                        result = queryExecutor.evaluate(source, expr, bl);
+                        return Streams.wrap(result);
+                    } catch (QueryEvaluationException e) {
+                        return Streams.fail(e);
+                    }
+
+                }).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Transform expr, BindingSet bindings)
@@ -234,14 +256,18 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateReactiveDefault(TupleExpr expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
-        return Streams.from(bindingList).flatMap(b -> {
-            try {
-                return evaluateReactorInternal(expr, b);
-            }
-            catch (Exception e) {
-                return Streams.fail(e);
-            }
-        });
+        Set<String> freeVars = expr.getBindingNames();
+
+
+        return Streams.from(bindingList)
+                .filter((b) -> !BindingSetUtil.hasBNode(BindingSetUtil.project(freeVars,b)))
+                .flatMap(b -> {
+                    try {
+                        return evaluateReactorInternal(expr, b);
+                    } catch (Exception e) {
+                        return Streams.fail(e);
+                    }
+                });
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Union expr, List<BindingSet> bindingList)

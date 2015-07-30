@@ -141,7 +141,6 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
         throws QueryEvaluationException
     {
         return this.evaluateReactiveInternal(expr.getLeftArg(), bindings)
-                .filter((b) -> !BindingSetUtil.hasBNode(b))
                 .buffer(getBatchSize())
                 .flatMap((b) -> {
                     try {
