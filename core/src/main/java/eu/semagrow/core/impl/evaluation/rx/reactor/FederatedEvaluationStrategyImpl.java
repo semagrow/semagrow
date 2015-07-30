@@ -185,7 +185,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     {
         Set<String> free = expr.getBindingNames();
         BindingSet relevant = BindingSetUtil.project(free, bindings);
-        
+
         if (BindingSetUtil.hasBNode(relevant))
             return Streams.empty();
         else {

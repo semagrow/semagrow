@@ -65,7 +65,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
                 final String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
 
-                final BindingSet relevantBindings = BindingSetUtil.project(freeVars, bindings);
+                final BindingSet relevantBindings = BindingSetUtil.project(computeVars(expr), bindings);
 
                 result = Streams.just(bindings).flatMap(b -> {
                     try {
@@ -81,7 +81,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
                 return result;
             } else {
 
-                final BindingSet relevantBindings = BindingSetUtil.project(freeVars, bindings);
+                final BindingSet relevantBindings = BindingSetUtil.project(computeVars(expr), bindings);
 
                 String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
 
