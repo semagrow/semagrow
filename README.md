@@ -43,12 +43,7 @@ Now you can run the .startup.sh script. SemaGrow can be accessed at http://local
 KNOWN ISSUES
 ============
 
-SemaGrow uses UNION instead of VALUES to implement the BindJoin operator. This fails in 4store in the presence
-of FILTER clauses due to unsafe optimization by 4store.
-This is fixed in 4store 1.1.5. Please cf.
-https://github.com/garlik/4store/blob/v1.1.6/NEWS
-where the following bug fix is reported for v1.1.5:
-* Fix bug in disjunctive FILTER optimisation
-
+SemaGrow uses UNION instead of VALUES to implement the BindJoin operator. This fails in 4store 1.1.5 
+and previous versions in the presence of FILTER clauses due to unsafe optimization by 4store.
 
 
