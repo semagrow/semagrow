@@ -153,8 +153,8 @@ public class SparqlController {
     
     @RequestMapping(value="", params={ CONSTANTS.WEBAPP.PARAM_QUERY })
     public void query(HttpServletResponse response, HttpServletRequest request, 
-            @RequestParam String query, 
-            @RequestParam(defaultValue="") String prefixes,
+            @RequestParam("query") String query,
+            @RequestParam(value="prefixes", defaultValue="") String prefixes,
             @RequestParam(value=CONSTANTS.WEBAPP.PARAM_ACCEPT, defaultValue="", required=false) String accept) 
             throws MalformedQueryException, RepositoryException, UpdateExecutionException, IOException, QueryEvaluationException, TupleQueryResultHandlerException, RDFHandlerException, SemaGrowTimeOutException, SemaGrowInternalException, SemaGrowExternalError, SemaGrowBadRequestException, Throwable {
         
@@ -212,7 +212,9 @@ public class SparqlController {
     }
             
     @RequestMapping(value="/explain", method=RequestMethod.POST, params={ CONSTANTS.WEBAPP.PARAM_QUERY })
-    public void explain(HttpServletResponse response, HttpServletRequest request, @RequestParam String query, @RequestParam(defaultValue="") String prefixes) 
+    public void explain(HttpServletResponse response, HttpServletRequest request,
+                        @RequestParam("query") String query,
+                        @RequestParam(value="prefixes", defaultValue="") String prefixes)
             throws IOException, RepositoryException, RepositoryException, MalformedQueryException {
         if(!prefixes.trim().equals("")){
             query = prefixes.concat("\n").concat(query);
@@ -239,7 +241,9 @@ public class SparqlController {
 
 
     @RequestMapping(value="/decompose", method=RequestMethod.POST, params={ CONSTANTS.WEBAPP.PARAM_QUERY })
-    public void decompose(HttpServletResponse response, HttpServletRequest request, @RequestParam String query, @RequestParam(defaultValue="") String prefixes)
+    public void decompose(HttpServletResponse response, HttpServletRequest request,
+                          @RequestParam("query") String query,
+                          @RequestParam(value="prefixes", defaultValue="") String prefixes)
             throws IOException, RepositoryException, RepositoryException, MalformedQueryException {
         if(!prefixes.trim().equals("")){
             query = prefixes.concat("\n").concat(query);

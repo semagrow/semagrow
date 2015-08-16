@@ -12,32 +12,20 @@
   <packaging>jar</packaging>
 
   <name>semagrow-monitor</name>
-  <dependencies>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-model</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-queryresultio-api</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-queryalgebra-model</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-queryrender</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <debug>false</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+  <dependency>
       <groupId>com.lmax</groupId>
       <artifactId>disruptor</artifactId>
       <version>3.2.1</version>

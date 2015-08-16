@@ -11,41 +11,23 @@
   <artifactId>semagrow-commons</artifactId>
 
   <name>semagrow-commons</name>
-  <dependencies>
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-model</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-queryresultio-api</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-sail-api</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-repository-sail</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-sail-inferencer</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-sail-memory</artifactId>
-      <version>${sesame.version}</version>
-    </dependency>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <debug>false</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
+      <dependency>
+          <groupId>commons-io</groupId>
+          <artifactId>commons-io</artifactId>
+          <version>2.4</version>
+      </dependency>
   </dependencies>
 </project>

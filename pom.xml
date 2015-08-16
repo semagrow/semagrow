@@ -11,10 +11,12 @@
 
     <properties>        
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <sesame.version>2.7.10</sesame.version>
+        <slf4j.version>1.7.12</slf4j.version>
+        <junit.version>4.11</junit.version>
+        <semagrow.version>${project.version}</semagrow.version>
         <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>
         <distribution.mvn>/var/www/mvn</distribution.mvn>
-        <sesame.version>2.7.10</sesame.version>
-        <semagrow.version>${project.version}</semagrow.version>
     </properties>
 
     <organization>
@@ -65,28 +67,29 @@
 
     <!-- REPOSITORIES -->
 
-<repositories>
+    <repositories>
 
-    <repository>
-        <id>swc-semagrow</id>
-        <name>SWC SemaGrow Repository</name>
-        <url>http://semagrow.semantic-web.at/mvn/</url>
-        <snapshots>
-            <updatePolicy>always</updatePolicy>
-            <enabled>true</enabled>
-        </snapshots>
-    </repository>
-    <repository>
-        <id>maven-central</id>
-        <url>http://repo1.maven.org/maven2</url>
-    </repository>
-
-    <repository>
-        <id>spring-milestone</id>
-        <name>Spring Milestones</name>
-        <url>https://repo.spring.io/libs-milestone</url>
-    </repository>
-</repositories>
+        <repository>
+            <id>swc-semagrow</id>
+            <name>SWC SemaGrow Repository</name>
+            <url>http://semagrow.semantic-web.at/mvn/</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+<!--        
+        <repository>
+            <id>maven-central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+-->
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/libs-milestone</url>
+        </repository>
+    </repositories>
 
     <pluginRepositories>
         <pluginRepository>
@@ -96,8 +99,8 @@
     </pluginRepositories>
 
     <scm>
-        <connection>scm:git:git://github.com/semagrow/semagrow-stack-modules.git</connection>
-        <url>https://github.com/semagrow/semagrow-stack-modules</url>
+        <connection>scm:git:git://github.com/semagrow/semagrow.git</connection>
+        <url>https://github.com/semagrow/semagrow</url>
     </scm>
 
     <distributionManagement>
@@ -112,26 +115,66 @@
     </distributionManagement>
 
     <dependencies>
+        <!-- OPENRDF SESAME -->
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-runtime</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-queryrender</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-trig</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-trix</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-rdfxml</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-n3</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>        
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-sail-rdbms</artifactId>
+            <version>${sesame.version}</version>
+        </dependency> 
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-queryresultio-sparqljson</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>               
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>        
+        </dependency>
+        
+        <!-- TEST DEPENDENCIES -->                
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>1.7.12</version>
+            <version>${slf4j.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.14</version>
-            <scope>test</scope>
-        </dependency>
-        -->
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
@@ -154,13 +197,14 @@
                     </plugins>
                 </pluginManagement>
             </build>
-            <id>semagrow-stack-modules-documentation</id>
+            <id>semagrow-stack-documentation</id>
             <reporting>
                 <plugins>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
+                          <additionalparam>-Xdoclint:none</additionalparam>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -209,6 +253,7 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
+                    <debug>false</debug>
                 </configuration>
             </plugin>
         </plugins>
@@ -216,7 +261,7 @@
 
     <modules>
         <module>commons</module>
-	    <module>core-api</module>
+        <module>core-api</module>
         <module>core</module>
         <module>monitor</module>
         <module>sail</module>

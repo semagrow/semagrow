@@ -15,98 +15,11 @@
     <properties>   
         <build.properties>src/properties/build.properties</build.properties>
         <tomcat.properties>src/properties/tomcat.properties</tomcat.properties>
-        <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>        
-        <distribution.mvn>/var/www/mvn</distribution.mvn>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
-        
-    <organization>
-        <name>SemaGrow - FP7</name>
-        <url>http://www.semagrow.eu</url>
-    </organization>
-    
-    <licenses>
-        <license>            
-            <name>Apache 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-        </license>
-    </licenses>
-    
-    <developers>
-        <developer>
-            <id>acharal</id>
-            <name>Angelos Charalambidis</name>
-            <email>acharal@iit.demokritos.gr</email>
-        </developer>
-        <developer>
-            <id>turnguard</id>
-            <name>Jürgen W. Jakobitsch</name>
-            <url>http://www.turnguard.com/turnguard</url>
-        </developer>
-        <developer>
-            <id>cmader</id>
-            <name>Christian Mader</name>
-            <url>http://company.semantic-web.at/person/christian_mader</url>
-        </developer>        
-    </developers>
-    
-    <contributors>
-        <contributor>
-            <name>Christian Blaschke</name>
-            <url>http://company.semantic-web.at/person/christian_blaschke</url>
-        </contributor>
-    </contributors>
-    
-    <mailingLists>
-        <mailingList>            
-            <name>public-semagrow</name>
-            <subscribe>subscribe@semagrow_list@googlegroups.com</subscribe>
-            <unsubscribe>unsubscribe@semagrow_list@googlegroups.com</unsubscribe>
-            <post>semagrow_list@googlegroups.com</post>
-        </mailingList>
-    </mailingLists>
       
     <!-- REPOSITORIES -->
-    <repositories>
-        <repository>
-            <id>swc-semagrow</id>
-            <name>SWC SemaGrow Repository</name>
-            <url>http://semagrow.semantic-web.at/mvn/</url>          
-            <snapshots>
-                <updatePolicy>always</updatePolicy>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>maven-central</id>
-            <url>http://repo1.maven.org/maven2</url>
-        </repository>        
-    </repositories>
-    
-    <pluginRepositories>
-        <pluginRepository>
-            <id>maven.tinyjee.org</id>
-            <url>http://maven.tinyjee.org</url>
-        </pluginRepository>
-    </pluginRepositories>
-              
-    <scm>
-        <connection>scm:git:git://github.com/semagrow/semagrow-stack-webapp.git</connection>    
-        <url>https://github.com/semagrow/semagrow-stack-webapp</url>
-        
-    </scm>
-           
-    <distributionManagement>
-        <site>
-            <id>online-site-repository</id>
-            <url>file://${distribution.site}</url>
-        </site>        
-        <repository>
-            <id>online-mvn-repository</id>
-            <url>file://${distribution.mvn}</url>
-        </repository>                
-    </distributionManagement>
-                       
+                  
     <dependencies>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
@@ -143,22 +56,17 @@
             <version>1.2</version>
             <scope>provided</scope>
         </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>openrdf-sesame</artifactId>
-            <version>${sesame.version}</version>
-            <classifier>onejar</classifier>
-        </dependency>
+
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.5.8</version>
+            <version>${slf4j.version}</version>
             <scope>provided</scope>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.5.8</version>
+            <version>${slf4j.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -186,64 +94,7 @@
 
     </dependencies>
     
-    <profiles>       
-        <profile>
-            <id>semagrow-stack-webapp-documentation</id>
-            <build>               
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-site-plugin</artifactId>
-                            <version>3.3</version>
-                        </plugin>                                
-                    </plugins>
-                </pluginManagement>                
-            </build>            
-            <reporting>                       
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <version>2.9.1</version>
-                        <configuration>                            
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jxr-plugin</artifactId>
-                        <version>2.1</version>
-                    </plugin>
-
-                    <!-- SUREFIRE -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-report-plugin</artifactId>
-                        <version>2.0</version>
-                        <configuration>
-                        </configuration>
-                    </plugin>                     
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-project-info-reports-plugin</artifactId>
-                        <version>2.4</version>
-                        <reportSets>
-                            <reportSet>
-                                <reports>                                    
-                                    <report>summary</report>
-                                    <report>project-team</report>
-                                    <report>mailing-list</report>
-                                    <report>license</report>
-                                    <report>scm</report>
-                                    <report>issue-tracking</report>
-                                    <report>dependencies</report>
-                                </reports>
-                            </reportSet>
-                        </reportSets>
-                    </plugin>                                                                              
-                </plugins>
-            </reporting>
-        </profile>
+    <profiles>        
         <profile>
             <id>semagrow-stack-webapp-distribution</id>
             <build>                
@@ -295,6 +146,215 @@
                 </plugins>
             </build>
         </profile>
+		<profile>
+      <id>debian</id>
+      <build>
+          <plugins>
+              <plugin>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <artifactId>properties-maven-plugin</artifactId>
+                  <version>1.0-alpha-2</version>
+                  <executions>
+                      <execution>
+                          <phase>validate</phase>
+                          <goals>
+                              <goal>read-project-properties</goal>
+                          </goals>
+                          <configuration>                            
+                              <files>                                                                
+                                  <file>${build.properties}</file>                                                                                                                                                               
+                              </files>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>  
+					    <plugin>
+					        <groupId>org.apache.maven.plugins</groupId>
+					        <artifactId>maven-dependency-plugin</artifactId>
+					        <version>2.8</version>
+					        <executions>
+					            <execution>
+					                <phase>validate</phase>
+					                <goals>
+					                    <goal>unpack</goal>
+					                </goals>
+					                <configuration>
+					                    <artifactItems>
+					                        <artifactItem>
+					                            <groupId>eu.semagrow</groupId>
+					                            <artifactId>semagrow-http</artifactId>
+					                            <version>${project.version}</version>
+					                            <classifier>distribution</classifier>
+					                            <type>zip</type>
+					                        </artifactItem>
+					                    </artifactItems>
+					                    <includes>**/*</includes>
+					                    <outputDirectory>${project.build.directory}/copied-tomcat</outputDirectory>
+					                    <overWriteReleases>false</overWriteReleases>
+					                    <overWriteSnapshots>true</overWriteSnapshots>
+					                </configuration>
+					            </execution>
+					        </executions>
+					    </plugin>                  
+              <plugin>
+                  <artifactId>jdeb</artifactId>
+                  <groupId>org.vafer</groupId>
+                  <version>1.0</version>
+                  <executions>
+                      <execution>
+                          <phase>package</phase>
+                          <goals>
+                              <goal>jdeb</goal>
+                          </goals>
+                          <configuration>                            
+                              <verbose>true</verbose>                            
+                              <controlDir>${basedir}/target/deb/control</controlDir>                                                                                         
+                              <dataSet>
+                                  <data>
+                                      <type>template</type>
+                                      <paths>
+                                          <path>etc/${distribution.all.package.shortname}</path>
+                                          <path>var/lib/${distribution.all.package.shortname}</path>
+                                          <path>var/log/${distribution.all.package.shortname}</path>
+                                          <path>var/run/${distribution.all.package.shortname}</path>
+                                      </paths>
+                                      <mapper>
+                                          <type>perm</type>
+                                          <user>loader</user>
+                                          <group>loader</group>
+                                      </mapper>
+                                  </data>                                        
+                                  <data>                                    
+                                      <src>${basedir}/target/deb/init.d</src>
+                                      <type>directory</type>                                             
+                                      <mapper>
+                                          <type>perm</type>
+                                          <prefix>/etc/init.d</prefix>
+                                          <user>loader</user>
+                                          <group>loader</group>
+                                      </mapper>
+                                  </data>
+                                  <data>
+                                      <src>${basedir}/target/copied-tomcat/resources/</src>
+                                      <type>directory</type>
+                                      <mapper>
+                                          <type>perm</type>
+                                          <prefix>/etc/default/${distribution.all.package.shortname}</prefix>
+                                          <user>loader</user>
+                                          <group>loader</group>
+                                      </mapper>
+                                  </data>
+                                  <data>
+                                      <src>${basedir}/target/copied-tomcat/</src>
+                                      <type>directory</type>
+                                      <excludes>**/domains/**, **/logs/**</excludes> 
+                                      <mapper>
+                                          <type>perm</type>
+                                          <prefix>/usr/local/${distribution.all.package.shortname}</prefix>
+                                          <user>loader</user>
+                                          <group>loader</group>
+                                      </mapper>
+                                  </data>
+                                  <data>
+                                      <src>${basedir}/target/copied-tomcat/</src>
+                                      <type>directory</type>
+                                      <includes>**/domains/**</includes>
+                                      <mapper>
+                                          <type>perm</type>
+                                          <prefix>/var/lib/${distribution.all.package.shortname}</prefix>
+                                          <user>loader</user>
+                                          <group>loader</group>
+                                      </mapper>
+                                  </data>
+                                  <data>
+                                      <type>link</type>
+                                      <linkName>/usr/local/${distribution.all.package.shortname}/domains</linkName>
+                                      <linkTarget>/var/lib/${distribution.all.package.shortname}/domains</linkTarget>
+                                      <symlink>true</symlink>
+                                  </data>
+                                  <data>
+                                      <type>link</type>
+                                      <linkName>/usr/local/${distribution.all.package.shortname}/logs</linkName>
+                                      <linkTarget>/var/log/${distribution.all.package.shortname}</linkTarget>
+                                      <symlink>true</symlink>
+                                  </data>                                        
+                              </dataSet>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>
+              <plugin>
+                  <artifactId>maven-resources-plugin</artifactId>
+                  <version>2.6</version>
+                  <executions>
+                      <execution>
+                          <id>copy-deb</id>
+                          <phase>initialize</phase>
+                          <goals>
+                              <goal>copy-resources</goal>
+                          </goals>
+                          <configuration>
+                              <outputDirectory>${basedir}/target/deb</outputDirectory>
+                              <resources>
+                                  <resource>
+                                      <directory>${basedir}/src/deb</directory>
+                                      <filtering>true</filtering>
+                                  </resource>
+                              </resources>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>copy-deb-deploy-script</id>
+                          <phase>initialize</phase>
+                          <goals>
+                              <goal>copy-resources</goal>
+                          </goals>
+                          <configuration>
+                              <outputDirectory>${basedir}/target/</outputDirectory>
+                              <resources>
+                                  <resource>
+                                      <directory>${basedir}/src/script</directory>
+                                      <filtering>true</filtering>
+                                  </resource>
+                              </resources>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>
+              <plugin>
+                  <artifactId>exec-maven-plugin</artifactId>
+                  <groupId>org.codehaus.mojo</groupId>
+                  <executions>
+                      <execution>
+                          <id>chmod-debian-deploy</id>
+                          <phase>deploy</phase>
+                          <goals>
+                              <goal>exec</goal>
+                          </goals>
+                          <configuration>
+                              <executable>chmod</executable>
+                              <arguments>
+                                  <argument>+x</argument>
+                                  <argument>${basedir}/target/deploy-debian.sh</argument>
+                              </arguments>
+                          </configuration>
+                      </execution>
+                      <execution>
+                          <id>debian-deploy</id>
+                          <phase>deploy</phase>
+                          <goals>
+                              <goal>exec</goal>
+                          </goals>
+                          <configuration>
+                              <executable>${basedir}/target/deploy-debian.sh</executable>
+                          </configuration>
+                      </execution>
+                  </executions>
+              </plugin>
+          </plugins>
+      </build>            
+		</profile>
+
     </profiles>  
   
     <build>                 
@@ -324,7 +384,8 @@
                 <version>2.0.2</version>
                 <configuration>
                     <source>1.7</source>
-                    <target>1.7</target>                   
+                    <target>1.7</target>
+                    <debug>false</debug>
                 </configuration>
             </plugin>      
             <plugin>

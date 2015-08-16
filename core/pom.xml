@@ -10,8 +10,19 @@
     <artifactId>semagrow-core</artifactId>
     <version>1.4.1</version>
     <name>semagrow-core</name>
-
-    <dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <debug>false</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>                
         <dependency>
             <groupId>eu.semagrow</groupId>
             <artifactId>semagrow-core-api</artifactId>
@@ -26,17 +37,7 @@
             <groupId>eu.semagrow</groupId>
             <artifactId>semagrow-monitor</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-model</artifactId>
-            <version>${sesame.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.openrdf.sesame</groupId>
-            <artifactId>sesame-queryalgebra-model</artifactId>
-            <version>${sesame.version}</version>
-        </dependency>
+        </dependency>        
         <dependency>
             <groupId>io.reactivex</groupId>
             <artifactId>rxjava</artifactId>
@@ -58,20 +59,11 @@
             <version>2.0.0.RELEASE</version>
         </dependency>
 
-
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <version>9.2-1004-jdbc4</version>
         </dependency>
-
-
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-            <version>1.7.5</version>
-        </dependency>
-
 
     </dependencies>
 

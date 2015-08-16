@@ -11,8 +11,19 @@
   <packaging>jar</packaging>
 
   <name>semagrow-sail</name>
-
-  <dependencies>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.3.2</version>
+                <configuration>
+                    <debug>false</debug>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+    <dependencies>
     <dependency>
       <groupId>eu.semagrow</groupId>
       <artifactId>semagrow-core</artifactId>
@@ -22,24 +33,7 @@
       <groupId>eu.semagrow</groupId>
       <artifactId>semagrow-core-api</artifactId>
       <version>${project.version}</version>
-    </dependency>
-    <!--
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-rio-api</artifactId>
-      <version>2.7.10</version>
-    </dependency>
-    -->
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-rio-ntriples</artifactId>
-      <version>2.7.10</version>
-    </dependency>
-    <dependency>
-      <groupId>org.openrdf.sesame</groupId>
-      <artifactId>sesame-rio-turtle</artifactId>
-      <version>2.7.10</version>
-    </dependency>
+    </dependency>    
   </dependencies>
 
 </project>

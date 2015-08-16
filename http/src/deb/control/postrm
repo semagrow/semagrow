@@ -1,0 +1,25 @@
+#!/bin/sh
+
+echo "POSTRM (version: ${project.version}) WITH $@"
+
+set -e
+case "$1" in
+    abort-install)
+			echo "Abort installation";
+    ;;
+		remove)
+			echo "Remove";
+		;;
+		purge)
+			echo "Purge";
+		;;
+		upgrade)
+			echo "Upgrade";
+		;;
+		abort-upgrade)
+			echo "Abort upgrade";
+		;;
+		failed-upgrade)
+			echo "Failed upgrade";
+		;;
+esac
