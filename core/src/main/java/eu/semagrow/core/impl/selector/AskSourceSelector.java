@@ -10,6 +10,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
+import org.openrdf.query.TupleQuery;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
@@ -80,14 +81,32 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
     	boolean ask;
     	
     	Value s = pattern.getSubjectVar().getValue();
+	String ss = (s==null)? null : s.stringValue();
+
     	Value p = pattern.getPredicateVar().getValue();
+	String sp = (p==null)? null : p.stringValue();
+
     	Value o = pattern.getObjectVar().getValue();
-    	
+	String so = (o==null)? null : o.stringValue();
+
+	String qs = "SELECT ?S ?P ?O WHERE { ?S ?P ?P } LIMIT 1";
     	Repository rep = new SPARQLRepository(source.stringValue());
     	rep.initialize();
     	RepositoryConnection conn = rep.getConnection();
-    	
-    	ask = conn.hasStatement((Resource)s,(URI)p,o,true);
+	try {
+		TupleQuery q = conn.prepareTupleQuery( org.openrdf.query.QueryLanguage.SPARQL, qs );
+		if( s != null ) { q.setBinding( "S", s ); }
+		if( p != null ) { q.setBinding( "P", p ); }
+		if( o != null ) { q.setBinding( "O", o ); }
+		ask = q.evaluate().hasNext();
+	}
+	catch( org.openrdf.query.MalformedQueryException ex ) {
+		throw new AssertionError();
+		// ASSERTION ERROR: This can never happen
+	}
+	catch( org.openrdf.query.QueryEvaluationException ex ) {
+		throw new RepositoryException( ex );
+	}
 
     	conn.close();
     	
