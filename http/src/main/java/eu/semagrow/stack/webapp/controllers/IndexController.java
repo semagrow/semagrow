@@ -24,7 +24,7 @@ public class IndexController {
     }
     
     @RequestMapping(value="/page", method=RequestMethod.GET, params={ CONSTANTS.WEBAPP.PARAM_TEMPLATE })
-    public ModelAndView page(HttpServletResponse response, @RequestParam String template) throws IOException{
+    public ModelAndView page(HttpServletResponse response, @RequestParam(value="template") String template) throws IOException{
         ModelAndView mav = new ModelAndView(template);
         return mav;
     }
