@@ -76,41 +76,60 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
         return restrictedList;
     }
 	
-    private boolean askPattern(StatementPattern pattern, URI source) throws RepositoryException {
-    	
-    	boolean ask;
-    	
-    	Value s = pattern.getSubjectVar().getValue();
+  private boolean askPattern( StatementPattern pattern, URI source )
+    throws RepositoryException
+  {
+    return askPattern( pattern, source, false, false );
+  }
+
+  private boolean askPattern( StatementPattern pattern, URI source, boolean allow_ask, boolean allow_limit )
+    throws RepositoryException
+  {
+
+    boolean retv = true;
+
+    Value s = pattern.getSubjectVar().getValue();
+    Value p = pattern.getPredicateVar().getValue();
+    Value o = pattern.getObjectVar().getValue();
+
+    Repository rep;
+
+    if( allow_ask || allow_limit ) {
+      rep = new SPARQLRepository(source.stringValue());
+      rep.initialize();
+      RepositoryConnection conn = rep.getConnection();
+
+      if( allow_ask ) {
+	retv = conn.hasStatement((Resource)s,(URI)p,o,true);
+      }
+      else {
 	String ss = (s==null)? null : s.stringValue();
-
-    	Value p = pattern.getPredicateVar().getValue();
 	String sp = (p==null)? null : p.stringValue();
-
-    	Value o = pattern.getObjectVar().getValue();
 	String so = (o==null)? null : o.stringValue();
-
 	String qs = "SELECT ?S ?P ?O WHERE { ?S ?P ?P } LIMIT 1";
-    	Repository rep = new SPARQLRepository(source.stringValue());
-    	rep.initialize();
-    	RepositoryConnection conn = rep.getConnection();
+
 	try {
-		TupleQuery q = conn.prepareTupleQuery( org.openrdf.query.QueryLanguage.SPARQL, qs );
-		if( s != null ) { q.setBinding( "S", s ); }
-		if( p != null ) { q.setBinding( "P", p ); }
-		if( o != null ) { q.setBinding( "O", o ); }
-		ask = q.evaluate().hasNext();
+	  TupleQuery q = conn.prepareTupleQuery( org.openrdf.query.QueryLanguage.SPARQL, qs );
+	  if( s != null ) { q.setBinding( "S", s ); }
+	  if( p != null ) { q.setBinding( "P", p ); }
+	  if( o != null ) { q.setBinding( "O", o ); }
+	  retv = q.evaluate().hasNext();
 	}
 	catch( org.openrdf.query.MalformedQueryException ex ) {
-		throw new AssertionError();
-		// ASSERTION ERROR: This can never happen
+	  throw new AssertionError();
+	  // ASSERTION ERROR: This can never happen
 	}
 	catch( org.openrdf.query.QueryEvaluationException ex ) {
-		throw new RepositoryException( ex );
+	  throw new RepositoryException( ex );
 	}
 
-    	conn.close();
+      }
+
+      conn.close();
+    } // endif allow_ask || alllow_limit
     	
-    	return ask;
-    }
+    return retv;
+  }
+
 }
 
