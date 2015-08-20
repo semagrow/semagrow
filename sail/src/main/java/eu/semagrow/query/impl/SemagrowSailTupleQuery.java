@@ -122,6 +122,8 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
         private CountDownLatch latch;
 
+        private Subscription subscription;
+
         public HandlerSubscriberAdapter(TupleQueryResultHandler handler, CountDownLatch latch) {
             this.handler = handler;
             this.latch = latch;
@@ -129,6 +131,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
         public void onSubscribe(Subscription subscription) {
             // FIXME: is it possible that tuplequeryhandler be slower than producer?
+            this.subscription = subscription;
             subscription.request(Long.MAX_VALUE);
         }
 
@@ -141,6 +144,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
                 handler.handleSolution(bindings);
             } catch (TupleQueryResultHandlerException e) {
+                subscription.cancel();
                 logger.error("Tuple handle solution error", e);
             }
         }
@@ -168,7 +172,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     logger.error("Tuple handle solution error", e);
                 }
             }
-
+            subscription.cancel();
         }
 
 
@@ -188,6 +192,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     logger.error("Tuple handle solution error", e);
                 }
             }
+            subscription.cancel();
         }
     }
 }
