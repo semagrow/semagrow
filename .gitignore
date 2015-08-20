@@ -7,3 +7,4 @@
 .settings/
 *.versionsBackup
 .DS_Store
+/bin
