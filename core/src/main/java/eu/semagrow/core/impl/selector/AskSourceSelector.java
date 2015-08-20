@@ -1,10 +1,12 @@
 package eu.semagrow.core.impl.selector;
 
-import java.util.LinkedList;
-import java.util.List;
+/**
+ * Created by antru on 1/27/15.
+ */
 
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
+
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -16,14 +18,17 @@ import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.sparql.SPARQLRepository;
 
-/**
- * Created by antru on 1/27/15.
- */
+import java.util.LinkedList;
+import java.util.List;
 
-public class AskSourceSelector extends SourceSelectorWrapper implements SourceSelector {
+public class AskSourceSelector extends SourceSelectorWrapper implements SourceSelector
+{
+
+  static private org.slf4j.Logger logger =
+    org.slf4j.LoggerFactory.getLogger( AskSourceSelector.class );
+
 
 	public AskSourceSelector(SourceSelector selector) {
         super(selector);
@@ -63,30 +68,16 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
         for (SourceMetadata metadata : list) {
             List<URI> sources = metadata.getEndpoints();
             SourceMetadata m = metadata;
-            boolean ask = true;     	
-        	try {
-        		ask = askPattern(pattern, sources.get(0));
-        	} catch (RepositoryException e) {
-        		ask = true;
-        		e.printStackTrace();
-        	}
-        	if (ask)
-            	restrictedList.add(m);
+            boolean ask = askPattern( pattern, sources.get(0), true, false );
+	    if( ask ) { restrictedList.add(m); }
         }
         return restrictedList;
     }
 	
-  private boolean askPattern( StatementPattern pattern, URI source )
-    throws RepositoryException
-  {
-    return askPattern( pattern, source, false, false );
-  }
-
   private boolean askPattern( StatementPattern pattern, URI source, boolean allow_ask, boolean allow_limit )
-    throws RepositoryException
   {
 
-    boolean retv = true;
+    boolean retv;
 
     Value s = pattern.getSubjectVar().getValue();
     Value p = pattern.getPredicateVar().getValue();
@@ -95,39 +86,82 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
     Repository rep;
 
     if( allow_ask || allow_limit ) {
+      retv = true;
       rep = new SPARQLRepository(source.stringValue());
-      rep.initialize();
-      RepositoryConnection conn = rep.getConnection();
-
-      if( allow_ask ) {
-	retv = conn.hasStatement((Resource)s,(URI)p,o,true);
+      RepositoryConnection conn = null;
+      try { 
+	rep.initialize();
+	conn = rep.getConnection();
       }
-      else {
+      catch( org.openrdf.repository.RepositoryException ex ) {
+	// Failed to contact source
+	// Log a warnig and reply "true" just in case this is a transient failure
+	logger.warn( "Failed to contact source to ASK about pattern {}. Exception: {}",
+		     pattern.toString(), ex.getMessage() );
+      }
+
+      if( allow_ask && (conn!=null) ) {
+	try { 
+	  retv = conn.hasStatement( (Resource)s, (URI)p, o, true );
+	  allow_limit = false; // No need to use this any more
+	}
+	catch( org.openrdf.repository.RepositoryException ex ) {
+	  // Failed to contact source
+	  // Log a warnig and reply "true" just in case this is a transient failure
+	  logger.warn( "Failed to contact source to ASK about pattern {}. Exception: {}",
+		       pattern.toString(), ex.getMessage() );
+	}
+      }
+
+      if( allow_limit && (conn!=null) ) {
 	String ss = (s==null)? null : s.stringValue();
 	String sp = (p==null)? null : p.stringValue();
 	String so = (o==null)? null : o.stringValue();
 	String qs = "SELECT ?S ?P ?O WHERE { ?S ?P ?P } LIMIT 1";
 
+	TupleQuery q;
 	try {
-	  TupleQuery q = conn.prepareTupleQuery( org.openrdf.query.QueryLanguage.SPARQL, qs );
+	  q = conn.prepareTupleQuery( org.openrdf.query.QueryLanguage.SPARQL, qs );
 	  if( s != null ) { q.setBinding( "S", s ); }
 	  if( p != null ) { q.setBinding( "P", p ); }
 	  if( o != null ) { q.setBinding( "O", o ); }
-	  retv = q.evaluate().hasNext();
 	}
 	catch( org.openrdf.query.MalformedQueryException ex ) {
 	  throw new AssertionError();
 	  // ASSERTION ERROR: This can never happen
 	}
-	catch( org.openrdf.query.QueryEvaluationException ex ) {
-	  throw new RepositoryException( ex );
+	catch( org.openrdf.repository.RepositoryException ex ) {
+	  // Failed to contact source
+	  // Log a warnig and reply "true" just in case this is a transient failure
+	  logger.warn( "Failed to contact source to ASK about pattern {}. Exception: {}",
+		       pattern.toString(), ex.getMessage() );
+	  q = null;
 	}
+	
+	try {
+	  retv = q.evaluate().hasNext();
+	}
+	catch( org.openrdf.query.QueryEvaluationException ex ) {
+	  // Failed to contact source
+	  // Log a warnig and reply "true" just in case this is a transient failure
+	  logger.warn( "Failed to contact source to execute query {}. Exception: {}",
+		       q.toString(), ex.getMessage() );
+	}
+	catch( NullPointerException ex ) { /* NOOP: q was not prepared above */ }
 
       }
 
-      conn.close();
+      try { conn.close(); }
+      catch( NullPointerException ex ) { /* NPOP: the connection failed to open above */ }
+      catch( org.openrdf.repository.RepositoryException ex ) { }
+
     } // endif allow_ask || alllow_limit
-    	
+    else {
+      // nothing I can do to double-check a source
+      // just say "true"
+      retv = true;
+    }	
+
     return retv;
   }
 
