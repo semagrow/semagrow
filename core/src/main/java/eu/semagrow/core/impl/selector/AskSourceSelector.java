@@ -24,7 +24,9 @@ import java.util.List;
  * ASK Source Selector.
  * 
  * <P>Implementation of SourceSelector that tries to execute ASK queries to identify
- * the data sources that hold triples that match the given triple patterns.
+ * the data sources that hold triples that match the given triple patterns. This class
+ * extends SourceSelectorWrapper, and thus relies on a wrapped SourceSelector that
+ * provides the initial list of candidate data sources. 
  *  
  * <P>Note that if any exceptions are thrown when connecting to the remote data sources,
  * this SourceSelector simples returns "true" (matching triples exist). This avoids
