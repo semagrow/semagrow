@@ -267,7 +267,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
             throws QueryEvaluationException
     {
         return evaluateReactorInternal(expr.getArg(), bindings)
-                .concatMap((b) -> {
+                .flatMap((b) -> {
                     try {
                         return Streams.just(QueryEvaluationUtil.extend(this, expr.getElements(), b));
                     } catch (Exception e) {
@@ -333,7 +333,14 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
 
         try {
             Entry e = new Entry(k, parentBindings, expr);
-            Stream<Entry> s = g.reduce( e, (e1, b) -> { try { e1.addSolution(b); return e1; } catch(Exception x) { return null; } });
+            Stream<Entry> s = g.reduce( e, (e1, b) -> {
+                try { e1.addSolution(b);
+                    return e1;
+                }
+                catch(Exception x) {
+                    return null;
+                }
+            });
             return s.flatMap( (ee) -> {
                 QueryBindingSet b = new QueryBindingSet(k);
                 try {
