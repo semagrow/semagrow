@@ -118,7 +118,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         try {
             String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQueryUNION(expr, bindings, relevant);
             result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
-            result = result.concatMap(b -> convertUnionBindings(b, bindings));
+            result = result.flatMap(b -> convertUnionBindings(b, bindings));
             return result;
         } catch(QueryEvaluationException e)  {
             throw e;
