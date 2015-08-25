@@ -68,7 +68,7 @@ public class PlanGeneratorImpl implements PlanGenerator {
         TupleExpr innerExpr = plan.getArg();
 
         // apply filters that can be applied
-        TupleExpr e = PlanUtil.applyRemainingFilters(innerExpr.clone(), ctx.filters);
+        TupleExpr e = PlanUtil.applyRemainingFilters(innerExpr.clone(), ctx.getFilters());
 
         plan.getArg().replaceWith(e);
 
