@@ -8,12 +8,18 @@ import org.openrdf.query.algebra.TupleExpr;
 import eu.semagrow.commons.algebra.QueryRoot;
 
 
+/**
+ * AST Expression Processing Event
+ * 
+ * @author Stasinos Konstantopoulos
+ */
+
 public class LogExprProcessing extends StructuredLogItemBase
 {
 	
 	static public LogExprProcessing create( TupleExpr expr, int processing_layer )
 	{
-		 QueryModelNode up = expr.getParentNode(), top = null;
+		 QueryModelNode up = expr.getParentNode(), top = expr;
 		 while( up != null) {
 			 top = up; up = up.getParentNode();
 		 }

@@ -1,6 +1,7 @@
 package eu.semagrow.art;
 
 import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.encoder.Encoder;
 
 
 public class StructuredFileAppender
@@ -8,11 +9,12 @@ public class StructuredFileAppender
 	implements Appender<StructuredLogItem>
 {
 
-	@Override
-	protected void append( StructuredLogItem logItem )
+	StructuredFileAppender()
 	{
-		// TODO Auto-generated method stub
-		
+		super();
+		Encoder<StructuredLogItem> encoder = null;
+		this.setEncoder( encoder );
 	}
+
 
 }

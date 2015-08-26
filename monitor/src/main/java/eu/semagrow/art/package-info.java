@@ -2,8 +2,8 @@
  * Semagrow Automated Rigorous Tester
  * 
  * <p>
- * Logging facility that extends the SLF4J API to allow structured
- * information to be logged.
+ * Logging facility that extends the Logback framework to allow structured
+ * information about the processing of AST expressions to be logged.
  * </p> 
  *  
  * @author Stasinos Konstantopoulos
