@@ -1,4 +1,4 @@
-package eu.semagrow.core.impl.algebra;
+package eu.semagrow.commons.algebra;
 
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.QueryModelVisitor;

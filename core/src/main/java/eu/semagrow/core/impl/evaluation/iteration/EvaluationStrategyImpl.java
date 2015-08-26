@@ -2,8 +2,7 @@ package eu.semagrow.core.impl.evaluation.iteration;
 
 import eu.semagrow.core.evaluation.FederatedEvaluationStrategy;
 import eu.semagrow.core.evaluation.QueryExecutor;
-import eu.semagrow.core.impl.algebra.*;
-import eu.semagrow.core.impl.evaluation.iteration.*;
+import eu.semagrow.commons.algebra.*;
 import eu.semagrow.core.impl.planner.Plan;
 import info.aduna.iteration.*;
 import org.openrdf.model.*;

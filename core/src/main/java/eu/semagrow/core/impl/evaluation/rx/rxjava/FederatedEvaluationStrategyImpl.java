@@ -1,9 +1,10 @@
 package eu.semagrow.core.impl.evaluation.rx.rxjava;
 
-import eu.semagrow.core.impl.algebra.*;
+import eu.semagrow.commons.algebra.*;
 import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
+
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -12,6 +13,7 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.reactivestreams.Publisher;
+
 import rx.Observable;
 import rx.RxReactiveStreams;
 import rx.schedulers.Schedulers;

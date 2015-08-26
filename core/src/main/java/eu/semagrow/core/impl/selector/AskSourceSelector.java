@@ -1,5 +1,7 @@
 package eu.semagrow.core.impl.selector;
 
+import eu.semagrow.art.LogExprProcessing;
+import eu.semagrow.commons.algebra.QueryRoot;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
 
@@ -9,6 +11,7 @@ import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.TupleQuery;
+import org.openrdf.query.algebra.QueryModelNode;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
@@ -40,9 +43,8 @@ import java.util.List;
 public class AskSourceSelector extends SourceSelectorWrapper implements SourceSelector
 {
 
-	static private org.slf4j.Logger logger =
+	private org.slf4j.Logger logger =
 			org.slf4j.LoggerFactory.getLogger( AskSourceSelector.class );
-
 
 	public AskSourceSelector( SourceSelector selector ) {
 		super( selector );
@@ -110,7 +112,8 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 	 private List<SourceMetadata> restrictSourceList( StatementPattern pattern, List<SourceMetadata> list )
 	 {
-		 long start = System.currentTimeMillis();
+		 LogExprProcessing logEvent = LogExprProcessing.create( pattern, 2 );
+
 		 List<SourceMetadata> restrictedList = new LinkedList<SourceMetadata>();
 
 		 for( SourceMetadata metadata : list ) {
@@ -119,7 +122,9 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			 boolean ask = askPattern( pattern, sources.get(0), false );
 			 if( ask ) { restrictedList.add( m ); }
 		 }
-		 logger.info( "AskSourceSelector {}", Long.toString(System.currentTimeMillis()-start) );
+		 
+		 logEvent.endEvent();
+		 logger.info( "AskSourceSelector {}", logEvent );
 		 return restrictedList;
 	 }
 

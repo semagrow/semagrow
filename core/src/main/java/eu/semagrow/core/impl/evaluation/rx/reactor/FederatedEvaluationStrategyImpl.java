@@ -1,9 +1,10 @@
 package eu.semagrow.core.impl.evaluation.rx.reactor;
 
-import eu.semagrow.core.impl.algebra.*;
+import eu.semagrow.commons.algebra.*;
 import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
+
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -14,6 +15,7 @@ import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.Union;
 import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.reactivestreams.Publisher;
+
 import reactor.Environment;
 import reactor.rx.Stream;
 import reactor.rx.Streams;

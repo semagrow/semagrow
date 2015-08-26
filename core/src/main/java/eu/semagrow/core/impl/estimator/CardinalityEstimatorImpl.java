@@ -2,10 +2,11 @@ package eu.semagrow.core.impl.estimator;
 
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.estimator.SelectivityEstimator;
-import eu.semagrow.core.impl.algebra.SourceQuery;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;
+import eu.semagrow.commons.algebra.SourceQuery;
+
 import org.openrdf.model.URI;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.VarNameCollector;

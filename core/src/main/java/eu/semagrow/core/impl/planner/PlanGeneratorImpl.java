@@ -1,13 +1,14 @@
 package eu.semagrow.core.impl.planner;
 
 import eu.semagrow.core.estimator.CardinalityEstimator;
-import eu.semagrow.core.impl.algebra.MergeJoin;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.source.SourceMetadata;
-import eu.semagrow.core.impl.algebra.BindJoin;
-import eu.semagrow.core.impl.algebra.HashJoin;
-import eu.semagrow.core.impl.algebra.SourceQuery;
 import eu.semagrow.core.impl.estimator.CostEstimator;
+import eu.semagrow.commons.algebra.MergeJoin;
+import eu.semagrow.commons.algebra.BindJoin;
+import eu.semagrow.commons.algebra.HashJoin;
+import eu.semagrow.commons.algebra.SourceQuery;
+
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
@@ -15,6 +16,7 @@ import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 
 import java.util.*;
+
 
 /**
  * Created by angel on 27/4/2015.

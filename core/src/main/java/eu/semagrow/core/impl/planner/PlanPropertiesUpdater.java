@@ -1,8 +1,8 @@
 package eu.semagrow.core.impl.planner;
 
-import eu.semagrow.core.impl.algebra.BindJoin;
-import eu.semagrow.core.impl.algebra.HashJoin;
-import eu.semagrow.core.impl.algebra.SourceQuery;
+import eu.semagrow.commons.algebra.BindJoin;
+import eu.semagrow.commons.algebra.HashJoin;
+import eu.semagrow.commons.algebra.SourceQuery;
 import org.openrdf.query.algebra.*;
 
 import java.util.HashSet;

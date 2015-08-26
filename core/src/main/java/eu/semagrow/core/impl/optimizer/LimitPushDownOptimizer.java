@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.optimizer;
 
-import eu.semagrow.core.impl.algebra.SourceQuery;
+import eu.semagrow.commons.algebra.SourceQuery;
 import eu.semagrow.core.impl.planner.Plan;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;

@@ -5,6 +5,7 @@ import eu.semagrow.core.impl.util.BPGCollector;
 import eu.semagrow.core.decomposer.QueryDecomposer;
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.source.SourceSelector;
+import eu.semagrow.art.*;
 
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
@@ -25,7 +26,10 @@ import java.util.Collection;
 public class DPQueryDecomposer implements QueryDecomposer
 {
 
-    private CostEstimator costEstimator;
+	private org.slf4j.Logger logger =
+			org.slf4j.LoggerFactory.getLogger( DPQueryDecomposer.class );
+
+	private CostEstimator costEstimator;
     private CardinalityEstimator cardinalityEstimator;
     private SourceSelector sourceSelector;
 
@@ -47,7 +51,7 @@ public class DPQueryDecomposer implements QueryDecomposer
      * sub-expressions that will be executed at each data source and to
      * annotate it with the execution plan.
      * 
-	 * @param expr The expression that will be decomposed
+	 * @param expr The expression that will be decomposed. It must be an instance of eu.semagrow.core.impl.algebra.QueryRoot
 	 * @param dataset
 	 * @param bindings
      */
@@ -55,7 +59,8 @@ public class DPQueryDecomposer implements QueryDecomposer
     @Override
     public void decompose( TupleExpr expr, Dataset dataset, BindingSet bindings )
     {
-
+    	LogExprProcessing logEvent = LogExprProcessing.create( expr, 1 );
+    	
         /*
          * Identify the Basic Graph Patterns, a partitioning of the AST into
          * BGP sub-trees such that each BGP only uses the operators that the decomposer
@@ -86,6 +91,8 @@ public class DPQueryDecomposer implements QueryDecomposer
             bgp.replaceWith( bestPlan );
         }
 
+        logEvent.endEvent();
+        logger.info( "Execution flow", logEvent );
     }
 
 

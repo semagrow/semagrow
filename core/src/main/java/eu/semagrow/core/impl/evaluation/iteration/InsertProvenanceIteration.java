@@ -1,6 +1,7 @@
 package eu.semagrow.core.impl.evaluation.iteration;
 
-import eu.semagrow.core.impl.algebra.ProvenanceValue;
+import eu.semagrow.commons.algebra.ProvenanceValue;
+
 import info.aduna.iteration.CloseableIteration;
 import info.aduna.iteration.ConvertingIteration;
 import org.openrdf.model.Value;

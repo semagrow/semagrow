@@ -6,7 +6,6 @@ import eu.semagrow.core.evaluation.FederatedEvaluationStrategy;
 import eu.semagrow.core.evaluation.FederatedQueryEvaluation;
 import eu.semagrow.core.evaluation.FederatedQueryEvaluationSession;
 import eu.semagrow.core.impl.evaluation.rx.reactor.FederatedEvaluationStrategyImpl;
-import eu.semagrow.core.impl.evaluation.rx.EvaluationStrategy;
 import eu.semagrow.core.impl.evaluation.rx.reactor.QueryExecutorImpl;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
@@ -14,7 +13,6 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.QueryRoot;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.sail.SailException;
@@ -234,7 +232,9 @@ public class SemagrowSailConnection extends SailConnectionBase {
         optimizer.optimize(tupleExpr, dataset, bindings);
 
         QueryDecomposer decomposer = semagrowSail.getDecomposer(includeOnlySources, excludeSources);
-        tupleExpr = new QueryRoot(tupleExpr);
+        
+        // TODO: get query label
+        tupleExpr = new eu.semagrow.commons.algebra.QueryRoot( null, tupleExpr );
         decomposer.decompose(tupleExpr, dataset, bindings);
 
         long end = System.currentTimeMillis() - start;
