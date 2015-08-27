@@ -18,10 +18,13 @@ import java.util.Collection;
 
 public class DecomposerContext
 {
+	public static final long LIMIT_NONE = -2;
+	public static final long LIMIT_OVERFLOW = -1;
 
-    private Ordering ordering;
+	private Ordering ordering;
     private Collection<ValueExpr> filters;
-    private int limit;
+
+    private long limit = DecomposerContext.LIMIT_NONE;
 
 	DecomposerContext( TupleExpr expr )
 	{
@@ -30,6 +33,19 @@ public class DecomposerContext
 
     public Ordering getOrdering() { return this.ordering; }
     public Collection<ValueExpr> getFilters() { return this.filters; }
-    public int getLimit() { return this.limit; }
+    
+    /**
+     * Gets the value of the LIMIT modifier
+     * @return long the value of the LIMIT modifier, if any; -2 if there is no LIMIT modifier; -1 if the LIMIT modifier overflows long
+     */
+
+    public long getLimit() { return this.limit; }
+
+    /**
+     * Checks if the query has a LIMIT modifier
+     * @return boolean
+     */
+
+    public boolean hasLimit() { return this.limit > -2; }
 
 }
