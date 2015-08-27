@@ -4,21 +4,21 @@ import eu.semagrow.core.impl.util.CombinationIterator;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.TupleExpr;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 /**
  * Created by angel on 27/4/2015.
  */
-public class DPPlanOptimizer implements PlanOptimizer {
+public class DPPlanOptimizer implements PlanOptimizer
+{
+
+    final private org.slf4j.Logger logger =
+    		org.slf4j.LoggerFactory.getLogger( DPPlanOptimizer.class );
 
     private PlanGenerator planGenerator;
 
     private PlanProperties properties = PlanProperties.defaultProperties();
-
-    final private Logger logger = LoggerFactory.getLogger(DPPlanOptimizer.class);
 
     public DPPlanOptimizer(PlanGenerator planGenerator)
     {

@@ -13,6 +13,7 @@ import eu.semagrow.core.transformation.QueryTransformation;
 import eu.semagrow.sail.SemagrowSail;
 import eu.semagrow.core.impl.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.core.impl.estimator.CostEstimatorImpl;
+
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
@@ -34,7 +35,10 @@ import java.util.List;
 /**
  * Created by angel on 5/29/14.
  */
-public class SemagrowSailFactory implements SailFactory, RepositoryResolverClient {
+public class SemagrowSailFactory implements SailFactory, RepositoryResolverClient
+{
+    final private org.slf4j.Logger logger =
+    		org.slf4j.LoggerFactory.getLogger( SemagrowSailFactory.class );
 
     public static final String SAIL_TYPE = "semagrow:SemagrowSail";
 
@@ -59,10 +63,7 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
 
             Repository metadata = createMetadataRepository(config.getMetadataConfig());
 
-            List<String> files = config.getInitialFiles();
-            for (String file : files) {
-                initializeMetadata(metadata, file);
-            }
+            initializeMetadata( metadata, config.getInitialFiles() );
 
             sail.setMetadataRepository(metadata);
 
@@ -169,16 +170,14 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
         }
     }
 
-    public void initializeMetadata(Repository metadata, List<String> files) {
-
-        for (String file : files) {
-            try {
-                initializeMetadata(metadata, file);
-            } catch (IOException | RDFParseException | RepositoryException e) {
-                e.printStackTrace();
+    public void initializeMetadata( Repository metadata, List<String> files )
+    {
+        for( String file : files ) {
+            try { initializeMetadata(metadata, file); }
+            catch( IOException | RDFParseException | RepositoryException ex ) {
+                logger.warn( "Failed reading default metadata from file {}: ", ex.getMessage() );
             }
         }
-
     }
 
     @Override

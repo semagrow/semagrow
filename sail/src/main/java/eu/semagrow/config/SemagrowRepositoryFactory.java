@@ -33,7 +33,7 @@ public class SemagrowRepositoryFactory implements RepositoryFactory {
         SemagrowRepositoryConfig config = (SemagrowRepositoryConfig) repositoryImplConfig;
         SailFactory sailFactory = SailRegistry.getInstance().get(config.getSemagrowSailConfig().getType());
         try {
-            SemagrowSail sail = (SemagrowSail) sailFactory.getSail(config.getSemagrowSailConfig());
+            SemagrowSail sail = (SemagrowSail) sailFactory.getSail(config.getSemagrowSailConfig());            
             return new SemagrowSailRepository(sail);
         } catch (SailConfigException e) {
             throw new RepositoryConfigException(e);

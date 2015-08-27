@@ -23,4 +23,4 @@ appender( "FILE", FileAppender ) {
 
 logger( "eu.semagrow.core.impl.planner", INFO, ["CONSOLE"], false )
 
-root( ERROR, ["STDOUT"] )
+root( WARN, ["STDOUT"] )

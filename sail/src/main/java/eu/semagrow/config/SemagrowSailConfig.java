@@ -68,7 +68,10 @@ public class SemagrowSailConfig extends SailImplConfigBase {
         }
     }
 
-    public void setInitialFiles(List<String> files) { filenames = new LinkedList<String>(files); }
+    public void addInitialFiles( java.util.Collection<String> files )
+    {
+    	filenames.addAll( files );
+    }
 
     public void setExecutorBatchSize(int b) {
         executorBatchSize = b;
