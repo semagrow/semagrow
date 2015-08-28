@@ -92,8 +92,8 @@ public class DPQueryDecomposer implements QueryDecomposer
             bgp.replaceWith( bestPlan );
         }
 
-        event.finalize();
         logger.info( "END" );
+        event.finalize();
     }
 
 
