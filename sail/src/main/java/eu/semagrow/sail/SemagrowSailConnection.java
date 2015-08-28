@@ -224,10 +224,6 @@ public class SemagrowSailConnection extends SailConnectionBase {
     public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
                                Collection<URI> includeOnlySources, Collection<URI> excludeSources)
     {
-
-
-        long start = System.currentTimeMillis();
-
         QueryOptimizer optimizer = semagrowSail.getOptimizer();
         optimizer.optimize(tupleExpr, dataset, bindings);
 
@@ -236,10 +232,6 @@ public class SemagrowSailConnection extends SailConnectionBase {
         // TODO: get query label
         tupleExpr = new eu.semagrow.commons.algebra.QueryRoot( null, tupleExpr );
         decomposer.decompose(tupleExpr, dataset, bindings);
-
-        long end = System.currentTimeMillis() - start;
-
-        logger.debug("Decomposition time = " + end);
 
         return tupleExpr;
     }

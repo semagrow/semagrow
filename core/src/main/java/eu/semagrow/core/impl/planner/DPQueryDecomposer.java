@@ -59,7 +59,8 @@ public class DPQueryDecomposer implements QueryDecomposer
     @Override
     public void decompose( TupleExpr expr, Dataset dataset, BindingSet bindings )
     {
-    	LogExprProcessing logEvent = LogExprProcessing.create( expr, 1 );
+    	LogExprProcessing event = LogExprProcessing.create( expr );
+        logger.info( "START" );
     	
         /*
          * Identify the Basic Graph Patterns, a partitioning of the AST into
@@ -91,8 +92,8 @@ public class DPQueryDecomposer implements QueryDecomposer
             bgp.replaceWith( bestPlan );
         }
 
-        logEvent.endEvent();
-        logger.info( "Execution flow", logEvent );
+        logger.info( "END" );
+        event.finalize();
     }
 
 

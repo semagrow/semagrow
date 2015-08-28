@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.evaluation.rx.reactor;
 
+import eu.semagrow.art.LogExprProcessing;
 import eu.semagrow.core.impl.evaluation.ConnectionManager;
 import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
 import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
@@ -26,6 +27,9 @@ import java.util.*;
 
 public class QueryExecutorImpl extends ConnectionManager implements QueryExecutor
 {
+    final private org.slf4j.Logger logger =
+    		org.slf4j.LoggerFactory.getLogger( QueryExecutorImpl.class );
+
     private boolean rowIdOpt = false;
 
     public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
@@ -49,59 +53,64 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     public Stream<BindingSet>
-        evaluateReactorImpl(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
-            throws QueryEvaluationException
+    evaluateReactorImpl(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+    		throws QueryEvaluationException
     {
-        Stream<BindingSet> result = null;
+    	LogExprProcessing event = LogExprProcessing.create( expr );
+    	logger.info( "START public evaluateReactorImpl()" );
 
-        try {
-            Set<String> freeVars = computeVars(expr);
+    	Stream<BindingSet> result = null;
 
-            freeVars.removeAll(bindings.getBindingNames());
+    	try {
+    		Set<String> freeVars = computeVars(expr);
 
-            if (freeVars.isEmpty()) {
+    		freeVars.removeAll(bindings.getBindingNames());
 
-                // all variables in expression are bound, switch to simple ASK query
+    		if (freeVars.isEmpty()) {
 
-                final String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
+    			// all variables in expression are bound, switch to simple ASK query
 
-                final BindingSet relevantBindings = BindingSetUtil.project(computeVars(expr), bindings);
+    			final String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
 
-                result = Streams.just(bindings).flatMap(b -> {
-                    try {
-                        if (sendBooleanQuery(endpoint, sparqlQuery, relevantBindings))
-                            return Streams.just(b);
-                        else
-                            return Streams.empty();
-                    } catch (Exception e) {
-                        return Streams.fail(e);
-                    }
-                });
+    			final BindingSet relevantBindings = BindingSetUtil.project(computeVars(expr), bindings);
 
-                return result;
-            } else {
+    			result = Streams.just(bindings).flatMap(b -> {
+    				try {
+    					if (sendBooleanQuery(endpoint, sparqlQuery, expr, relevantBindings))
+    						return Streams.just(b);
+    					else
+    						return Streams.empty();
+    				} catch (Exception e) {
+    					return Streams.fail(e);
+    				}
+    			});
 
-                final BindingSet relevantBindings = BindingSetUtil.project(computeVars(expr), bindings);
+    		}
+    		else {
 
-                String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
+    			final BindingSet relevantBindings = BindingSetUtil.project(computeVars(expr), bindings);
 
-                result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings)
-                        .map(b -> BindingSetUtil.merge(bindings, b));
-            }
+    			String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
 
-            return result;
+    			result = sendTupleQuery(endpoint, sparqlQuery, expr, relevantBindings)
+    					.map(b -> BindingSetUtil.merge(bindings, b));
+    		}
 
-        } catch (QueryEvaluationException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new QueryEvaluationException(e);
-        }
+        	logger.info( "END public evaluateReactorImpl()" );
+        	event.finalize();
+    		return result;
+
+    	}
+    	catch( QueryEvaluationException ex ) { throw ex; }
+    	catch( Exception ex ) { throw new QueryEvaluationException( ex ); }
     }
 
     protected Stream<BindingSet>
         evaluateReactorImpl(URI endpoint, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
+    	LogExprProcessing event = LogExprProcessing.create( expr );
+    	logger.info( "START protected evaluateReactorImpl()" );
 
         if (bindings.size() == 1)
             return evaluateReactorImpl(endpoint, expr, bindings.get(0));
@@ -117,14 +126,15 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
         try {
             String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQueryUNION(expr, bindings, relevant);
-            result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
+            result = sendTupleQuery(endpoint, sparqlQuery, expr, EmptyBindingSet.getInstance());
             result = result.flatMap(b -> convertUnionBindings(b, bindings));
-            return result;
-        } catch(QueryEvaluationException e)  {
-            throw e;
-        } catch(Exception e) {
-            throw new QueryEvaluationException(e);
         }
+        catch( QueryEvaluationException e ) { throw e; }
+        catch( Exception e ) { throw new QueryEvaluationException(e); }
+
+        logger.info( "END public evaluateReactorImpl()" );
+    	event.finalize();
+        return result;
     }
 
     private Stream<BindingSet> convertUnionBindings(BindingSet rightBindings, List<BindingSet> leftBindings) {
@@ -175,35 +185,46 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     protected Stream<BindingSet>
-        sendTupleQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
-            throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+    sendTupleQuery(URI endpoint, String sparqlQuery, TupleExpr expr, BindingSet bindings)
+    throws QueryEvaluationException, MalformedQueryException, RepositoryException
+    {
+    	LogExprProcessing event = LogExprProcessing.create( expr );
+    	logger.info( "START sendTupleQuery()" );
 
-        RepositoryConnection conn = getConnection(endpoint);
-        TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery);
+    	RepositoryConnection conn = getConnection(endpoint);
+    	TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery);
+    	logger.info( "Classname: " + query.getClass().getCanonicalName() );
 
-        for (Binding b : bindings)
-            query.setBinding(b.getName(), b.getValue());
+    	for (Binding b : bindings)
+    		query.setBinding(b.getName(), b.getValue());
 
-
-        return Streams.wrap(new TupleQueryResultPublisher(query))
-                .finallyDo((s) -> closeQuietly(conn));
+    	Stream<BindingSet> retv = Streams.wrap(new TupleQueryResultPublisher(query))
+    			.finallyDo((s) -> closeQuietly(conn)); 
+        logger.info( "END sendTupleQuery()" );
+    	event.finalize();
+    	return retv;
     }
 
     protected boolean
-        sendBooleanQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
-            throws QueryEvaluationException, MalformedQueryException, RepositoryException {
+    sendBooleanQuery(URI endpoint, String sparqlQuery, TupleExpr expr, BindingSet bindings)
+    throws QueryEvaluationException, MalformedQueryException, RepositoryException
+    {
+    	LogExprProcessing event = LogExprProcessing.create( expr );
+    	logger.info( "START sendBooleanQuery()" );
 
-        RepositoryConnection conn = getConnection(endpoint);
-        BooleanQuery query = conn.prepareBooleanQuery(QueryLanguage.SPARQL, sparqlQuery);
+    	RepositoryConnection conn = getConnection(endpoint);
+    	BooleanQuery query = conn.prepareBooleanQuery(QueryLanguage.SPARQL, sparqlQuery);
 
-        for (Binding b : bindings)
-            query.setBinding(b.getName(), b.getValue());
+    	for (Binding b : bindings)
+    		query.setBinding(b.getName(), b.getValue());
 
-        logger.debug("Sending to {} query {} with {}", endpoint.stringValue(), sparqlQuery.replace('\n', ' '), query.getBindings());
+    	logger.debug("Sending to {} query {} with {}", endpoint.stringValue(), sparqlQuery.replace('\n', ' '), query.getBindings());
 
-        boolean answer = query.evaluate();
-        closeQuietly(conn);
-        return answer;
+    	boolean answer = query.evaluate();
+    	closeQuietly(conn);
+        logger.info( "END sendBooleanQuery()" );
+    	event.finalize();
+    	return answer;
     }
 
 

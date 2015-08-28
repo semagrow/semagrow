@@ -2,14 +2,17 @@ package eu.semagrow;
 
 import eu.semagrow.commons.utils.FileUtils;
 import eu.semagrow.config.SemagrowRepositoryConfig;
+import eu.semagrow.core.impl.selector.AskSourceSelector;
 import eu.semagrow.query.SemagrowTupleQuery;
 import eu.semagrow.repository.SemagrowRepository;
 
+import org.openrdf.OpenRDFException;
 import org.openrdf.model.Graph;
 import org.openrdf.query.*;
 import org.openrdf.query.resultio.*;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
+import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.*;
 import org.openrdf.rio.helpers.StatementCollector;
 import org.openrdf.sail.config.SailConfigException;
@@ -45,6 +48,12 @@ public class QueryTest extends TestCase
 	}
 
 	private static final String strQueryFAO[] = {
+"PREFIX dct: <http://purl.org/dc/terms/>\n" +
+		"PREFIX s: <http://schema.semagrow.eu/>\n" +
+		"SELECT * WHERE {\n" +
+		"  <http://agris.fao.org/aos/records/PH2011000084> dct:subject ?SUBJ .\n" +
+		"  ?SUBJ ?P ?O .\n" +
+		"} \n ",
 "PREFIX dct: <http://purl.org/dc/terms/>\n" +
 		"SELECT distinct ?s (COUNT(distinct ?o) as ?NELEMENTS) WHERE {\n" +
 		"  <http://agris.fao.org/aos/records/PH2011000084> dct:subject ?o .\n" +
@@ -86,12 +95,13 @@ public class QueryTest extends TestCase
 		"<http://www.semagrow.eu/agmip#expA1>\n" +
 		"<http://www.w3.org/2003/01/geo/wgs84_pos#geometry> ?WKT2 .\n" +
 		"}"
-};
+	};
 
-    public void testQuery()
-    throws Exception
-    {
+	protected SemagrowRepository repo = null;
+	protected RepositoryConnection conn = null;
 
+	protected void setUp()
+	{
         // remove CSV and TSV format due to bug: literals are recognized as URIs if they contain a substring parsable as URI.
         TupleQueryResultParserRegistry registry = TupleQueryResultParserRegistry.getInstance();
         registry.remove(registry.get(TupleQueryResultFormat.CSV));
@@ -101,15 +111,74 @@ public class QueryTest extends TestCase
         BooleanQueryResultParserRegistry booleanRegistry = BooleanQueryResultParserRegistry.getInstance();
         booleanRegistry.remove(booleanRegistry.get(BooleanQueryResultFormat.JSON));
 
-        SemagrowRepositoryConfig repoConfig = getConfig( QueryTest.repoConfigFile );
-        String repoType = repoConfig.getType();
-        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get( repoType );
-        Repository repository = (SemagrowRepository)repoFactory.getRepository( repoConfig );
-        repository.initialize();
-        RepositoryConnection conn = repository.getConnection();
-        
+		try {
+	        SemagrowRepositoryConfig repoConfig = getConfig( QueryTest.repoConfigFile );
+	        String repoType = repoConfig.getType();
+	        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get( repoType );
+			this.repo = (SemagrowRepository)repoFactory.getRepository( repoConfig );
+			this.repo.initialize();
+			this.conn = this.repo.getConnection();
+		}
+		catch( RepositoryConfigException ex ) {
+			ex.printStackTrace();
+		}
+		catch( RepositoryException ex ) {
+			ex.printStackTrace();
+		}
+		catch( OpenRDFException ex ) {
+			ex.printStackTrace();
+		}
+		catch( IOException ex ) {
+			ex.printStackTrace();
+		}
+	}
+
+    private SemagrowRepositoryConfig getConfig( File file )
+    throws OpenRDFException, IOException
+    {
+    	Graph configGraph = parseConfig(file);
+    	RepositoryConfig repConf = RepositoryConfig.create(configGraph, null);
+    	repConf.validate();
+    	RepositoryImplConfig implConf = repConf.getRepositoryImplConfig();
+    	return (SemagrowRepositoryConfig)implConf;
+    }
+
+    protected Graph parseConfig(File file)
+    throws SailConfigException, IOException
+    {
+    	org.openrdf.rio.RDFFormat format =
+    			org.openrdf.rio.Rio.getParserFormatForFileName( file.getAbsolutePath() );
+        if( format==null ) {
+            throw new SailConfigException("Unsupported file format: " + file.getAbsolutePath());
+        }
+        org.openrdf.rio.RDFParser parser = org.openrdf.rio.Rio.createParser(format);
+        Graph model = new org.openrdf.model.impl.GraphImpl();
+        parser.setRDFHandler(new StatementCollector(model));
+        InputStream stream = new FileInputStream(file);
+
+        try { parser.parse( stream, file.getAbsolutePath() ); }
+        catch( Exception ex ) {
+            throw new SailConfigException("Error parsing file!");
+        }
+
+        stream.close();
+        return model;
+    }
+
+	public void testQuery()
+    throws Exception
+    {
+		// Fixture setup must succeed
+		assertFalse( this.repo == null );
+		assertFalse( this.conn == null );
+
+		String queryString = QueryTest.strQueryFAO[0];
+		org.slf4j.Logger logger =
+				org.slf4j.LoggerFactory.getLogger( QueryTest.class );
+		logger.info( "Testing on {}", QueryTest.strQueryFAO[0] );
+
         SemagrowTupleQuery query =
-        		(SemagrowTupleQuery) conn.prepareTupleQuery(QueryLanguage.SPARQL, QueryTest.strQueryDLO[0] );
+        		(SemagrowTupleQuery) conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString );
 
         System.out.println(query.getDecomposedQuery());
 
@@ -140,50 +209,19 @@ public class QueryTest extends TestCase
             }
         });
 
-
-        conn.close();
-
     }
 
-    private SemagrowRepositoryConfig getConfig( File file )
-    {
 
+	@Override
+	protected void tearDown()
+	{
         try {
-            Graph configGraph = parseConfig(file);
-            RepositoryConfig repConf = RepositoryConfig.create(configGraph, null);
-            repConf.validate();
-            RepositoryImplConfig implConf = repConf.getRepositoryImplConfig();
-            return (SemagrowRepositoryConfig)implConf;
-        } catch (RepositoryConfigException e) {
-            e.printStackTrace();
-            return new SemagrowRepositoryConfig();
-        } catch (SailConfigException | IOException | NullPointerException e) {
-            e.printStackTrace();
-            return new SemagrowRepositoryConfig();
-        }
-    }
+			this.conn.close();
+	        this.repo.shutDown();
+		}
+		catch( RepositoryException ex ) {
+			ex.printStackTrace();
+		}
+	}
 
-    protected Graph parseConfig(File file)
-    throws SailConfigException, IOException
-    {
-
-    	org.openrdf.rio.RDFFormat format =
-    			org.openrdf.rio.Rio.getParserFormatForFileName( file.getAbsolutePath() );
-        if( format==null ) {
-            throw new SailConfigException("Unsupported file format: " + file.getAbsolutePath());
-        }
-        org.openrdf.rio.RDFParser parser = org.openrdf.rio.Rio.createParser(format);
-        Graph model = new org.openrdf.model.impl.GraphImpl();
-        parser.setRDFHandler(new StatementCollector(model));
-        InputStream stream = new FileInputStream(file);
-
-        try {
-            parser.parse( stream, file.getAbsolutePath() );
-        } catch (Exception e) {
-            throw new SailConfigException("Error parsing file!");
-        }
-
-        stream.close();
-        return model;
-    }
 }

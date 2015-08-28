@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import org.openrdf.query.algebra.QueryModelNode;
 import org.openrdf.query.algebra.TupleExpr;
+import org.slf4j.MDC;
 
 import eu.semagrow.commons.algebra.QueryRoot;
 
@@ -17,32 +18,51 @@ import eu.semagrow.commons.algebra.QueryRoot;
 public class LogExprProcessing extends StructuredLogItemBase
 {
 	
-	static public LogExprProcessing create( TupleExpr expr, int processing_layer )
+	static public LogExprProcessing create( TupleExpr expr )
 	{
 		 QueryModelNode up = expr.getParentNode(), top = expr;
 		 while( up != null) {
 			 top = up; up = up.getParentNode();
 		 }
 		 assert top instanceof QueryRoot;
-		 return new LogExprProcessing( ((QueryRoot)top).getUUID(), processing_layer );
+		 
+		 return new LogExprProcessing( ((QueryRoot)top).getUUID() );
 	}
 
+	private final String nestingLevel;
 
-	private final int processing_layer;
-
-	public LogExprProcessing( UUID queryUUID, int processing_layer )
+	public LogExprProcessing( UUID queryUUID )
 	{
 		super( queryUUID );
-		this.processing_layer = processing_layer;
+		String l = MDC.get( "nestingLevel" );
+		if( l == null ) {
+			this.nestingLevel = "1";
+			MDC.put("nestingLevel", "1");
+		}
+		else {
+			final int nn = Integer.parseInt(l) + 1;
+			this.nestingLevel = Integer.toString( nn );
+			MDC.put( "nestingLevel", this.nestingLevel );
+		}
 	}
 
-	public int getLayer() { return this.processing_layer; }
-
+	@Override
+	public void finalize()
+	{
+		if( this.end_time == -1 ) {
+			String l = MDC.get( "nestingLevel" );
+			assert l == this.nestingLevel;
+			int ll = Integer.parseInt( l ) - 1;
+			assert ll >= 0;
+			MDC.put( "nestingLevel", Integer.toString(ll) );
+			super.finalize();
+		}
+	}
 
 	@Override
 	public String toString()
 	{
-		return null;
+		return "Execution at level " + this.nestingLevel;
 	}
 
 }

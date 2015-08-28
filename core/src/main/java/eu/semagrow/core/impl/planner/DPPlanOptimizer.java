@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.planner;
 
+import eu.semagrow.art.LogExprProcessing;
 import eu.semagrow.core.impl.util.CombinationIterator;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
@@ -79,6 +80,9 @@ public class DPPlanOptimizer implements PlanOptimizer
 
     public Plan getBestPlan(TupleExpr expr, BindingSet bindings, Dataset dataset)
     {
+    	LogExprProcessing event = LogExprProcessing.create( expr );
+        logger.info( "START" );
+    	
         // optPlans is a function from (Set of Expressions) to (Set of Plans)
         PlanCollection optPlans = new PlanCollection();
 
@@ -116,6 +120,8 @@ public class DPPlanOptimizer implements PlanOptimizer
             logger.info("Found " + fullPlans.size() + " complete optimal plans");
         }
 
+        logger.info( "END" );
+        event.finalize();
         return getBestPlan(fullPlans);
     }
 

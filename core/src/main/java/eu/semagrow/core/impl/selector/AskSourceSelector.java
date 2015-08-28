@@ -112,7 +112,8 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 	 private List<SourceMetadata> restrictSourceList( StatementPattern pattern, List<SourceMetadata> list )
 	 {
-		 LogExprProcessing logEvent = LogExprProcessing.create( pattern, 2 );
+		 LogExprProcessing logEvent = LogExprProcessing.create( pattern );
+		 logger.info( "START" );
 
 		 List<SourceMetadata> restrictedList = new LinkedList<SourceMetadata>();
 
@@ -123,8 +124,8 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			 if( ask ) { restrictedList.add( m ); }
 		 }
 		 
-		 logEvent.endEvent();
-		 logger.info( "AskSourceSelector {}", logEvent );
+		 logger.info( "END" );
+		 logEvent.finalize();
 		 return restrictedList;
 	 }
 
