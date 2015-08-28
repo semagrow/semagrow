@@ -59,7 +59,7 @@ public class DPQueryDecomposer implements QueryDecomposer
     @Override
     public void decompose( TupleExpr expr, Dataset dataset, BindingSet bindings )
     {
-    	LogExprProcessing event = LogExprProcessing.create( expr );
+    	LogExprProcessing event = new LogExprProcessing();
         logger.info( "START" );
     	
         /*
@@ -92,8 +92,8 @@ public class DPQueryDecomposer implements QueryDecomposer
             bgp.replaceWith( bestPlan );
         }
 
-        logger.info( "END" );
         event.finalize();
+        logger.info( "END" );
     }
 
 

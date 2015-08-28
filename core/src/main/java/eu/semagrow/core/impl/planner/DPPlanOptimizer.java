@@ -80,7 +80,7 @@ public class DPPlanOptimizer implements PlanOptimizer
 
     public Plan getBestPlan(TupleExpr expr, BindingSet bindings, Dataset dataset)
     {
-    	LogExprProcessing event = LogExprProcessing.create( expr );
+       	LogExprProcessing event = new LogExprProcessing();
         logger.info( "START" );
     	
         // optPlans is a function from (Set of Expressions) to (Set of Plans)

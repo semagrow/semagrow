@@ -19,16 +19,20 @@ import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
- * Created by angel on 6/9/14.
+ * Title: SemagrowSailTupleQuery
+ *
+ * @author Angelos Charalambidis
  */
+
 public class SemagrowSailTupleQuery extends SemagrowSailQuery implements SemagrowTupleQuery {
 
     private boolean includeProvenanceData = false;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
-    public SemagrowSailTupleQuery(ParsedTupleQuery query, SailRepositoryConnection connection) {
-        super(query,connection);
+    public SemagrowSailTupleQuery( ParsedTupleQuery query, SailRepositoryConnection connection )
+    {
+        super( query, connection );
     }
 
     public TupleQueryResult evaluate() throws QueryEvaluationException {

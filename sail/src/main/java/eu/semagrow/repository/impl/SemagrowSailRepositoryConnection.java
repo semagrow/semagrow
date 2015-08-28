@@ -1,6 +1,7 @@
 package eu.semagrow.repository.impl;
 
 import eu.semagrow.repository.SemagrowRepositoryConnection;
+import eu.semagrow.query.SemagrowQuery;
 import eu.semagrow.query.impl.SemagrowSailBooleanQuery;
 import eu.semagrow.query.impl.SemagrowSailTupleQuery;
 import org.openrdf.query.*;
@@ -24,23 +25,25 @@ public class SemagrowSailRepositoryConnection extends RepositoryConnectionWrappe
     }
 
     @Override
-    public Query prepareQuery(QueryLanguage ql, String queryString, String baseURI)
-            throws MalformedQueryException, RepositoryException {
+    public SemagrowQuery prepareQuery( QueryLanguage ql, String queryString, String baseURI )
+            throws MalformedQueryException, RepositoryException
+    {
         ParsedQuery parsedQuery = QueryParserUtil.parseQuery(ql, queryString, baseURI);
 
-        if (parsedQuery instanceof ParsedTupleQuery) {
+        if( parsedQuery instanceof ParsedTupleQuery ) {
             return new SemagrowSailTupleQuery((ParsedTupleQuery)parsedQuery, this.getDelegate());
         }
-        else if (parsedQuery instanceof ParsedBooleanQuery) {
+        else if( parsedQuery instanceof ParsedBooleanQuery ) {
             return new SemagrowSailBooleanQuery((ParsedBooleanQuery)parsedQuery, this.getDelegate());
         }
         else {
-            return super.prepareQuery(ql, queryString, baseURI);
+        	throw new java.lang.UnsupportedOperationException(
+        			parsedQuery.getClass().getCanonicalName() + " is not supported" );
         }
     }
 
     @Override
-    public Query prepareQuery(QueryLanguage ql, String queryString)
+    public SemagrowQuery prepareQuery( QueryLanguage ql, String queryString )
             throws MalformedQueryException, RepositoryException {
         return prepareQuery(ql, queryString, null);
     }

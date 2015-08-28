@@ -229,8 +229,9 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
         QueryDecomposer decomposer = semagrowSail.getDecomposer(includeOnlySources, excludeSources);
         
-        // TODO: get query label
-        tupleExpr = new eu.semagrow.commons.algebra.QueryRoot( null, tupleExpr );
+        // TupleExpr used here must have been instantiated by the 
+        // SemagrowSailQuery constructor and be QueryRoot
+        assert tupleExpr instanceof eu.semagrow.commons.algebra.QueryRoot;
         decomposer.decompose(tupleExpr, dataset, bindings);
 
         return tupleExpr;

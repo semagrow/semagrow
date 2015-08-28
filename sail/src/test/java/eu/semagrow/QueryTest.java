@@ -2,7 +2,6 @@ package eu.semagrow;
 
 import eu.semagrow.commons.utils.FileUtils;
 import eu.semagrow.config.SemagrowRepositoryConfig;
-import eu.semagrow.core.impl.selector.AskSourceSelector;
 import eu.semagrow.query.SemagrowTupleQuery;
 import eu.semagrow.repository.SemagrowRepository;
 
@@ -10,7 +9,6 @@ import org.openrdf.OpenRDFException;
 import org.openrdf.model.Graph;
 import org.openrdf.query.*;
 import org.openrdf.query.resultio.*;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.*;

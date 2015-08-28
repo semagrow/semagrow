@@ -194,7 +194,6 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     	RepositoryConnection conn = getConnection(endpoint);
     	TupleQuery query = conn.prepareTupleQuery(QueryLanguage.SPARQL, sparqlQuery);
     	logger.info( "Classname: " + query.getClass().getCanonicalName() );
-
     	for (Binding b : bindings)
     		query.setBinding(b.getName(), b.getValue());
 

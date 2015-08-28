@@ -28,18 +28,13 @@ import org.slf4j.Marker;
 
 public abstract class StructuredLogItemBase implements StructuredLogItem 
 {
-	protected final UUID queryUUID;
-	protected final Marker marker;
 	protected final long start_time;
 	protected long end_time;
 
-	protected StructuredLogItemBase( UUID queryUUID )
+	protected StructuredLogItemBase()
 	{
-		this.queryUUID = queryUUID;
-		this.marker = null;
 		this.start_time = System.currentTimeMillis();
 		this.end_time = -1;
-		MDC.put( "uuid", this.queryUUID.toString() );
 		MDC.put( "startTime", Long.toString(this.start_time) );
 		MDC.put( "endTime", "UNKNOWN" );
 	}
@@ -58,9 +53,6 @@ public abstract class StructuredLogItemBase implements StructuredLogItem
 			MDC.put( "endTime", Long.toString(this.end_time) );
 		}
 	}
-
-	@Override
-	public UUID getQueryUUID() { return this.queryUUID; }
 
 	@Override
 	public long getStartTime() { return this.start_time; }

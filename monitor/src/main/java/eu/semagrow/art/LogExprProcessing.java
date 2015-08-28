@@ -18,22 +18,10 @@ import eu.semagrow.commons.algebra.QueryRoot;
 public class LogExprProcessing extends StructuredLogItemBase
 {
 	
-	static public LogExprProcessing create( TupleExpr expr )
-	{
-		 QueryModelNode up = expr.getParentNode(), top = expr;
-		 while( up != null) {
-			 top = up; up = up.getParentNode();
-		 }
-		 assert top instanceof QueryRoot;
-		 
-		 return new LogExprProcessing( ((QueryRoot)top).getUUID() );
-	}
-
 	private final String nestingLevel;
 
-	public LogExprProcessing( UUID queryUUID )
+	public LogExprProcessing()
 	{
-		super( queryUUID );
 		String l = MDC.get( "nestingLevel" );
 		if( l == null ) {
 			this.nestingLevel = "1";

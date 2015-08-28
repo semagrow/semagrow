@@ -30,8 +30,8 @@ public class CachedSourceSelector extends SourceSelectorWrapper
     @Override
     public List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings)
     {
-    	LogExprProcessing event = LogExprProcessing.create( pattern );
-        logger.info( "START" );
+       	LogExprProcessing event = new LogExprProcessing();
+       	logger.info( "START" );
         
         List<SourceMetadata> retv;
 

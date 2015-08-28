@@ -1,8 +1,5 @@
 package eu.semagrow.art;
 
-import java.util.UUID;
-
-import org.slf4j.Logger;
 
 /**
  * Structured Log Item
@@ -18,7 +15,6 @@ import org.slf4j.Logger;
 public interface StructuredLogItem
 {
 
-	public UUID getQueryUUID();
 	public long getStartTime();
 	public long getEndTime();
 	void finalize();
