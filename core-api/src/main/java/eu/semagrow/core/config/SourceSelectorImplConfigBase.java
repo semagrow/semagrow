@@ -1,5 +1,6 @@
-package eu.semagrow.config;
+package eu.semagrow.core.config;
 
+import org.openrdf.model.BNode;
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
 
@@ -23,7 +24,9 @@ public class SourceSelectorImplConfigBase implements SourceSelectorImplConfig {
     }
 
     public Resource export(Graph graph) {
-        return null;
+        BNode implNode = graph.getValueFactory().createBNode();
+        graph.add(implNode, SemagrowSchema.SOURCESELECTOR, graph.getValueFactory().createLiteral(getType()));
+        return implNode;
     }
 
     public void parse(Graph graph, Resource resource) throws SourceSelectorConfigException {

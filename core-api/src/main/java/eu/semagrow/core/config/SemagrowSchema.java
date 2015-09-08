@@ -1,4 +1,4 @@
-package eu.semagrow.config;
+package eu.semagrow.core.config;
 
 import org.openrdf.model.Namespace;
 import org.openrdf.model.URI;
@@ -15,6 +15,7 @@ public class SemagrowSchema {
     public static final String NAMESPACE = "http://schema.semagrow.eu/";
 
     public static final String PREFIX = "semagrow";
+    public static final URI SOURCESELECTOR ;
 
     public static Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
 
@@ -40,5 +41,6 @@ public class SemagrowSchema {
         QUERYTRANSFORMDB = vf.createURI(NAMESPACE, "queryTransformDB");
         QUERYTRANSFORMUSER = vf.createURI(NAMESPACE, "queryTransformUser");
         QUERYTRANSFORMPASSWORD = vf.createURI(NAMESPACE, "queryTransformPass");
+        SOURCESELECTOR = vf.createURI(NAMESPACE, "sourceSelector");
     }
 }

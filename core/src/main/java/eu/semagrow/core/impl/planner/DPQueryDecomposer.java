@@ -2,6 +2,7 @@ package eu.semagrow.core.impl.planner;
 
 import eu.semagrow.core.decomposer.QueryDecomposer;
 import eu.semagrow.core.estimator.CardinalityEstimator;
+import eu.semagrow.core.impl.selector.StaticSourceSelector;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.impl.estimator.CostEstimator;
 import eu.semagrow.core.impl.util.BPGCollector;
@@ -45,7 +46,9 @@ public class DPQueryDecomposer implements QueryDecomposer {
     {
         DecomposerContext ctx = getContext(bgp, dataset, bindings);
 
-        PlanGenerator planGenerator = new PlanGeneratorImpl(ctx, sourceSelector, costEstimator, cardinalityEstimator);
+        SourceSelector staticSelector = new StaticSourceSelector(sourceSelector.getSources(bgp, dataset, bindings));
+
+        PlanGenerator planGenerator = new PlanGeneratorImpl(ctx, staticSelector, costEstimator, cardinalityEstimator);
 
         PlanOptimizer planOptimizer = new DPPlanOptimizer(planGenerator);
 

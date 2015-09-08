@@ -1,4 +1,4 @@
-package eu.semagrow.config;
+package eu.semagrow.core.config;
 
 import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;

@@ -1,4 +1,4 @@
-package eu.semagrow.config;
+package eu.semagrow.core.config;
 
 /**
  * Created by angel on 11/1/14.
@@ -11,4 +11,7 @@ public class SourceSelectorConfigException extends Exception {
         super(e);
     }
 
+    public SourceSelectorConfigException(String msg) {
+        super(msg);
+    }
 }

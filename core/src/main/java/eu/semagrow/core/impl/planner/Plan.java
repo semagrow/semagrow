@@ -42,7 +42,7 @@ public class Plan extends UnaryTupleOperator {
         StringBuilder sb = new StringBuilder(128);
 
         sb.append(super.getSignature());
-        sb.append("(cost=" + getProperties().getCost().toString() +", card=" + getProperties().getCardinality() +")");
+        sb.append("(cost=" + getProperties().getCost().toString() +")");
         return sb.toString();
     }
 }

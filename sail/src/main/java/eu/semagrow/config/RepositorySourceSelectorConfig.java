@@ -1,5 +1,6 @@
 package eu.semagrow.config;
 
+import eu.semagrow.core.config.SourceSelectorImplConfigBase;
 import org.openrdf.repository.config.RepositoryImplConfig;
 import org.openrdf.repository.sail.config.ProxyRepositoryConfig;
 //import eu.semagrow.commons.voidinfer.config.SEVODInferencerConfig;

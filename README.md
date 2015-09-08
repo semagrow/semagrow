@@ -10,7 +10,7 @@
 
 ### Building the Semagrow as jar/war distribution
 
-To build semagrow simply cd into ${semagrow-stack-modules.root} and issue the following command 
+To build semagrow simply cd into ${semagrow.root} and issue the following command 
 
     mvn clean install
 
@@ -19,11 +19,11 @@ This will result in a jar file in the target directory of the respective module 
 
 ## Building the Semagrow preinstalled in Apache Tomcat
 
-To build a fully functional tomcat with the semagrow preinstalled cd into ${semagrow-stack-webapp.root} and issue the following command 
+To build a fully functional tomcat with the semagrow preinstalled cd into ${semagrow.root} and issue the following command 
 
         mvn clean package -Psemagrow-stack-webapp-distribution
 
-This will result in a zip file in ${semagrow-stack-webapp.root}/target containing a fully
+This will result in a zip file in ${semagrow.root}/http/target containing a fully
 equipped tomcat (in version 7.0.42 as of writing). This tomcat is configured with all
 dependencies (lib, JNDI) that are needed to run the semagrow. Please note that external
 dependencies need to be setup individually. For example a the Postgres database needs
