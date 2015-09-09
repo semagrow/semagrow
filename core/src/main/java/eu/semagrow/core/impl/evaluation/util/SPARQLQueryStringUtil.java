@@ -1,14 +1,17 @@
 package eu.semagrow.core.impl.evaluation.util;
 
 import eu.semagrow.core.impl.evaluation.iteration.InsertValuesBindingsIteration;
+import eu.semagrow.core.impl.planner.Plan;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
+import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.parser.ParsedBooleanQuery;
+import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
 
@@ -149,6 +152,8 @@ public class SPARQLQueryStringUtil {
         }
 
         String query = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
+        query = updateFunctionCallsSELECT(expr, query, freeVars);
+        freeVars.addAll(additionalBindingNames(expr));
         String where = query.substring(query.indexOf('{'));
         StringBuilder sb = new StringBuilder();
 
@@ -193,8 +198,11 @@ public class SPARQLQueryStringUtil {
             throws Exception
     {
         String query = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
+        query = updateFunctionCallsBIND(expr, query); // not tested
+        relevantBindingNames.addAll(additionalBindingNames(expr)); // not tested
         String where = query.substring(query.indexOf('{'));
         StringBuilder sb = new StringBuilder();
+
         int i = 1;
         boolean flag1 = false;
         for (BindingSet b : bindings) {
@@ -233,6 +241,106 @@ public class SPARQLQueryStringUtil {
         pr = pr + "\nWHERE { ";
         return (pr + sb.toString());
     }
+
+    private static String updateFunctionCallsBIND(TupleExpr expr, String query) {
+
+        String newString = query;
+        StringBuilder builder = new StringBuilder();
+
+        if (expr instanceof Plan) {
+            TupleExpr e = ((Plan) expr).getArg();
+            if (e instanceof Extension) {
+                for (ExtensionElem elem : ((Extension) e).getElements()) {
+                    ValueExpr f = elem.getExpr();
+                    if (f instanceof FunctionCall) {
+
+                        builder.append("  BIND(<" + ((FunctionCall) f).getURI() + ">(");
+                        boolean flag = false;
+                        for (ValueExpr arg : ((FunctionCall) f).getArgs()) {
+
+                            if (flag) {
+                                builder.append(", ");
+                            }
+                            if (arg instanceof Var) {
+                                builder.append("?" + ((Var) arg).getName());
+                            }
+                            if (arg instanceof ValueConstant) {
+                                appendValueAsString(builder, ((ValueConstant) arg).getValue());
+                            }
+                            flag = true;
+                        }
+                        builder.append(") as ?" + elem.getName() + ") .\n");
+                    }
+                }
+            }
+        }
+
+        newString = newString.replace("}", builder.toString() + "}");
+        return newString;
+    }
+
+    private static String updateFunctionCallsSELECT(TupleExpr expr, String query, Set<String> freeVars) {
+
+        String newString = query;
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("\nSELECT ");
+        for (String var : freeVars) {
+            builder.append("?"+var+" ");
+        }
+
+        if (expr instanceof Plan) {
+            TupleExpr e = ((Plan) expr).getArg();
+            if (e instanceof Extension) {
+                for (ExtensionElem elem : ((Extension) e).getElements()) {
+                    ValueExpr f = elem.getExpr();
+                    if (f instanceof FunctionCall) {
+
+                        builder.append("(<" + ((FunctionCall) f).getURI() + ">(");
+                        boolean flag = false;
+                        for (ValueExpr arg : ((FunctionCall) f).getArgs()) {
+
+                            if (flag) {
+                                builder.append(", ");
+                            }
+                            if (arg instanceof Var) {
+                                builder.append("?" + ((Var) arg).getName());
+                            }
+                            if (arg instanceof ValueConstant) {
+                                appendValueAsString(builder, ((ValueConstant) arg).getValue());
+                            }
+                            flag = true;
+                        }
+                        builder.append(") as ?" + elem.getName() + ")");
+                    }
+                }
+            }
+        }
+        builder.append("\nWHERE {");
+        newString = newString.replace("{", "{" + builder.toString());
+        newString = newString + "\n}";
+        return newString;
+    }
+
+    private static Set<String> additionalBindingNames(TupleExpr expr) {
+
+        Set<String> set = new HashSet<>();
+
+        if (expr instanceof Plan) {
+            TupleExpr e = ((Plan) expr).getArg();
+            if (e instanceof Extension) {
+                for (ExtensionElem elem : ((Extension) e).getElements()) {
+                    ValueExpr f = elem.getExpr();
+                    if (f instanceof FunctionCall) {
+                        set.add(elem.getName());
+                    }
+                }
+            }
+        }
+        return set;
+    }
+
+
     ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
 
