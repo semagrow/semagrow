@@ -1,0 +1,29 @@
+$menuSpeed: 0.5s;
+$menuWidth: 600px;
+
+/**Disable webkit perspective for now (disappointing, because it improves the transition a lot..)
+This perspective messes up the full screen capabilities of YASR/YASQE, and positioning of e.g. selectboxes
+**/
+.tab-pane {
+/* 	-webkit-perspective: 1500px; */
+/* 	perspective: 1500px; */
+/* 	-webkit-perspective-origin: 0% 50%; */
+/* 	perspective-origin: 0% 50%; */
+}
+
+
+.wrapper {
+	position: relative;
+	left: 0;
+	z-index: 99;
+	height: 100%;
+}
+
+.menu-open {
+	.menu-slide {
+		left: $menuWidth;
+		visibility: visible;
+	}
+}
+
+

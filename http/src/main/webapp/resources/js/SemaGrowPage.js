@@ -63,7 +63,18 @@ SemaGrowPage = {
             }
         };
         HttpClient.GET("page?template=gettingstarted", oRequestData, HTTPAccept.HTML);         
-    },    
+    },
+    loadYASGUI: function(){
+        var oRequestData = {
+            "localData":{
+                "onSuccess":function(oRequestData, response){
+                    document.getElementById("sparqlContent").innerHTML=response.responseText;
+                    var yasgui = YASGUI(document.getElementById("sparqlContainer"), {endpoint: "sparql"});
+                }
+            }
+        };
+        HttpClient.GET("page?template=yasgui", oRequestData, HTTPAccept.HTML);
+    },
     login: function(){       
         var oRequestData = {
             "localData":{
@@ -189,12 +200,19 @@ SemaGrowTabs = {
         
         /* append tabview to content */
         this.mainTabs.appendTo("content");
+
+        $('.yui-navset ul')
+            .removeClass('yui-nav')
+            .addClass('nav navbar navbar-nav navbar-default')
+            .css({"display": "block", "width":"100%", "margin":"2px"});
+
+        $('.yui-content').css({"clear":"both", "background-color": "white"});
         
         /* tab change routine */
         this.mainTabs.on('activeTabChange', function(ev) {
             switch(ev.newValue.get("id")){
                 case 'sparql':
-                    SemaGrowSparql.loadSparql();
+                    SemaGrowPage.loadYASGUI();
                 break;
                 case 'gettingstarted':
                     SemaGrowPage.loadGettingStarted();
@@ -212,7 +230,7 @@ SemaGrowTabs = {
         });
         
         /* activating first tab */
-        this.mainTabs.set('activeIndex', 0);
+        this.mainTabs.set('activeIndex', 1);
     }
 };
 

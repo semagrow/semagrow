@@ -39,6 +39,10 @@ to semagrow:metadataInit "/tmp/metadata.ttl" ;".
 
 Now you can run the .startup.sh script. SemaGrow can be accessed at http://localhost:8080/SemaGrow/ .
 
+###Deploy the war file easily
+Run the script located at semagrow/http/src/frontend/ with the root directory of semagrow as an argument, like this:
+sh deployWAR.sh /home/test/semagrow
+
 
 KNOWN ISSUES
 ============
