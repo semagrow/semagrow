@@ -26,7 +26,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         subscriber.onSubscribe(new TupleQueryResultProducer(subscriber, query));
     }
 
-    public static final class TupleQueryResultProducer implements Subscription, TupleQueryResultHandler {
+    public static final class TupleQueryResultProducer implements Subscription {
 
 
         private Subscriber<? super BindingSet> subscriber;
@@ -39,8 +39,6 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
         }
 
-        //////////////////////////
-
         @Override
         public void request(long l) {
 
@@ -49,7 +47,35 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
                 try {
                     logger.info("query {} with {}", query, query.getBindings());
                     isEvaluating = true;
-                    query.evaluate(this);
+
+                    query.evaluate(new TupleQueryResultHandler() {
+
+                        @Override
+                        public void handleBoolean(boolean b) throws QueryResultHandlerException {
+
+                        }
+
+                        @Override
+                        public void handleLinks(List<String> list) throws QueryResultHandlerException {
+
+                        }
+
+                        @Override
+                        public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
+
+                        }
+
+                        @Override
+                        public void endQueryResult() throws TupleQueryResultHandlerException {
+                            subscriber.onComplete();
+                        }
+
+                        @Override
+                        public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
+                            subscriber.onNext(bindingSet);
+                        }
+
+                    });
                 } catch (Exception e) {
                     subscriber.onError(e);
                 }
@@ -60,34 +86,5 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         public void cancel() {
             isEvaluating = false;
         }
-
-        //////////////////////////
-
-        @Override
-        public void handleBoolean(boolean b) throws QueryResultHandlerException {
-
-        }
-
-        @Override
-        public void handleLinks(List<String> list) throws QueryResultHandlerException {
-
-        }
-
-        @Override
-        public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
-
-        }
-
-        @Override
-        public void endQueryResult() throws TupleQueryResultHandlerException {
-            subscriber.onComplete();
-        }
-
-        @Override
-        public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
-            subscriber.onNext(bindingSet);
-        }
-
-
     }
 }
