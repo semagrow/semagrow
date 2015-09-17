@@ -281,6 +281,8 @@ public class SPARQLQueryStringUtil {
 
     private static String updateFunctionCallsSELECT(TupleExpr expr, String query, Set<String> freeVars) {
 
+        Boolean extensionFlag = false;
+
         String newString = query;
         StringBuilder builder = new StringBuilder();
 
@@ -292,6 +294,7 @@ public class SPARQLQueryStringUtil {
         if (expr instanceof Plan) {
             TupleExpr e = ((Plan) expr).getArg();
             if (e instanceof Extension) {
+                extensionFlag = true;
                 for (ExtensionElem elem : ((Extension) e).getElements()) {
                     ValueExpr f = elem.getExpr();
                     if (f instanceof FunctionCall) {
@@ -316,9 +319,11 @@ public class SPARQLQueryStringUtil {
                 }
             }
         }
-        builder.append("\nWHERE {");
-        newString = newString.replace("{", "{" + builder.toString());
-        newString = newString + "\n}";
+        if (extensionFlag) {
+            builder.append("\nWHERE {");
+            newString = newString.replace("{", "{" + builder.toString());
+            newString = newString + "\n}";
+        }
         return newString;
     }
 
