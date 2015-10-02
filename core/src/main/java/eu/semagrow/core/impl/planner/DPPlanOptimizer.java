@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.planner;
 
-import eu.semagrow.art.LogExprProcessing;
+import eu.semagrow.art.Loggable;
 import eu.semagrow.core.impl.util.CombinationIterator;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
@@ -61,7 +61,7 @@ public class DPPlanOptimizer implements PlanOptimizer
 
         int planSize = plans.size();
         plans.retainAll(bestPlans);
-        logger.debug("Pruned " + (planSize - plans.size()) + " suboptimal plans of " + planSize + " plans");
+        logger.debug("Prune {} of {} plans", (planSize - plans.size()), planSize);
     }
 
     protected int comparePlan(Plan plan1, Plan plan2)
@@ -78,11 +78,8 @@ public class DPPlanOptimizer implements PlanOptimizer
         return  plan1.getProperties().isComparable(plan2.getProperties());
     }
 
-    public Plan getBestPlan(TupleExpr expr, BindingSet bindings, Dataset dataset)
-    {
-       	LogExprProcessing event = new LogExprProcessing();
-        logger.info( "START" );
-    	
+    @Loggable
+    public Plan getBestPlan(TupleExpr expr, BindingSet bindings, Dataset dataset) {
         // optPlans is a function from (Set of Expressions) to (Set of Plans)
         PlanCollection optPlans = new PlanCollection();
 
@@ -95,11 +92,10 @@ public class DPPlanOptimizer implements PlanOptimizer
         //
         Set<TupleExpr> r = optPlans.getExpressions();
 
-        for (Pair<Set<TupleExpr>, Set<TupleExpr>> p : pairsubsets(r))
-        {
+        for (Pair<Set<TupleExpr>, Set<TupleExpr>> p : pairsubsets(r)) {
             Set<TupleExpr> o1 = p.getFirst();
             Set<TupleExpr> o2 = p.getSecond();
-            Set<TupleExpr> s  = new HashSet<>(o1);
+            Set<TupleExpr> s = new HashSet<>(o1);
             s.addAll(o2);
 
             Collection<Plan> plans1 = optPlans.get(o1);
@@ -117,11 +113,11 @@ public class DPPlanOptimizer implements PlanOptimizer
         prunePlans(fullPlans);
 
         if (!fullPlans.isEmpty()) {
-            logger.info("Found " + fullPlans.size() + " complete optimal plans");
+            logger.info("Found {} complete optimal plans", fullPlans.size());
+        } else {
+            logger.warn("Found no complete plans");
         }
 
-        logger.info( "END" );
-        event.finalize();
         return getBestPlan(fullPlans);
     }
 

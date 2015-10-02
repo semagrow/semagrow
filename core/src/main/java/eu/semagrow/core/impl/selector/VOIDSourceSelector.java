@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.selector;
 
+import eu.semagrow.art.Loggable;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.source.SourceMetadata;
 import org.openrdf.model.Resource;
@@ -29,6 +30,7 @@ public class VOIDSourceSelector extends VOIDBase
         super(voidRepository);
     }
 
+    @Loggable
     public List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
 
         if (!pattern.getSubjectVar().hasValue() &&
@@ -39,6 +41,7 @@ public class VOIDSourceSelector extends VOIDBase
             return new LinkedList<SourceMetadata>(datasetsToSourceMetadata(pattern, getDatasets(pattern)));
     }
 
+    @Loggable
     public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
 
         if (expr instanceof StatementPattern)

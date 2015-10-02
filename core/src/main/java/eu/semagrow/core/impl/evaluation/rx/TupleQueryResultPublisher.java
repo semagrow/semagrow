@@ -44,10 +44,12 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         @Override
         public void request(long l) {
 
-            logger.debug("Requesting {} results and isEvaluating = {} ", l, isEvaluating);
+            //logger.debug("Requesting {} results and isEvaluating = {} ", l, isEvaluating);
             if (!isEvaluating) {
                 try {
-                    logger.debug("query {} with {}", query, query.getBindings());
+                    if (logger.isDebugEnabled())
+                        logger.debug("Query {} with {}", query.toString().replace("\n", " "), query.getBindings());
+
                     isEvaluating = true;
                     query.evaluate(this);
                 } catch (Exception e) {

@@ -17,6 +17,7 @@ import org.openrdf.query.algebra.evaluation.TripleSource;
 import org.reactivestreams.Publisher;
 
 import reactor.Environment;
+import reactor.core.dispatch.TraceableDelegatingDispatcher;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 
@@ -192,7 +193,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             return Streams.empty();
         else {
             Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-            return Streams.wrap(result).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
+            return Streams.wrap(result).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
         }
     }
 
@@ -215,7 +216,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                         return Streams.fail(e);
                     }
 
-                }).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
+                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Transform expr, BindingSet bindings)

@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.estimator;
 
+import eu.semagrow.art.Loggable;
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.commons.algebra.BindJoin;
 import eu.semagrow.commons.algebra.HashJoin;
@@ -33,10 +34,12 @@ public class CostEstimatorImpl implements CostEstimator {
      * @param expr
      * @return
      */
+    @Loggable
     public Cost getCost(TupleExpr expr) {
         return getCost(expr, Site.LOCAL);
     }
 
+    @Loggable
     public Cost getCost(TupleExpr expr, Site site) {
         return getCost(expr, site.getURI());
     }

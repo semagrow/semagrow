@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.selector;
 
-import eu.semagrow.art.LogExprProcessing;
+import eu.semagrow.art.Loggable;
 import eu.semagrow.commons.algebra.QueryRoot;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
@@ -109,12 +109,9 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 	 * @param list The list of candidate data sources
 	 * @return The subset of the data sources in list that contain triples matching the pattern 
 	 */
-
+	 @Loggable
 	 private List<SourceMetadata> restrictSourceList( StatementPattern pattern, List<SourceMetadata> list )
 	 {
-		 LogExprProcessing event = new LogExprProcessing();
-		 logger.info( "START" );
-
 		 List<SourceMetadata> restrictedList = new LinkedList<SourceMetadata>();
 
 		 for( SourceMetadata metadata : list ) {
@@ -124,8 +121,6 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			 if( ask ) { restrictedList.add( m ); }
 		 }
 		 
-		 logger.info( "END" );
-		 event.finalize();
 		 return restrictedList;
 	 }
 

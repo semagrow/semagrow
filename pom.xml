@@ -263,6 +263,7 @@
                     <debug>false</debug>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 

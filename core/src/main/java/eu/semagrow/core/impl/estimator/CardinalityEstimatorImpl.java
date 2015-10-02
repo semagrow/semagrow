@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.estimator;
 
+import eu.semagrow.art.Loggable;
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.estimator.SelectivityEstimator;
 import eu.semagrow.core.impl.planner.Plan;
@@ -25,6 +26,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         this.statistics = statistics;
     }
 
+    @Loggable
     public long getCardinality(TupleExpr expr)
     {
         return getCardinality(expr, null);

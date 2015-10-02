@@ -39,7 +39,7 @@ public class LogExprProcessing extends StructuredLogItemBase
 	{
 		if( this.end_time == -1 ) {
 			String l = MDC.get( "nestingLevel" );
-			assert l == this.nestingLevel;
+			assert l.equals(this.nestingLevel);
 			int ll = Integer.parseInt( l ) - 1;
 			assert ll >= 0;
 			MDC.put( "nestingLevel", Integer.toString(ll) );

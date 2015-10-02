@@ -41,8 +41,11 @@ public class QueryTest extends TestCase
 	};
 	private static final String pathnameDBPedia;
 	static {
+		pathnameDBPedia = null;
+		/*
 		try { pathnameDBPedia = FileUtils.getFile( "dbpedia.ttl" ).getAbsolutePath(); }
 		catch( IOException ex ) { throw new AssertionError( ex ); }
+		*/
 	}
 
 	private static final String strQueryFAO[] = {
@@ -177,8 +180,6 @@ public class QueryTest extends TestCase
 
         SemagrowTupleQuery query =
         		(SemagrowTupleQuery) conn.prepareTupleQuery(QueryLanguage.SPARQL, queryString );
-
-        System.out.println(query.getDecomposedQuery());
 
         query.evaluate(new TupleQueryResultHandler() {
             @Override

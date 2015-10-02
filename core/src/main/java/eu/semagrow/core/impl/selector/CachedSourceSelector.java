@@ -1,7 +1,6 @@
 package eu.semagrow.core.impl.selector;
 
-import eu.semagrow.art.LogExprProcessing;
-import eu.semagrow.core.impl.planner.DPPlanOptimizer;
+import eu.semagrow.art.Loggable;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
 import org.openrdf.query.BindingSet;
@@ -28,11 +27,9 @@ public class CachedSourceSelector extends SourceSelectorWrapper
     }
 
     @Override
+    @Loggable
     public List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings)
     {
-       	LogExprProcessing event = new LogExprProcessing();
-       	logger.info( "START" );
-        
         List<SourceMetadata> retv;
 
         if( cache.containsKey(pattern) ) {
@@ -44,8 +41,6 @@ public class CachedSourceSelector extends SourceSelectorWrapper
             retv = list;
         }
 
-        logger.info( "END" );
-        event.finalize();
         return retv;
     }
 
