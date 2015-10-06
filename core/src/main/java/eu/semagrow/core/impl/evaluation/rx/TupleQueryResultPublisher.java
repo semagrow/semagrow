@@ -48,15 +48,11 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
             if (!isEvaluating) {
                 try {
                     if (logger.isDebugEnabled())
-                        logger.debug("Sending query (id = {}) {} with {}", query.hashCode(), query.toString().replace("\n", " "), query.getBindings());
+                        logger.debug("Sending query {} with {}", query.toString().replace("\n", " "), query.getBindings());
 
                     isEvaluating = true;
 
-                    query.evaluate(new TupleQueryResultHandler() {
-
-                        //private final Logger logger = LoggerFactory.getLogger(TupleQueryResultHandler.class);
-                        private int count;
-
+                    query.evaluate(new LoggingTupleQueryResultHandler(query, new TupleQueryResultHandler() {
                         @Override
                         public void handleBoolean(boolean b) throws QueryResultHandlerException {
 
@@ -69,21 +65,19 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
                         @Override
                         public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
-                            count = 0;
+
                         }
 
                         @Override
                         public void endQueryResult() throws TupleQueryResultHandlerException {
-                            logger.debug("Query (id = {}) returned {} results.", query.hashCode(), count);
                             subscriber.onComplete();
                         }
 
                         @Override
                         public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
-                            count++;
                             subscriber.onNext(bindingSet);
                         }
-                    });
+                    }));
 
                 } catch (Exception e) {
                     subscriber.onError(e);
