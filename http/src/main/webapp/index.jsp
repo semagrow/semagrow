@@ -10,8 +10,11 @@
         <link rel="stylesheet" type="text/css" href="resources/styles/style.css" />
         <link rel="stylesheet" type="text/css" href="resources/styles/tabview.css" />
         <link rel="stylesheet" type="text/css" href="resources/styles/datatable.css" />
+        <link rel="stylesheet" type="text/css" href="resources/styles/yasgui_custom.min.css" />
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/tabview/assets/skins/sam/tabview.css">
         <link rel="stylesheet" type="text/css" href="http://yui.yahooapis.com/2.9.0/build/datatable/assets/skins/sam/datatable.css" />
+        <!--<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">-->
+        <link rel="stylesheet" type="text/css" href="resources/styles/bootstrap.min.css" />
         <script src="http://yui.yahooapis.com/2.9.0/build/yahoo/yahoo-min.js" ></script>
         <script src="http://yui.yahooapis.com/2.9.0/build/event/event-min.js" ></script>
         <script src="http://yui.yahooapis.com/2.9.0/build/yahoo-dom-event/yahoo-dom-event.js"></script>
@@ -28,7 +31,10 @@
         <script src="resources/js/openrdf/vocabulary/VOCAB.js"></script>
         <script src="resources/js/ApplicationState.js"></script>
         <script src="resources/js/http/HttpClient-0.0.1.js"></script>
+        <script src="resources/js/yasgui.min.js"></script>
+        <script src="//code.jquery.com/jquery-1.11.3.min.js"></script>
         <script src="resources/js/SemaGrowPage.js"></script>
+
         <script>
             var app;
             function init() {
@@ -44,9 +50,9 @@
             
         </style>
     </head>
-    <body class="yui-skin-sam">
+    <body class="yui-skin-sam" style="overflow-x:auto;min-width:1280px;">
         <div id="header">
-            <img id="logo" src="resources/images/logo.png"/>
+            <img id="logo" src="resources/images/logo_small.png"/>
             <div id="auth">
                 <jsp:include page="/WEB-INF/jsp/auth/login.jsp" />
             </div>

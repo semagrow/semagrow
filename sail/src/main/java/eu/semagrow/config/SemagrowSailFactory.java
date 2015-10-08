@@ -1,6 +1,9 @@
 package eu.semagrow.config;
 
 
+import eu.semagrow.core.config.SourceSelectorConfigException;
+import eu.semagrow.core.config.SourceSelectorFactory;
+import eu.semagrow.core.config.SourceSelectorImplConfig;
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.impl.alignment.QueryTransformationImpl;
 import eu.semagrow.core.impl.estimator.CostEstimator;
@@ -67,7 +70,10 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
 
             sail.setMetadataRepository(metadata);
 
-            SourceSelector selector = getSourceSelector(metadata, config, config.getSourceSelectorConfig());
+            SourceSelector selector =
+                    (config.hasSelectorConfig()) ?
+                            getSourceSelector(config.getSourceSelectorConfig()) :
+                            getSourceSelector(metadata, config, config.getSourceSelectorConfig());
 
             sail.setSourceSelector(selector);
 
@@ -128,6 +134,17 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
         }
         else
             throw new SourceSelectorConfigException();
+    }
+
+    public SourceSelector getSourceSelector(SourceSelectorImplConfig config)
+            throws SourceSelectorConfigException
+    {
+        SourceSelectorFactory factory = SourceSelectorRegistry.getInstance().get(config.getType());
+        if (factory != null) {
+            return factory.getSourceSelector(config);
+        } else {
+            throw new SourceSelectorConfigException("Cannot find appropriate source selector factory");
+        }
     }
 
     private QueryTransformation getQueryTransformation(SemagrowSailConfig sailConfig) {

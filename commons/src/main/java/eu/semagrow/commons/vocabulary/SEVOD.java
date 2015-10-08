@@ -18,11 +18,10 @@ public final class SEVOD {
     public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
 
     public final static URI SUBJECTREGEXPATTERN;
-
     public final static URI OBJECTREGEXPATTERN;
-
+    public final static URI SUBJECTVOCABULARY;
+    public final static URI OBJECTVOCABULARY;
     public final static URI SUBJECTCLASS;
-
     public final static URI OBJECTCLASS;
 
     public final static URI INTINTERVAL;
@@ -34,6 +33,8 @@ public final class SEVOD {
         ValueFactory factory = ValueFactoryImpl.getInstance();
         SUBJECTREGEXPATTERN = factory.createURI(SEVOD.NAMESPACE, "subjectRegexPattern");
         OBJECTREGEXPATTERN = factory.createURI(SEVOD.NAMESPACE, "objectRegexPattern");
+        SUBJECTVOCABULARY = factory.createURI(SEVOD.NAMESPACE, "subjectVocabulary");
+        OBJECTVOCABULARY = factory.createURI(SEVOD.NAMESPACE, "objectVocabulary");
         OBJECTCLASS = factory.createURI(SEVOD.NAMESPACE, "objectClass");
         SUBJECTCLASS = factory.createURI(SEVOD.NAMESPACE, "subjectClass");
         INTINTERVAL = factory.createURI(SEVOD.NAMESPACE, "intInterval");

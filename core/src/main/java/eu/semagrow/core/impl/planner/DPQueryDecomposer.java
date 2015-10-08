@@ -4,6 +4,8 @@ import eu.semagrow.core.impl.estimator.CostEstimator;
 import eu.semagrow.core.impl.util.BPGCollector;
 import eu.semagrow.core.decomposer.QueryDecomposer;
 import eu.semagrow.core.estimator.CardinalityEstimator;
+import eu.semagrow.core.impl.selector.StaticSourceSelector;
+import eu.semagrow.core.impl.optimizer.ExtensionOptimizer;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.art.*;
 
@@ -74,6 +76,8 @@ public class DPQueryDecomposer implements QueryDecomposer
         	 * Specifically, collects FILTER statements */
             DecomposerContext ctx = new DecomposerContext( bgp );
 
+            SourceSelector staticSelector = new StaticSourceSelector(sourceSelector.getSources(bgp, dataset, bindings));
+
         	/* uses the SourceSelector provided in order to identify the
         	 * sub-expressions that can be executed at each data source,
         	 * and annotates with cardinality and selectivity metadata */
@@ -90,6 +94,8 @@ public class DPQueryDecomposer implements QueryDecomposer
             bgp.replaceWith( bestPlan );
         }
 
+        ExtensionOptimizer opt = new ExtensionOptimizer();
+        opt.optimize(expr, dataset, bindings);
     }
 
 

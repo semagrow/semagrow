@@ -9,6 +9,7 @@
 @prefix sr:   <http://www.openrdf.org/config/repository/sail#>.
 @prefix sail: <http://www.openrdf.org/config/sail#>.
 @prefix semagrow: <http://schema.semagrow.eu/>.
+@prefix quetsal: <http://quetsal.aksw.org/>.
 
 [] a rep:Repository ;
    rep:repositoryTitle "SemaGrow Repository" ;
@@ -18,6 +19,10 @@
       sr:sailImpl [
          sail:sailType "semagrow:SemagrowSail" ;
          semagrow:metadataInit "/etc/default/semagrow/metadata.ttl" ;
+         semagrow:sourceSelector "aksw:hibiscus";
+         quetsal:hibiscusMode "Index_dominant" ;
+         quetsal:commonPredThreshold "1" ;
+         semagrow:executorBatchSize "8" ;
          semagrow:queryTransformDB "jdbc:postgresql://localhost:5432/alignmentDB"  ;
          semagrow:queryTransformUser "postgres" ;
          semagrow:queryTransformPass "postgres"

@@ -33,7 +33,13 @@
       <groupId>eu.semagrow</groupId>
       <artifactId>semagrow-core-api</artifactId>
       <version>${project.version}</version>
-    </dependency>    
+    </dependency>
+    <dependency>
+      <groupId>eu.semagrow</groupId>
+      <artifactId>semagrow-quetsal</artifactId>
+      <version>${project.version}</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
 </project>

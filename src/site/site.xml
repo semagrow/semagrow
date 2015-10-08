@@ -9,6 +9,7 @@
     <menu ref="modules"/>
     <menu name="SemaGrow-Stack-Modules">
       <item name="Introduction" href="index.html"/>
+      <item name="Installation" href="installation.html"/>
       <item name="Building" href="building.html"/>
       <item name="Creating a module" href="modulecreation.html"/>
     </menu>

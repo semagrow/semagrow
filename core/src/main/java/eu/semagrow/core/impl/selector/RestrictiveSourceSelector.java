@@ -63,11 +63,9 @@ public class RestrictiveSourceSelector extends SourceSelectorWrapper {
 
     @Override
     public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
-        if (expr instanceof StatementPattern)
-            return getSources((StatementPattern)expr, dataset, bindings);
 
-        List<StatementPattern> patterns  = StatementPatternCollector.process(expr);
-        return getSources(patterns, dataset, bindings);
+        List<SourceMetadata> res = getWrappedSelector().getSources(expr, dataset, bindings);
+        return isRestrictive() ? restrictSourceList(res) : res;
     }
 
     private List<SourceMetadata> restrictSourceList(List<SourceMetadata> list) {

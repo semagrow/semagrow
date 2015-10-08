@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <author>Jürgen Jakobitsch</author>
+        <title>SemaGrow-Stack-Assembly - Installation</title>
+    </properties>
+    <meta name="keyword" content="semagrow, installation"/>
+    <body>
+        <section name="Installation">
+            <p>   
+                This page contains information on how to install a linux package distribution
+                of the SemaGrow Stack.
+            </p>
+            <p>
+                <ol>
+                    <li>Notes</li>
+                    <li>System requirements</li>
+                    <li><a href="#Debian">Debian</a></li>                    
+                    <li>RPM Installation</li>                    
+                </ol>
+            </p>
+        </section>   
+        <section name="Notes">
+            <ul>
+                <li>
+                    For all packages of this version of the SemaGrow-Stack checkout /etc/default/semagrow/
+                    for basic configuration files for the defined federation's sparql endpoints 
+                    and for a configurable list of SparqlSamples.
+                </li>                
+            </ul>
+        </section>     
+        <section name="System requirements">
+            To be able to run the SemaGrow-Stack it is necessary that the following
+            components are installed.
+            <ol>
+                <li>JDK<br/>
+                    A JDK (Java Development Kit) is necessary to compile all java-components. All builds
+                    have been tested with java versions between 1.8.0_45.<br/> 
+                    Please note that a JRE is not sufficient.
+                    To check the installed version enter the following command in a terminal
+                    <br/>
+<source>
+    java -version
+</source>
+                </li>
+            </ol>
+        </section>
+        <a name="Debian"/>
+        <section name="Debian">            
+            <subsection name="Installation">
+            To install the SemaGrow-Stack on a linux distribution the package manager of which is able
+            to handle deb packages take the following steps, exemplified for an ubuntu lucid installation.<br/>
+            The steps are the same for all debian based distros but might differ in details.
+            <ol>
+                <li>Add the SemaGrow Debian Repository to the sources list.<br/>
+<source>
+    sed -i '$ a\deb http://semagrow.semantic-web.at/deb/ lucid free' /etc/apt/sources.list
+</source>                
+                </li>
+                <li>Import the repository key
+<source>
+    wget -qO - http://semagrow.semantic-web.at/deb/packages.semagrow.key | sudo apt-key add -
+</source>
+                </li>
+                <li>Update the package manager
+<source>
+    aptitude update
+</source>                    
+                </li>
+                <li>Search the SemaGrow-Stack
+<source>
+    aptitude search semagrow
+</source>                    
+                </li>
+                <li>Install the SemaGrow-Stack
+<source>
+    aptitude install semagrow
+</source>                    
+                </li>                                
+            </ol>                
+            </subsection>
+
+            <subsection name="FileStructure">
+            The installation creates the following filestructure
+            <ul>
+                <li>/usr/
+                    <ul>
+                        <li>local/
+                            <ul>
+                                <li>semagrow/ (tomcat root)
+                                    <ul>
+                                        <li>bin</li>
+                                        <li>conf</li>
+                                        <li>domains (symlink to /var/lib/semagrow/domains)</li>
+                                        <li>lib
+                                            <ul>
+                                                <li>semagrow (semagrow specific libs)</li>
+                                            </ul>
+                                        </li>
+                                        <li>logs (symlink to /var/log/semagrow)</li>
+                                        <li>temp</li>
+                                        <li>work</li>
+                                    </ul>                                    
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>/etc/
+                    <ul>
+                        <li>init.d/
+                            <ul>
+                                <li>semagrow (start script)</li>
+                            </ul>
+                        </li>
+                        <li>default
+                            <ul>
+                                <li>semagrow
+                                    <ul>
+                                        <li>metadata.ttl (federation configuration)</li>
+                                        <li>sparql.samples.ttl (sparql samples)</li>
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li>/var/
+                    <ul>
+                        <li>run/
+                            <ul>
+                                <li>semagrow/ (containing pid file)</li>
+                            </ul>
+                        </li>
+                        <li>log/
+                            <ul>
+                                <li>semagrow/ (containing log files)</li>
+                            </ul>
+                        </li>
+                        <li>lib
+                            <ul>
+                                <li>semagrow/
+                                    <ul>
+                                        <li>domains
+                                            <ul>
+                                                <li>localhost
+                                                    <ul>
+                                                        <li>webapps
+                                                            <ul>
+                                                                <li>SemaGrow.war</li>
+                                                            </ul>
+                                                        </li>
+                                                    </ul>
+                                                </li>
+                                            </ul>
+                                        </li>                                        
+                                    </ul>
+                                </li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>                
+            </subsection>
+            <subsection name="Commands">
+                <ul>
+                    <li>Start the SemaGrow stack
+<source>
+    /etc/init.d/semagrow start
+</source>
+                    </li>
+                    <li>Stop the SemaGrow stack
+<source>
+    /etc/init.d/semagrow stop
+</source>
+                    </li>    
+                    <li>Retrieve the current status of the SemaGrow stack
+<source>
+    /etc/init.d/semagrow status
+</source>
+                    </li>                                    
+                </ul>
+            </subsection>
+        </section>
+    </body>
+</document>
