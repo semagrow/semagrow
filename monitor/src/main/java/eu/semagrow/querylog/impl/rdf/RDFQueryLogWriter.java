@@ -8,6 +8,7 @@ import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.model.vocabulary.RDF;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.TupleQuery;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -74,14 +75,11 @@ public class RDFQueryLogWriter implements QueryLogWriter {
         return record;
     }
 
-    private Value createTupleExpr(TupleExpr expr, BindingSet bindings)
+    private Value createTupleExpr(TupleQuery expr, BindingSet bindings)
             throws QueryLogException
     {
         try {
-            String queryString = null;
-            ParsedTupleQuery query = new ParsedTupleQuery(expr);
-            queryString = new SPARQLQueryRenderer().render(query);
-            return vf.createLiteral(queryString);
+            return vf.createLiteral(expr.toString());
         } catch (Exception e) {
             throw new QueryLogException(e);
         }

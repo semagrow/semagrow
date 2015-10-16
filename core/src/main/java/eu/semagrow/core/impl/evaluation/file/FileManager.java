@@ -38,6 +38,7 @@ public class FileManager implements MaterializationManager {
         this.baseDir = baseDir;
     }
 
+
     @Override
     public CloseableIteration<BindingSet,QueryEvaluationException>
         getResult(URI q) throws QueryEvaluationException

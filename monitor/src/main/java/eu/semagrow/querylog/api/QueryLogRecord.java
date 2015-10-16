@@ -3,6 +3,7 @@ package eu.semagrow.querylog.api;
 
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.TupleQuery;
 import org.openrdf.query.algebra.TupleExpr;
 
 import java.util.Date;
@@ -14,7 +15,7 @@ import java.util.List;
 public interface QueryLogRecord {
     URI getEndpoint();
 
-    TupleExpr getQuery();
+    TupleQuery getQuery();
 
     BindingSet getBindings();
 

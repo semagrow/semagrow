@@ -4,6 +4,7 @@ import eu.semagrow.querylog.api.QueryLogRecord;
 import eu.semagrow.querylog.api.QueryLogRecordFactory;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.TupleQuery;
 import org.openrdf.query.algebra.TupleExpr;
 
 /**
@@ -16,7 +17,7 @@ public class QueryLogRecordFactoryImpl implements QueryLogRecordFactory {
 
     @Override
     public QueryLogRecord createQueryLogRecord(URI endpoint,
-                                               TupleExpr expr,
+                                               TupleQuery expr,
                                                BindingSet bindingNames)
     {
         // TODO: session is null
