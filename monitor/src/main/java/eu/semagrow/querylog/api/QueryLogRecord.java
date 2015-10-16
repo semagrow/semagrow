@@ -15,7 +15,7 @@ import java.util.List;
 public interface QueryLogRecord {
     URI getEndpoint();
 
-    TupleQuery getQuery();
+    String getQuery();
 
     BindingSet getBindings();
 

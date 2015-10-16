@@ -125,7 +125,7 @@ public class SemagrowSail extends SailBase {
         this.queryEvaluation = queryEvaluation;
     }
 
-    private MaterializationManager getManager() {
+    public MaterializationManager getManager() {
         return materializationManager;
     }
 

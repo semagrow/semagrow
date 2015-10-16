@@ -41,13 +41,14 @@ public class SemagrowSailConnection extends SailConnectionBase {
     private static final URI METADATA_GRAPH =
             ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
 
-    private static QueryExecutorImpl executor = new QueryExecutorImpl();
+    private static QueryExecutorImpl executor;
 
     public SemagrowSailConnection(SemagrowSail sail)
     {
         super(sail);
         //queryEvaluation = sail.getQueryEvaluation();
         this.semagrowSail = sail;
+        this.executor = new QueryExecutorImpl(semagrowSail.getRecordLog(), semagrowSail.getManager());
     }
 
     @Override

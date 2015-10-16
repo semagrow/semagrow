@@ -75,7 +75,7 @@ public class RDFQueryLogWriter implements QueryLogWriter {
         return record;
     }
 
-    private Value createTupleExpr(TupleQuery expr, BindingSet bindings)
+    private Value createTupleExpr(String expr, BindingSet bindings)
             throws QueryLogException
     {
         try {

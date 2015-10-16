@@ -10,6 +10,7 @@ import eu.semagrow.querylog.impl.QueryLogRecordImpl;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.*;
+import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +31,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
 
     private QueryLogHandler qfrHandler;
 
-    private TupleQuery query;
+    private String query;
     private String id;
     private UUID uuid;
     private int count;
@@ -42,7 +43,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     private QueryLogRecord queryLogRecord;
 
 
-    public LoggingTupleQueryResultHandler(TupleQuery q, QueryResultHandler handler, QueryLogHandler qfrHandler, MaterializationManager mat) {
+    public LoggingTupleQueryResultHandler(String q, QueryResultHandler handler, QueryLogHandler qfrHandler, MaterializationManager mat) {
         super(handler);
         this.mat = mat;
         this.qfrHandler = qfrHandler;
@@ -60,7 +61,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     @Override
     public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
         count = 0;
-        logger.debug("{} - Starting {}", id, query.toString().replace("\n", " "));
+        logger.debug("{} - Starting {}", id, query.replace("\n", " "));
         handle.startQueryResult(list);
         start = System.currentTimeMillis();
 
@@ -111,7 +112,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
 
 
 
-    protected QueryLogRecordImpl createMetadata(URI endpoint, TupleQuery expr, BindingSet bindings, List<String> bindingNames) {
+    protected QueryLogRecordImpl createMetadata(URI endpoint, String expr, BindingSet bindings, List<String> bindingNames) {
         return new QueryLogRecordImpl(uuid, endpoint, expr, bindings, bindingNames);
     }
 }

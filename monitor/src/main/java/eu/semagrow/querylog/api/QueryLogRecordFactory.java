@@ -11,7 +11,7 @@ import org.openrdf.query.algebra.TupleExpr;
 public interface QueryLogRecordFactory {
 
     QueryLogRecord createQueryLogRecord(URI endpoint,
-                                        TupleQuery expr,
+                                        String expr,
                                         BindingSet bindingNames);
 
 }

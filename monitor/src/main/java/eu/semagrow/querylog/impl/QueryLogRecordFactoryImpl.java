@@ -17,7 +17,7 @@ public class QueryLogRecordFactoryImpl implements QueryLogRecordFactory {
 
     @Override
     public QueryLogRecord createQueryLogRecord(URI endpoint,
-                                               TupleQuery expr,
+                                               String expr,
                                                BindingSet bindingNames)
     {
         // TODO: session is null

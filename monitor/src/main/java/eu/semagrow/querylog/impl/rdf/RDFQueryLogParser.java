@@ -8,12 +8,14 @@ import eu.semagrow.querylog.impl.QueryLogRecordImpl;
 import eu.semagrow.querylog.impl.rdf.vocabulary.QFR;
 import org.openrdf.model.*;
 import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
+import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.query.parser.ParsedQuery;
+import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.query.parser.QueryParserUtil;
+import org.openrdf.repository.sail.SailTupleQuery;
+import org.openrdf.repository.sparql.query.SPARQLTupleQuery;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.Rio;
 
@@ -69,12 +71,12 @@ public class RDFQueryLogParser implements QueryLogParser {
         URI results  = model.filter(qr, QFR.RESULTFILE, null).objectURI();
 
         Date startTime = parseDate(model.filter(qr, QFR.START, null).objectLiteral(), model);
-        Date endTime = parseDate(model.filter(qr,QFR.END, null).objectLiteral(), model);
+        Date endTime = parseDate(model.filter(qr, QFR.END, null).objectLiteral(), model);
 
         long cardinality = parseCardinality(model.filter(qr, QFR.CARDINALITY, null).objectLiteral(), model);
-        TupleExpr expr = parseQuery(model.filter(qr, QFR.QUERY, null).objectValue(), model);
+        String expr = parseQuery(model.filter(qr, QFR.QUERY, null).objectValue(), model).toString();
 
-        QueryLogRecord r = new QueryLogRecordImpl(null, endpoint, expr, EmptyBindingSet.getInstance(), Collections.<String>emptyList());
+        QueryLogRecord r = new QueryLogRecordImpl(null, endpoint, expr , EmptyBindingSet.getInstance(), Collections.<String>emptyList());
 
         //r.setDuration(startTime, endTime);
 

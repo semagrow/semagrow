@@ -16,7 +16,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
     //private QueryEvaluationSession session;
     private UUID session;
 
-    private TupleQuery query;
+    private String query;
 
     private URI endpoint;
 
@@ -34,7 +34,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
 
     private BindingSet bindings;
 
-    public QueryLogRecordImpl(UUID session, URI endpoint, TupleQuery query, BindingSet bindings) {
+    public QueryLogRecordImpl(UUID session, URI endpoint, String query, BindingSet bindings) {
         this.session = session;
         this.endpoint = endpoint;
         this.query = query;
@@ -56,7 +56,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
         this.bindingNames = new LinkedList<String>(bindingNames);
     }*/
 
-    public QueryLogRecordImpl(UUID session, URI endpoint, TupleQuery query, BindingSet bindings, Collection<String> bindingNames) {
+    public QueryLogRecordImpl(UUID session, URI endpoint, String query, BindingSet bindings, Collection<String> bindingNames) {
         this.session = session;
         this.endpoint = endpoint;
         this.query = query;
@@ -69,7 +69,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
     public URI getEndpoint() { return endpoint; }
 
     @Override
-    public TupleQuery getQuery() { return query; }
+    public String getQuery() { return query; }
 
     /*
     @Override
