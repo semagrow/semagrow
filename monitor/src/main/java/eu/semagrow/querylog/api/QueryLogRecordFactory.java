@@ -2,6 +2,7 @@ package eu.semagrow.querylog.api;
 
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.TupleQuery;
 import org.openrdf.query.algebra.TupleExpr;
 
 /**
@@ -10,7 +11,7 @@ import org.openrdf.query.algebra.TupleExpr;
 public interface QueryLogRecordFactory {
 
     QueryLogRecord createQueryLogRecord(URI endpoint,
-                                        TupleExpr expr,
+                                        TupleQuery expr,
                                         BindingSet bindingNames);
 
 }

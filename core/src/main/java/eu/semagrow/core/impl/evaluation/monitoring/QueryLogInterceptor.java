@@ -17,6 +17,7 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.impl.EmptyBindingSet;
+import org.openrdf.query.parser.ParsedTupleQuery;
 
 import java.io.IOException;
 import java.util.*;
@@ -73,7 +74,8 @@ public class QueryLogInterceptor
     }
 
     protected QueryLogRecordImpl createMetadata(URI endpoint, TupleExpr expr, BindingSet bindings, Set<String> bindingNames) {
-        return new QueryLogRecordImpl(UUID.randomUUID(), endpoint, expr, bindings, bindingNames);
+
+        return new QueryLogRecordImpl(UUID.randomUUID(), endpoint, null, bindings, bindingNames);
     }
 
     protected CloseableIteration<BindingSet, QueryEvaluationException>

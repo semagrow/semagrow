@@ -1,28 +1,54 @@
 package eu.semagrow.core.impl.evaluation.rx;
 
+import eu.semagrow.core.impl.evaluation.file.MaterializationHandle;
+import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
+import eu.semagrow.core.impl.evaluation.file.QueryResultHandlerWrapper;
+import eu.semagrow.querylog.api.QueryLogException;
+import eu.semagrow.querylog.api.QueryLogHandler;
+import eu.semagrow.querylog.api.QueryLogRecord;
+import eu.semagrow.querylog.impl.QueryLogRecordImpl;
+import org.openrdf.model.URI;
+import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.*;
+import org.openrdf.query.impl.EmptyBindingSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * Created by antru on 6/10/2015.
  */
-public class LoggingTupleQueryResultHandler implements TupleQueryResultHandler {
+public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper implements TupleQueryResultHandler {
 
     private static final Logger logger = LoggerFactory.getLogger(LoggingTupleQueryResultHandler.class);
 
-    private TupleQueryResultHandler wrapperHandler;
+    private MaterializationManager mat;
+    private MaterializationHandle handle;
+
+    private QueryLogHandler qfrHandler;
+
     private TupleQuery query;
     private String id;
+    private UUID uuid;
     private int count;
 
-    public LoggingTupleQueryResultHandler(TupleQuery q, TupleQueryResultHandler handler) {
-        wrapperHandler = handler;
+    private long start;
+    private long end;
+
+
+    private QueryLogRecord queryLogRecord;
+
+
+    public LoggingTupleQueryResultHandler(TupleQuery q, QueryResultHandler handler, QueryLogHandler qfrHandler, MaterializationManager mat) {
+        super(handler);
+        this.mat = mat;
+        this.qfrHandler = qfrHandler;
+
         query = q;
-        UUID uuid = UUID.randomUUID();
+        uuid = UUID.randomUUID();
         if (uuid.toString().length() > 12) {
             id = uuid.toString().substring(uuid.toString().length() - 12);
         }
@@ -32,32 +58,60 @@ public class LoggingTupleQueryResultHandler implements TupleQueryResultHandler {
     }
 
     @Override
-    public void handleBoolean(boolean b) throws QueryResultHandlerException {
-        wrapperHandler.handleBoolean(b);
-    }
-
-    @Override
-    public void handleLinks(List<String> list) throws QueryResultHandlerException {
-        wrapperHandler.handleLinks(list);
-    }
-
-    @Override
     public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
-        wrapperHandler.startQueryResult(list);
         count = 0;
         logger.debug("{} - Starting {}", id, query.toString().replace("\n", " "));
+        handle.startQueryResult(list);
+        start = System.currentTimeMillis();
+
+        queryLogRecord = createMetadata(ValueFactoryImpl.getInstance().createURI("", ""), query, EmptyBindingSet.getInstance(), list);
+        try {
+            handle = mat.saveResult();
+        } catch (QueryEvaluationException e) {
+            logger.error("Error while creating a materialization handle", e);
+        }
+        super.startQueryResult(list);
     }
 
     @Override
     public void endQueryResult() throws TupleQueryResultHandlerException {
-        wrapperHandler.endQueryResult();
+        handle.endQueryResult();
         logger.debug("{} - Query returned {} results.", id, count);
+
+        end = System.currentTimeMillis();
+        queryLogRecord.setCardinality(count);
+        queryLogRecord.setDuration(start, end);
+
+        if (queryLogRecord.getCardinality() == 0) {
+            try {
+                handle.destroy();
+            } catch (IOException e) {
+                logger.error("Error while destroying a materialization handle", e);
+            }
+        } else {
+            queryLogRecord.setResults(handle.getId());
+        }
+
+        try {
+            qfrHandler.handleQueryRecord(queryLogRecord);
+        } catch (QueryLogException e) {
+            logger.error("Error while pushing record to queryloghandler", e);
+        }
+
+        super.endQueryResult();
     }
 
     @Override
     public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
-        wrapperHandler.handleSolution(bindingSet);
         count++;
         logger.debug("{} - Found {}", id, bindingSet);
+        handle.handleSolution(bindingSet);
+        super.handleSolution(bindingSet);
+    }
+
+
+
+    protected QueryLogRecordImpl createMetadata(URI endpoint, TupleQuery expr, BindingSet bindings, List<String> bindingNames) {
+        return new QueryLogRecordImpl(uuid, endpoint, expr, bindings, bindingNames);
     }
 }
