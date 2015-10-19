@@ -1,10 +1,12 @@
 package eu.semagrow.core.impl.evaluation.rx.reactor;
 
 import eu.semagrow.core.impl.evaluation.ConnectionManager;
+import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
 import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
 import eu.semagrow.core.impl.evaluation.rx.TupleQueryResultPublisher;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
+import eu.semagrow.querylog.api.QueryLogHandler;
 import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
@@ -14,6 +16,7 @@ import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.impl.EmptyBindingSet;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
+import org.openrdf.repository.sparql.query.QueryStringUtil;
 import org.reactivestreams.Publisher;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
@@ -27,6 +30,13 @@ import java.util.*;
 public class QueryExecutorImpl extends ConnectionManager implements QueryExecutor
 {
     private boolean rowIdOpt = false;
+    private QueryLogHandler qfrHandler;
+    private MaterializationManager mat;
+
+    public QueryExecutorImpl(QueryLogHandler qfrHandler, MaterializationManager mat) {
+        this.qfrHandler = qfrHandler;
+        this.mat = mat;
+    }
 
     public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException
@@ -185,7 +195,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
             query.setBinding(b.getName(), b.getValue());
 
 
-        return Streams.wrap(new TupleQueryResultPublisher(query))
+        return Streams.wrap(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat))
                 .finallyDo((s) -> closeQuietly(conn));
     }
 
