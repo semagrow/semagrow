@@ -64,7 +64,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
         logger.debug("{} - Starting {}", id, query.replace("\n", " "));
         start = System.currentTimeMillis();
 
-        queryLogRecord = createMetadata(ValueFactoryImpl.getInstance().createURI("", ""), query, EmptyBindingSet.getInstance(), list);
+        queryLogRecord = createMetadata(ValueFactoryImpl.getInstance().createURI("http://www.iamabsoluteuri.com", ""), query, EmptyBindingSet.getInstance(), list);
         try {
             handle = mat.saveResult();
         } catch (QueryEvaluationException e) {
