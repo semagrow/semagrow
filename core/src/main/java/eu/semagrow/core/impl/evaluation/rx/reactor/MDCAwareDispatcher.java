@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation.rx.reactor;
 
 import org.slf4j.MDC;
-import reactor.core.processor.InsufficientCapacityException;
+//import reactor.core.processor.InsufficientCapacityException;
 import reactor.fn.Consumer;
 import reactor.core.Dispatcher;
 
@@ -38,7 +38,7 @@ public class MDCAwareDispatcher implements Dispatcher {
     }
 
     @Override
-    public <E> void tryDispatch(E e, Consumer<E> consumer, Consumer<Throwable> consumer1) throws InsufficientCapacityException {
+    public <E> void tryDispatch(E e, Consumer<E> consumer, Consumer<Throwable> consumer1) /*throws InsufficientCapacityException*/ {
 
         final Map<String,String> contextMap = MDC.getCopyOfContextMap();
 
