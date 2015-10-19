@@ -30,6 +30,10 @@ public class RDFQueryLogFactory implements QueryLogFactory {
         if (config instanceof RDFQueryLogConfig) {
             RDFQueryLogConfig rdfConfig = (RDFQueryLogConfig) config;
 
+            QueryLogManager qfrManager = new QueryLogManager(rdfConfig.getLogDir(), rdfConfig.getFilePrefix());
+            String filename = qfrManager.getLastFile();
+            rdfConfig.setFilename(filename);
+
             RDFWriterFactory writerFactory = getRDFWriterFactory(rdfConfig);
 
             if (rdfConfig.rotate()) {
@@ -42,8 +46,6 @@ public class RDFQueryLogFactory implements QueryLogFactory {
                 }
             } else {
                 try {
-                    QueryLogManager qfrManager = new QueryLogManager(rdfConfig.getLogDir(), rdfConfig.getFilePrefix());
-                    String filename = qfrManager.getLastFile();
                     return getQueryRecordLogger(writerFactory, filename);
                 } catch (FileNotFoundException e) {
                     throw new QueryLogException(e);

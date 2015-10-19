@@ -62,7 +62,6 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
         count = 0;
         logger.debug("{} - Starting {}", id, query.replace("\n", " "));
-        handle.startQueryResult(list);
         start = System.currentTimeMillis();
 
         queryLogRecord = createMetadata(ValueFactoryImpl.getInstance().createURI("", ""), query, EmptyBindingSet.getInstance(), list);
@@ -71,6 +70,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
         } catch (QueryEvaluationException e) {
             logger.error("Error while creating a materialization handle", e);
         }
+        handle.startQueryResult(list);
         super.startQueryResult(list);
     }
 
