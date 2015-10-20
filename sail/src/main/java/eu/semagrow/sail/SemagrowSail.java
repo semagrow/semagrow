@@ -59,7 +59,9 @@ public class SemagrowSail extends SailBase {
     private ExecutorService executor = Executors.newCachedThreadPool();
     private Repository metadataRepository;
 
-    public SemagrowSail() { }
+    public SemagrowSail() {
+        handler = createRecordLog();
+    }
 
     public boolean isWritable() throws SailException {
         return false;
@@ -115,7 +117,7 @@ public class SemagrowSail extends SailBase {
     public FederatedQueryEvaluation getQueryEvaluation() {
 
         if (queryEvaluation == null) {
-            handler = getRecordLog();
+            //handler = getRecordLog();
             queryEvaluation = new QueryEvaluationImpl(getManager(), handler, executor);
         }
         return queryEvaluation;
@@ -129,7 +131,7 @@ public class SemagrowSail extends SailBase {
         return materializationManager;
     }
 
-    public QueryLogWriter getRecordLog() {
+    private QueryLogWriter createRecordLog() {
 
         RDFQueryLogConfig config = new RDFQueryLogConfig();
         QueryLogFactory factory = new RDFQueryLogFactory();
@@ -150,6 +152,10 @@ public class SemagrowSail extends SailBase {
             logger.warn("Cannot initialize Query Log writer", e);
         }
         return null;
+    }
+
+    public QueryLogWriter getRecordLog() {
+        return handler;
     }
 
     @Override
