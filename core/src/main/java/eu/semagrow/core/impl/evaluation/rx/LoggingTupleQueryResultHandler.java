@@ -35,6 +35,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     private String id;
     private UUID uuid;
     private int count;
+    private URI endpoint;
 
     private long start;
     private long end;
@@ -43,10 +44,11 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     private QueryLogRecord queryLogRecord;
 
 
-    public LoggingTupleQueryResultHandler(String q, QueryResultHandler handler, QueryLogHandler qfrHandler, MaterializationManager mat) {
+    public LoggingTupleQueryResultHandler(String q, QueryResultHandler handler, QueryLogHandler qfrHandler, MaterializationManager mat, URI endpoint) {
         super(handler);
         this.mat = mat;
         this.qfrHandler = qfrHandler;
+        this.endpoint = endpoint;
 
         query = q;
         uuid = UUID.randomUUID();
@@ -64,7 +66,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
         logger.debug("{} - Starting {}", id, query.replace("\n", " "));
         start = System.currentTimeMillis();
 
-        queryLogRecord = createMetadata(ValueFactoryImpl.getInstance().createURI("http://www.iamabsoluteuri.com", ""), query, EmptyBindingSet.getInstance(), list);
+        queryLogRecord = createMetadata(endpoint, query, EmptyBindingSet.getInstance(), list);
         try {
             handle = mat.saveResult();
         } catch (QueryEvaluationException e) {

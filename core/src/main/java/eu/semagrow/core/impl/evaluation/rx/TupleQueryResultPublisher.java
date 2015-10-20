@@ -2,6 +2,7 @@ package eu.semagrow.core.impl.evaluation.rx;
 
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.querylog.api.QueryLogHandler;
+import org.openrdf.model.URI;
 import org.openrdf.query.*;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.parser.ParsedTupleQuery;
@@ -28,16 +29,18 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
     private String queryStr;
     private QueryLogHandler qfrHandler;
     private MaterializationManager mat;
+    private URI endpoint;
 
-    public TupleQueryResultPublisher(TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat) {
+    public TupleQueryResultPublisher(TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URI endpoint) {
         this.query = query;
         this.qfrHandler = qfrHandler;
         this.queryStr = queryStr;
         this.mat = mat;
+        this.endpoint = endpoint;
     }
 
     public void subscribe(Subscriber<? super BindingSet> subscriber) {
-        subscriber.onSubscribe(new TupleQueryResultProducer(subscriber, query, queryStr, qfrHandler, mat));
+        subscriber.onSubscribe(new TupleQueryResultProducer(subscriber, query, queryStr, qfrHandler, mat, endpoint));
     }
 
     public static final class TupleQueryResultProducer implements Subscription {
@@ -49,13 +52,15 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         private boolean isEvaluating = false;
         private QueryLogHandler qfrHandler;
         private MaterializationManager mat;
+        private URI endpoint;
 
-        public TupleQueryResultProducer(Subscriber<? super BindingSet> o, TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat) {
+        public TupleQueryResultProducer(Subscriber<? super BindingSet> o, TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URI endpoint) {
             this.subscriber = o;
             this.query = query;
             this.qfrHandler = qfrHandler;
             this.mat = mat;
             this.queryStr = queryStr;
+            this.endpoint = endpoint;
         }
 
         //////////////////////////
@@ -73,7 +78,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
                     TupleQueryResultHandler handler = new SubscribedQueryResultHandler(subscriber);
 
-                    handler = new LoggingTupleQueryResultHandler(queryStr, handler, qfrHandler, mat);
+                    handler = new LoggingTupleQueryResultHandler(queryStr, handler, qfrHandler, mat, endpoint);
 
                     query.evaluate(handler);
 

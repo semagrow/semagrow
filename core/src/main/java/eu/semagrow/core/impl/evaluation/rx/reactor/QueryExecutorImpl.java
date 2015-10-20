@@ -195,7 +195,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
             query.setBinding(b.getName(), b.getValue());
 
 
-        return Streams.wrap(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat))
+        return Streams.wrap(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat, endpoint))
                 .finallyDo((s) -> closeQuietly(conn));
     }
 
