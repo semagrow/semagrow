@@ -46,6 +46,8 @@ public class RDFQueryLogFactory implements QueryLogFactory {
                 }
             } else {
                 try {
+                    //QueryLogManager qfrManager = new QueryLogManager(rdfConfig.getLogDir(), rdfConfig.getFilePrefix());
+                   // String filename = qfrManager.getLastFile();
                     return getQueryRecordLogger(writerFactory, filename);
                 } catch (FileNotFoundException e) {
                     throw new QueryLogException(e);

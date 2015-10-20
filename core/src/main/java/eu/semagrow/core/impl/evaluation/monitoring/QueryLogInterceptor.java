@@ -75,7 +75,7 @@ public class QueryLogInterceptor
 
     protected QueryLogRecordImpl createMetadata(URI endpoint, TupleExpr expr, BindingSet bindings, Set<String> bindingNames) {
 
-        return new QueryLogRecordImpl(UUID.randomUUID(), endpoint, null, bindings, bindingNames);
+        return new QueryLogRecordImpl(UUID.randomUUID(), endpoint, expr, bindings, bindingNames);
     }
 
     protected CloseableIteration<BindingSet, QueryEvaluationException>

@@ -17,6 +17,8 @@ public interface QueryLogRecord {
 
     String getQuery();
 
+    TupleExpr getExpr();
+
     BindingSet getBindings();
 
     java.util.UUID getSession();

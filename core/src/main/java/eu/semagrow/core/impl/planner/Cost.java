@@ -46,6 +46,16 @@ public class Cost implements Comparable<Cost> {
         return a;
     }
 
+    /**
+     * This method returns a cost value that aggregates the various partial
+     * cost values (CPU, memory, IO, and network cost.
+     *
+     * NOTE that currently only CPU cost is used.
+     * @return
+     */
+
+    public double getOverallCost() { return this.cpuCost; }
+
     public static Cost cpuCost(double cpuCost) { return new Cost(cpuCost); }
 
     public static Cost networkCost(long networkCost) {

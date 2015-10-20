@@ -3,8 +3,11 @@ package eu.semagrow.querylog.impl;
 import eu.semagrow.querylog.api.QueryLogRecord;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
+import org.openrdf.query.MalformedQueryException;
+import org.openrdf.query.QueryLanguage;
 import org.openrdf.query.TupleQuery;
 import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.parser.QueryParserUtil;
 
 import java.util.*;
 
@@ -17,6 +20,8 @@ public class QueryLogRecordImpl implements QueryLogRecord {
     private UUID session;
 
     private String query;
+
+    private TupleExpr expr;
 
     private URI endpoint;
 
@@ -38,6 +43,16 @@ public class QueryLogRecordImpl implements QueryLogRecord {
         this.session = session;
         this.endpoint = endpoint;
         this.query = query;
+        this.expr = null;
+        this.bindings = bindings;
+        this.bindingNames = new LinkedList<String>();
+    }
+
+    public QueryLogRecordImpl(UUID session, URI endpoint, TupleExpr query, BindingSet bindings) {
+        this.session = session;
+        this.endpoint = endpoint;
+        this.expr = query;
+        this.query = query.toString();
         this.bindings = bindings;
         this.bindingNames = new LinkedList<String>();
     }
@@ -60,6 +75,16 @@ public class QueryLogRecordImpl implements QueryLogRecord {
         this.session = session;
         this.endpoint = endpoint;
         this.query = query;
+        this.expr = null;
+        this.bindings = bindings;
+        this.bindingNames = new LinkedList<String>(bindingNames);
+    }
+
+    public QueryLogRecordImpl(UUID session, URI endpoint, TupleExpr query, BindingSet bindings, Collection<String> bindingNames) {
+        this.session = session;
+        this.endpoint = endpoint;
+        this.expr = query;
+        this.query = expr.toString();
         this.bindings = bindings;
         this.bindingNames = new LinkedList<String>(bindingNames);
     }
@@ -70,6 +95,9 @@ public class QueryLogRecordImpl implements QueryLogRecord {
 
     @Override
     public String getQuery() { return query; }
+
+    @Override
+    public TupleExpr getExpr() { return expr; }
 
     /*
     @Override
