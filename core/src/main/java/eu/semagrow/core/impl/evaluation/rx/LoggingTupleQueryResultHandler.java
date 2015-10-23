@@ -32,7 +32,6 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     private QueryLogHandler qfrHandler;
 
     private String query;
-    private String id;
     private UUID uuid;
     private int count;
     private URI endpoint;
@@ -49,21 +48,13 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
         this.mat = mat;
         this.qfrHandler = qfrHandler;
         this.endpoint = endpoint;
-
-        query = q;
-        uuid = UUID.randomUUID();
-        if (uuid.toString().length() > 12) {
-            id = uuid.toString().substring(uuid.toString().length() - 12);
-        }
-        else {
-            id = uuid.toString();
-        }
+        this.query = q;
+        this.uuid = UUID.randomUUID();
     }
 
     @Override
     public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
         count = 0;
-        logger.debug("{} - Starting {}", id, query.replace("\n", " "));
         start = System.currentTimeMillis();
 
         queryLogRecord = createMetadata(endpoint, query, EmptyBindingSet.getInstance(), list);
@@ -79,7 +70,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     @Override
     public void endQueryResult() throws TupleQueryResultHandlerException {
         handle.endQueryResult();
-        logger.debug("{} - Query returned {} results.", id, count);
+        logger.info("rq {} - Found {} results.", Math.abs(query.hashCode()), count);
 
         end = System.currentTimeMillis();
         queryLogRecord.setCardinality(count);
@@ -107,7 +98,10 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     @Override
     public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
         count++;
-        logger.debug("{} - Found {}", id, bindingSet);
+        if (count == 1) {
+            logger.info("rq {} - Found first result.", Math.abs(query.hashCode()));
+        }
+        logger.debug("rq {} - Found {}", Math.abs(query.hashCode()), bindingSet);
         handle.handleSolution(bindingSet);
         super.handleSolution(bindingSet);
     }
@@ -117,4 +111,5 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     protected QueryLogRecordImpl createMetadata(URI endpoint, String expr, BindingSet bindings, List<String> bindingNames) {
         return new QueryLogRecordImpl(uuid, endpoint, expr, bindings, bindingNames);
     }
+
 }

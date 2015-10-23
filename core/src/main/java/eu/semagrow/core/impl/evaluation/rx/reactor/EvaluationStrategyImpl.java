@@ -61,7 +61,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
             throws QueryEvaluationException
     {
         //return RxReactiveStreams.toPublisher(evaluateReactorInternal(expr, bindings));;
-        return evaluateReactorInternal(expr, bindings).subscribeOn(dispatcher);
+        return evaluateReactorInternal(expr, bindings);//.subscribeOn(dispatcher);
     }
 
     public boolean isTrue(ValueExpr expr, BindingSet bindings)

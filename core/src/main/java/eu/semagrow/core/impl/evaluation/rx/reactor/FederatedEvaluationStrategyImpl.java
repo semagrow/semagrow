@@ -2,6 +2,7 @@ package eu.semagrow.core.impl.evaluation.rx.reactor;
 
 import eu.semagrow.commons.algebra.*;
 import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
+import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.impl.evaluation.rx.QueryExecutor;
 
@@ -14,8 +15,13 @@ import org.openrdf.query.algebra.Join;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.Union;
 import org.openrdf.query.algebra.evaluation.TripleSource;
+import org.openrdf.query.parser.ParsedTupleQuery;
+import org.openrdf.query.parser.QueryParserUtil;
+import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
 import org.reactivestreams.Publisher;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import reactor.Environment;
 import reactor.core.dispatch.TraceableDelegatingDispatcher;
 import reactor.rx.Stream;
@@ -28,6 +34,8 @@ import java.util.Set;
  * Created by antonis on 26/3/2015.
  */
 public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
+
+    private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 
     public QueryExecutor queryExecutor;
 
@@ -168,6 +176,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
             throws QueryEvaluationException
     {
+        logger.info("sq {} - Source query <{}> at source {}",
+                Math.abs(expr.hashCode()), SPARQLQueryStringUtil.tupleExpr2Str(expr), expr.getSources());
+
         //return queryExecutor.evaluateReactorInternal(null, expr.getArg(), bindings)
         if (expr.getSources().size() == 0)
             return Streams.empty();
@@ -193,7 +204,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             return Streams.empty();
         else {
             Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-            return Streams.wrap(result).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+            return Streams.wrap(result);//.subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
         }
     }
 
@@ -216,7 +227,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                         return Streams.fail(e);
                     }
 
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+                });//.subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Transform expr, BindingSet bindings)
@@ -242,6 +253,10 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
+        logger.info("sq {} - Source query <{}> at source {}",
+                    Math.abs(expr.hashCode()), SPARQLQueryStringUtil.tupleExpr2Str(expr), expr.getSources());
+        //logger.info("sq {} - Estimated results: {}", Math.abs(expr.hashCode()), expr.)
+
         //return queryExecutor.evaluateReactorInternal(null, expr.getArg(), bindings)
         if (expr.getSources().size() == 0)
             return Streams.empty();

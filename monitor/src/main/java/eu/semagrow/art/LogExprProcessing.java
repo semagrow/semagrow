@@ -6,7 +6,7 @@ import org.openrdf.query.algebra.QueryModelNode;
 import org.openrdf.query.algebra.TupleExpr;
 import org.slf4j.MDC;
 
-import eu.semagrow.commons.algebra.QueryRoot;
+//import eu.semagrow.commons.algebra.QueryRoot;
 
 
 /**

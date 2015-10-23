@@ -95,7 +95,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
                 String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
 
-                result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings)
+                result = sendTupleQuery(endpoint, sparqlQuery, relevantBindings, expr)
                         .map(b -> BindingSetUtil.merge(bindings, b));
             }
 
@@ -127,7 +127,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
         try {
             String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQueryUNION(expr, bindings, relevant);
-            result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance());
+            result = sendTupleQuery(endpoint, sparqlQuery, EmptyBindingSet.getInstance(), expr);
             result = result.flatMap(b -> convertUnionBindings(b, bindings));
             return result;
         } catch(QueryEvaluationException e)  {
@@ -185,7 +185,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     protected Stream<BindingSet>
-        sendTupleQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendTupleQuery(URI endpoint, String sparqlQuery, BindingSet bindings, TupleExpr expr)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);
@@ -194,6 +194,13 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
+        logger.info("rc {} - rq {} - sq {} - Sending to {} query {} with {}",
+                conn.hashCode(),
+                Math.abs(sparqlQuery.hashCode()),
+                Math.abs(expr.getParentNode().getParentNode().hashCode()),
+                endpoint.stringValue(),
+                sparqlQuery.replace('\n', ' '),
+                query.getBindings());
 
         return Streams.wrap(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat, endpoint))
                 .finallyDo((s) -> closeQuietly(conn));
@@ -209,7 +216,12 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.debug("Sending to {} query {} with {}", endpoint.stringValue(), sparqlQuery.replace('\n', ' '), query.getBindings());
+        logger.info("rc {} - rq {} - sq {} - Sending to {} query {} with {}",
+                conn.hashCode(),
+                Math.abs(sparqlQuery.hashCode()),
+                endpoint.stringValue(),
+                sparqlQuery.replace('\n', ' '),
+                query.getBindings());
 
         boolean answer = query.evaluate();
         closeQuietly(conn);

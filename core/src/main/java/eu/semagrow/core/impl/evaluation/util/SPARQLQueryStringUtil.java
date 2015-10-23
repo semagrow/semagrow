@@ -345,6 +345,14 @@ public class SPARQLQueryStringUtil {
         return set;
     }
 
+    public static String tupleExpr2Str(TupleExpr expr) {
+        try {
+            return new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr)).substring(15).replace('\n',' ');
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
 
     ////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////////////////////////////
