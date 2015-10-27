@@ -176,7 +176,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        logger.info("sq {} - Source query <{}> at source {}",
+        logger.info("sq {} - Source query [{}] at source {}",
                 Math.abs(expr.hashCode()), SPARQLQueryStringUtil.tupleExpr2Str(expr), expr.getSources());
 
         //return queryExecutor.evaluateReactorInternal(null, expr.getArg(), bindings)
@@ -253,7 +253,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
-        logger.info("sq {} - Source query <{}> at source {}",
+        logger.info("sq {} - Source query [{}] at source [{}]",
                     Math.abs(expr.hashCode()), SPARQLQueryStringUtil.tupleExpr2Str(expr), expr.getSources());
         //logger.info("sq {} - Estimated results: {}", Math.abs(expr.hashCode()), expr.)
 

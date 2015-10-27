@@ -194,7 +194,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.info("rc {} - rq {} - sq {} - Sending to {} query {} with {}",
+        logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
                 conn.hashCode(),
                 Math.abs(sparqlQuery.hashCode()),
                 Math.abs(expr.getParentNode().getParentNode().hashCode()),
@@ -216,7 +216,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.info("rc {} - rq {} - sq {} - Sending to {} query {} with {}",
+        logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
                 conn.hashCode(),
                 Math.abs(sparqlQuery.hashCode()),
                 endpoint.stringValue(),
