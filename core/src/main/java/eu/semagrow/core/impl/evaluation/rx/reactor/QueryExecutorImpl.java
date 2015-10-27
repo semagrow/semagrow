@@ -196,7 +196,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
         logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
                 conn.hashCode(),
-                Math.abs(sparqlQuery.hashCode()),
+                Math.abs((sparqlQuery+endpoint).hashCode()),
                 Math.abs(expr.getParentNode().getParentNode().hashCode()),
                 endpoint.stringValue(),
                 sparqlQuery.replace('\n', ' '),
@@ -218,7 +218,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
         logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
                 conn.hashCode(),
-                Math.abs(sparqlQuery.hashCode()),
+                Math.abs((sparqlQuery+endpoint).hashCode()),
                 endpoint.stringValue(),
                 sparqlQuery.replace('\n', ' '),
                 query.getBindings());
