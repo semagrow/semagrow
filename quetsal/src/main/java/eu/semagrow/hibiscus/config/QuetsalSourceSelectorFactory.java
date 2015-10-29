@@ -34,7 +34,7 @@ public abstract class QuetsalSourceSelectorFactory implements SourceSelectorFact
 
         if (summaries == null) {
             try {
-                //cleanUp();
+                cleanUp();
                 summaries = generateSummaries(config.getMetadataFile());
             } catch (IOException e) {
                 e.printStackTrace();
