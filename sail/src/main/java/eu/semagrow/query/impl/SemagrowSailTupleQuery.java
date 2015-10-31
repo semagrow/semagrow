@@ -154,7 +154,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                 }
 
                 handler.handleSolution(bindings);
-                logger.debug("Found " + bindings);
+                logger.info("-> Found " + bindings);
                 resultsCount++;
             } catch (TupleQueryResultHandlerException e) {
                 subscription.cancel();
@@ -191,7 +191,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
         public void onComplete() {
             latch.countDown();
-            logger.info("Found " + resultsCount + "results.");
+            logger.info("Found " + resultsCount + " results.");
             if (isStarted) {
                 try {
                     handler.endQueryResult();

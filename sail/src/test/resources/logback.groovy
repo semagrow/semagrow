@@ -22,6 +22,7 @@ appender( "FILE", FileAppender ) {
 }
 
 logger( "eu.semagrow.core.impl", DEBUG, ["PROCFLOW"], false )
+logger( "eu.semagrow.query.impl", DEBUG, ["PROCFLOW"], false )
 logger( "reactor", TRACE, ["PROCFLOW"], false )
 
 root( INFO, ["CONSOLE"] )
