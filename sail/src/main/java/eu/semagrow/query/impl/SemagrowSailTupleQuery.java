@@ -132,6 +132,8 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
         private Subscription subscription;
 
+        private int resultsCount = 0;
+
         public HandlerSubscriberAdapter(TupleQueryResultHandler handler, CountDownLatch latch) {
             this.handler = handler;
             this.latch = latch;
@@ -148,9 +150,12 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                 if (!isStarted) {
                     handler.startQueryResult(new ArrayList<>(bindings.getBindingNames()));
                     isStarted = true;
+                    logger.info("Found first result.");
                 }
 
                 handler.handleSolution(bindings);
+                logger.debug("Found " + bindings);
+                resultsCount++;
             } catch (TupleQueryResultHandlerException e) {
                 subscription.cancel();
                 logger.error("Tuple handle solution error", e);
@@ -186,6 +191,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
         public void onComplete() {
             latch.countDown();
+            logger.info("Found " + resultsCount + "results.");
             if (isStarted) {
                 try {
                     handler.endQueryResult();
