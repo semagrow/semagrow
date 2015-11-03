@@ -2,6 +2,7 @@ package eu.semagrow.core.impl.evaluation.rx.reactor;
 
 import eu.semagrow.core.impl.evaluation.ConnectionManager;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
+import eu.semagrow.core.impl.evaluation.util.LoggingUtil;
 import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
 import eu.semagrow.core.impl.evaluation.util.BindingSetUtil;
 import eu.semagrow.core.impl.evaluation.rx.TupleQueryResultPublisher;
@@ -79,7 +80,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
                 result = Streams.just(bindings).flatMap(b -> {
                     try {
-                        if (sendBooleanQuery(endpoint, sparqlQuery, relevantBindings))
+                        if (sendBooleanQuery(endpoint, sparqlQuery, relevantBindings, expr))
                             return Streams.just(b);
                         else
                             return Streams.empty();
@@ -194,20 +195,14 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
-                conn.hashCode(),
-                Math.abs((sparqlQuery+endpoint).hashCode()),
-                Math.abs(expr.getParentNode().getParentNode().hashCode()),
-                endpoint.stringValue(),
-                sparqlQuery.replace('\n', ' '),
-                query.getBindings());
+        LoggingUtil.logRemote(logger, conn, sparqlQuery, endpoint, expr, query);
 
         return Streams.wrap(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat, endpoint))
                 .finallyDo((s) -> closeQuietly(conn));
     }
 
     protected boolean
-        sendBooleanQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendBooleanQuery(URI endpoint, String sparqlQuery, BindingSet bindings, TupleExpr expr)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);
@@ -216,12 +211,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         for (Binding b : bindings)
             query.setBinding(b.getName(), b.getValue());
 
-        logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
-                conn.hashCode(),
-                Math.abs((sparqlQuery+endpoint).hashCode()),
-                endpoint.stringValue(),
-                sparqlQuery.replace('\n', ' '),
-                query.getBindings());
+        LoggingUtil.logRemote(logger, conn, sparqlQuery, endpoint, expr, query);
 
         boolean answer = query.evaluate();
         closeQuietly(conn);

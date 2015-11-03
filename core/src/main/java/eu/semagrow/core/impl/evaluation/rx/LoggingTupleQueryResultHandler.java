@@ -3,6 +3,7 @@ package eu.semagrow.core.impl.evaluation.rx;
 import eu.semagrow.core.impl.evaluation.file.MaterializationHandle;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.core.impl.evaluation.file.QueryResultHandlerWrapper;
+import eu.semagrow.core.impl.evaluation.util.LoggingUtil;
 import eu.semagrow.querylog.api.QueryLogException;
 import eu.semagrow.querylog.api.QueryLogHandler;
 import eu.semagrow.querylog.api.QueryLogRecord;
@@ -57,41 +58,44 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
         count = 0;
         start = System.currentTimeMillis();
 
-        queryLogRecord = createMetadata(endpoint, query, EmptyBindingSet.getInstance(), list);
-        try {
-            handle = mat.saveResult();
-        } catch (QueryEvaluationException e) {
-            logger.error("Error while creating a materialization handle", e);
+        if (handle != null) {
+            queryLogRecord = createMetadata(endpoint, query, EmptyBindingSet.getInstance(), list);
+            try {
+                handle = mat.saveResult();
+            } catch (QueryEvaluationException e) {
+                logger.error("Error while creating a materialization handle", e);
+            }
+            handle.startQueryResult(list);
         }
-        handle.startQueryResult(list);
         super.startQueryResult(list);
     }
 
     @Override
     public void endQueryResult() throws TupleQueryResultHandlerException {
-        handle.endQueryResult();
-        logger.info("rq {} - Found {} results.", Math.abs(query.hashCode()), count);
+        LoggingUtil.logEnd(logger, query, endpoint, count);
 
-        end = System.currentTimeMillis();
-        queryLogRecord.setCardinality(count);
-        queryLogRecord.setDuration(start, end);
+        if (handle != null) {
+            handle.endQueryResult();
+            end = System.currentTimeMillis();
+            queryLogRecord.setCardinality(count);
+            queryLogRecord.setDuration(start, end);
 
-        if (queryLogRecord.getCardinality() == 0) {
-            try {
-                handle.destroy();
-            } catch (IOException e) {
-                logger.error("Error while destroying a materialization handle", e);
+            if (queryLogRecord.getCardinality() == 0) {
+                try {
+                    handle.destroy();
+                } catch (IOException e) {
+                    logger.error("Error while destroying a materialization handle", e);
+                }
+            } else {
+                queryLogRecord.setResults(handle.getId());
             }
-        } else {
-            queryLogRecord.setResults(handle.getId());
-        }
 
-        try {
-            qfrHandler.handleQueryRecord(queryLogRecord);
-        } catch (QueryLogException e) {
-            logger.error("Error while pushing record to queryloghandler", e);
+            try {
+                qfrHandler.handleQueryRecord(queryLogRecord);
+            } catch (QueryLogException e) {
+                logger.error("Error while pushing record to queryloghandler", e);
+            }
         }
-
         super.endQueryResult();
     }
 
@@ -99,10 +103,13 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
         count++;
         if (count == 1) {
-            logger.info("rq {} - Found first result.", Math.abs(query.hashCode()));
+            LoggingUtil.logFirstResult(logger, query, endpoint);
         }
-        logger.debug("rq {} - Found {}", Math.abs(query.hashCode()), bindingSet);
-        handle.handleSolution(bindingSet);
+        LoggingUtil.logResult(logger, query, endpoint, bindingSet);
+
+        if (handle != null) {
+            handle.handleSolution(bindingSet);
+        }
         super.handleSolution(bindingSet);
     }
 

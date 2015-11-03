@@ -47,21 +47,21 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         vf = tripleSource.getValueFactory();
         evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource);
         Environment.initializeIfEmpty();
-        dispatcher = new MDCAwareDispatcher(Environment.cachedDispatcher());
+        dispatcher = new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public EvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
         vf = tripleSource.getValueFactory();
         evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource,dataset);
         Environment.initializeIfEmpty();
-        dispatcher = new MDCAwareDispatcher(Environment.cachedDispatcher());
+        dispatcher = new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public Publisher<BindingSet> evaluate(TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         //return RxReactiveStreams.toPublisher(evaluateReactorInternal(expr, bindings));;
-        return evaluateReactorInternal(expr, bindings);//.subscribeOn(dispatcher);
+        return evaluateReactorInternal(expr, bindings).subscribeOn(Environment.dispatcher(Environment.WORK_QUEUE));
     }
 
     public boolean isTrue(ValueExpr expr, BindingSet bindings)

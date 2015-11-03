@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Created by antonis on 9/4/2015.
@@ -30,6 +32,8 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
     private QueryLogHandler qfrHandler;
     private MaterializationManager mat;
     private URI endpoint;
+
+    private static ExecutorService executorService = Executors.newCachedThreadPool();
 
     public TupleQueryResultPublisher(TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URI endpoint) {
         this.query = query;
@@ -61,6 +65,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
             this.mat = mat;
             this.queryStr = queryStr;
             this.endpoint = endpoint;
+            logger.debug("new TupleQueryResultProducer - {}", endpoint);
         }
 
         //////////////////////////
@@ -68,7 +73,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         @Override
         public void request(long l) {
 
-            //logger.debug("Requesting {} results and isEvaluating = {} ", l, isEvaluating);
+            logger.debug("Requesting {} results and isEvaluating = {} ", l, isEvaluating);
             if (!isEvaluating) {
                 try {
                     if (logger.isDebugEnabled())
@@ -76,11 +81,23 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
                     isEvaluating = true;
 
-                    TupleQueryResultHandler handler = new SubscribedQueryResultHandler(subscriber);
 
-                    handler = new LoggingTupleQueryResultHandler(queryStr, handler, qfrHandler, mat, endpoint);
+                    Runnable task = new Runnable() {
+                        @Override
+                        public void run() {
+                            TupleQueryResultHandler handler = new SubscribedQueryResultHandler(subscriber);
 
-                    query.evaluate(handler);
+                            //handler = new LoggingTupleQueryResultHandler(queryStr, handler, qfrHandler, mat, endpoint);
+                            handler = new LoggingTupleQueryResultHandler(queryStr, handler, null, mat, endpoint);
+                            try {
+                                query.evaluate(handler);
+                            } catch (Exception e) {
+                            subscriber.onError(e);
+                            }
+                        }
+                    };
+
+                    executorService.execute(task);
 
                 } catch (Exception e) {
                     subscriber.onError(e);
@@ -115,7 +132,6 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
             @Override
             public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
-
             }
 
             @Override
@@ -125,6 +141,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
             @Override
             public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
+                logger.debug("found " + bindingSet);
                 subscriber.onNext(bindingSet);
             }
         }
