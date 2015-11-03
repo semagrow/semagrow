@@ -1,6 +1,7 @@
 package eu.semagrow.core.impl.evaluation.util;
 
 import org.openrdf.model.BNode;
+import org.openrdf.model.Value;
 import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.algebra.evaluation.QueryBindingSet;
@@ -92,4 +93,20 @@ public class BindingSetUtil {
         return false;
     }
 
+    /**
+     * Returns true if the value of every binding name on first agrees with
+     * the value of the binding name (if exists) on the second bindingset
+     * @param first
+     * @param second
+     * @return true or false
+     */
+    public static boolean agreesOn(BindingSet first, BindingSet second) {
+
+        for (Binding b : first) {
+            Value v = second.getValue(b.getName());
+            if (v != null && !v.equals(b.getValue()))
+                return false;
+        }
+        return true;
+    }
 }
