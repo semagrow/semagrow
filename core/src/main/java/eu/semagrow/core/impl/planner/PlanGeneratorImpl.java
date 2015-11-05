@@ -110,6 +110,17 @@ public class PlanGeneratorImpl implements PlanGenerator {
 
         Collection<Plan> plans = new LinkedList<Plan>();
 
+
+        List<BindingSetAssignment> assignments = BindingSetAssignmentCollector.process(expr);
+
+        for (BindingSetAssignment a : assignments) {
+            Set<TupleExpr> exprLabel =  new HashSet<TupleExpr>();
+            exprLabel.add(a);
+            Plan p = createPlan(exprLabel, a);
+            plans.add(p);
+        }
+
+
         // extract the statement patterns
         List<StatementPattern> statementPatterns = StatementPatternCollector.process(expr);
 

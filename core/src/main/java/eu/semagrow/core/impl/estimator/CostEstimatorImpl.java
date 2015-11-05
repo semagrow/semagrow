@@ -5,6 +5,7 @@ import eu.semagrow.core.impl.algebra.BindJoin;
 import eu.semagrow.core.impl.algebra.HashJoin;
 import eu.semagrow.core.impl.algebra.MergeJoin;
 import eu.semagrow.core.impl.algebra.SourceQuery;
+import eu.semagrow.core.impl.planner.BindingSetAssignmentCollector;
 import eu.semagrow.core.impl.planner.Cost;
 import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.impl.planner.Site;
@@ -56,6 +57,8 @@ public class CostEstimatorImpl implements CostEstimator {
             return getCost((UnaryTupleOperator)expr, source);
         else if (expr instanceof BinaryTupleOperator)
             return getCost((BinaryTupleOperator)expr, source);
+        else if (expr instanceof BindingSetAssignment)
+            return getCost((BindingSetAssignment)expr, source);
         else
             return new Cost(cardinalityEstimator.getCardinality(expr, source));
     }
@@ -140,5 +143,9 @@ public class CostEstimatorImpl implements CostEstimator {
 
     public Cost getCost(BinaryTupleOperator expr, URI source) {
         return getCost(expr.getLeftArg(), source).add(getCost(expr.getRightArg(), source));
+    }
+
+    public Cost getCost(BindingSetAssignment expr, URI source) {
+        return new Cost(0);
     }
 }

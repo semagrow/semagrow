@@ -7,10 +7,14 @@ import eu.semagrow.core.impl.planner.Plan;
 import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;
 import org.openrdf.model.URI;
+import org.openrdf.model.Value;
+import org.openrdf.query.BindingSet;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.VarNameCollector;
 import org.openrdf.query.impl.EmptyBindingSet;
 
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 
 /**
@@ -49,6 +53,8 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
             return getCardinality((SourceQuery)expr, source);
         else if (expr instanceof EmptySet)
             return getCardinality((EmptySet)expr, source);
+        else if (expr instanceof BindingSetAssignment)
+            return getCardinality((BindingSetAssignment)expr, source);
         else if (expr instanceof Plan)
             return ((Plan)expr).getProperties().getCardinality();
 
@@ -124,6 +130,20 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
 
     public long getCardinality(EmptySet set, URI source) {
         return 0;
+    }
+
+
+    public long getCardinality(BindingSetAssignment assignment, URI source){
+        Iterator<BindingSet> it = assignment.getBindingSets().iterator();
+
+        int i = 0;
+
+        while (it.hasNext()) {
+            it.next();
+            i++;
+        }
+
+        return i;
     }
 
     /**
@@ -202,6 +222,8 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
             return getVarSelectivity(varName, (BinaryTupleOperator)expr, source);
         else if (expr instanceof UnaryTupleOperator)
             return getVarSelectivity(varName, (UnaryTupleOperator)expr, source);
+        else if (expr instanceof BindingSetAssignment)
+            return getVarSelectivity(varName, (BindingSetAssignment)expr, source);
 
         Set<String> varNames = VarNameCollector.process(expr);
 
@@ -216,6 +238,29 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         long distinct = getVarCardinality(varName, pattern, source);
 
         return ((double)1/distinct);
+    }
+
+    public double getVarSelectivity(String varName, BindingSetAssignment assignment, URI source) {
+        if (assignment.getBindingNames().contains(varName))
+            return 1;
+        else {
+            // count distinct;
+            long distinct = 0;
+            Set<Value> distinctValues = new HashSet<>();
+
+            Iterator<BindingSet> it = assignment.getBindingSets().iterator();
+
+            while (it.hasNext())
+            {
+                BindingSet bset = it.next();
+                Value v = bset.getValue(varName);
+                if (v != null)
+                    distinctValues.add(v);
+            }
+
+            distinct = (long)distinctValues.size();
+            return ((double)1/distinct);
+        }
     }
 
     public double getVarSelectivity(String varName, SourceQuery expr, URI source) {
@@ -258,6 +303,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
 
         return stats.getVarCardinality(varName);
     }
+
 
     /*
     public long getVarCardinality(String varName, Union union, URI source) {
