@@ -7,6 +7,7 @@ import eu.semagrow.core.impl.estimator.CostEstimator;
 import eu.semagrow.core.impl.evaluation.QueryEvaluationImpl;
 import eu.semagrow.core.impl.evaluation.file.FileManager;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
+import eu.semagrow.core.impl.optimizer.FilterOptimizer;
 import eu.semagrow.core.impl.planner.DPQueryDecomposer;
 import eu.semagrow.core.impl.selector.RestrictiveSourceSelector;
 import eu.semagrow.core.source.SourceSelector;
@@ -79,8 +80,9 @@ public class SemagrowSail extends SailBase {
 
         QueryOptimizerList optimizer = new QueryOptimizerList(
                 new ConjunctiveConstraintSplitter(),
-                new CompareOptimizer(),
-                new SameTermFilterOptimizer()
+                //new CompareOptimizer(),
+                //new SameTermFilterOptimizer(),
+                new FilterOptimizer()
         );
 
         return optimizer;

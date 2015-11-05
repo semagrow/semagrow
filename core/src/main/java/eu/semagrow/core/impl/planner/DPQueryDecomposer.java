@@ -2,6 +2,7 @@ package eu.semagrow.core.impl.planner;
 
 import eu.semagrow.core.decomposer.QueryDecomposer;
 import eu.semagrow.core.estimator.CardinalityEstimator;
+import eu.semagrow.core.impl.optimizer.LimitPushDownOptimizer;
 import eu.semagrow.core.impl.selector.StaticSourceSelector;
 import eu.semagrow.core.impl.optimizer.ExtensionOptimizer;
 import eu.semagrow.core.source.SourceSelector;
@@ -11,6 +12,8 @@ import eu.semagrow.core.impl.util.FilterCollector;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.evaluation.QueryOptimizer;
+import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
 
 import java.util.Collection;
 
@@ -42,7 +45,10 @@ public class DPQueryDecomposer implements QueryDecomposer {
         for (TupleExpr bgp : basicGraphPatterns)
             decomposebgp(bgp, dataset, bindings);
 
-        ExtensionOptimizer opt = new ExtensionOptimizer();
+        QueryOptimizer opt =  new QueryOptimizerList(
+                new ExtensionOptimizer(),
+                new LimitPushDownOptimizer());
+
         opt.optimize(expr, dataset, bindings);
     }
 
