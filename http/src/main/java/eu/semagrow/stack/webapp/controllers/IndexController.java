@@ -28,4 +28,17 @@ public class IndexController {
         ModelAndView mav = new ModelAndView(template);
         return mav;
     }
+
+    @RequestMapping(value="/monitor", method=RequestMethod.GET)
+    public void monitor(HttpServletResponse response) throws IOException{
+        // acess
+        //response.write();
+        //ModelAndView mav = new ModelAndView(template);
+        //return mav;
+        response.setContentType("text/csv");
+        response.getWriter().println("1;2;3;4");
+        response.getWriter().println("0;2;2;5");
+
+        response.getWriter().flush();
+    }
 }
