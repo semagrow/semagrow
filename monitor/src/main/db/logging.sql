@@ -21,3 +21,4 @@ CREATE TABLE logging_event
     nesting           VARCHAR(254),
     event_id          BIGINT DEFAULT nextval('logging_event_id_seq') PRIMARY KEY
   );
+

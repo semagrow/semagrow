@@ -34,8 +34,8 @@ public class DbAppender extends ch.qos.logback.classic.db.DBAppender {
     static final int  CALLER_LINE_INDEX = 14;
     static final int  EVENT_ID_INDEX  = 15;
 
-    static final int  QUERY_ID_INDEX = 16;
-    static final int  NESTING_INDEX = 17;
+    static final int  QUERY_ID_INDEX = 11;
+    static final int  NESTING_INDEX = 12;
 
     @Override
     protected String getInsertSQL() {
@@ -45,6 +45,9 @@ public class DbAppender extends ch.qos.logback.classic.db.DBAppender {
     @Override
     public void start() {
         insertSQL = buildInsertSQL();
+        super.start();
+        insertSQL = buildInsertSQL();
+
     }
 
     @Override
@@ -52,6 +55,8 @@ public class DbAppender extends ch.qos.logback.classic.db.DBAppender {
 
         bindLoggingEventWithInsertStatement(insertStatement, event);
         bindDiagnosticContext(insertStatement, event);
+
+        // bindCallerDataWithPreparedStatement(insertStatement, event.getCallerData());
 
         int updateCount = insertStatement.executeUpdate();
         if (updateCount != 1) {
@@ -115,11 +120,9 @@ public class DbAppender extends ch.qos.logback.classic.db.DBAppender {
     {
         Map<String,String> properties = mergePropertyMaps(event);
 
-        if (properties.get("uuid") != null)
-            stmt.setString(QUERY_ID_INDEX, properties.get("uuid"));
+        stmt.setString(QUERY_ID_INDEX, properties.getOrDefault("uuid", null));
 
-        if (properties.get("nestingLevel") != null)
-            stmt.setString(NESTING_INDEX, properties.get("nestingLevel"));
+        stmt.setString(NESTING_INDEX, properties.getOrDefault("nestingLevel", null));
     }
 
 
@@ -138,7 +141,7 @@ public class DbAppender extends ch.qos.logback.classic.db.DBAppender {
         sqlBuilder.append("arg2").append(", ");
         sqlBuilder.append("arg3").append(", ");
         sqlBuilder.append("query_id").append(", ");
-        sqlBuilder.append("nesting").append(", ");
+        sqlBuilder.append("nesting").append(") ");
         sqlBuilder.append("VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
         return sqlBuilder.toString();
     }

@@ -31,10 +31,10 @@ public class SemagrowSailRepositoryConnection extends RepositoryConnectionWrappe
         ParsedQuery parsedQuery = QueryParserUtil.parseQuery(ql, queryString, baseURI);
 
         if( parsedQuery instanceof ParsedTupleQuery ) {
-            return new SemagrowSailTupleQuery((ParsedTupleQuery)parsedQuery, this.getDelegate());
+            return new SemagrowSailTupleQuery((ParsedTupleQuery)parsedQuery, queryString, this.getDelegate());
         }
         else if( parsedQuery instanceof ParsedBooleanQuery ) {
-            return new SemagrowSailBooleanQuery((ParsedBooleanQuery)parsedQuery, this.getDelegate());
+            return new SemagrowSailBooleanQuery((ParsedBooleanQuery)parsedQuery,  queryString, this.getDelegate());
         }
         else {
         	throw new java.lang.UnsupportedOperationException(
@@ -52,14 +52,14 @@ public class SemagrowSailRepositoryConnection extends RepositoryConnectionWrappe
     public SemagrowSailTupleQuery prepareTupleQuery(QueryLanguage ql, String queryString, String baseURI)
             throws MalformedQueryException, RepositoryException {
         ParsedTupleQuery parsedQuery = QueryParserUtil.parseTupleQuery(ql, queryString, baseURI);
-        return new SemagrowSailTupleQuery(parsedQuery, this.getDelegate());
+        return new SemagrowSailTupleQuery(parsedQuery, queryString, this.getDelegate());
     }
 
     @Override
     public SemagrowSailBooleanQuery prepareBooleanQuery(QueryLanguage ql, String queryString, String baseURI)
             throws MalformedQueryException, RepositoryException {
         ParsedBooleanQuery parsedQuery = QueryParserUtil.parseBooleanQuery(ql, queryString, baseURI);
-        return new SemagrowSailBooleanQuery(parsedQuery, this.getDelegate());
+        return new SemagrowSailBooleanQuery(parsedQuery, queryString, this.getDelegate());
     }
 
     @Override

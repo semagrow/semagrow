@@ -164,12 +164,14 @@ public class SemagrowSailConnection extends SailConnectionBase {
                      Collection<URI> excludeSources)
             throws SailException
     {
+	long start_time = System.currentTimeMillis();
         logger.debug("Starting decomposition of " + tupleExpr.toString());
 
         TupleExpr decomposed = null;
 
         decomposed = decompose(tupleExpr, dataset, bindings, includeOnlySources, excludeSources);
-
+	long end_time = System.currentTimeMillis();
+	logger.debug("Decomposition duration = " + (start_time - end_time));
         logger.debug("Query decomposed to " + decomposed.toString());
 
         return evaluateOnlyReactive(decomposed, dataset, bindings, b, p);

@@ -19,6 +19,7 @@ public class SemagrowSailBooleanQuery extends SemagrowSailQuery
 
 
     public SemagrowSailBooleanQuery(ParsedBooleanQuery tupleQuery,
+                                    String queryString,
                                     SailRepositoryConnection sailConnection) {
         super(tupleQuery, sailConnection);
     }

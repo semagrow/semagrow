@@ -29,10 +29,12 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
     private boolean includeProvenanceData = false;
 
     private Logger logger = LoggerFactory.getLogger(this.getClass());
+    private String queryString;
 
-    public SemagrowSailTupleQuery( ParsedTupleQuery query, SailRepositoryConnection connection )
+    public SemagrowSailTupleQuery( ParsedTupleQuery query, String queryString, SailRepositoryConnection connection )
     {
-        super( query, connection );
+        super(query, connection );
+        this.queryString = queryString;
     }
 
     public TupleQueryResult evaluate() throws QueryEvaluationException {
@@ -65,7 +67,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
         QueryResults.report(queryResult, handler);
         */
 
-        logger.info("SemaGrow query evaluate with handler");
+        logger.info("SemaGrow query evaluate with handler {}", this.queryString);
         TupleExpr tupleExpr = getParsedQuery().getTupleExpr();
 
         try {
@@ -79,7 +81,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
             //result = enforceMaxQueryTime(bindingsIter);
 
-            logger.debug("Query evaluation Start.");
+            logger.info("Query evaluation Start.");
 
             CountDownLatch latch = new CountDownLatch(1);
 
@@ -100,7 +102,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     throw new QueryEvaluationException(subscriberAdapter.errorThrown);
             }
 
-            logger.debug("Query evaluation End.");
+            logger.info("Query evaluation End.");
         }
         catch (SailException e) {
             throw new QueryEvaluationException(e.getMessage(), e);

@@ -61,7 +61,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
             throws QueryEvaluationException
     {
         //return RxReactiveStreams.toPublisher(evaluateReactorInternal(expr, bindings));;
-        return evaluateReactorInternal(expr, bindings).subscribeOn(Environment.dispatcher(Environment.WORK_QUEUE));
+        return evaluateReactorInternal(expr, bindings).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public boolean isTrue(ValueExpr expr, BindingSet bindings)
@@ -288,7 +288,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
     {
         return Streams.merge(
                 this.evaluateReactorInternal(expr.getLeftArg(), bindings),
-                this.evaluateReactorInternal(expr.getRightArg(), bindings));
+                this.evaluateReactorInternal(expr.getRightArg(), bindings)).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Join expr, BindingSet bindings)
@@ -301,7 +301,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                     } catch (Exception e) {
                         return Streams.fail(e);
                     }
-                });
+                }).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(LeftJoin expr, BindingSet bindings)
@@ -319,7 +319,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                     } catch (Exception e) {
                         return Streams.fail(e);
                     }
-                });
+                }).subscribeOn(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Group expr, BindingSet bindings)

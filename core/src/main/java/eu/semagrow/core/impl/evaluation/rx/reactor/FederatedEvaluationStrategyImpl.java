@@ -170,7 +170,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                     } catch (Exception e) {
                         return Streams.fail(e);
                     }
-                });//.subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
@@ -203,7 +203,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             return Streams.empty();
         else {
             Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-            return Streams.wrap(result).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)));
+            return Streams.wrap(result).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
         }
     }
 
@@ -226,7 +226,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                         return Streams.fail(e);
                     }
 
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)));
+                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Transform expr, BindingSet bindings)
