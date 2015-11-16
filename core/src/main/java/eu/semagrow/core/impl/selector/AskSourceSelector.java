@@ -16,22 +16,24 @@ import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.sparql.SPARQLRepository;
 
+import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.*;
 
 
 /**
  * ASK Source Selector.
- * 
+ *
  * <P>Implementation of SourceSelector that tries to execute ASK queries to identify
  * the data sources that hold triples that match the given triple patterns. This class
  * extends SourceSelectorWrapper, and thus relies on a wrapped SourceSelector that
- * provides the initial list of candidate data sources. 
- *  
+ * provides the initial list of candidate data sources.
+ *
  * <P>Note that if any exceptions are thrown when connecting to the remote data sources,
  * this SourceSelector simples returns "true" (matching triples exist). This avoids
  * rejecting data sources that hold relevant triples because of transient errors.
- *  
+ *
  * @author Antonios Troumpoukis
  * @author Stasinos Konstantopoulos
  */
@@ -44,20 +46,18 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			org.slf4j.LoggerFactory.getLogger( AskSourceSelector.class );
 
 
+	static private ExecutorService executor;
+
 	public AskSourceSelector( SourceSelector selector ) {
-		super( selector );
-	}
 
-	public AskSourceSelector( SourceSelector selector, int cacheSize ) {
 		super( selector );
+		executor = Executors.newCachedThreadPool();
 	}
-
 
 
 	/*
 	 * SourceSelector IMPLEMENTATION
 	 */
-
 
 
 	@Override
@@ -102,10 +102,10 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 	 * <p>
 	 * This method is the entry point to the specific functionality of this class, and all the methods
 	 * above that implement the SourceSelector interface must use this method. This allows all performance
-	 * related logging to be implemented here.   
+	 * related logging to be implemented here.
 	 * @param pattern The triple pattern that guides data source selection
 	 * @param list The list of candidate data sources
-	 * @return The subset of the data sources in list that contain triples matching the pattern 
+	 * @return The subset of the data sources in list that contain triples matching the pattern
 	 */
 
 	 private List<SourceMetadata> restrictSourceList( StatementPattern pattern, List<SourceMetadata> list )
@@ -113,27 +113,55 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 long start = System.currentTimeMillis();
 		 List<SourceMetadata> restrictedList = new LinkedList<SourceMetadata>();
 
+		 Collection<Callable<SourceMetadata>> todo = new LinkedList<Callable<SourceMetadata>>();
+
 		 for( SourceMetadata metadata : list ) {
 			 List<URI> sources = metadata.getEndpoints();
 			 SourceMetadata m = metadata;
-			 boolean ask = askPattern( pattern, sources.get(0), false );
-			 if( ask ) { restrictedList.add( m ); }
+
+			 Callable<SourceMetadata> f = () -> {
+				 boolean ask = askPattern(pattern, sources.get(0), false);
+				 return ask ? m : null;
+			 };
+
+			 todo.add(f);
 		 }
+
+		 try {
+			 List<Future<SourceMetadata>> list1 = executor.invokeAll(todo);
+			 for (Future<SourceMetadata> fut : list1) {
+				 if (fut.isDone()) {
+					 SourceMetadata m = null;
+					 try {
+						 m = fut.get();
+					 } catch (ExecutionException e) {
+						 logger.info( "AskSourceSelector Future execution", e);
+					 }
+					 if (m != null) {
+						 restrictedList.add(m);
+					 }
+				 }
+			 }
+
+		 } catch (InterruptedException e) {
+			 logger.info( "AskSourceSelector interrupted", e);
+		 }
+
 		 logger.info( "AskSourceSelector {}", Long.toString(System.currentTimeMillis()-start) );
 		 return restrictedList;
 	 }
 
-	 
+
 	 /**
 	  * This method checks if a SPARQL endpoint serves at least one triple that matches {@pattern}.
 	  * Not all endpoint implementations support ASK queries. If the ASK query fails, this method can
 	  * fall back to querying {@code SELECT * WHERE { pattern } LIMIT 1. Note that his can be very slow
 	  * for some endpoint implementations, unfortunately usually those that do not support ASK in the
-	  * first place. 
+	  * first place.
 	  * @param pattern The triple pattern to check
 	  * @param source The URL of the SPARQL endpoint
 	  * @param boolean allow_select If true, then the method is allowed to fall back to SELECT
-	  * @return false if it has been established that {@code source} does not contain any matching triples, true otherwise 
+	  * @return false if it has been established that {@code source} does not contain any matching triples, true otherwise
 	  */
 
 	 private boolean askPattern( StatementPattern pattern, URI source, boolean allow_select )
@@ -150,7 +178,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 retv = true;
 		 rep = new SPARQLRepository( source.stringValue() );
 		 RepositoryConnection conn = null;
-		 try { 
+		 try {
 			 rep.initialize();
 			 conn = rep.getConnection();
 		 }
@@ -162,7 +190,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 }
 
 		 if( conn!= null ) {
-			 try { 
+			 try {
 				 retv = conn.hasStatement( (Resource)s, (URI)p, o, true );
 				 allow_select = false; // No need to use this any more
 			 }
