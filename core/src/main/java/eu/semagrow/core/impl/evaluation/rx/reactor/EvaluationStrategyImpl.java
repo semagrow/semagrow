@@ -215,17 +215,9 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
     public Stream<BindingSet> evaluateReactorInternal(BindingSetAssignment expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        final Iterator<BindingSet> iter = expr.getBindingSets().iterator();
-
-        final List<BindingSet> blist = new LinkedList<BindingSet>();
-        Iterators.addAll(iter, blist);
-
-        return Streams.from(blist)
-                .map((b) -> {
-                    QueryBindingSet bb = new QueryBindingSet(bindings);
-                    bb.addAll(b);
-                    return bb;
-                });
+        return Streams.from(expr.getBindingSets())
+                .filter((b) -> BindingSetUtil.agreesOn(bindings, b))
+                .map((b) -> BindingSetUtil.merge(bindings, b));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(ExternalSet expr, BindingSet bindings)

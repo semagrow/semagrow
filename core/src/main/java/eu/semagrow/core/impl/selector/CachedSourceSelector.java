@@ -6,6 +6,8 @@ import eu.semagrow.core.source.SourceSelector;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.StatementPattern;
+import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -52,6 +54,13 @@ public class CachedSourceSelector extends SourceSelectorWrapper
             list.addAll(this.getSources(p, dataset, bindings));
         }
         return list;
+    }
+
+    @Override
+    public List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
+        //FIXME: This is not the case in general but only in a pattern-wise src selector
+        List<StatementPattern> patterns  = StatementPatternCollector.process( expr );
+        return getSources( patterns, dataset, bindings );
     }
 
 

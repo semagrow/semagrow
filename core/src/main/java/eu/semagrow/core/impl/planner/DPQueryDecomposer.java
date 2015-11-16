@@ -4,6 +4,7 @@ import eu.semagrow.core.impl.estimator.CostEstimator;
 import eu.semagrow.core.impl.util.BPGCollector;
 import eu.semagrow.core.decomposer.QueryDecomposer;
 import eu.semagrow.core.estimator.CardinalityEstimator;
+import eu.semagrow.core.impl.optimizer.LimitPushDownOptimizer;
 import eu.semagrow.core.impl.selector.StaticSourceSelector;
 import eu.semagrow.core.impl.optimizer.ExtensionOptimizer;
 import eu.semagrow.core.source.SourceSelector;
@@ -12,15 +13,17 @@ import eu.semagrow.art.*;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.TupleExpr;
+import org.openrdf.query.algebra.evaluation.QueryOptimizer;
+import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
 
 import java.util.Collection;
 
 
 /**
  * Dynamic Programming Query Decomposer
- * 
- * <p>Dynamic Programming implementation of the Query Decomposer.</p> 
- *  
+ *
+ * <p>Dynamic Programming implementation of the Query Decomposer.</p>
+ *
  * @author Angelos Charalambidis
  * @author Stasinos Konstantopoulos
  */
@@ -52,7 +55,7 @@ public class DPQueryDecomposer implements QueryDecomposer
      * This methods edits {@code expr} in place to decompose it into the
      * sub-expressions that will be executed at each data source and to
      * annotate it with the execution plan.
-     * 
+     *
 	 * @param expr The expression that will be decomposed. It must be an instance of eu.semagrow.core.impl.algebra.QueryRoot
 	 * @param dataset
 	 * @param bindings
@@ -94,7 +97,10 @@ public class DPQueryDecomposer implements QueryDecomposer
             bgp.replaceWith( bestPlan );
         }
 
-        ExtensionOptimizer opt = new ExtensionOptimizer();
+        QueryOptimizer opt =  new QueryOptimizerList(
+                new ExtensionOptimizer(),
+                new LimitPushDownOptimizer());
+
         opt.optimize(expr, dataset, bindings);
     }
 

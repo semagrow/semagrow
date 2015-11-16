@@ -10,6 +10,9 @@ import org.openrdf.rio.*;
 import org.openrdf.rio.helpers.BasicParserSettings;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * Created by angel on 26/6/2015.
@@ -31,6 +34,7 @@ public abstract class QuetsalSourceSelectorFactory implements SourceSelectorFact
 
         if (summaries == null) {
             try {
+                cleanUp();
                 summaries = generateSummaries(config.getMetadataFile());
             } catch (IOException e) {
                 e.printStackTrace();
@@ -86,6 +90,17 @@ public abstract class QuetsalSourceSelectorFactory implements SourceSelectorFact
         parser.parse(new FileInputStream(VoidPath), "");
 
         return f.getAbsolutePath();
+    }
+
+    private void cleanUp() {
+        Path currentRelativePath = Paths.get("");
+        String s = currentRelativePath.toAbsolutePath().toString() + "/summaries\\/memorystore.data";
+        Path memstorepath = Paths.get(s);
+        try {
+            Files.delete(memstorepath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
 }
