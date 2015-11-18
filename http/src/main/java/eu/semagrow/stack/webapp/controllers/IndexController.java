@@ -29,15 +29,36 @@ public class IndexController {
         return mav;
     }
 
-    @RequestMapping(value="/monitor", method=RequestMethod.GET)
+    @RequestMapping(value="/monitoring", method=RequestMethod.GET)
     public void monitor(HttpServletResponse response) throws IOException{
-        // acess
-        //response.write();
-        //ModelAndView mav = new ModelAndView(template);
-        //return mav;
+
         response.setContentType("text/csv");
-        response.getWriter().println("1;2;3;4");
-        response.getWriter().println("0;2;2;5");
+
+        response.getWriter().println("\"Query\";\"QueryString\";\"Endpoint\";\"Time\"");
+        response.getWriter().println("\"Q1\";\"SELECT\";\"Total\";\"1000\"");
+        response.getWriter().println("\"Q1\";\"SELECT\";\"Decomposition\";\"70\"");
+        response.getWriter().println("\"Q1\";\"SELECT\";\"EP2\";\"100\"");
+        response.getWriter().println("\"Q1\";\"SELECT\";\"EP1\";\"120\"");
+        response.getWriter().println("\"Q2\";\"SELECT\";\"Total\";\"800\"");
+        response.getWriter().println("\"Q2\";\"SELECT\";\"EP1\";\"80\"");
+        response.getWriter().println("\"Q2\";\"SELECT\";\"EP2\";\"70\"");
+        response.getWriter().println("\"Q2\";\"SELECT\";\"Decomposition\";\"90\"");
+        response.getWriter().println("\"Q3\";\"SELECT\";\"Total\";\"1400\"");
+        response.getWriter().println("\"Q3\";\"SELECT\";\"EP1\";\"300\"");
+        response.getWriter().println("\"Q3\";\"SELECT\";\"Decomposition\";\"30\"");
+        response.getWriter().println("\"Q3\";\"SELECT\";\"EP2\";\"410\"");
+        response.getWriter().println("\"Q4\";\"SELECT\";\"Total\";\"1200\"");
+        response.getWriter().println("\"Q4\";\"SELECT\";\"EP1\";\"500\"");
+        response.getWriter().println("\"Q4\";\"SELECT\";\"EP2\";\"810\"");
+        response.getWriter().println("\"Q4\";\"SELECT\";\"Decomposition\";\"90\"");
+        response.getWriter().println("\"Q5\";\"SELECT * WHERE { ?s ?p ?o \\n FILTER(regex(str(?o),\"\"xxx\"\",'i')) }\";\"EP1\";\"700\"");
+        response.getWriter().println("\"Q5\";\"SELECT * WHERE { ?s ?p ?o FILTER(regex(str(?o),\"\"xxx\"\",'i')) }\";\"EP2\";\"510\"");
+        response.getWriter().println("\"Q5\";\"SELECT * WHERE { ?s ?p ?o FILTER(regex(str(?o),\"\"xxx\"\",'i')) }\";\"Decomposition\";\"70\"");
+        response.getWriter().println("\"Q5\";\"SELECT * WHERE { ?s ?p ?o FILTER(regex(str(?o),\"\"xxx\"\",'i')) }\";\"Total\";\"1600\"");
+        response.getWriter().println("\"Q6\";\"SELECT\";\"EP1\";\"300\"");
+        response.getWriter().println("\"Q6\";\"SELECT\";\"EP2\";\"410\"");
+        response.getWriter().println("\"Q6\";\"SELECT\";\"Decomposition\";\"100\"");
+        response.getWriter().println("\"Q6\";\"SELECT\";\"Total\";\"1300\"");
 
         response.getWriter().flush();
     }
