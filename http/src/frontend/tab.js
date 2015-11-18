@@ -134,6 +134,11 @@ var Tab = function(yasgui, id, name, endpoint) {
     var yasqeContainer = $('<div>', {
         id: 'yasqe_' + persistentOptions.id
     }).appendTo($paneContent);
+    var monitorContainer = $('<iframe/>', {
+        id: 'monitor_' + persistentOptions.id,
+        src: "./resources/monitor/index.html",
+        style: "width:100%; height:350px; border:0; display:none;"
+    }).appendTo($paneContent);
     var treeContainer = $('<iframe/>', {
         id: 'tree_' + persistentOptions.id,
         src: "./resources/semagrow_site/index.html",
@@ -142,11 +147,6 @@ var Tab = function(yasgui, id, name, endpoint) {
     }).appendTo($paneContent);
     var yasrContainer = $('<div>', {
         id: 'yasq_' + persistentOptions.id
-    }).appendTo($paneContent);
-    var monitorContainer = $('<iframe/>', {
-        id: 'monitor_' + persistentOptions.id,
-        src: "./resources/monitor/monitor.html",
-        style: "width:100%; height:700px; border:0; display:none;"
     }).appendTo($paneContent);
 
 
@@ -324,7 +324,12 @@ var Tab = function(yasgui, id, name, endpoint) {
 
             $monitorBtn.click(function(){
                 //yasrContainer.css("display","none");//document.getElementById('yasq_' + persistentOptions.id).style.display="none";
-                monitorContainer.css("display","block");
+                if(monitorContainer.css("display") == "none"){
+                    monitorContainer.css("display","block");
+                }
+                else{
+                    monitorContainer.css("display", "none");
+                }
                 //yasrDisplayed = false;
                 //decomposeDisplayed = true;
                 //var h = document.getElementById('tree_' + persistentOptions.id).contentWindow.document.body.scrollHeight;
