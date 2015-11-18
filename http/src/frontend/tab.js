@@ -69,6 +69,7 @@ var Tab = function(yasgui, id, name, endpoint) {
     var $endpointInput;
     var $queryBtn;
     var $decomposeBtn;
+    var $monitorBtn;
     var addControlBar = function() {
 
         var $btnGroup = $('<div>', {
@@ -108,6 +109,15 @@ var Tab = function(yasgui, id, name, endpoint) {
             .text("Execute")
             .appendTo($btnGroup);
 
+        $monitorBtn = $('<button>', {
+            type: 'button',
+            class: 'menuButton btn btn-default'
+        })
+            .text("Monitor")
+            .appendTo($btnGroup);
+
+        $monitorBtn.hide();
+
         var $paneMenu = menu.initWrapper().appendTo($controlBar);
             menu.updateWrapper();
             $paneMenu.collapse({toggle:false});
@@ -123,6 +133,11 @@ var Tab = function(yasgui, id, name, endpoint) {
 
     var yasqeContainer = $('<div>', {
         id: 'yasqe_' + persistentOptions.id
+    }).appendTo($paneContent);
+    var monitorContainer = $('<iframe/>', {
+        id: 'monitor_' + persistentOptions.id,
+        src: "./resources/monitor/index.html",
+        style: "width:100%; height:350px; border:0; display:none;"
     }).appendTo($paneContent);
     var treeContainer = $('<iframe/>', {
         id: 'tree_' + persistentOptions.id,
@@ -243,6 +258,7 @@ var Tab = function(yasgui, id, name, endpoint) {
                 $('.nav-tabs .active').removeClass('querying');
                 yasgui.emit('queryFinish', yasgui, tab);
                 tab.emit('queryFinish');
+                $monitorBtn.show();
             });
             var beforeSend = null;
             tab.yasqe.options.sparql.callbacks.beforeSend = function() {
@@ -284,6 +300,7 @@ var Tab = function(yasgui, id, name, endpoint) {
                 //document.getElementById('yasq_' + persistentOptions.id).style.display="block";
                 treeContainer.css("display","none");
                 yasrContainer.css("display","block");
+                $monitorBtn.hide();
                 yasrDisplayed = true;
                 decomposeDisplayed = false;
                 //$(".yasqe_queryButton").click();
@@ -301,6 +318,24 @@ var Tab = function(yasgui, id, name, endpoint) {
                 //document.getElementById('tree_' + persistentOptions.id).height=h;
                 document.getElementById('tree_' + persistentOptions.id).contentWindow.init("../../sparql",tab.yasqe);
                 document.getElementById('tree_' + persistentOptions.id).contentWindow.raw_();
+                //console.log(document.getElementById('tree_' + persistentOptions.id).contentWindow.document.getElementById("result2").offsetHeight);
+                //document.getElementById('tree_' + persistentOptions.id).height=document.getElementById('tree_' + persistentOptions.id).contentWindow.document.getElementById("result2").offsetHeight;
+            });
+
+            $monitorBtn.click(function(){
+                //yasrContainer.css("display","none");//document.getElementById('yasq_' + persistentOptions.id).style.display="none";
+                if(monitorContainer.css("display") == "none"){
+                    monitorContainer.css("display","block");
+                }
+                else{
+                    monitorContainer.css("display", "none");
+                }
+                //yasrDisplayed = false;
+                //decomposeDisplayed = true;
+                //var h = document.getElementById('tree_' + persistentOptions.id).contentWindow.document.body.scrollHeight;
+                //document.getElementById('tree_' + persistentOptions.id).height=h;
+                //document.getElementById('monitor_' + persistentOptions.id).contentWindow.init("../../sparql",tab.yasqe);
+                //document.getElementById('monitor_' + persistentOptions.id).contentWindow.raw_();
                 //console.log(document.getElementById('tree_' + persistentOptions.id).contentWindow.document.getElementById("result2").offsetHeight);
                 //document.getElementById('tree_' + persistentOptions.id).height=document.getElementById('tree_' + persistentOptions.id).contentWindow.document.getElementById("result2").offsetHeight;
             });
