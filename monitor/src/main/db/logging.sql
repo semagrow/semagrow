@@ -93,24 +93,39 @@ CREATE VIEW source_query_end AS
 
 
 CREATE VIEW query AS
-  SELECT query_id, query_string FROM query_start
-  ORDER BY query_start_time;
+  SELECT
+    query_id,
+    query_string
+  FROM
+    query_start
+  ORDER BY
+    query_start_time;
 
 
 CREATE VIEW decomposition AS
   SELECT
     query_start.query_id,
     (decomposition_end_time - query_start_time) as decomposition_time
-  FROM query_start, decomposition_end
-  WHERE query_start.query_id = decomposition_end.query_id;
+  FROM
+    query_start,
+    decomposition_end
+  WHERE
+    query_start.query_id = decomposition_end.query_id
+  ORDER BY
+    query_start_time;
 
 
 CREATE VIEW evaluation AS
   SELECT
     query_start.query_id,
     (execution_end_time - query_start_time) as evaluation_time
-  FROM query_start, execution_end
-  WHERE query_start.query_id = execution_end.query_id;
+  FROM
+    query_start,
+    execution_end
+  WHERE
+    query_start.query_id = execution_end.query_id
+  ORDER BY
+    query_start_time;
 
 
 CREATE VIEW source_query AS

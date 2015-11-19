@@ -33,8 +33,6 @@ public class CsvCreator {
         Map<String, String> queryId = new HashMap<>();
         Map<String, String> queryString = new HashMap<>();
 
-        list.add("\"Query\";\"QueryString\";\"Endpoint\";\"Time\"");
-
         Connection connection = null;
         Statement stmt = null;
 
@@ -123,6 +121,10 @@ public class CsvCreator {
                     connection.close();
             } catch (SQLException e) { }
         }
+
+        java.util.Collections.sort(list);
+
+        list.add(0, "\"Query\";\"QueryString\";\"Endpoint\";\"Time\"");
 
         return list;
     }
