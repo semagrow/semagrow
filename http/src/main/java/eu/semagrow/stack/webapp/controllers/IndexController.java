@@ -1,5 +1,6 @@
 package eu.semagrow.stack.webapp.controllers;
 
+import eu.semagrow.art.CsvCreator;
 import eu.semagrow.commons.CONSTANTS;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
@@ -34,6 +35,15 @@ public class IndexController {
 
         response.setContentType("text/csv");
 
+        CsvCreator creator = new CsvCreator("jdbc:postgresql://127.0.0.1:5432/Logging", "postgres", "postgres");
+
+        for (String line : creator.getCsv()) {
+            response.getWriter().println(line);
+        }
+
+        // TODO, adeiasma vashs, karfwta pramata: logback, edw kai sto SemagrowFederationMonitorer.js
+
+        /*
         response.getWriter().println("\"Query\";\"QueryString\";\"Endpoint\";\"Time\"");
         response.getWriter().println("\"Q1\";\"SELECT\";\"Total\";\"1000\"");
         response.getWriter().println("\"Q1\";\"SELECT\";\"Decomposition\";\"70\"");
@@ -59,7 +69,7 @@ public class IndexController {
         response.getWriter().println("\"Q6\";\"SELECT\";\"EP2\";\"410\"");
         response.getWriter().println("\"Q6\";\"SELECT\";\"Decomposition\";\"100\"");
         response.getWriter().println("\"Q6\";\"SELECT\";\"Total\";\"1300\"");
-
+        */
         response.getWriter().flush();
     }
 }
