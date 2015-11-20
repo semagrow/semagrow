@@ -53,7 +53,12 @@ public class CsvCreator {
                 String query_id = rs.getString("query_id");
                 String query_string = rs.getString("query_string");
 
-                queryId.put(query_id, "Q" + i);
+                if (i<10) {
+                    queryId.put(query_id, "Q0" + i);
+                }
+                else {
+                    queryId.put(query_id, "Q" + i);
+                }
                 queryString.put(query_id, query_string);
                 i++;
             }
@@ -128,6 +133,4 @@ public class CsvCreator {
 
         return list;
     }
-
-    // TODO BEAUTIFY
 }
