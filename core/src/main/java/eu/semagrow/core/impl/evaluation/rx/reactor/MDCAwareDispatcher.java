@@ -14,13 +14,15 @@ import java.util.concurrent.TimeUnit;
 public class MDCAwareDispatcher implements Dispatcher {
 
     private Dispatcher delegate;
+    private final Map<String,String> contextMap;
 
-    public MDCAwareDispatcher(Dispatcher delegate) { this.delegate = delegate; }
+    public MDCAwareDispatcher(Dispatcher delegate) {
+        this.delegate = delegate;
+        contextMap = MDC.getCopyOfContextMap();
+    }
 
     @Override
     public <E> void dispatch(E e, final Consumer<E> consumer, Consumer<Throwable> consumer1) {
-
-        final Map<String,String> contextMap = MDC.getCopyOfContextMap();
 
         delegate.dispatch(e, new Consumer<E>() {
             @Override
@@ -39,8 +41,6 @@ public class MDCAwareDispatcher implements Dispatcher {
 
     @Override
     public <E> void tryDispatch(E e, Consumer<E> consumer, Consumer<Throwable> consumer1) /*throws InsufficientCapacityException*/ {
-
-        final Map<String,String> contextMap = MDC.getCopyOfContextMap();
 
         delegate.tryDispatch(e, new Consumer<E>() {
             @Override
@@ -80,7 +80,6 @@ public class MDCAwareDispatcher implements Dispatcher {
 
     @Override
     public void execute(Runnable command) {
-        final Map<String,String> contextMap = MDC.getCopyOfContextMap();
 
         delegate.execute(new Runnable() {
             @Override

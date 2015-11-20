@@ -15,8 +15,10 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -81,10 +83,12 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
 
                     isEvaluating = true;
 
+                    final Map<String,String> contextMap = MDC.getCopyOfContextMap();
 
                     Runnable task = new Runnable() {
                         @Override
                         public void run() {
+                            MDC.setContextMap(contextMap);
                             TupleQueryResultHandler handler = new SubscribedQueryResultHandler(subscriber);
 
                             //handler = new LoggingTupleQueryResultHandler(queryStr, handler, qfrHandler, mat, endpoint);

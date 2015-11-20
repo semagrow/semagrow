@@ -40,9 +40,10 @@ logger( "eu.semagrow.core.impl", DEBUG, ["PROCFLOW"], false )
 logger( "eu.semagrow.query.impl", DEBUG, ["PROCFLOW"], false )
 logger( "eu.semagrow.sail", DEBUG, ["PROCFLOW"], false )
 
-logger( "eu.semagrow.core.impl",  INFO, ["DB"], false )
-logger( "eu.semagrow.query.impl", INFO, ["DB"], false )
-logger( "eu.semagrow.sail", INFO, ["DB"], false )
+logger( "eu.semagrow.query.impl.SemagrowSailTupleQuery",  INFO, ["DB"], false )
+logger( "eu.semagrow.core.impl.planner.DPQueryDecomposer", INFO, ["DB"], false )
+logger( "eu.semagrow.core.impl.evaluation.rx.reactor.QueryExecutorImpl", INFO, ["DB"], false )
+logger( "eu.semagrow.core.impl.evaluation.rx.LoggingTupleQueryResultHandler", INFO, ["DB"], false )
 
 logger( "reactor", TRACE, ["PROCFLOW"], false )
 
