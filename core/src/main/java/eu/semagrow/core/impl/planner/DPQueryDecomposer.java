@@ -19,8 +19,14 @@ import java.util.Collection;
 
 
 /**
- * Created by angel on 27/4/2015.
+ * Dynamic Programming Query Decomposer
+ * 
+ * <p>Dynamic programming implementation of the
+ * eu.semagrow.core.decomposer.QueryDecomposer interface.</p>
+ * 
+ * @author Angelos Charalambidis
  */
+
 public class DPQueryDecomposer implements QueryDecomposer {
 
     private CostEstimator costEstimator;

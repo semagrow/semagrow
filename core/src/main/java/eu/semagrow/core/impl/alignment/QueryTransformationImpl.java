@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package eu.semagrow.core.impl.alignment;
 
 import eu.semagrow.core.transformation.QueryTransformation;
@@ -21,8 +17,8 @@ import java.util.*;
 
 /**
  *
- * @author akukurik
- * @author acharal
+ * @author Antonis Kukurikos
+ * @author Angelos Charalambidis
  */
 public class QueryTransformationImpl implements QueryTransformation {
 
@@ -108,10 +104,6 @@ public class QueryTransformationImpl implements QueryTransformation {
      * @param source the URI of the resource for which an equivalent is asked
      * @param transformationID the id of the specific transformation that produced the equivalence
      * @return A URI that is equivalent to the source URI under transformationID
-     * @throws java.io.IOException
-     * @throws ClassNotFoundException
-     * @throws java.sql.SQLException
-     * @throws java.net.URISyntaxException
      */
     public URI getURI(URI source, int transformationID) {
 
@@ -169,16 +161,14 @@ public class QueryTransformationImpl implements QueryTransformation {
         return response;
     }
 
+
     /**
-     *
-     * @param target the URI of the resource for which an equivalent is asked
-     * @param transformationID the id of the specific transformation that produced the equivalence
-     * @return A URI that is equivalent to the target URI under transformationID
-     * @throws java.io.IOException
-     * @throws ClassNotFoundException
-     * @throws java.sql.SQLException
-     * @throws java.net.URISyntaxException
-     */
+    *
+    * @param target the URI of the resource for which an equivalent is asked
+    * @param transformationID the id of the specific transformation that produced the equivalence
+    * @return A URI that is equivalent to the target URI under transformationID
+    */
+
     public URI getInvURI(URI target, int transformationID) {
 
         URI response = null;
@@ -186,8 +176,6 @@ public class QueryTransformationImpl implements QueryTransformation {
 
         double confidence;
         int normalized;
-
-
 
 
         String sql = "SELECT * FROM aligned_elements WHERE entity2_uri = '" + target.toString() + "' AND id=" + transformationID;

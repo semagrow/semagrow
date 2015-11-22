@@ -54,6 +54,16 @@
             <name>Angelos Charalambidis</name>
             <email>acharal@iit.demokritos.gr</email>
         </developer>
+        <developer>
+            <id>antru</id>
+            <name>Antonis Troumpoukis</name>
+            <email>antru@iit.demokritos.gr</email>
+        </developer>
+        <developer>
+            <id>stasinos</id>
+            <name>Stasinos Konstantopoulos</name>
+            <email>konstant@iit.demokritos.gr</email>
+        </developer>
     </developers>
 
     <mailingLists>
@@ -243,6 +253,11 @@
                     <target>1.8</target>
                     <debug>false</debug>
                 </configuration>
+            </plugin>
+            <plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-javadoc-plugin</artifactId>
+            	<version>2.10.3</version>
             </plugin>
         </plugins>
     </build>

@@ -8,9 +8,16 @@ import org.openrdf.query.algebra.TupleExpr;
 import java.util.List;
 
 /**
+ * Source Selector
+ * 
+ * Interface for all components that select data sources that contain triples
+ * that match a simple query pattern or a complex expression.
+ * 
  * @author Angelos Charalambidis
  */
-public interface SourceSelector {
+
+public interface SourceSelector
+{
 
     /**
      * Returns a list of operational endpoints where you can find
@@ -18,10 +25,26 @@ public interface SourceSelector {
      * @param pattern
      * @return a list of endpoints
      */
-    List<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings);
+    List<SourceMetadata> getSources( StatementPattern pattern, Dataset dataset, BindingSet bindings );
 
-    List<SourceMetadata> getSources(Iterable<StatementPattern> patterns, Dataset dataset, BindingSet bindings);
+    /**
+     * Returns a list of operational endpoints where you can find
+     * triples that match the given patterns.
+     * @param patterns
+     * @param dataset
+     * @param bindings
+     * @return
+     */
+    List<SourceMetadata> getSources( Iterable<StatementPattern> patterns, Dataset dataset, BindingSet bindings );
 
-    List<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings);
+    /**
+     * Returns a list of operational endpoints where you can find
+     * triples that match the given expression.
+     * @param expr
+     * @param dataset
+     * @param bindings
+     * @return
+     */
+    List<SourceMetadata> getSources( TupleExpr expr, Dataset dataset, BindingSet bindings );
 
 }

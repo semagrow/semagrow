@@ -5,17 +5,19 @@ import java.util.Collection;
 import org.openrdf.model.URI;
 
 /**
- * {@todo Descrption}
+ * Query Transformation
  * 
  * @author Antonis Kukurikos
  */
 
-public interface QueryTransformation {
+public interface QueryTransformation
+{
 
 	/**
-	 * @return A list of equivalent URIs aligned with a certain confidence with the initial URI and belonging to a specific schema
+	 * @return A list of equivalent URIs aligned with a certain confidence
+	 * with the initial URI and belonging to a specific schema
 	 */
-	public Collection<EquivalentURI> retrieveEquivalentURIs(URI uri);
+	public Collection<EquivalentURI> retrieveEquivalentURIs( URI uri );
 
     public URI getURI(URI source, int transformationID);
 
