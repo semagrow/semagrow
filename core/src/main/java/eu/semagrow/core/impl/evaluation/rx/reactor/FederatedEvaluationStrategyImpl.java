@@ -170,7 +170,8 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                     } catch (Exception e) {
                         return Streams.fail(e);
                     }
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
+                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
@@ -203,7 +204,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             return Streams.empty();
         else {
             Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
-            return Streams.wrap(result).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+            return Streams.wrap(result)
+                    .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
+                    .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
         }
     }
 
@@ -226,7 +229,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                         return Streams.fail(e);
                     }
 
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+                })
+                .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
+                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Transform expr, BindingSet bindings)
@@ -294,7 +299,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                         return evaluateReactorInternal(e, bindingList);
                     } catch (Exception x) {
                         return Streams.fail(x);
-                }});
+                }})
+                .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
+                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
     }
 }
 

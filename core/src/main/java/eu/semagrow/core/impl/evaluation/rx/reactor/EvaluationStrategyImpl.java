@@ -61,8 +61,8 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
             throws QueryEvaluationException
     {
         //return RxReactiveStreams.toPublisher(evaluateReactorInternal(expr, bindings));;
-        return evaluateReactorInternal(expr, bindings)
-                .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+        return evaluateReactorInternal(expr, bindings);
+                //.subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
     }
 
     public boolean isTrue(ValueExpr expr, BindingSet bindings)
@@ -282,7 +282,8 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         return Streams.merge(
                 this.evaluateReactorInternal(expr.getLeftArg(), bindings),
                 this.evaluateReactorInternal(expr.getRightArg(), bindings))
-                    .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+                    .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
+                    .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Join expr, BindingSet bindings)
@@ -295,7 +296,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                     } catch (Exception e) {
                         return Streams.fail(e);
                     }
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(LeftJoin expr, BindingSet bindings)
@@ -307,13 +308,14 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         joinAttributes.retainAll(expr.getRightArg().getBindingNames());
 
         return evaluateReactorInternal(expr.getLeftArg(), bindings)
-                .concatMap((b) -> {
+                .flatMap((b) -> {
                     try {
                         return this.evaluateReactorInternal(expr.getRightArg(), b).defaultIfEmpty(b);
                     } catch (Exception e) {
                         return Streams.fail(e);
                     }
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL)));
+                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
+                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
     }
 
     public Stream<BindingSet> evaluateReactorInternal(Group expr, BindingSet bindings)
