@@ -73,3 +73,6 @@ path {
     font-weight: bold;
     text-anchor: middle;
 }
+table td {
+        vertical-align:top
+}

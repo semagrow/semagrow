@@ -2,9 +2,7 @@ import ch.qos.logback.core.db.DriverManagerConnectionSource
 import ch.qos.logback.classic.db.DBAppender
 import eu.semagrow.art.DbAppender
 
-
-def HOME = System.getProperty( "user.home" )
-def LOGDIR = "${HOME}/var/log";
+def LOGDIR = "/var/log/semagrow";
 
 appender( "PROCFLOW", ConsoleAppender ) {
   encoder( PatternLayoutEncoder) {
@@ -21,7 +19,7 @@ appender( "CONSOLE", ConsoleAppender ) {
 appender( "DB", DbAppender) {
   connectionSource(DriverManagerConnectionSource) {
     driverClass = "org.postgresql.Driver"
-    url = "jdbc:postgresql://127.0.0.1:5432/Logging"
+    url = "jdbc:postgresql://localhost:5432/logging"
     user = "postgres"
     password = "postgres"
   }

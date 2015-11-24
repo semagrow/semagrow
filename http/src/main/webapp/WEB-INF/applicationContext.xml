@@ -14,6 +14,11 @@
     <mvc:annotation-driven />
     <mvc:resources location="/resources/" mapping="/resources/**"/>
 
+    <bean id="creator" class="eu.semagrow.art.CsvCreator">
+        <constructor-arg index="0" value="jdbc:postgresql://127.0.0.1:5432/logging"/>
+        <constructor-arg index="1" value="postgres"/>
+        <constructor-arg index="2" value="postgres"/>
+    </bean>
     <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
         <property name="prefix" value="/WEB-INF/jsp/"/>
         <property name="suffix" value=".jsp"/>

@@ -2,7 +2,7 @@ SemaGrowFederationMonitorer = function() {
 };
 
 SemaGrowFederationMonitorer.prototype = {
-	serviceEndpoint:"http://localhost:8080/SemaGrow/monitoring",
+	serviceEndpoint:"http://localhost/SemaGrow/monitoring",
 	containerElement:"container",
 	detailElement:"detail",
 	queryElement:"queryContainer",
@@ -15,7 +15,7 @@ SemaGrowFederationMonitorer.prototype = {
 		return this.queries.indexOf(queryName);
   },
 	parseQueryString: function(queryString){
-		return queryString.replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/\r?\n/g, "<br/>");
+		return queryString.replace(/\\"/g, '"').replace(/\\'/g, "'").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 	},
 	start: function(){
 		that = this;
@@ -92,7 +92,7 @@ SemaGrowFederationMonitorer.prototype = {
 											detailString += "</tr>";
 											detailString += "<tr>";
 											detailString += "<td style=\"color:black\">QueryString:</td>";
-											detailString += "<td style=\"color:black\"><p>"+unescape(detail["QueryString"])+"</p></td>";
+											detailString += "<td style=\"color:black\"><code>"+unescape(detail["QueryString"])+"</code></td>";
 											detailString += "</tr>";
 											for (var key in detail["Queries"]) {
 													if (detail["Queries"].hasOwnProperty(key)) {
@@ -133,7 +133,7 @@ SemaGrowFederationMonitorer.prototype = {
                       return d.color = color(d.key);
                   })
                   .attr("d", pointline(d.values));
-
+/*
           svg.append("text")
                   .attr("x", (legendSpace / 2) + i * legendSpace)
                   .attr("y", height + (margin.bottom / 2) + 5)
@@ -142,7 +142,7 @@ SemaGrowFederationMonitorer.prototype = {
                       return d.color = color(d.key);
                   })
                   .text(d.key);
-
+*/
       });
 
       svg.append("g")
