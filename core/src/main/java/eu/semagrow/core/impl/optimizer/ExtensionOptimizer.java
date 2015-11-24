@@ -12,6 +12,7 @@ import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.algebra.helpers.VarNameCollector;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -42,10 +43,19 @@ public class ExtensionOptimizer implements QueryOptimizer {
         @Override
         public void meet(Extension filter) {
             super.meet(filter);
-            ExtensionRelocator.relocate(filter);
+            if (!hasAggregates(filter))
+                ExtensionRelocator.relocate(filter);
         }
     }
 
+    private static boolean hasAggregates(Extension ext) {
+
+        for (ExtensionElem e : ext.getElements()) {
+            if (e.getExpr() instanceof AggregateOperator)
+                return true;
+        }
+        return false;
+    }
 
 
 	/*-----------------------------*
