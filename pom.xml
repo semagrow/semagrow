@@ -203,6 +203,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                           <additionalparam>-Xdoclint:none</additionalparam>
+                          <aggregate>true</aggregate>
                         </configuration>
                     </plugin>
                     <plugin>
