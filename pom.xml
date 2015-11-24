@@ -57,9 +57,14 @@
             <email>acharal@iit.demokritos.gr</email>
         </developer>
         <developer>
-            <id>konstant</id>
+            <id>antru</id>
+            <name>Antonis Troumpoukis</name>
+            <email>antru@iit.demokritos.gr</email>
+        </developer>
+        <developer>
+            <id>stasinos</id>
             <name>Stasinos Konstantopoulos</name>
-            <email>stasinos@konstant.gr</email>
+            <email>konstant@iit.demokritos.gr</email>
         </developer>
     </developers>
 
@@ -200,6 +205,7 @@
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <configuration>
                           <additionalparam>-Xdoclint:none</additionalparam>
+                          <aggregate>true</aggregate>
                         </configuration>
                     </plugin>
                     <plugin>
@@ -251,7 +257,11 @@
                     <debug>false</debug>
                 </configuration>
             </plugin>
-
+            <plugin>
+            	<groupId>org.apache.maven.plugins</groupId>
+            	<artifactId>maven-javadoc-plugin</artifactId>
+            	<version>2.10.3</version>
+            </plugin>
         </plugins>
     </build>
 

@@ -160,7 +160,6 @@ public class CompactBNodeTurtleWriter extends TurtleWriter {
      * @param st The statement.
      * @throws org.openrdf.rio.RDFHandlerException
      *         If the RDF handler has encountered an unrecoverable error.
-     * @TODO check if the same BNode occurs more than once in object position
      */
     @Override
     public void handleStatement(Statement st) throws RDFHandlerException {

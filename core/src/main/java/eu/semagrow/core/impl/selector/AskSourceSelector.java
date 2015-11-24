@@ -27,16 +27,16 @@ import java.util.concurrent.*;
 
 /**
  * ASK Source Selector.
- *
- * <P>Implementation of SourceSelector that tries to execute ASK queries to identify
+ * 
+ * <p>Implementation of SourceSelector that tries to execute ASK queries to identify
  * the data sources that hold triples that match the given triple patterns. This class
  * extends SourceSelectorWrapper, and thus relies on a wrapped SourceSelector that
- * provides the initial list of candidate data sources.
- *
- * <P>Note that if any exceptions are thrown when connecting to the remote data sources,
+ * provides the initial list of candidate data sources. 
+ *  
+ * <p>Note that if any exceptions are thrown when connecting to the remote data sources,
  * this SourceSelector simples returns "true" (matching triples exist). This avoids
  * rejecting data sources that hold relevant triples because of transient errors.
- *
+ *  
  * @author Antonios Troumpoukis
  * @author Stasinos Konstantopoulos
  */
@@ -100,7 +100,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 	/**
 	 * This method returns a list of {link SourceMetadata} objects that refer to data sources that
-	 * contain at least one triple that matches {@pattern}. The input {@code list} of candidate
+	 * contain at least one triple that matches {@code pattern}. The input {@code list} of candidate
 	 * data sources is not modified.
 	 * <p>
 	 * This method is the entry point to the specific functionality of this class, and all the methods

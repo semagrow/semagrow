@@ -22,7 +22,8 @@ import java.util.Collection;
 /**
  * Dynamic Programming Query Decomposer
  *
- * <p>Dynamic Programming implementation of the Query Decomposer.</p>
+ * <p>Dynamic programming implementation of the
+ * eu.semagrow.core.decomposer.QueryDecomposer interface.</p>
  *
  * @author Angelos Charalambidis
  * @author Stasinos Konstantopoulos

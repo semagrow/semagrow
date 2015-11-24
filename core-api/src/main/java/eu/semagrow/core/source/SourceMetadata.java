@@ -7,14 +7,18 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * Partially the interface of SelectedResource.
+ * Source Metadata
+ * 
+ * Interface for all components that serve metadata about datasets.
  * Contains only info about the source and the required transformations.
  * The term SourceMetadata does not refer only to a certain endpoint.
  * Supports alternative endpoints for the same source (e.g. mirrored)
  * Each endpoint contain exactly the same triples, so it is considered as the same source.
  * Endpoints that contain different number of triples are considered different sources.
- * Created by angel on 5/22/14.
+ * 
+ * @author Angelos Charalambidis
  */
+
 public interface SourceMetadata {
 
     /**
@@ -35,9 +39,9 @@ public interface SourceMetadata {
 
     /**
      *
-     * @return true if the pattern must be transformed
-     * TODO: must return the kind of transformation (target vocabulary)
+     * @return {@code true} if the pattern must be transformed
      */
+    // TODO: must return the kind of transformation (target vocabulary)
     boolean isTransformed();
 
     /**

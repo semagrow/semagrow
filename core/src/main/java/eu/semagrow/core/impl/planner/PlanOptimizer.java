@@ -5,10 +5,25 @@ import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.TupleExpr;
 
 /**
- * Created by angel on 27/4/2015.
+ * Plan Optimizer
+ * 
+ * <p>Interface for any component that optimizes
+ * a query execution plan.</p>
+ * 
+ * @author Angelos Charalambidis
  */
-public interface PlanOptimizer {
 
-    Plan getBestPlan(TupleExpr expr, BindingSet bindings, Dataset dataset);
+public interface PlanOptimizer
+{
+
+	/**
+	 * This method 
+	 * @param expr
+	 * @param bindings
+	 * @param dataset
+	 * @return
+	 */
+
+	Plan getBestPlan( TupleExpr expr, BindingSet bindings, Dataset dataset );
 
 }
