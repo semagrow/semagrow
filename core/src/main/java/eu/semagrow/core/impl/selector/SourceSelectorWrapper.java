@@ -10,7 +10,9 @@ import org.openrdf.query.algebra.TupleExpr;
 import java.util.List;
 
 /**
- * Created by angel on 6/19/14.
+ * A simple wrapper of a @{link SourceSelector} that can be
+ * used to remove all the boilerplate code in the inherited classes
+ * @author Angelos Charalambidis
  */
 public class SourceSelectorWrapper  implements SourceSelector {
 

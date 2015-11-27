@@ -9,7 +9,11 @@ import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 
 /**
- * Created by angel on 6/26/14.
+ * A semantically-preserved optimizer that pushes down @{link Limit} nodes
+ * as far as possible. This optimizer is usefull in general since Limit
+ * nodes can pushed down to the remote sources and therefore subqueries can
+ * retrieve only limited query answers.
+ * @author Angelos Charalambidis
  */
 public class LimitPushDownOptimizer implements QueryOptimizer {
 

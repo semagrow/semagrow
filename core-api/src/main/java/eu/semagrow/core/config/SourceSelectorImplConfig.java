@@ -4,7 +4,7 @@ import org.openrdf.model.Graph;
 import org.openrdf.model.Resource;
 
 /**
- * Created by angel on 11/1/14.
+ * @author Angelos Charalambidis
  */
 public interface SourceSelectorImplConfig {
 

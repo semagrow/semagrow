@@ -1,7 +1,8 @@
 package eu.semagrow.core.impl.planner;
 
 /**
- * Created by angel on 21/4/2015.
+ * A simple data structure for describing a cost of an execution plan.
+ * @author Angelos Charalambidis
  */
 public class Cost implements Comparable<Cost> {
 

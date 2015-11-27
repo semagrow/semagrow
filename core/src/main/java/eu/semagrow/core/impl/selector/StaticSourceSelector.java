@@ -10,7 +10,8 @@ import org.openrdf.query.algebra.TupleExpr;
 import java.util.*;
 
 /**
- * Created by angel on 16/6/2015.
+ * A source selector that is constructed with a list of {@link SourceMetadata}
+ * and then serve SourceMetadata only of this list.
  */
 public class StaticSourceSelector implements SourceSelector {
 

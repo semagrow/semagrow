@@ -2,7 +2,10 @@ package eu.semagrow.core.impl.planner;
 
 
 /**
- * Created by angel on 21/4/2015.
+ * A structure that contains the @{link Plan} properties needed
+ * by the {@link PlanOptimizer}.
+ *
+ * @author Angelos Charalambidis
  */
 public class PlanProperties {
 

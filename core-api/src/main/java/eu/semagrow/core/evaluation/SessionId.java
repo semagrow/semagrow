@@ -3,7 +3,7 @@ package eu.semagrow.core.evaluation;
 import org.openrdf.model.URI;
 
 /**
- * Created by angel on 6/23/14.
+ * @author Angelos Charalambidis
  */
 public interface SessionId {
 

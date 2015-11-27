@@ -8,7 +8,8 @@ import org.openrdf.model.impl.ValueFactoryImpl;
 
 
 /**
- * Created by angel on 11/1/14.
+ *
+ * @author Angelos Charalambidis
  */
 public class SemagrowSchema {
 

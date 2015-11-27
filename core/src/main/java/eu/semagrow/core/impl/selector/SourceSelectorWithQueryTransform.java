@@ -14,7 +14,8 @@ import org.openrdf.query.algebra.Var;
 import java.util.*;
 
 /**
- * Created by angel on 11/17/14.
+ * Provides query transformation functionality on a {@link SourceSelector} component.
+ * @author Angelos Charalambidis
  */
 public class SourceSelectorWithQueryTransform extends SourceSelectorWrapper {
 

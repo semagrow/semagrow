@@ -16,10 +16,9 @@ import org.openrdf.repository.Repository;
 import java.util.*;
 
 /**
- * TODO: Use properties void:uriSpace, svd:objectUriRegexPattern, ...
- * TODO: Use alternative ``mirror'' endpoints.
- * TODO: Use transformed pattern
- * Created by angel on 5/27/14.
+ * The default source selection implementation based on a Repository
+ * that uses VoID description to describe dataset metadata
+ * @author Angelos Charalambidis
  */
 public class VOIDSourceSelector extends VOIDBase
         implements SourceSelector {

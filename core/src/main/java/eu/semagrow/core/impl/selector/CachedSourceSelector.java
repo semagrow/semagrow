@@ -15,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by angel on 10/6/2015.
+ * Wraps a underlying @{link SourceSelector} and provides a simple
+ * caching mechanism to tha source selection requests
+ * @author Angelos Charalambidis
  */
 public class CachedSourceSelector extends SourceSelectorWrapper
 {

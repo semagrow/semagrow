@@ -11,7 +11,7 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * Created by angel on 22/4/2015.
+ * @author Angelos Charalambidis
  */
 public class PlanUtil {
 

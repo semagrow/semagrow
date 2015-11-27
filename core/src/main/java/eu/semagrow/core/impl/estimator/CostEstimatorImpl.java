@@ -30,10 +30,6 @@ public class CostEstimatorImpl implements CostEstimator {
         this.cardinalityEstimator = cardinalityEstimator;
     }
 
-    /**
-     * @param expr
-     * @return
-     */
     @Loggable
     public Cost getCost(TupleExpr expr) {
         return getCost(expr, Site.LOCAL);

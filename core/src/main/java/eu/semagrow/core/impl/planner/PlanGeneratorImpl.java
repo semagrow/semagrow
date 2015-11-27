@@ -19,7 +19,8 @@ import java.util.*;
 
 
 /**
- * Created by angel on 27/4/2015.
+ * The default implementation of the @{link PlanGenerator}
+ * @author Angelos Charalambidis
  */
 public class PlanGeneratorImpl implements PlanGenerator {
 

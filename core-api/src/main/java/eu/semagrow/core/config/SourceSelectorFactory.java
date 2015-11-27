@@ -3,7 +3,8 @@ package eu.semagrow.core.config;
 import eu.semagrow.core.source.SourceSelector;
 
 /**
- * Created by angel on 11/1/14.
+ *
+ * @author Angelos Charalambidis
  */
 public interface SourceSelectorFactory {
 

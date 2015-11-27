@@ -3,7 +3,7 @@ package eu.semagrow.core.impl.planner;
 import org.openrdf.model.URI;
 
 /**
- * Created by angel on 21/4/2015.
+ * @author Angelos Charalambidis
  */
 public class Site {
 

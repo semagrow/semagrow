@@ -9,7 +9,9 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by angel on 21/4/2015.
+ * A PlanVisitor that traverses the execution plan tree and updates
+ * the properties derived by the operator specifications
+ * @author Angelos Charalambidis
  */
 public class PlanPropertiesUpdater extends PlanVisitorBase<RuntimeException> {
 

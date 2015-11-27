@@ -17,7 +17,10 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by angel on 25/8/2015.
+ * A semantically-preserved optimizer that pushes down @{link Extension} nodes
+ * as far as possible. This optimizer can be useful when @{link Extension} contain
+ * custom functions that can be executed only by the remote sources.
+ * @author Angelos Charalambidis
  */
 public class ExtensionOptimizer implements QueryOptimizer {
 
@@ -27,10 +30,6 @@ public class ExtensionOptimizer implements QueryOptimizer {
         tupleExpr.visit(new ExtensionFinder(tupleExpr));
     }
 
-
-    	/*--------------------------*
-	 * Inner class ExtensionFinder *
-	 *--------------------------*/
 
     protected static class ExtensionFinder extends QueryModelVisitorBase<RuntimeException> {
 

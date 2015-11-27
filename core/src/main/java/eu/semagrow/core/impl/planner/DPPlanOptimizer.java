@@ -9,7 +9,9 @@ import org.openrdf.query.algebra.TupleExpr;
 import java.util.*;
 
 /**
- * Created by angel on 27/4/2015.
+ * A plan optimizer that uses Dynamic Programming to
+ * search for an optimal plan with respect to a CostEstimator
+ * @author Angelos Charalambidis
  */
 public class DPPlanOptimizer implements PlanOptimizer
 {
@@ -26,6 +28,12 @@ public class DPPlanOptimizer implements PlanOptimizer
         this.planGenerator = planGenerator;
     }
 
+    /**
+     * Removes from the collection all the plans that
+     * are considered inferior. After pruning the plans
+     * in the collection are considered incomparable and minimal
+     * @param plans
+     */
     protected void prunePlans(Collection<Plan> plans)
     {
         List<Plan> bestPlans = new ArrayList<Plan>();
@@ -121,6 +129,11 @@ public class DPPlanOptimizer implements PlanOptimizer
         return getBestPlan(fullPlans);
     }
 
+    /**
+     * Returns the best plan out of a collection of plans
+     * @param plans a collection of equivalent plans
+     * @return the prefered plan
+     */
     private Plan getBestPlan(Collection<Plan> plans)
     {
         if (plans.isEmpty())
