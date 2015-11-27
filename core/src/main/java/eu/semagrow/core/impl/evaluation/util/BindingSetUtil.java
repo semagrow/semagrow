@@ -11,8 +11,11 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Created by angel on 9/7/2015.
+ * Various static functions for {@link BindingSet} handling.
+ *
+ * @author Angelos Charalambidis
  */
+
 public class BindingSetUtil {
 
 

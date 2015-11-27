@@ -9,7 +9,9 @@ import org.openrdf.repository.RepositoryConnection;
 import org.slf4j.Logger;
 
 /**
- * Created by antonis on 3/11/2015.
+ * Various static functions for logging specific messages.
+ *
+ * @author Antonis Troumpoukis
  */
 public class LoggingUtil {
 

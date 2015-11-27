@@ -22,8 +22,12 @@ import java.util.Set;
 import java.util.regex.Matcher;
 
 /**
- * Created by angel on 5/7/2015.
+ * Various static functions for query handling.
+ *
+ * @author Angelos Charalambidis
+ * @author Antonis Troumpoukis
  */
+
 public class SPARQLQueryStringUtil {
 
 
@@ -79,6 +83,16 @@ public class SPARQLQueryStringUtil {
         return sb.toString();
     }
 
+    /**
+     * Construct a SPARQL query string for the provided tuple exprossion.
+     * If the projection is empty or null, build an ASK query, otherwise build a SELECT query.
+     *
+     * @param expr
+     * @param projection
+     * @return The corresponding SPARQL query string
+     * @throws Exception
+     */
+
 
     public static String buildSPARQLQuery(TupleExpr expr, Collection<String> projection)
             throws Exception
@@ -119,6 +133,16 @@ public class SPARQLQueryStringUtil {
         return new SPARQLQueryRenderer().render(query);
     }
 
+    /**
+     * Construct a bind join subquery for the provided tuple exprossion and a set of relevant input bindings,
+     * using the SPARQL 1.1 VALUES operator.
+     *
+     * @param expr
+     * @param bindings
+     * @param relevantBindingNames
+     * @return The corresponding SPARQL query string
+     * @throws Exception
+     */
 
     public static String buildSPARQLQueryVALUES(TupleExpr expr,
                                          List<BindingSet> bindings,
@@ -135,8 +159,16 @@ public class SPARQLQueryStringUtil {
         return buildSPARQLQuery(expr,freeVars) + buildVALUESClause(bindings,relevantBindingNames);
     }
 
-    ////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////////////////////////////
+    /**
+     * Construct a bind join subquery for the provided tuple exprossion and a set of relevant input bindings,
+     * using the UNION operator.
+     *
+     * @param expr
+     * @param bindings
+     * @param relevantBindingNames
+     * @return The corresponding SPARQL query string
+     * @throws Exception
+     */
 
     public static String buildSPARQLQueryUNION(TupleExpr expr,
                                            List<BindingSet> bindings,

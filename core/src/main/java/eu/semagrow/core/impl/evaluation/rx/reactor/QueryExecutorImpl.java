@@ -25,7 +25,11 @@ import reactor.rx.Streams;
 import java.util.*;
 
 /**
- * Created by antonis on 7/4/2015.
+ * Reactor Streams Query Executor
+ *
+ * <p>Implementation of QueryExecutor interface. The implementation uses Reactor Streams library.
+ *
+ * @author Antonis Troumpoukis
  */
 
 public class QueryExecutorImpl extends ConnectionManager implements QueryExecutor
@@ -39,12 +43,30 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         this.mat = mat;
     }
 
+    /**
+     * Evaluation of a remote query to a specified endpoint, given a binding.
+     *
+     * @param endpoint The endpoint in which the source query is to be sent
+     * @param expr The tuple expression that corresponds to the source query
+     * @param bindings a list of bindings
+     * @return A publisher who publishes the evaluation results
+     * @throws QueryEvaluationException
+     */
     public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException
     {
         return evaluateReactorImpl(endpoint, expr, bindings);
     }
 
+    /**
+     * Evaluation of a remote query to a specified endpoint, given a list of bindings.
+     *
+     * @param endpoint The endpoint in which the source query is to be sent
+     * @param expr The tuple expression that corresponds to the source query
+     * @param bindingList a list of bindings
+     * @return A publisher who publishes the evaluation results
+     * @throws QueryEvaluationException
+     */
     public Publisher<BindingSet> evaluate(final URI endpoint, final TupleExpr expr, final List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
@@ -59,6 +81,15 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
     }
 
+    /**
+     * Evaluation of a remote query to a specified endpoint, given a binding
+     *
+     * @param endpoint The endpoint in which the source query is to be sent
+     * @param expr The tuple expression that corresponds to the source query
+     * @param bindings the binding
+     * @return Stream with the evaluation results
+     * @throws QueryEvaluationException
+     */
     public Stream<BindingSet>
         evaluateReactorImpl(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException
@@ -109,6 +140,15 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         }
     }
 
+    /**
+     * Evaluation of a remote query to a specified endpoint, given a list of bindings
+     *
+     * @param endpoint The endpoint in which the source query is to be sent
+     * @param expr The tuple expression that corresponds to the source query
+     * @param bindings a list of bindings
+     * @return Stream with the evaluation results
+     * @throws QueryEvaluationException
+     */
     protected Stream<BindingSet>
         evaluateReactorImpl(URI endpoint, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
@@ -185,6 +225,18 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
                 .map((join) -> BindingSetUtil.merge(join.getValue(), leftBindings.get(join.getKey())));
     }
 
+    /**
+     * Sends a tuple query to a given endpoint.
+     *
+     * @param endpoint The endpoint in which the query is to be sent
+     * @param sparqlQuery The query string to be sent
+     * @param bindings A set of bindings for the query
+     * @param expr The tuple expression that corresponds to the query string
+     * @return Stream with the query results
+     * @throws QueryEvaluationException
+     * @throws MalformedQueryException
+     * @throws RepositoryException
+     */
     protected Stream<BindingSet>
         sendTupleQuery(URI endpoint, String sparqlQuery, BindingSet bindings, TupleExpr expr)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
@@ -201,6 +253,18 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
                 .finallyDo((s) -> closeQuietly(conn));
     }
 
+    /**
+     * Sends a boolean query to a given endpoint.
+     *
+     * @param endpoint The endpoint in which the query is to be sent
+     * @param sparqlQuery The query string to be sent
+     * @param bindings A set of bindings for the query
+     * @param expr The tuple expression that corresponds to the query string
+     * @return Stream with the query results
+     * @throws QueryEvaluationException
+     * @throws MalformedQueryException
+     * @throws RepositoryException
+     */
     protected boolean
         sendBooleanQuery(URI endpoint, String sparqlQuery, BindingSet bindings, TupleExpr expr)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
