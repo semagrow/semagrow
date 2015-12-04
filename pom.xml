@@ -9,8 +9,9 @@
     <name>semagrow</name>
     <url>http://semagrow.eu</url>
 
-    <properties>        
+    <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javadoc.version>1.4</javadoc.version>
         <sesame.version>2.7.10</sesame.version>
         <slf4j.version>1.7.7</slf4j.version>
         <logback.version>1.1.3</logback.version>
@@ -90,7 +91,7 @@
                 <enabled>true</enabled>
             </snapshots>
         </repository>
-<!--        
+<!--
         <repository>
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2</url>
@@ -132,7 +133,7 @@
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-runtime</artifactId>
             <version>${sesame.version}</version>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-queryrender</artifactId>
@@ -157,24 +158,24 @@
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-rio-n3</artifactId>
             <version>${sesame.version}</version>
-        </dependency>        
+        </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-sail-rdbms</artifactId>
             <version>${sesame.version}</version>
-        </dependency> 
+        </dependency>
         <dependency>
             <groupId>org.openrdf.sesame</groupId>
             <artifactId>sesame-queryresultio-sparqljson</artifactId>
             <version>${sesame.version}</version>
-        </dependency>               
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>${slf4j.version}</version>        
+            <version>${slf4j.version}</version>
         </dependency>
-        
-        <!-- TEST DEPENDENCIES -->                
+
+        <!-- TEST DEPENDENCIES -->
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -183,67 +184,6 @@
         </dependency>
 
     </dependencies>
-
-    <profiles>
-        <profile>
-            <build>
-                <pluginManagement>
-                    <plugins>
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-site-plugin</artifactId>
-                            <version>3.3</version>
-                        </plugin>
-                    </plugins>
-                </pluginManagement>
-            </build>
-            <id>semagrow-stack-documentation</id>
-            <reporting>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-javadoc-plugin</artifactId>
-                        <configuration>
-                          <additionalparam>-Xdoclint:none</additionalparam>
-                          <aggregate>true</aggregate>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-jxr-plugin</artifactId>
-                        <version>2.1</version>
-                    </plugin>
-
-                    <!-- SUREFIRE -->
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-report-plugin</artifactId>
-                        <version>2.0</version>
-                        <configuration>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-project-info-reports-plugin</artifactId>
-                        <version>2.4</version>
-                        <reportSets>
-                            <reportSet>
-                                <reports>
-                                    <report>summary</report>
-                                    <report>project-team</report>
-                                    <report>mailing-list</report>
-                                    <report>license</report>
-                                    <report>scm</report>
-                                    <report>issue-tracking</report>
-                                    <report>dependencies</report>
-                                </reports>
-                            </reportSet>
-                        </reportSets>
-                    </plugin>
-                </plugins>
-            </reporting>
-        </profile>
-    </profiles>
 
     <build>
         <plugins>
@@ -258,13 +198,73 @@
                 </configuration>
             </plugin>
             <plugin>
-            	<groupId>org.apache.maven.plugins</groupId>
-            	<artifactId>maven-javadoc-plugin</artifactId>
-            	<version>2.10.3</version>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.3</version>
+            </plugin>
+            <plugin>
+              	<groupId>org.apache.maven.plugins</groupId>
+              	<artifactId>maven-javadoc-plugin</artifactId>
+              	<version>2.10.3</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                  <additionalparam>-Xdoclint:none</additionalparam>
+                  <show>public</show>
+                  <header>semagrow, ${project.version}</header>
+                  <footer>semagrow, ${project.version}</footer>
+                  <doctitle>semagrow, ${project.version}</doctitle>
+                  <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+                  <destDir>api-${javadoc.version}</destDir>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <checkoutDirectory>${project.build.directory}/scmpublish</checkoutDirectory>
+                    <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
+                    <content>${project.reporting.outputDirectory}</content>
+                    <includes>api-*</includes>
+                    <skipDeletedFiles>false</skipDeletedFiles>
+                    <pubScmUrl>scm:git:git@github.com:semagrow/semagrow.git</pubScmUrl>
+                    <scmBranch>gh-pages</scmBranch>
+                </configuration>
             </plugin>
         </plugins>
     </build>
-
+<!--
+    <reporting>
+      <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.10.3</version>
+            <configuration>
+              <aggregate>true</aggregate>
+              <additionalparam>-Xdoclint:none</additionalparam>
+              <show>public</show>
+              <header>semagrow, ${project.version}</header>
+              <footer>semagrow, ${project.version}</footer>
+              <doctitle>semagrow, ${project.version}</doctitle>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-scm-publish-plugin</artifactId>
+            <version>1.0</version>
+            <configuration>
+                <checkoutDirectory>${project.build.directory}/scmpublish</checkoutDirectory>
+                <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
+                <content>${project.reporting.outputDirectory}/apidocs</content>
+                <skipDeletedFiles>false</skipDeletedFiles>
+                <pubScmUrl>scm:git:git@github.com:semagrow/semagrow.git</pubScmUrl>
+                <scmBranch>gh-pages</scmBranch>
+            </configuration>
+        </plugin>
+      </plugins>
+    </reporting>
+-->
     <modules>
         <module>commons</module>
         <module>core-api</module>
