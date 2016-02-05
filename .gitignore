@@ -10,3 +10,4 @@
 /bin
 /classes
 node_modules/
+.externalToolBuilders/
