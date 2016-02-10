@@ -1,0 +1,13 @@
+.yasgui {
+	position:relative;
+	@import "mixins.scss";
+	@import "bootstrap_full.scss";
+	@import "../node_modules/jquery-ui/themes/base/jquery.ui.resizable.css";
+	@import "yasqe.scss";
+	@import "yasr.scss";
+	@import "tab.scss";
+	@import "menu.scss";
+	@import "controlbar.scss";
+	@import "../node_modules/selectize/dist/css/selectize.css";
+	@import "../node_modules/selectize/dist/css/selectize.bootstrap3.css";
+}

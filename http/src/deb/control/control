@@ -1,0 +1,7 @@
+Package: semagrow
+Version: ${project.version}
+Section: misc
+Priority: low
+Architecture: all
+Description: SemaGrowStack
+Maintainer: jakobitschj@semantic-web.at

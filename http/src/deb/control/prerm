@@ -1,0 +1,27 @@
+#!/bin/sh
+
+SEMAGROW_SHORT_NAME="${distribution.all.package.shortname}";
+SEMAGROW_HOME="${distribution.all.package.home}";
+
+echo "PREREMOVE (version: ${project.version}) WITH $@"
+
+#rm -f /etc/init.d/$SEMAGROW_SHORT_NAME
+
+set -e
+case "$1" in
+    remove)
+	    echo "Remove";
+    ;;
+    upgrade)
+	    echo "Upgrade";
+			echo "Deleting : $SEMAGROW_HOME/work/Catalina/localhost/SemaGrow";
+			rm -rf $SEMAGROW_HOME/work/Catalina/localhost/SemaGrow
+			echo "Deleting : $SEMAGROW_HOME/domains/localhost/webapps/SemaGrow";
+			rm -rf $SEMAGROW_HOME/domains/localhost/webapps/SemaGrow
+			echo "Deleting : $SEMAGROW_HOME/domains/localhost/webapps/SemaGrow.war";
+			rm -f $SEMAGROW_HOME/domains/localhost/webapps/SemaGrow.war
+    ;;
+    fail-upgrade)
+	    echo "Fail upgrade";
+    ;;
+esac

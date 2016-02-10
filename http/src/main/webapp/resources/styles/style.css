@@ -1,0 +1,29 @@
+html, body {
+    margin: 0px;
+    padding: 0px;
+    font-family: Verdana, sans-serif;
+    font-size: 76%;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: normal;
+}
+
+#header #auth {
+    float:right; 
+    margin-top: 8px;
+    margin-right: 5px;
+
+}
+
+#header #auth label { display: none; }
+
+#logo {
+    height:45px;
+    margin-left:5px;
+}
+
+
+#content div.yui-skin-sam div.yui-navset div.yui-content {
+    background-color: white;
+    clear: both;
+}

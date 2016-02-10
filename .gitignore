@@ -1,0 +1,13 @@
+*.iml
+.idea
+*/target
+*target*
+.project
+.classpath
+.settings/
+*.versionsBackup
+.DS_Store
+/bin
+/classes
+node_modules/
+.externalToolBuilders/

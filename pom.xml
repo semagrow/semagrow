@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>eu.semagrow</groupId>
+    <artifactId>semagrow</artifactId>
+    <version>1.4.1</version>
+    <packaging>pom</packaging>
+    <name>semagrow</name>
+    <url>http://semagrow.eu</url>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <javadoc.version>1.4</javadoc.version>
+        <sesame.version>2.7.10</sesame.version>
+        <slf4j.version>1.7.7</slf4j.version>
+        <logback.version>1.1.3</logback.version>
+        <groovy.version>2.4.0</groovy.version>
+        <junit.version>4.11</junit.version>
+        <semagrow.version>${project.version}</semagrow.version>
+        <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>
+        <distribution.mvn>/var/www/mvn</distribution.mvn>
+    </properties>
+
+    <organization>
+        <name>SemaGrow - FP7</name>
+        <url>http://www.semagrow.eu</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Apache 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>turnguard</id>
+            <name>Jürgen W. Jakobitsch A</name>
+            <url>http://www.turnguard.com/turnguard</url>
+            <email>j.jakobitsch@semantic-web.at</email>
+        </developer>
+        <developer>
+            <id>cmader</id>
+            <name>Christian Mader</name>
+            <url>http://company.semantic-web.at/person/christian_mader</url>
+            <email>c.mader@semantic-web.at</email>
+        </developer>
+        <developer>
+            <id>gmouchakis</id>
+            <name>Giannis Mouchakis</name>
+            <email>gmouchakis@iit.demokritos.gr</email>
+        </developer>
+        <developer>
+            <id>acharal</id>
+            <name>Angelos Charalambidis</name>
+            <email>acharal@iit.demokritos.gr</email>
+        </developer>
+        <developer>
+            <id>antru</id>
+            <name>Antonis Troumpoukis</name>
+            <email>antru@iit.demokritos.gr</email>
+        </developer>
+        <developer>
+            <id>stasinos</id>
+            <name>Stasinos Konstantopoulos</name>
+            <email>konstant@iit.demokritos.gr</email>
+        </developer>
+    </developers>
+
+    <mailingLists>
+        <mailingList>
+            <name>public-semagrow</name>
+            <subscribe>subscribe@semagrow_list@googlegroups.com</subscribe>
+            <unsubscribe>unsubscribe@semagrow_list@googlegroups.com</unsubscribe>
+            <post>semagrow_list@googlegroups.com</post>
+        </mailingList>
+    </mailingLists>
+
+    <!-- REPOSITORIES -->
+
+    <repositories>
+
+        <repository>
+            <id>swc-semagrow</id>
+            <name>SWC SemaGrow Repository</name>
+            <url>http://semagrow.semantic-web.at/mvn/</url>
+            <snapshots>
+                <updatePolicy>always</updatePolicy>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+<!--
+        <repository>
+            <id>maven-central</id>
+            <url>http://repo1.maven.org/maven2</url>
+        </repository>
+-->
+        <repository>
+            <id>spring-milestone</id>
+            <name>Spring Milestones</name>
+            <url>https://repo.spring.io/libs-milestone</url>
+        </repository>
+    </repositories>
+
+    <pluginRepositories>
+        <pluginRepository>
+            <id>maven.tinyjee.org</id>
+            <url>http://maven.tinyjee.org</url>
+        </pluginRepository>
+    </pluginRepositories>
+
+    <scm>
+        <connection>scm:git:git://github.com/semagrow/semagrow.git</connection>
+        <url>https://github.com/semagrow/semagrow</url>
+    </scm>
+
+    <distributionManagement>
+        <site>
+            <id>online-documentation</id>
+            <url>file://${distribution.site}</url>
+        </site>
+        <repository>
+            <id>online-mvn-repository</id>
+            <url>file://${distribution.mvn}</url>
+        </repository>
+    </distributionManagement>
+
+    <dependencies>
+        <!-- OPENRDF SESAME -->
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-runtime</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-queryrender</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-trig</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-trix</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-rdfxml</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-rio-n3</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-sail-rdbms</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.openrdf.sesame</groupId>
+            <artifactId>sesame-queryresultio-sparqljson</artifactId>
+            <version>${sesame.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+
+        <!-- TEST DEPENDENCIES -->
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>${junit.version}</version>
+            <scope>test</scope>
+        </dependency>
+
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>2.0.2</version>
+                <configuration>
+                    <source>1.8</source>
+                    <target>1.8</target>
+                    <debug>false</debug>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-site-plugin</artifactId>
+                <version>3.3</version>
+            </plugin>
+            <plugin>
+              	<groupId>org.apache.maven.plugins</groupId>
+              	<artifactId>maven-javadoc-plugin</artifactId>
+              	<version>2.10.3</version>
+                <configuration>
+                  <aggregate>true</aggregate>
+                  <additionalparam>-Xdoclint:none</additionalparam>
+                  <show>public</show>
+                  <header>semagrow, ${project.version}</header>
+                  <footer>semagrow, ${project.version}</footer>
+                  <doctitle>semagrow, ${project.version}</doctitle>
+                  <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
+                  <destDir>api-${javadoc.version}</destDir>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-scm-publish-plugin</artifactId>
+                <version>1.0</version>
+                <configuration>
+                    <checkoutDirectory>${project.build.directory}/scmpublish</checkoutDirectory>
+                    <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
+                    <content>${project.reporting.outputDirectory}</content>
+                    <includes>api-*</includes>
+                    <skipDeletedFiles>false</skipDeletedFiles>
+                    <pubScmUrl>scm:git:git@github.com:semagrow/semagrow.git</pubScmUrl>
+                    <scmBranch>gh-pages</scmBranch>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+<!--
+    <reporting>
+      <plugins>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>2.10.3</version>
+            <configuration>
+              <aggregate>true</aggregate>
+              <additionalparam>-Xdoclint:none</additionalparam>
+              <show>public</show>
+              <header>semagrow, ${project.version}</header>
+              <footer>semagrow, ${project.version}</footer>
+              <doctitle>semagrow, ${project.version}</doctitle>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-scm-publish-plugin</artifactId>
+            <version>1.0</version>
+            <configuration>
+                <checkoutDirectory>${project.build.directory}/scmpublish</checkoutDirectory>
+                <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
+                <content>${project.reporting.outputDirectory}/apidocs</content>
+                <skipDeletedFiles>false</skipDeletedFiles>
+                <pubScmUrl>scm:git:git@github.com:semagrow/semagrow.git</pubScmUrl>
+                <scmBranch>gh-pages</scmBranch>
+            </configuration>
+        </plugin>
+      </plugins>
+    </reporting>
+-->
+    <modules>
+        <module>commons</module>
+        <module>core-api</module>
+        <module>core</module>
+        <module>monitor</module>
+        <module>sail</module>
+        <module>http</module>
+        <module>quetsal</module>
+    </modules>
+</project>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document>
+    <properties>
+        <author>Jürgen Jakobitsch</author>
+        <title>semagrow-stack-modules-api-querydecomp - Building</title>
+    </properties>
+    <meta name="keyword" content="semagrow, build"/>
+    <body>
+        <section name="Building">
+            <p>
+                This page contains information on how to build and customize
+                the semagrow-stack-modules-api-querydecomp
+            </p>
+            <p>
+                <ol>
+                    <li>Notes</li>
+                    <li>System requirements</li>
+                    <li>Building the semagrow-stack-modules-api-querydecomp (default)</li>
+                    <li>Generating the maven-site documentation</li>
+                </ol>
+            </p>
+        </section>
+        <section name="Notes">
+            <ul>
+                <li>The following build instructions and customizations are for development only.</li>
+                <li>
+                    Installation of the SemaGrow-Stack-Webapp on production systems should be done
+                    using the available package manager (debian/rpm).
+                </li>
+            </ul>
+        </section>
+        <section name="System requirements">
+            To be able to build the SemaGrow-Stack-Webapp it is necessary that the following
+            components are installed.
+            <ol>
+                <li>git<br/>
+                    git is necessary to clone all repositories. All builds have been tested with
+                    git version 1.8.1.4. To check the installed version enter the following command
+                    in a terminal
+                    <br/>
+<source>
+    git --version
+</source>
+                    <br/>
+                </li>
+                <li>JDK<br/>
+                    A JDK (Java Development Kit) is necessary to compile all java-components. All builds
+                    have been tested with java version 1.6.0_39. Please note that a JRE is not sufficient.
+                    To check the installed version enter the following command in a terminal
+                    <br/>
+<source>
+    java -version
+</source>
+                    <br/>
+                </li>
+                <li>Maven<br/>
+                    Maven is necessary to build and assemble all components. All builds have
+                    been tested with Apache Maven 3.0.3. Please make sure that mvn also uses the runtime
+                    from the JDK and not from JRE. To check the installed version enter the following command
+                    in a terminal
+                    <br/>
+<source>
+    mvn --version
+</source>
+                    <br/>
+                </li>
+            </ol>
+        </section>
+        <section name="Building the semagrow-stack-modules-api-querydecomp (default)">
+        </section>
+        <section name="Generating the maven-site documentation">
+        </section>
+    </body>
+</document>

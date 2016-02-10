@@ -1,0 +1,78 @@
+body {    
+  font-family:'Ubuntu Mono',Monospace,Arial;
+  font-size:9pt;
+  background-color: #FFFFFF;
+  color: #FFFFFF;
+}
+
+div {
+    marging:0px;
+    padding:0px;
+}
+
+a {
+    text-decoration: none;
+    color: #000;
+}
+
+a:hover {
+    text-decoration: underline;
+    color: #000;
+}
+
+#menu {
+    float:left;
+    margin-right: 120px;
+    font-weight: bold;
+}
+
+#results table {
+    background-color: #000;
+}
+
+#results table th {
+    background-color: #000;
+    color: #FFF;
+}
+
+#results table th a {    
+    color: #FFF;
+}
+
+#results table td {
+    padding: 4px;
+    background-color: #FFF;
+    color: #000;
+}
+
+/* VISUALIZATION */
+path { 
+    stroke: steelblue;
+    stroke-width: 2;
+    fill: none;
+}
+
+.axis path,
+.axis line {
+    fill: none;
+    stroke: black;
+    stroke-width: 1;
+    shape-rendering: crispEdges;
+}
+.axisLabel {
+	fill:black;
+    stroke: none;
+}
+.tick {
+	fill:black;
+    stroke: none;
+}
+
+.legend {
+    font-size: 16px;
+    font-weight: bold;
+    text-anchor: middle;
+}
+table td {
+        vertical-align:top
+}

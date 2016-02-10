@@ -1,0 +1,38 @@
+#!/bin/sh
+
+SEMAGROW_SHORT_NAME="${distribution.all.package.shortname}";
+SEMAGROW_HOME="${distribution.all.package.home}";
+SEMAGROW_GROUP="${distribution.all.package.group}";
+SEMAGROW_USER="${distribution.all.package.user}";
+
+echo "PREINSTALL (version: ${project.version}) WITH $@"
+
+set -e
+case "$1" in
+    install)
+        echo "Install";
+        echo "Checking Stack Group and User";
+
+        if ! getent group "$SEMAGROW_GROUP" > /dev/null 2>&1 ; then
+            addgroup --system "$SEMAGROW_GROUP" --quiet
+            echo "Created group $SEMAGROW_GROUP";
+        else 
+            echo "Group $SEMAGROW_GROUP already exists";
+        fi
+
+        if ! id $SEMAGROW_USER > /dev/null 2>&1 ; then
+            adduser --system --home $SEMAGROW_HOME --no-create-home \
+            --ingroup "$SEMAGROW_GROUP" --disabled-password --shell /bin/false \
+            "$SEMAGROW_USER"
+            echo "Created user $SEMAGROW_USER";
+        else
+            echo "User $SEMAGROW_USER already exists";
+        fi
+    ;;
+		upgrade)
+			echo "Upgrade";
+		;;
+		abort-upgrade)
+			echo "Abort upgrade";
+		;;
+esac

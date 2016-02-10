@@ -1,0 +1,5 @@
+#!/bin/sh
+echo "removing semagrow init script"
+
+rm -f /etc/init.d/semagrow
+rm -f /sbin/start-stop-daemon
