@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.selector;
 
+import eu.semagrow.core.source.Site;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.transformation.EquivalentURI;
@@ -136,7 +137,7 @@ public class SourceSelectorWithQueryTransform extends SourceSelectorWrapper {
         }
 
 
-        public List<URI> getEndpoints() { return metadata.getEndpoints(); }
+        public List<Site> getSites() { return metadata.getSites(); }
 
         public StatementPattern original() { return original; }
 

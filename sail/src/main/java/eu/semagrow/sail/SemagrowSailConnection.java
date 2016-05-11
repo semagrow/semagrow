@@ -1,12 +1,12 @@
 package eu.semagrow.sail;
 
-import eu.semagrow.core.decomposer.QueryDecomposer;
-import eu.semagrow.core.decomposer.QueryDecompositionException;
-import eu.semagrow.core.evaluation.FederatedEvaluationStrategy;
-import eu.semagrow.core.evaluation.FederatedQueryEvaluation;
-import eu.semagrow.core.evaluation.FederatedQueryEvaluationSession;
-import eu.semagrow.core.impl.evaluation.rx.reactor.FederatedEvaluationStrategyImpl;
-import eu.semagrow.core.impl.evaluation.rx.reactor.QueryExecutorImpl;
+import eu.semagrow.core.plan.QueryDecomposer;
+import eu.semagrow.core.plan.QueryDecompositionException;
+import eu.semagrow.core.evalit.FederatedEvaluationStrategy;
+import eu.semagrow.core.evalit.FederatedQueryEvaluation;
+import eu.semagrow.core.evalit.FederatedQueryEvaluationSession;
+import eu.semagrow.core.impl.evaluation.reactor.FederatedEvaluationStrategyImpl;
+import eu.semagrow.core.impl.sparql.QueryExecutorImpl;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
 import org.openrdf.model.impl.ValueFactoryImpl;

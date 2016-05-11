@@ -35,6 +35,7 @@ public final class VOID {
     public final static URI URIREGEXPATTERN;
     public final static URI PROPERTY;
     public final static URI CLASS;
+    public final static URI URISPACE;
 
     static {
         ValueFactory factory = ValueFactoryImpl.getInstance();
@@ -53,6 +54,7 @@ public final class VOID {
         URIREGEXPATTERN = factory.createURI(VOID.NAMESPACE, "uriRegexPattern");
         PROPERTY = factory.createURI(VOID.NAMESPACE, "property");
         CLASS = factory.createURI(VOID.NAMESPACE, "class");
+        URISPACE = factory.createURI(VOID.NAMESPACE, "uriSpace");
     }
 
 }

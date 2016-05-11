@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.evaluation.util;
 
-import eu.semagrow.commons.algebra.SourceQuery;
+import eu.semagrow.core.impl.plan.ops.SourceQuery;
 import org.openrdf.model.URI;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Query;

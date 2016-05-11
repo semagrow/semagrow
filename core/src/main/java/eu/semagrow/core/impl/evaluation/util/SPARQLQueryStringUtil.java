@@ -1,17 +1,15 @@
 package eu.semagrow.core.impl.evaluation.util;
 
-import eu.semagrow.core.impl.evaluation.iteration.InsertValuesBindingsIteration;
-import eu.semagrow.core.impl.planner.Plan;
+import eu.semagrow.core.impl.evalit.iteration.InsertValuesBindingsIteration;
+import eu.semagrow.core.plan.Plan;
 import org.openrdf.model.Literal;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
-import org.openrdf.query.Binding;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.*;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.parser.ParsedBooleanQuery;
-import org.openrdf.query.parser.ParsedQuery;
 import org.openrdf.query.parser.ParsedTupleQuery;
 import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
 

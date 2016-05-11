@@ -1,10 +1,10 @@
 package eu.semagrow.core.impl.optimizer;
 
-import eu.semagrow.commons.algebra.BindJoin;
-import eu.semagrow.commons.algebra.HashJoin;
-import eu.semagrow.commons.algebra.MergeJoin;
-import eu.semagrow.commons.algebra.SourceQuery;
-import eu.semagrow.core.impl.planner.Plan;
+import eu.semagrow.core.impl.plan.ops.BindJoin;
+import eu.semagrow.core.impl.plan.ops.HashJoin;
+import eu.semagrow.core.impl.plan.ops.MergeJoin;
+import eu.semagrow.core.impl.plan.ops.SourceQuery;
+import eu.semagrow.core.plan.Plan;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.*;
@@ -12,7 +12,6 @@ import org.openrdf.query.algebra.evaluation.QueryOptimizer;
 import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.openrdf.query.algebra.helpers.VarNameCollector;
 
-import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 

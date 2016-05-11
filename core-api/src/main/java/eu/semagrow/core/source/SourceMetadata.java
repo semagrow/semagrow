@@ -25,7 +25,7 @@ public interface SourceMetadata {
      * Gets alternative endpoints for the same dataset
      * @return
      */
-    List<URI> getEndpoints();
+    List<Site> getSites();
 
     /**
      * Gets the pattern which the datasource contain triples

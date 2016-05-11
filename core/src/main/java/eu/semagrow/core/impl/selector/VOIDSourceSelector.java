@@ -1,8 +1,9 @@
 package eu.semagrow.core.impl.selector;
 
 import eu.semagrow.art.Loggable;
-import eu.semagrow.core.source.SourceSelector;
-import eu.semagrow.core.source.SourceMetadata;
+import eu.semagrow.core.impl.sparql.SPARQLSite;
+import eu.semagrow.core.impl.sparql.SPARQLSiteFactory;
+import eu.semagrow.core.source.*;
 import org.openrdf.model.Resource;
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -121,7 +122,7 @@ public class VOIDSourceSelector extends VOIDBase
 
     private class SourceMetadataImpl implements SourceMetadata {
 
-        private List<URI> endpoints = new LinkedList<URI>();
+        private List<Site> endpoints = new LinkedList<Site>();
 
         private StatementPattern pattern;
 
@@ -129,11 +130,19 @@ public class VOIDSourceSelector extends VOIDBase
 
         public SourceMetadataImpl(StatementPattern pattern, URI endpoint) {
             this.pattern = pattern;
-            endpoints.add(endpoint);
+            SiteFactory siteFactory;
+            if (endpoint.stringValue().contains("cassandra")) {
+                siteFactory = SiteRegistry.getInstance().get("CASSANDRA");
+            } else {
+
+                siteFactory = SiteRegistry.getInstance().get("SPARQL");
+            }
+            //FIXME (not appropriate sitefactory)
+            endpoints.add(siteFactory.getSite(endpoint));
             schemaMappings = new HashMap<String, Collection<URI>>();
         }
 
-        public List<URI> getEndpoints() { return endpoints; }
+        public List<Site> getSites() { return endpoints; }
 
         public StatementPattern original() {
             return pattern;

@@ -1,5 +1,6 @@
 package eu.semagrow.core.impl.selector;
 
+import eu.semagrow.core.source.Site;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.source.SourceMetadata;
 import org.openrdf.model.URI;
@@ -7,7 +8,6 @@ import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
 
 import java.util.*;
 
@@ -72,7 +72,7 @@ public class RestrictiveSourceSelector extends SourceSelectorWrapper {
         List<SourceMetadata> restrictedList = new LinkedList<SourceMetadata>();
 
         for (SourceMetadata metadata : list) {
-            Collection<URI> metadataSources = metadata.getEndpoints();
+            Collection<Site> metadataSources = metadata.getSites();
             if (exclude.isEmpty() &&
                 Collections.disjoint(metadataSources, exclude))
             {
@@ -103,8 +103,8 @@ public class RestrictiveSourceSelector extends SourceSelectorWrapper {
             this.includeOnly = includeOnly;
         }
 
-        public List<URI> getEndpoints() {
-            List<URI> l =  new LinkedList<URI>(metadata.getEndpoints());
+        public List<Site> getSites() {
+            List<Site> l =  new LinkedList<Site>(metadata.getSites());
             l.retainAll(includeOnly);
             return l;
         }

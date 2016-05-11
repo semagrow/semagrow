@@ -1,7 +1,8 @@
 package eu.semagrow.core.impl.selector;
 
 import eu.semagrow.art.Loggable;
-import eu.semagrow.commons.algebra.QueryRoot;
+import eu.semagrow.core.impl.sparql.SPARQLSite;
+import eu.semagrow.core.source.Site;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
 
@@ -11,7 +12,6 @@ import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.Dataset;
 import org.openrdf.query.TupleQuery;
-import org.openrdf.query.algebra.QueryModelNode;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
@@ -118,11 +118,12 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 Collection<Callable<SourceMetadata>> todo = new LinkedList<Callable<SourceMetadata>>();
 
 		 for( SourceMetadata metadata : list ) {
-			 List<URI> sources = metadata.getEndpoints();
+			 List<Site> sources = metadata.getSites();
 			 SourceMetadata m = metadata;
 
 			 Callable<SourceMetadata> f = () -> {
-				 boolean ask = askPattern(pattern, sources.get(0), false);
+				 //FIXME
+				 boolean ask = askPattern(pattern, ((SPARQLSite)sources.get(0)).getURI(), false);
 				 return ask ? m : null;
 			 };
 

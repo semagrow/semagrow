@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.evaluation.util;
 
-import eu.semagrow.core.impl.evaluation.rx.EvaluationStrategy;
+import eu.semagrow.core.eval.EvaluationStrategy;
 import org.openrdf.model.Value;
 import org.openrdf.query.BindingSet;
 import org.openrdf.query.QueryEvaluationException;

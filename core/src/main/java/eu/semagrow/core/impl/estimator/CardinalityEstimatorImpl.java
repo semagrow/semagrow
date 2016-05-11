@@ -3,10 +3,12 @@ package eu.semagrow.core.impl.estimator;
 import eu.semagrow.art.Loggable;
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.estimator.SelectivityEstimator;
-import eu.semagrow.core.impl.planner.Plan;
+import eu.semagrow.core.plan.Plan;
+import eu.semagrow.core.impl.sparql.SPARQLSite;
+import eu.semagrow.core.source.Site;
 import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;
-import eu.semagrow.commons.algebra.SourceQuery;
+import eu.semagrow.core.impl.plan.ops.SourceQuery;
 
 import org.openrdf.model.URI;
 import org.openrdf.model.Value;
@@ -36,7 +38,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return getCardinality(expr, null);
     }
 
-    public long getCardinality(TupleExpr expr, URI source)  {
+    public long getCardinality(TupleExpr expr, Site source)  {
 
         if (expr instanceof StatementPattern)
             return getCardinality((StatementPattern)expr, source);
@@ -65,36 +67,36 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
 
     }
 
-    public long getCardinality(StatementPattern pattern, URI source) {
+    public long getCardinality(StatementPattern pattern, Site source) {
 
         if (source != null)
-            return statistics.getStats(pattern, EmptyBindingSet.getInstance(), source).getCardinality();
+            return statistics.getStats(pattern, EmptyBindingSet.getInstance(), (URI) source.getID()).getCardinality();
         else
             return 0;
 
     }
 
-    public long getCardinality(Union union, URI source) {
+    public long getCardinality(Union union, Site source) {
         return getCardinality(union.getLeftArg(), source) +
                getCardinality(union.getRightArg(), source);
     }
 
-    public long getCardinality(Filter filter, URI source) {
+    public long getCardinality(Filter filter, Site source) {
         double sel = getConditionSelectivity(filter.getCondition(), filter.getArg(), source);
         return (long) (getCardinality(filter.getArg(), source) * sel);
     }
 
-    public long getCardinality(Projection projection, URI source) {
+    public long getCardinality(Projection projection, Site source) {
         return getCardinality(projection.getArg(), source);
     }
 
-    public long getCardinality(Slice slice, URI source) {
+    public long getCardinality(Slice slice, Site source) {
         long card = getCardinality(slice.getArg(), source);
         long sliceCard = slice.getOffset() + slice.getLimit();
         return (card > sliceCard)? sliceCard : card;
     }
 
-    public long getCardinality(Join join, URI source){
+    public long getCardinality(Join join, Site source){
 
         long card1 = getCardinality(join.getLeftArg(), source);
 
@@ -111,7 +113,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return tt;
     }
 
-    public long getCardinality(LeftJoin join, URI source) {
+    public long getCardinality(LeftJoin join, Site source) {
         long card1 = getCardinality(join.getLeftArg(), source);
         long card2 = getCardinality(join.getRightArg(), source);
 
@@ -124,19 +126,19 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return (long)(card1 * card2 * sel) + (long)(card1 * (1/sel));
     }
 
-    public long getCardinality(SourceQuery query, URI source) {
+    public long getCardinality(SourceQuery query, Site source) {
         long card = 0;
-        for (URI src : query.getSources())
+        for (Site src : query.getSources())
             card += getCardinality(query.getArg(), src);
         return card;
     }
 
-    public long getCardinality(EmptySet set, URI source) {
+    public long getCardinality(EmptySet set, Site source) {
         return 0;
     }
 
 
-    public long getCardinality(BindingSetAssignment assignment, URI source){
+    public long getCardinality(BindingSetAssignment assignment, Site source){
         Iterator<BindingSet> it = assignment.getBindingSets().iterator();
 
         int i = 0;
@@ -156,7 +158,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
      * @param source a referring data source
      * @return the selectivity factor
      */
-    public double getJoinSelectivity(Join join, URI source) {
+    public double getJoinSelectivity(Join join, Site source) {
 
         Set<String> varNames = getCommonVariables(join.getLeftArg(), join.getRightArg());
         // TODO: check if calculation of selectivity of multiple variables is correct.
@@ -180,7 +182,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
      * @param source
      * @return
      */
-    public double getConditionSelectivity(ValueExpr condition, TupleExpr expr, URI source) {
+    public double getConditionSelectivity(ValueExpr condition, TupleExpr expr, Site source) {
         if (condition instanceof And) {
             return getConditionSelectivity((And)condition, expr, source);
         } else if (condition instanceof Or) {
@@ -193,24 +195,24 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return 0.25;
     }
 
-    public double getConditionSelectivity(And valueExpr, TupleExpr expr, URI source) {
+    public double getConditionSelectivity(And valueExpr, TupleExpr expr, Site source) {
         double sel1 = getConditionSelectivity(valueExpr.getLeftArg(), expr, source);
         double sel2 = getConditionSelectivity(valueExpr.getRightArg(), expr, source);
         return sel1 * sel2;
     }
 
-    public double getConditionSelectivity(Or valueExpr, TupleExpr expr, URI source) {
+    public double getConditionSelectivity(Or valueExpr, TupleExpr expr, Site source) {
         double sel1 = getConditionSelectivity(valueExpr.getLeftArg(), expr, source);
         double sel2 = getConditionSelectivity(valueExpr.getRightArg(), expr, source);
         return sel1 + sel2 - sel1 * sel2;
     }
 
-    public double getConditionSelectivity(Not valueExpr, TupleExpr expr, URI source) {
+    public double getConditionSelectivity(Not valueExpr, TupleExpr expr, Site source) {
         double sel = getConditionSelectivity(valueExpr.getArg(), expr, source);
         return 1 - sel;
     }
 
-    public double getConditionSelectivity(Compare valueExpr, TupleExpr expr, URI source) {
+    public double getConditionSelectivity(Compare valueExpr, TupleExpr expr, Site source) {
         Compare.CompareOp op = valueExpr.getOperator();
         return 0.5;
     }
@@ -219,7 +221,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return getConditionSelectivity(condition, expr, null);
     }
 
-    public double getVarSelectivity(String varName, TupleExpr expr, URI source) {
+    public double getVarSelectivity(String varName, TupleExpr expr, Site source) {
         if (expr instanceof StatementPattern)
             return getVarSelectivity(varName, (StatementPattern)expr, source);
         else if (expr instanceof BinaryTupleOperator)
@@ -237,14 +239,14 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         return 0.5;
     }
 
-    public double getVarSelectivity(String varName, StatementPattern pattern, URI source) {
+    public double getVarSelectivity(String varName, StatementPattern pattern, Site source) {
 
         long distinct = getVarCardinality(varName, pattern, source);
 
         return ((double)1/distinct);
     }
 
-    public double getVarSelectivity(String varName, BindingSetAssignment assignment, URI source) {
+    public double getVarSelectivity(String varName, BindingSetAssignment assignment, Site source) {
         if (assignment.getBindingNames().contains(varName))
             return 1;
         else {
@@ -267,19 +269,19 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
         }
     }
 
-    public double getVarSelectivity(String varName, SourceQuery expr, URI source) {
+    public double getVarSelectivity(String varName, SourceQuery expr, Site source) {
         double sel = 1;
-        for (URI src : expr.getSources()) {
+        for (Site src : expr.getSources()) {
             sel = Math.min(sel, getVarSelectivity(varName, expr.getArg(), src));
         }
         return sel;
     }
 
-    public double getVarSelectivity(String varName, Plan p, URI source) {
-        return getVarSelectivity(varName, p.getArg(), p.getProperties().getSite().getURI());
+    public double getVarSelectivity(String varName, Plan p, Site source) {
+        return getVarSelectivity(varName, p.getArg(), p.getProperties().getSite());
     }
 
-    public double getVarSelectivity(String varName, UnaryTupleOperator expr, URI source) {
+    public double getVarSelectivity(String varName, UnaryTupleOperator expr, Site source) {
         if (expr instanceof SourceQuery)
             return getVarSelectivity(varName, (SourceQuery)expr, source);
         else if (expr instanceof Plan) {
@@ -288,7 +290,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
             return getVarSelectivity(varName, expr.getArg(), source);
     }
 
-    public double getVarSelectivity(String varName, BinaryTupleOperator expr, URI source) {
+    public double getVarSelectivity(String varName, BinaryTupleOperator expr, Site source) {
         double leftSel = getVarSelectivity(varName, expr.getLeftArg(), source);
         double rightSel = getVarSelectivity(varName, expr.getRightArg(), source);
         return Math.min(leftSel, rightSel);
@@ -301,9 +303,9 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
      * @param source a potential referring data source
      * @return the estimated number of distinct values of a variable.
      */
-    public long getVarCardinality(String varName, StatementPattern pattern, URI source) {
+    public long getVarCardinality(String varName, StatementPattern pattern, Site source) {
 
-        Statistics stats = statistics.getStats(pattern, EmptyBindingSet.getInstance(), source);
+        Statistics stats = statistics.getStats(pattern, EmptyBindingSet.getInstance(), (URI) source.getID());
 
         return stats.getVarCardinality(varName);
     }

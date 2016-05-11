@@ -6,7 +6,7 @@ import eu.semagrow.core.config.SourceSelectorFactory;
 import eu.semagrow.core.config.SourceSelectorImplConfig;
 import eu.semagrow.core.estimator.CardinalityEstimator;
 import eu.semagrow.core.impl.alignment.QueryTransformationImpl;
-import eu.semagrow.core.impl.estimator.CostEstimator;
+import eu.semagrow.core.estimator.CostEstimator;
 import eu.semagrow.core.impl.selector.*;
 import eu.semagrow.core.impl.statistics.CachedStatisticsProvider;
 import eu.semagrow.core.impl.statistics.VOIDStatisticsProvider;
@@ -127,7 +127,7 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
             if (transformation != null)
                 selector = new SourceSelectorWithQueryTransform(selector, transformation);
 
-            selector = new AskSourceSelector(selector);
+            //selector = new AskSourceSelector(selector);
             selector = new CachedSourceSelector(selector);
 
             return selector;

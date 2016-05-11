@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.evaluation;
 
-import eu.semagrow.core.impl.evaluation.rx.reactor.QueryExecutorImpl;
+import eu.semagrow.core.impl.sparql.QueryExecutorImpl;
 import org.openrdf.model.URI;
 import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;

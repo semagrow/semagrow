@@ -1,7 +1,7 @@
 package eu.semagrow.stack.webapp.controllers;
 
 import eu.semagrow.commons.utils.FileUtils;
-import eu.semagrow.core.decomposer.QueryDecompositionException;
+import eu.semagrow.core.plan.QueryDecompositionException;
 import eu.semagrow.query.SemagrowTupleQuery;
 import eu.semagrow.repository.SemagrowRepository;
 import eu.semagrow.commons.CONSTANTS;
@@ -44,12 +44,10 @@ import org.openrdf.query.resultio.TupleQueryResultFormat;
 import org.openrdf.query.resultio.TupleQueryResultParserRegistry;
 import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriter;
 import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
-import org.openrdf.repository.Repository;
 import org.openrdf.repository.RepositoryConnection;
 import org.openrdf.repository.RepositoryException;
 import org.openrdf.repository.config.*;
 import org.openrdf.repository.http.HTTPQueryEvaluationException;
-import org.openrdf.repository.sail.config.SailRepositoryConfig;
 import org.openrdf.rio.RDFFormat;
 import org.openrdf.rio.RDFHandlerException;
 import org.openrdf.rio.RDFParser;

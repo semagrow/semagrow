@@ -1,6 +1,6 @@
 package eu.semagrow.core.estimator;
 
-import org.openrdf.model.URI;
+import eu.semagrow.core.source.Site;
 import org.openrdf.query.algebra.TupleExpr;
 
 
@@ -34,5 +34,5 @@ public interface CardinalityEstimator
      * @param source
      * @return
      */
-    long getCardinality( TupleExpr expr, URI source );
+    long getCardinality( TupleExpr expr, Site source );
 }

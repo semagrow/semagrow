@@ -1,6 +1,6 @@
 package eu.semagrow.core.estimator;
 
-import org.openrdf.model.URI;
+import eu.semagrow.core.source.Site;
 import org.openrdf.query.algebra.Join;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.ValueExpr;
@@ -26,7 +26,7 @@ public interface SelectivityEstimator
      * @return the selectivity factor
      */
 
-	double getJoinSelectivity( Join expr, URI source );
+	double getJoinSelectivity( Join expr, Site source );
 
 
     /**
@@ -47,7 +47,7 @@ public interface SelectivityEstimator
      * @return the estimated number of distinct values of a variable.
      */
 
-    double getVarSelectivity( String varName, TupleExpr expr, URI source );
+    double getVarSelectivity( String varName, TupleExpr expr, Site source );
 
     
     /**
@@ -61,7 +61,7 @@ public interface SelectivityEstimator
      * @return
      */
 
-    double getConditionSelectivity( ValueExpr condition, TupleExpr expr, URI source );
+    double getConditionSelectivity( ValueExpr condition, TupleExpr expr, Site source );
 
     
     /**

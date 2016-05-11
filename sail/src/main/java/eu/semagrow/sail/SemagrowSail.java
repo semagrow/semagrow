@@ -1,14 +1,13 @@
 package eu.semagrow.sail;
 
-import eu.semagrow.core.decomposer.QueryDecomposer;
+import eu.semagrow.core.plan.QueryDecomposer;
 import eu.semagrow.core.estimator.CardinalityEstimator;
-import eu.semagrow.core.evaluation.FederatedQueryEvaluation;
-import eu.semagrow.core.impl.estimator.CostEstimator;
-import eu.semagrow.core.impl.evaluation.QueryEvaluationImpl;
+import eu.semagrow.core.evalit.FederatedQueryEvaluation;
+import eu.semagrow.core.estimator.CostEstimator;
+import eu.semagrow.core.impl.evalit.QueryEvaluationImpl;
 import eu.semagrow.core.impl.evaluation.file.FileManager;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
-import eu.semagrow.core.impl.optimizer.FilterOptimizer;
-import eu.semagrow.core.impl.planner.DPQueryDecomposer;
+import eu.semagrow.core.impl.plan.DPQueryDecomposer;
 import eu.semagrow.core.impl.selector.RestrictiveSourceSelector;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.querylog.api.QueryLogException;
@@ -20,9 +19,7 @@ import org.openrdf.model.URI;
 import org.openrdf.model.ValueFactory;
 import org.openrdf.model.impl.ValueFactoryImpl;
 import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.evaluation.impl.CompareOptimizer;
 import org.openrdf.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
-import org.openrdf.query.algebra.evaluation.impl.SameTermFilterOptimizer;
 import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
 import org.openrdf.query.resultio.TupleQueryResultFormat;
 import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
@@ -81,10 +78,10 @@ public class SemagrowSail extends SailBase {
         CostEstimator costEstimator = getCostEstimator();
 
         QueryOptimizerList optimizer = new QueryOptimizerList(
-                new ConjunctiveConstraintSplitter(),
+                new ConjunctiveConstraintSplitter()//,
                 //new CompareOptimizer(),
                 //new SameTermFilterOptimizer(),
-                new FilterOptimizer()
+                //new FilterOptimizer()
         );
 
         return optimizer;

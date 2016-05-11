@@ -6,8 +6,7 @@ import com.fluidops.fedx.FederationManager;
 import com.fluidops.fedx.algebra.StatementSource;
 import com.fluidops.fedx.cache.Cache;
 import com.fluidops.fedx.structures.Endpoint;
-import eu.semagrow.core.source.SourceMetadata;
-import eu.semagrow.hibiscus.util.BPGCollector;
+import eu.semagrow.core.source.*;
 import org.aksw.sparql.query.algebra.helpers.BasicGraphPatternExtractor;
 import org.openrdf.model.URI;
 import org.openrdf.model.impl.ValueFactoryImpl;
@@ -15,7 +14,6 @@ import org.openrdf.query.algebra.QueryRoot;
 import org.openrdf.query.algebra.StatementPattern;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.helpers.StatementPatternCollector;
-import org.openrdf.query.parser.ParsedQuery;
 
 import java.util.*;
 
@@ -38,6 +36,9 @@ public class QuetsalSourceSelector {
     {
         List<SourceMetadata> metadata = new LinkedList<>();
 
+        SiteRegistry registry = SiteRegistry.getInstance();
+        SiteFactory factory = registry.get("SPARQL");
+
         for (StatementPattern pattern : lst.keySet()) {
             List<StatementSource> sources = lst.get(pattern);
             if (!sources.isEmpty()) {
@@ -45,8 +46,11 @@ public class QuetsalSourceSelector {
                     URI endpoint = toURI(src);
                     metadata.add(new SourceMetadata() {
                         @Override
-                        public List<URI> getEndpoints() {
-                            return Collections.singletonList(endpoint);
+                        public List<Site> getSites() {
+                            //FIXME
+                            SiteConfig config = factory.getConfig();
+                            config.parse(null, endpoint);
+                            return Collections.singletonList(factory.getSite(config));
                         }
 
                         @Override
