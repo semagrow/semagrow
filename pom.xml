@@ -273,6 +273,5 @@
         <module>sail</module>
         <module>http</module>
         <module>quetsal</module>
-        <module>cassandra</module>
     </modules>
 </project>
