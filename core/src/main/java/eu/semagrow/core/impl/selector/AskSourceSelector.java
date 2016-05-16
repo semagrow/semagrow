@@ -122,9 +122,13 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			 SourceMetadata m = metadata;
 
 			 Callable<SourceMetadata> f = () -> {
-				 //FIXME
-				 boolean ask = askPattern(pattern, ((SPARQLSite)sources.get(0)).getURI(), false);
-				 return ask ? m : null;
+				 if (sources.get(0) instanceof SPARQLSite) {
+					 boolean ask = askPattern(pattern, ((SPARQLSite) sources.get(0)).getURI(), false);
+					 return ask ? m : null;
+				 }
+				 else {
+					 return m;
+				 }
 			 };
 
 			 todo.add(f);
