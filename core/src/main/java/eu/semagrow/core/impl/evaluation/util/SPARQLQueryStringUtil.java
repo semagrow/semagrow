@@ -122,7 +122,10 @@ public class SPARQLQueryStringUtil {
 
         ParsedTupleQuery query = new ParsedTupleQuery(body);
 
-        return new SPARQLQueryRenderer().render(query);
+        String queryString = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
+        queryString = updateFunctionCallsSELECT(expr, queryString, computeVars(expr));
+
+        return queryString;
     }
 
     private static String buildAskSPARQLQuery(TupleExpr expr) throws Exception
