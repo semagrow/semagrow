@@ -3,12 +3,12 @@ package eu.semagrow.utils.sparqlutils;
 import eu.semagrow.commons.CONSTANTS;
 import java.util.HashMap;
 import java.util.HashSet;
-import org.openrdf.query.BooleanQuery;
-import org.openrdf.query.GraphQuery;
-import org.openrdf.query.Query;
-import org.openrdf.repository.sail.SailBooleanQuery;
-import org.openrdf.repository.sail.SailGraphQuery;
-import org.openrdf.repository.sail.SailTupleQuery;
+import org.eclipse.rdf4j.query.BooleanQuery;
+import org.eclipse.rdf4j.query.GraphQuery;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.repository.sail.SailBooleanQuery;
+import org.eclipse.rdf4j.repository.sail.SailGraphQuery;
+import org.eclipse.rdf4j.repository.sail.SailTupleQuery;
 
 /**
  *

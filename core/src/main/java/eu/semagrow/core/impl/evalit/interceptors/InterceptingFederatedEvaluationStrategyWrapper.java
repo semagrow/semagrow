@@ -2,10 +2,10 @@ package eu.semagrow.core.impl.evalit.interceptors;
 
 import eu.semagrow.core.evalit.FederatedEvaluationStrategy;
 import eu.semagrow.core.evalit.util.FederatedEvaluationStrategyWrapper;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.Collections;
 import java.util.List;

@@ -7,17 +7,17 @@ import eu.semagrow.core.evalit.FederatedQueryEvaluation;
 import eu.semagrow.core.evalit.FederatedQueryEvaluationSession;
 import eu.semagrow.core.impl.evaluation.reactor.FederatedEvaluationStrategyImpl;
 import eu.semagrow.core.impl.sparql.QueryExecutorImpl;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.SailReadOnlyException;
-import org.openrdf.sail.helpers.SailConnectionBase;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.sail.SailException;
+import org.eclipse.rdf4j.sail.SailReadOnlyException;
+import org.eclipse.rdf4j.sail.helpers.AbstractSailConnection;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,7 +30,7 @@ import java.util.Collections;
  * A Semagrow Readonly Connection
  * @author acharal@iit.demokritos.gr
  */
-public class SemagrowSailConnection extends SailConnectionBase {
+public class SemagrowSailConnection extends AbstractSailConnection {
 
     private final Logger logger = LoggerFactory.getLogger(SemagrowSailConnection.class);
 
@@ -38,8 +38,8 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
     private FederatedQueryEvaluation queryEvaluation;
 
-    private static final URI METADATA_GRAPH =
-            ValueFactoryImpl.getInstance().createURI("http://www.semagrow.eu/metadata");
+    private static final IRI METADATA_GRAPH =
+            SimpleValueFactory.getInstance().createIRI("http://www.semagrow.eu/metadata");
 
     private static QueryExecutorImpl executor;
 
@@ -73,7 +73,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
                                     boolean b) throws SailException {
 
         return evaluateInternal(tupleExpr, dataset, bindings, b, false,
-                Collections.<URI>emptySet(), Collections.<URI>emptySet());
+                Collections.<IRI>emptySet(), Collections.<IRI>emptySet());
     }
 
 
@@ -81,7 +81,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
     public final CloseableIteration<? extends BindingSet, QueryEvaluationException> evaluate(
             TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
             boolean includeInferred, boolean includeProvenance,
-            Collection<URI> includeOnlySources, Collection<URI> excludeSources)
+            Collection<IRI> includeOnlySources, Collection<IRI> excludeSources)
             throws SailException
     {
 
@@ -131,8 +131,8 @@ public class SemagrowSailConnection extends SailConnectionBase {
                          Dataset dataset,
                          BindingSet bindings,
                          boolean b, boolean p,
-                         Collection<URI> includeOnlySources,
-                         Collection<URI> excludeSources)
+                         Collection<IRI> includeOnlySources,
+                         Collection<IRI> excludeSources)
             throws SailException {
 
         logger.debug("Starting decomposition of " + tupleExpr.toString());
@@ -148,8 +148,8 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
     public  Publisher<? extends BindingSet>
         evaluateReactive(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings, boolean b, boolean p,
-                         Collection<URI> includeOnlySources,
-                         Collection<URI> excludeSources)
+                         Collection<IRI> includeOnlySources,
+                         Collection<IRI> excludeSources)
             throws SailException
     {
         return evaluateInternalReactive(tupleExpr, dataset, bindings, b, p, includeOnlySources, excludeSources);
@@ -160,8 +160,8 @@ public class SemagrowSailConnection extends SailConnectionBase {
                      Dataset dataset,
                      BindingSet bindings,
                      boolean b, boolean p,
-                     Collection<URI> includeOnlySources,
-                     Collection<URI> excludeSources)
+                     Collection<IRI> includeOnlySources,
+                     Collection<IRI> excludeSources)
             throws SailException
     {
         long start_time = System.currentTimeMillis();
@@ -221,11 +221,11 @@ public class SemagrowSailConnection extends SailConnectionBase {
             throws QueryDecompositionException
     {
         return decompose(tupleExpr, dataset, bindings,
-                Collections.<URI>emptySet(), Collections.<URI>emptySet());
+                Collections.<IRI>emptySet(), Collections.<IRI>emptySet());
     }
 
     public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
-                               Collection<URI> includeOnlySources, Collection<URI> excludeSources)
+                               Collection<IRI> includeOnlySources, Collection<IRI> excludeSources)
     {
         QueryOptimizer optimizer = semagrowSail.getOptimizer();
         optimizer.optimize(tupleExpr, dataset, bindings);
@@ -248,7 +248,7 @@ public class SemagrowSailConnection extends SailConnectionBase {
 
     @Override
     protected CloseableIteration<? extends Statement, SailException>
-                    getStatementsInternal(Resource resource, URI uri, Value value, boolean b, Resource... resources) throws SailException {
+                    getStatementsInternal(Resource resource, IRI uri, Value value, boolean b, Resource... resources) throws SailException {
         return null;
     }
 
@@ -273,12 +273,12 @@ public class SemagrowSailConnection extends SailConnectionBase {
     }
 
     @Override
-    protected void addStatementInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+    protected void addStatementInternal(Resource resource, IRI uri, Value value, Resource... resources) throws SailException {
 
     }
 
     @Override
-    protected void removeStatementsInternal(Resource resource, URI uri, Value value, Resource... resources) throws SailException {
+    protected void removeStatementsInternal(Resource resource, IRI uri, Value value, Resource... resources) throws SailException {
 
     }
 

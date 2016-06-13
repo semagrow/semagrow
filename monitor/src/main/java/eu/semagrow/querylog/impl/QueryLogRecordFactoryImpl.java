@@ -2,10 +2,8 @@ package eu.semagrow.querylog.impl;
 
 import eu.semagrow.querylog.api.QueryLogRecord;
 import eu.semagrow.querylog.api.QueryLogRecordFactory;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
 
 /**
  * Created by angel on 10/22/14.
@@ -16,7 +14,7 @@ public class QueryLogRecordFactoryImpl implements QueryLogRecordFactory {
 
 
     @Override
-    public QueryLogRecord createQueryLogRecord(URI endpoint,
+    public QueryLogRecord createQueryLogRecord(IRI endpoint,
                                                String expr,
                                                BindingSet bindingNames)
     {

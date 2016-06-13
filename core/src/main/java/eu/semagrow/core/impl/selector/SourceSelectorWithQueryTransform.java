@@ -5,12 +5,12 @@ import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.transformation.EquivalentURI;
 import eu.semagrow.core.transformation.QueryTransformation;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.Var;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.Var;
 
 import java.util.*;
 
@@ -76,7 +76,7 @@ public class SourceSelectorWithQueryTransform extends SourceSelectorWrapper {
         Set<FuzzyEntry<Var>> vars = new HashSet<FuzzyEntry<Var>>();
 
         Value val = v.getValue();
-        if (val != null && val instanceof URI) {
+        if (val != null && val instanceof IRI) {
             Collection<EquivalentURI> uris =  getEquivalentURI(v);
             for(EquivalentURI uri : uris)
             {
@@ -93,8 +93,8 @@ public class SourceSelectorWithQueryTransform extends SourceSelectorWrapper {
     private Collection<EquivalentURI> getEquivalentURI(Var v) {
         Value val = v.getValue();
 
-        if (val != null && val instanceof URI) {
-            URI uri = (URI)val;
+        if (val != null && val instanceof IRI) {
+            IRI uri = (IRI)val;
             return queryTransformation.retrieveEquivalentURIs(uri);
         }
 
@@ -143,7 +143,7 @@ public class SourceSelectorWithQueryTransform extends SourceSelectorWrapper {
 
         public StatementPattern target() { return entry.getElem(); }
 
-        public Collection<URI> getSchema(String var) { return metadata.getSchema(var); }
+        public Collection<IRI> getSchema(String var) { return metadata.getSchema(var); }
 
         public boolean isTransformed() { return true; }
 

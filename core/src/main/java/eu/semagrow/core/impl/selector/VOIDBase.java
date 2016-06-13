@@ -2,13 +2,13 @@ package eu.semagrow.core.impl.selector;
 
 import eu.semagrow.commons.vocabulary.SEVOD;
 import eu.semagrow.commons.vocabulary.VOID;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.*;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -32,7 +32,7 @@ public abstract class VOIDBase {
         this.voidRepository = voidRepository;
     }
 
-    protected Set<Resource> getMatchingDatasetsOfPredicate(URI pred) {
+    protected Set<Resource> getMatchingDatasetsOfPredicate(IRI pred) {
         String q = "SELECT ?dataset { ?dataset <" + VOID.PROPERTY + "> ?prop. \n" +
                           "?dataset <"+ VOID.TRIPLES + "> ?triples. FILTER (?triples > 0) .  }";
         //String q = "SELECT ?dataset { ?dataset ?p ?p1. }";
@@ -41,7 +41,7 @@ public abstract class VOIDBase {
         return evalQuerySet(q, bindings, "dataset");
     }
 
-    protected Set<Resource> getMatchingDatasetsOfSubject(URI subject) {
+    protected Set<Resource> getMatchingDatasetsOfSubject(IRI subject) {
         //String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
         String q = "SELECT ?dataset { ?dataset <" + SEVOD.SUBJECTREGEXPATTERN + "> ?pattern .\n" +
                            "?dataset <"+ VOID.TRIPLES + "> ?triples. FILTER (?triples > 0) . FILTER regex(str(?subject), str(?pattern)). }";
@@ -50,7 +50,7 @@ public abstract class VOIDBase {
         return evalQuerySet(q, bindings, "dataset");
     }
 
-    protected Set<Resource> getMatchingDatasetsOfObject(URI subject) {
+    protected Set<Resource> getMatchingDatasetsOfObject(IRI subject) {
         //String q = "SELECT ?dataset { ?dataset <" + VOID.URIREGEXPATTERN + "> ?pattern . FILTER regex(str(?subject), str(?pattern)). }";
         String q = "SELECT ?dataset { ?dataset <" + SEVOD.OBJECTREGEXPATTERN + "> ?pattern . "+
                 "?dataset <"+ VOID.TRIPLES + "> ?triples. FILTER (?triples > 0) . FILTER regex(str(?subject), str(?pattern)). }";
@@ -59,14 +59,14 @@ public abstract class VOIDBase {
         return evalQuerySet(q, bindings, "dataset");
     }
 
-    protected Set<Resource> getMatchingDatasetsOfEndpoint(URI endpoint) {
+    protected Set<Resource> getMatchingDatasetsOfEndpoint(IRI endpoint) {
         String q = "SELECT ?dataset { ?dataset <" + VOID.SPARQLENDPOINT + "> ?endpoint. }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("endpoint", endpoint);
         return evalQuerySet(q, bindings, "dataset");
     }
 
-    protected Set<Resource> getMatchingDatasetsOfClass(URI c) {
+    protected Set<Resource> getMatchingDatasetsOfClass(IRI c) {
         String q = "SELECT ?dataset { ?dataset <" + VOID.CLASS + "> ?class. }";
         QueryBindingSet bindings = new QueryBindingSet();
         bindings.addBinding("class", c);
@@ -91,7 +91,7 @@ public abstract class VOIDBase {
         return null;
     }
 
-    protected URI getEndpoint(Resource dataset) {
+    protected IRI getEndpoint(Resource dataset) {
         String qStr = "SELECT ?endpoint { ?dataset <" + VOID.SPARQLENDPOINT + "> ?endpoint }";
         RepositoryConnection conn = null;
         try {
@@ -103,7 +103,7 @@ public abstract class VOIDBase {
             if (!r.hasNext())
                 return null;
             else
-                return (URI)r.next().getBinding("endpoint").getValue();
+                return (IRI)r.next().getBinding("endpoint").getValue();
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -113,11 +113,11 @@ public abstract class VOIDBase {
         return null;
     }
 
-    protected Set<URI> getEndpoints() {
+    protected Set<IRI> getEndpoints() {
         String qStr = "SELECT DISTINCT ?endpoint { ?dataset <" + VOID.SPARQLENDPOINT + "> ?endpoint }";
         RepositoryConnection conn = null;
 
-        Set<URI> endpoints = new HashSet<URI>();
+        Set<IRI> endpoints = new HashSet<IRI>();
 
         try {
             conn = voidRepository.getConnection();
@@ -127,7 +127,7 @@ public abstract class VOIDBase {
             TupleQueryResult r = q.evaluate();
 
             while (r.hasNext()) {
-                URI e = (URI)r.next().getBinding("endpoint").getValue();
+                IRI e = (IRI)r.next().getBinding("endpoint").getValue();
                 if (e != null) {
                     endpoints.add(e);
                 }

@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.evalit.interceptors;
 
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
+import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
 
 /**
  * Created by angel on 6/27/14.

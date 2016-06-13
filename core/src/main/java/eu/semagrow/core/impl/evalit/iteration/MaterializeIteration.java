@@ -2,11 +2,11 @@ package eu.semagrow.core.impl.evalit.iteration;
 
 import eu.semagrow.core.impl.evaluation.file.MaterializationHandle;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
-import info.aduna.iteration.DelayedIteration;
-import info.aduna.iteration.Iteration;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.common.iteration.DelayedIteration;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
 
 import java.util.ArrayList;
 

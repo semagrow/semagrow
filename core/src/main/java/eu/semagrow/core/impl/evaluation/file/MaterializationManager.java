@@ -1,9 +1,9 @@
 package eu.semagrow.core.impl.evaluation.file;
 
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 
 /**
  * Created by angel on 10/20/14.
@@ -11,7 +11,7 @@ import org.openrdf.query.QueryEvaluationException;
 public interface MaterializationManager {
 
     CloseableIteration<BindingSet,QueryEvaluationException>
-        getResult(URI handle) throws QueryEvaluationException;
+        getResult(IRI handle) throws QueryEvaluationException;
 
     MaterializationHandle saveResult() throws QueryEvaluationException;
 

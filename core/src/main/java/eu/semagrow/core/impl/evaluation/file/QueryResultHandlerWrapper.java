@@ -1,9 +1,9 @@
 package eu.semagrow.core.impl.evaluation.file;
 
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryResultHandler;
-import org.openrdf.query.QueryResultHandlerException;
-import org.openrdf.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryResultHandler;
+import org.eclipse.rdf4j.query.QueryResultHandlerException;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
 
 import java.util.List;
 

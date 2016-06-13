@@ -1,13 +1,13 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.CloseableIterationBase;
-import info.aduna.iteration.Iteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.AbstractCloseableIteration;
+import org.eclipse.rdf4j.common.iteration.Iteration;
 
 /**
  * Created by angel on 12/4/14.
  */
-public abstract class FlatMapIteration<T,S,X extends Exception> extends CloseableIterationBase<T,X> {
+public abstract class FlatMapIteration<T,S,X extends Exception> extends AbstractCloseableIteration<T,X> {
 
     private final Iteration<? extends S,? extends X> iter;
 

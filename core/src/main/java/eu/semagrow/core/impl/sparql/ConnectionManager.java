@@ -1,11 +1,9 @@
-package eu.semagrow.core.impl.evaluation;
+package eu.semagrow.core.impl.sparql;
 
-import eu.semagrow.core.impl.sparql.QueryExecutorImpl;
-import org.openrdf.model.URI;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sparql.SPARQLRepository;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +16,7 @@ import java.util.Map;
 public class ConnectionManager {
 
     protected final Logger logger = LoggerFactory.getLogger(QueryExecutorImpl.class);
-    private Map<URI,Repository> repoMap = new HashMap<URI,Repository>();
+    private Map<IRI,Repository> repoMap = new HashMap<IRI,Repository>();
     private Integer countconn = 0;
 
     public void initialize() { }
@@ -34,7 +32,7 @@ public class ConnectionManager {
         }
     }
 
-    public RepositoryConnection getConnection(URI endpoint) throws RepositoryException {
+    public RepositoryConnection getConnection(IRI endpoint) throws RepositoryException {
         Repository repo = null;
 
         if (!repoMap.containsKey(endpoint)) {

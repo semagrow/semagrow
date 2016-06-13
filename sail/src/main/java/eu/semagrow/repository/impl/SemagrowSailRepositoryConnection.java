@@ -1,15 +1,18 @@
 package eu.semagrow.repository.impl;
 
+import eu.semagrow.query.sparql.SPARQLParserFactory;
 import eu.semagrow.repository.SemagrowRepositoryConnection;
 import eu.semagrow.query.SemagrowQuery;
 import eu.semagrow.query.impl.SemagrowSailBooleanQuery;
 import eu.semagrow.query.impl.SemagrowSailTupleQuery;
-import org.openrdf.query.*;
-import org.openrdf.query.parser.*;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.base.RepositoryConnectionWrapper;
-import org.openrdf.repository.sail.*;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.parser.*;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.base.RepositoryConnectionWrapper;
+import org.eclipse.rdf4j.repository.sail.*;
+
+import java.util.Optional;
 
 /**
  * Created by angel on 6/10/14.
@@ -22,6 +25,11 @@ public class SemagrowSailRepositoryConnection extends RepositoryConnectionWrappe
                                             RepositoryConnection baseConnection)
     {
         super(repository, baseConnection);
+        Optional<QueryParserFactory> factory = QueryParserRegistry.getInstance().get(QueryLanguage.SPARQL);
+        if (factory.isPresent()) {
+            QueryParserRegistry.getInstance().remove(factory.get());
+            QueryParserRegistry.getInstance().add(new SPARQLParserFactory());
+        }
     }
 
     @Override

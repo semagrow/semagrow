@@ -3,11 +3,11 @@ package eu.semagrow.core.impl.selector;
 import eu.semagrow.core.source.Site;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.core.source.SourceMetadata;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.*;
 
@@ -16,32 +16,32 @@ import java.util.*;
  */
 public class RestrictiveSourceSelector extends SourceSelectorWrapper {
 
-    private Set<URI> includeOnly;
+    private Set<IRI> includeOnly;
 
-    private Set<URI> exclude;
+    private Set<IRI> exclude;
 
     public RestrictiveSourceSelector(SourceSelector selector) {
         super(selector);
-        includeOnly = new HashSet<URI>();
-        exclude = new HashSet<URI>();
+        includeOnly = new HashSet<IRI>();
+        exclude = new HashSet<IRI>();
     }
 
     public RestrictiveSourceSelector(SourceSelector selector,
-                                     Collection<URI> includeOnly,
-                                     Collection<URI> exclude)
+                                     Collection<IRI> includeOnly,
+                                     Collection<IRI> exclude)
     {
         this(selector);
         includeOnlySources(includeOnly);
         excludeSources(exclude);
     }
 
-    public void excludeSource(URI source) { exclude.add(source); }
+    public void excludeSource(IRI source) { exclude.add(source); }
 
-    public void excludeSources(Collection<URI> sources) { exclude.addAll(sources); }
+    public void excludeSources(Collection<IRI> sources) { exclude.addAll(sources); }
 
-    public void includeOnlySource(URI source) { includeOnly.add(source); }
+    public void includeOnlySource(IRI source) { includeOnly.add(source); }
 
-    public void includeOnlySources(Collection<URI> sources) { includeOnly.addAll(sources); }
+    public void includeOnlySources(Collection<IRI> sources) { includeOnly.addAll(sources); }
 
     public boolean isRestrictive() { return !(includeOnly.isEmpty() && exclude.isEmpty()); }
 
@@ -96,9 +96,9 @@ public class RestrictiveSourceSelector extends SourceSelectorWrapper {
     protected class IncludeOnlySourceMetadata implements SourceMetadata {
 
         private final SourceMetadata metadata;
-        private final Set<URI> includeOnly;
+        private final Set<IRI> includeOnly;
 
-        public IncludeOnlySourceMetadata(final SourceMetadata metadata, final Set<URI> includeOnly) {
+        public IncludeOnlySourceMetadata(final SourceMetadata metadata, final Set<IRI> includeOnly) {
             this.metadata = metadata;
             this.includeOnly = includeOnly;
         }
@@ -113,7 +113,7 @@ public class RestrictiveSourceSelector extends SourceSelectorWrapper {
 
         public StatementPattern target() { return metadata.target(); }
 
-        public Collection<URI> getSchema(String var) { return metadata.getSchema(var); }
+        public Collection<IRI> getSchema(String var) { return metadata.getSchema(var); }
 
         public boolean isTransformed() { return metadata.isTransformed(); }
 

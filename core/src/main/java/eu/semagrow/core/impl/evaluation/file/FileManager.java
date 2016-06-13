@@ -1,13 +1,13 @@
 package eu.semagrow.core.impl.evaluation.file;
 
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryResultHandler;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.resultio.*;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryResultHandler;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.resultio.*;
 
 import java.io.*;
 import java.net.URISyntaxException;
@@ -41,16 +41,16 @@ public class FileManager implements MaterializationManager {
 
     @Override
     public CloseableIteration<BindingSet,QueryEvaluationException>
-        getResult(URI q) throws QueryEvaluationException
+        getResult(IRI q) throws QueryEvaluationException
     {
         try {
             File f = new File(convertbackURI(q));
             TupleQueryResultParserRegistry registry = TupleQueryResultParserRegistry.getInstance();
-            TupleQueryResultFormat ff = registry.getFileFormatForFileName(f.getAbsolutePath());
-            TupleQueryResultParserFactory factory = registry.get(ff);
+            QueryResultFormat ff = registry.getFileFormatForFileName(f.getAbsolutePath()).get();
+            TupleQueryResultParserFactory factory = registry.get(ff).get();
             TupleQueryResultParser parser = factory.getParser();
             InputStream in = new FileInputStream(f);
-            org.openrdf.http.client.BackgroundTupleResult result = new org.openrdf.http.client.BackgroundTupleResult(parser, in, null);
+            org.eclipse.rdf4j.http.client.BackgroundTupleResult result = new org.eclipse.rdf4j.http.client.BackgroundTupleResult(parser, in);
 
            // execute(result);
             return result;
@@ -64,7 +64,7 @@ public class FileManager implements MaterializationManager {
 
         try {
             File file = getNewFile();
-            URI storeId = convertURI(file.toURI());
+            IRI storeId = convertURI(file.toURI());
             OutputStream out = new FileOutputStream(file, true);
             TupleQueryResultWriter writer = writerFactory.getWriter(out);
             return new StoreHandler(storeId, writer, out);
@@ -83,11 +83,11 @@ public class FileManager implements MaterializationManager {
         return File.createTempFile(filePrefix, "." + ext, baseDir);
     }
 
-    public static URI convertURI(java.net.URI uri) {
-        return ValueFactoryImpl.getInstance().createURI(uri.toString());
+    public static IRI convertURI(java.net.URI uri) {
+        return SimpleValueFactory.getInstance().createIRI(uri.toString());
     }
 
-    public static java.net.URI convertbackURI(URI uri) throws URISyntaxException {
+    public static java.net.URI convertbackURI(IRI uri) throws URISyntaxException {
         return new java.net.URI(uri.stringValue());
     }
 
@@ -95,17 +95,17 @@ public class FileManager implements MaterializationManager {
             extends QueryResultHandlerWrapper
             implements MaterializationHandle
     {
-        private URI id;
+        private IRI id;
         private boolean started = false;
         private OutputStream out;
 
-        public StoreHandler(URI id, QueryResultHandler handler, OutputStream out) {
+        public StoreHandler(IRI id, QueryResultHandler handler, OutputStream out) {
             super(handler);
             this.id = id;
             this.out = out;
         }
 
-        public URI getId() { return id; }
+        public IRI getId() { return id; }
 
         public void handleException(Exception e) {
             try {

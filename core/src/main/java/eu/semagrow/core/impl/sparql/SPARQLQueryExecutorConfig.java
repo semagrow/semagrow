@@ -2,8 +2,8 @@ package eu.semagrow.core.impl.sparql;
 
 import eu.semagrow.core.eval.QueryExecutorConfigException;
 import eu.semagrow.core.eval.QueryExecutorImplConfig;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 
 /**
  * Created by angel on 6/4/2016.
@@ -22,12 +22,12 @@ public class SPARQLQueryExecutorConfig implements QueryExecutorImplConfig {
     }
 
     @Override
-    public Resource export(Graph graph) {
+    public Resource export(Model graph) {
         return null;
     }
 
     @Override
-    public void parse(Graph graph, Resource resource) throws QueryExecutorConfigException {
+    public void parse(Model graph, Resource resource) throws QueryExecutorConfigException {
 
     }
 }

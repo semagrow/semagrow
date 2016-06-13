@@ -1,11 +1,11 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
 import eu.semagrow.core.evalit.EvaluationStrategy;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.evaluation.federation.JoinExecutorBase;
 
 /**
  * Created by angel on 6/5/14.
@@ -15,9 +15,9 @@ public class BindJoinIteration extends JoinExecutorBase<BindingSet> {
     private EvaluationStrategy evaluationStrategy;
 
     public BindJoinIteration(CloseableIteration<BindingSet,QueryEvaluationException> leftIter,
-                             TupleExpr rightArg, org.openrdf.query.BindingSet bindings,
+                             TupleExpr rightArg, org.eclipse.rdf4j.query.BindingSet bindings,
                              EvaluationStrategy strategy)
-            throws org.openrdf.query.QueryEvaluationException {
+            throws org.eclipse.rdf4j.query.QueryEvaluationException {
         super(leftIter, rightArg, bindings);
 
         this.evaluationStrategy = strategy;

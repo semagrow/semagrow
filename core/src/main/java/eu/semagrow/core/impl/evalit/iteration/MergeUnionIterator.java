@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
-import info.aduna.iteration.Iteration;
-import info.aduna.iteration.LookAheadIteration;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.common.iteration.LookAheadIteration;
 
 import java.util.*;
 

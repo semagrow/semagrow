@@ -3,11 +3,11 @@ package eu.semagrow.core.impl.selector;
 import eu.semagrow.art.Loggable;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
 
 import java.util.HashMap;
 import java.util.LinkedList;

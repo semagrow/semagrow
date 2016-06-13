@@ -7,7 +7,7 @@ import eu.semagrow.core.plan.Ordering;
 import eu.semagrow.core.plan.Plan;
 import eu.semagrow.core.plan.PlanProperties;
 import eu.semagrow.core.source.LocalSite;
-import org.openrdf.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.*;
 
 import java.util.HashSet;
 import java.util.Set;

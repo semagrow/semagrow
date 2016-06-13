@@ -1,9 +1,9 @@
 package eu.semagrow.core.plan;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.algebra.QueryModelVisitor;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.algebra.QueryModelVisitor;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
 
 import java.util.*;
 
@@ -14,7 +14,7 @@ public class Plan extends UnaryTupleOperator {
 
     private Set<TupleExpr> id;
 
-    private Map<String, Collection<URI>> schemas = new HashMap<String, Collection<URI>>();
+    private Map<String, Collection<IRI>> schemas = new HashMap<String, Collection<IRI>>();
 
     private PlanProperties properties;
 

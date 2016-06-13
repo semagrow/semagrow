@@ -1,7 +1,7 @@
 package eu.semagrow.commons;
 
-import org.openrdf.query.resultio.TupleQueryResultFormat;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 /**
  *

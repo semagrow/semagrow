@@ -1,7 +1,7 @@
 package eu.semagrow.core.source;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 
 /**
  * Created by angel on 5/4/2016.
@@ -12,8 +12,8 @@ public interface SiteConfig {
 
     void validate();
 
-    Resource export(Graph graph);
+    Resource export(Model graph);
 
-    void parse(Graph graph, Resource resource);
+    void parse(Model graph, Resource resource);
 
 }

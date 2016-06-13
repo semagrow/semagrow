@@ -2,15 +2,17 @@ package eu.semagrow.core.impl.evaluation;
 
 import eu.semagrow.core.eval.*;
 import eu.semagrow.core.source.Site;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+
+import java.util.Optional;
 
 /**
  * Created by antonis on 21/3/2016.
  */
 public class StaticQueryExecutorResolver implements QueryExecutorResolver {
 
-    ValueFactory vf = ValueFactoryImpl.getInstance();
+    ValueFactory vf = SimpleValueFactory.getInstance();
 
     QueryExecutor defaultExecutor;
 
@@ -23,11 +25,11 @@ public class StaticQueryExecutorResolver implements QueryExecutorResolver {
     @Override
     public QueryExecutor resolve(Site endpoint) {
 
-        QueryExecutorFactory factory = QueryExecutorRegistry.getInstance().get(endpoint.getType());
+        Optional<QueryExecutorFactory> factory = QueryExecutorRegistry.getInstance().get(endpoint.getType());
 
-        if (factory != null)
+        if (factory.isPresent())
             try {
-                return factory.getQueryExecutor(null);
+                return factory.get().getQueryExecutor(null);
             } catch (QueryExecutorConfigException e) {
                 return this.defaultExecutor;
             }

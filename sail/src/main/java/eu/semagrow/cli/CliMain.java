@@ -1,25 +1,24 @@
 package eu.semagrow.cli;
 
-import eu.semagrow.commons.utils.FileUtils;
 import eu.semagrow.config.SemagrowRepositoryConfig;
 import eu.semagrow.query.SemagrowTupleQuery;
 import eu.semagrow.repository.SemagrowRepository;
-import org.openrdf.model.Graph;
-import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.resultio.*;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.*;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.sail.config.SailConfigException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.resultio.*;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.config.*;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +48,7 @@ public class CliMain {
 
         SemagrowRepositoryConfig repoConfig = getConfig(repositoryConfig);
 
-        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get(repoConfig.getType());
+        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get(repoConfig.getType()).get();
 
         Repository repository = null;
         try {
@@ -94,7 +93,7 @@ public class CliMain {
 
         try {
             File file = new File(repositoryFile);
-            Graph configGraph = parseConfig(file);
+            Model configGraph = parseConfig(file);
             RepositoryConfig repConf = RepositoryConfig.create(configGraph, null);
             repConf.validate();
             RepositoryImplConfig implConf = repConf.getRepositoryImplConfig();
@@ -112,21 +111,21 @@ public class CliMain {
 
         OutputStream outStream = new FileOutputStream(resultFile);
 
-        TupleQueryResultFormat writerFormat = TupleQueryResultWriterRegistry.getInstance().getFileFormatForFileName(resultFile);
-        TupleQueryResultWriterFactory writerFactory = TupleQueryResultWriterRegistry.getInstance().get(writerFormat);
+        QueryResultFormat writerFormat = TupleQueryResultWriterRegistry.getInstance().getFileFormatForFileName(resultFile).get();
+        TupleQueryResultWriterFactory writerFactory = TupleQueryResultWriterRegistry.getInstance().get(writerFormat).get();
         return writerFactory.getWriter(outStream);
 
     }
 
 
-    protected static Graph parseConfig(File file)
+    protected static Model parseConfig(File file)
             throws SailConfigException, IOException
     {
-        RDFFormat format = Rio.getParserFormatForFileName(file.getAbsolutePath());
+        RDFFormat format = Rio.getParserFormatForFileName(file.getAbsolutePath()).get();
         if (format==null)
             throw new SailConfigException("Unsupported file format: " + file.getAbsolutePath());
         RDFParser parser = Rio.createParser(format);
-        Graph model = new GraphImpl();
+        Model model = new LinkedHashModel();
         parser.setRDFHandler(new StatementCollector(model));
         InputStream stream = new FileInputStream(file);
 

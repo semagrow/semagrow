@@ -5,15 +5,16 @@ import eu.semagrow.config.SemagrowRepositoryConfig;
 import eu.semagrow.query.SemagrowTupleQuery;
 import eu.semagrow.repository.SemagrowRepository;
 
-import org.openrdf.OpenRDFException;
-import org.openrdf.model.Graph;
-import org.openrdf.query.*;
-import org.openrdf.query.resultio.*;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.*;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.sail.config.SailConfigException;
+import org.eclipse.rdf4j.OpenRDFException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.resultio.*;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.config.*;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 
 import junit.framework.TestCase;
 
@@ -105,17 +106,17 @@ public class QueryTest extends TestCase
 	{
         // remove CSV and TSV format due to bug: literals are recognized as URIs if they contain a substring parsable as URI.
         TupleQueryResultParserRegistry registry = TupleQueryResultParserRegistry.getInstance();
-        registry.remove(registry.get(TupleQueryResultFormat.CSV));
-        registry.remove(registry.get(TupleQueryResultFormat.TSV));
-        registry.remove(registry.get(TupleQueryResultFormat.JSON));
+        registry.remove(registry.get(TupleQueryResultFormat.CSV).get());
+        registry.remove(registry.get(TupleQueryResultFormat.TSV).get());
+        registry.remove(registry.get(TupleQueryResultFormat.JSON).get());
 
         BooleanQueryResultParserRegistry booleanRegistry = BooleanQueryResultParserRegistry.getInstance();
-        booleanRegistry.remove(booleanRegistry.get(BooleanQueryResultFormat.JSON));
+        booleanRegistry.remove(booleanRegistry.get(BooleanQueryResultFormat.JSON).get());
 
 		try {
 	        SemagrowRepositoryConfig repoConfig = getConfig( QueryTest.repoConfigFile );
 	        String repoType = repoConfig.getType();
-	        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get( repoType );
+	        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get( repoType ).get();
 			this.repo = (SemagrowRepository)repoFactory.getRepository( repoConfig );
 			this.repo.initialize();
 			this.conn = this.repo.getConnection();
@@ -137,23 +138,23 @@ public class QueryTest extends TestCase
     private SemagrowRepositoryConfig getConfig( File file )
     throws OpenRDFException, IOException
     {
-    	Graph configGraph = parseConfig(file);
+    	Model configGraph = parseConfig(file);
     	RepositoryConfig repConf = RepositoryConfig.create(configGraph, null);
     	repConf.validate();
     	RepositoryImplConfig implConf = repConf.getRepositoryImplConfig();
     	return (SemagrowRepositoryConfig)implConf;
     }
 
-    protected Graph parseConfig(File file)
+    protected Model parseConfig(File file)
     throws SailConfigException, IOException
     {
-    	org.openrdf.rio.RDFFormat format =
-    			org.openrdf.rio.Rio.getParserFormatForFileName( file.getAbsolutePath() );
+    	org.eclipse.rdf4j.rio.RDFFormat format =
+    			org.eclipse.rdf4j.rio.Rio.getParserFormatForFileName( file.getAbsolutePath() ).get();
         if( format==null ) {
             throw new SailConfigException("Unsupported file format: " + file.getAbsolutePath());
         }
-        org.openrdf.rio.RDFParser parser = org.openrdf.rio.Rio.createParser(format);
-        Graph model = new org.openrdf.model.impl.GraphImpl();
+        org.eclipse.rdf4j.rio.RDFParser parser = org.eclipse.rdf4j.rio.Rio.createParser(format);
+        Model model = new LinkedHashModel();
         parser.setRDFHandler(new StatementCollector(model));
         InputStream stream = new FileInputStream(file);
 

@@ -7,11 +7,11 @@ import eu.semagrow.core.plan.*;
 import eu.semagrow.core.source.*;
 import eu.semagrow.core.estimator.CostEstimator;
 
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
-import org.openrdf.query.algebra.helpers.VarNameCollector;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
 
 import java.util.*;
 

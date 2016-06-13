@@ -5,9 +5,9 @@ import eu.semagrow.querylog.config.QueryLogFactory;
 import eu.semagrow.querylog.impl.rdf.QueryLogManager;
 import eu.semagrow.querylog.impl.rdf.RDFQueryLogWriter;
 import eu.semagrow.querylog.config.QueryLogConfig;
-import org.openrdf.rio.RDFWriter;
-import org.openrdf.rio.RDFWriterFactory;
-import org.openrdf.rio.RDFWriterRegistry;
+import org.eclipse.rdf4j.rio.RDFWriter;
+import org.eclipse.rdf4j.rio.RDFWriterFactory;
+import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 
 import java.io.*;
 
@@ -20,7 +20,7 @@ public class RDFQueryLogFactory implements QueryLogFactory {
 
     public RDFWriterFactory getRDFWriterFactory(RDFQueryLogConfig config) {
         RDFWriterRegistry writerRegistry = RDFWriterRegistry.getInstance();
-        RDFWriterFactory writerFactory = writerRegistry.get(config.getRdfFormat());
+        RDFWriterFactory writerFactory = writerRegistry.get(config.getRdfFormat()).get();
         return writerFactory;
     }
 

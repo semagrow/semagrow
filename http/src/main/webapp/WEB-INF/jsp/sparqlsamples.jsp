@@ -1,13 +1,13 @@
 <%@page import="eu.semagrow.commons.vocabulary.SEMAGROW"%>
-<%@page import="org.openrdf.model.vocabulary.DCTERMS"%>
+<%@page import="org.eclipse.rdf4j.model.vocabulary.DCTERMS"%>
 <%@page import="java.util.HashSet"%>
 <%@page import="java.util.HashMap"%>
-<%@page import="org.openrdf.model.Value"%>
-<%@page import="org.openrdf.model.URI"%>
-<%@page import="org.openrdf.model.Resource"%>
-<%@page import="org.openrdf.query.BindingSet"%>
-<%@page import="org.openrdf.query.impl.MutableTupleQueryResult"%>
-<%@page import="org.openrdf.query.TupleQueryResult"%>
+<%@page import="org.eclipse.rdf4j.model.Value"%>
+<%@page import="org.eclipse.rdf4j.model.URI"%>
+<%@page import="org.eclipse.rdf4j.model.Resource"%>
+<%@page import="org.eclipse.rdf4j.query.BindingSet"%>
+<%@page import="org.eclipse.rdf4j.query.impl.MutableTupleQueryResult"%>
+<%@page import="org.eclipse.rdf4j.query.TupleQueryResult"%>
 <%@page import="eu.semagrow.stack.webapp.controllers.SparqlSamplesController"%>
 <%@page import="eu.semagrow.commons.CONSTANTS"%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>

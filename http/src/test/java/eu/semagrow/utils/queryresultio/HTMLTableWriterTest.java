@@ -15,18 +15,19 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.openrdf.model.impl.LiteralImpl;
-import org.openrdf.model.impl.URIImpl;
-import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.sail.memory.MemoryStore;
+
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.MalformedQueryException;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 /**
  *
@@ -58,15 +59,16 @@ public class HTMLTableWriterTest {
         Repository rep = new SailRepository(new MemoryStore());
         RepositoryConnection repCon = null;
         ByteArrayOutputStream baos = null;
+        ValueFactory vf = SimpleValueFactory.getInstance();
         try {
             rep.initialize();
             repCon = rep.getConnection();
             repCon.begin();
-            repCon.add(new URIImpl("urn:x"), new URIImpl("urn:p"), new URIImpl("urn:p-uri"));
-            repCon.add(new URIImpl("urn:x"), new URIImpl("urn:p"), new LiteralImpl("p1-lit"));
-            repCon.add(new URIImpl("urn:x"), new URIImpl("urn:p"), new LiteralImpl("p1-lit-en","en"));
-            repCon.add(new URIImpl("urn:x"), new URIImpl("urn:p"), new LiteralImpl("p1-lit-typed",XMLSchema.STRING));
-            repCon.add(new URIImpl("urn:x"), new URIImpl("urn:p"), new LiteralImpl("true",XMLSchema.BOOLEAN));
+            repCon.add(vf.createIRI("urn:x"), vf.createIRI("urn:p"), vf.createIRI("urn:p-uri"));
+            repCon.add(vf.createIRI("urn:x"), vf.createIRI("urn:p"), vf.createLiteral("p1-lit"));
+            repCon.add(vf.createIRI("urn:x"), vf.createIRI("urn:p"), vf.createLiteral("p1-lit-en","en"));
+            repCon.add(vf.createIRI("urn:x"), vf.createIRI("urn:p"), vf.createLiteral("p1-lit-typed",XMLSchema.STRING));
+            repCon.add(vf.createIRI("urn:x"), vf.createIRI("urn:p"), vf.createLiteral("true",XMLSchema.BOOLEAN));
             repCon.commit();
             baos = new ByteArrayOutputStream();
             repCon.prepareTupleQuery(

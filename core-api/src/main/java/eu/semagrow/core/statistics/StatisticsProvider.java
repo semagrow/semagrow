@@ -1,8 +1,8 @@
 package eu.semagrow.core.statistics;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
 
 /**
  * A simple interface that provides statistics for tuples in a triple store
@@ -11,7 +11,7 @@ import org.openrdf.query.algebra.StatementPattern;
  */
 public interface StatisticsProvider {
 
-    long getTriplesCount(URI source);
+    long getTriplesCount(IRI source);
 
     /*
     long getPatternCount(StatementPattern pattern, URI source);
@@ -23,6 +23,6 @@ public interface StatisticsProvider {
     long getDistinctPredicates(StatementPattern pattern, URI source);
     */
 
-    Statistics getStats(StatementPattern pattern, BindingSet bindings, URI source);
+    Statistics getStats(StatementPattern pattern, BindingSet bindings, IRI source);
 
 }

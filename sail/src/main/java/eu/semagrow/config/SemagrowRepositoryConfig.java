@@ -1,19 +1,20 @@
 package eu.semagrow.config;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
-import org.openrdf.model.util.GraphUtil;
-import org.openrdf.model.util.GraphUtilException;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryImplConfigBase;
-import org.openrdf.sail.config.SailConfigException;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.repository.config.AbstractRepositoryImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 
-import static org.openrdf.repository.sail.config.SailRepositorySchema.SAILIMPL;
+import java.util.Optional;
+
+import static org.eclipse.rdf4j.repository.sail.config.SailRepositorySchema.SAILIMPL;
 
 /**
  * Created by angel on 6/10/14.
  */
-public class SemagrowRepositoryConfig extends RepositoryImplConfigBase {
+public class SemagrowRepositoryConfig extends AbstractRepositoryImplConfig {
 
     private SemagrowSailConfig sailConfig = new SemagrowSailConfig();
 
@@ -30,7 +31,7 @@ public class SemagrowRepositoryConfig extends RepositoryImplConfigBase {
     }
 
     @Override
-    public Resource export(Graph graph) {
+    public Resource export(Model graph) {
         Resource repImplNode = super.export(graph);
 
         if (sailConfig != null) {
@@ -43,19 +44,16 @@ public class SemagrowRepositoryConfig extends RepositoryImplConfigBase {
 
 
     @Override
-    public void parse(Graph graph, Resource node) throws RepositoryConfigException {
+    public void parse(Model graph, Resource node) throws RepositoryConfigException {
 
         try {
-            Resource sailImplNode = GraphUtil.getOptionalObjectResource(graph, node, SAILIMPL);
+            Optional<Resource> sailImplNode = Models.objectResource(graph.filter(node, SAILIMPL,null));
 
-            if (sailImplNode != null) {
+            if (sailImplNode.isPresent()) {
 
                     sailConfig  = new SemagrowSailConfig();
-                    sailConfig.parse(graph, sailImplNode);
+                    sailConfig.parse(graph, sailImplNode.get());
             }
-        }
-        catch (GraphUtilException e) {
-            throw new RepositoryConfigException(e.getMessage(), e);
         }
         catch (SailConfigException e) {
             throw new RepositoryConfigException(e.getMessage(), e);

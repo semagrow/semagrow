@@ -6,11 +6,11 @@ import eu.semagrow.core.evalit.EvaluationStrategy;
 import eu.semagrow.core.impl.evalit.interceptors.AbstractEvaluationSessionAwareInterceptor;
 import eu.semagrow.core.impl.evalit.interceptors.InterceptingEvaluationStrategy;
 import eu.semagrow.core.impl.evalit.interceptors.QueryEvaluationInterceptor;
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.IterationWrapper;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.IterationWrapper;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.Collection;
 import java.util.LinkedList;

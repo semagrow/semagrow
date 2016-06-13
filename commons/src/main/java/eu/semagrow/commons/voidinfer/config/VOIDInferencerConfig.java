@@ -1,12 +1,12 @@
 package eu.semagrow.commons.voidinfer.config;
 
-import org.openrdf.sail.config.DelegatingSailImplConfigBase;
-import org.openrdf.sail.config.SailImplConfig;
+import org.eclipse.rdf4j.sail.config.AbstractDelegatingSailImplConfig;
+import org.eclipse.rdf4j.sail.config.SailImplConfig;
 
 /**
  * Created by angel on 5/29/14.
  */
-public class VOIDInferencerConfig extends DelegatingSailImplConfigBase {
+public class VOIDInferencerConfig extends AbstractDelegatingSailImplConfig {
 
     public VOIDInferencerConfig() { }
 

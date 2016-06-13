@@ -4,15 +4,15 @@ import eu.semagrow.core.impl.plan.ops.ProvenanceValue;
 //import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.ParallelEvaluator;
 //import eu.semagrow.stack.modules.sails.semagrow.evaluation.iteration.parallel.base.ParallelEvaluatorBase;
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.LookAheadIteration;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
-import org.openrdf.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.LookAheadIteration;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 
 import java.util.ArrayList;
 import java.util.HashMap;

@@ -7,22 +7,19 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryResultHandlerException;
-import org.openrdf.query.TupleQueryResultHandler;
-import org.openrdf.query.TupleQueryResultHandlerException;
-import org.openrdf.query.resultio.QueryResultFormat;
-import org.openrdf.query.resultio.QueryResultWriterBase;
-import org.openrdf.query.resultio.TupleQueryResultFormat;
-import org.openrdf.query.resultio.TupleQueryResultWriter;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryResultHandlerException;
+import org.eclipse.rdf4j.query.TupleQueryResultHandlerException;
+import org.eclipse.rdf4j.query.resultio.AbstractQueryResultWriter;
+import org.eclipse.rdf4j.query.resultio.QueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriter;
 
 /**
  *
  * @author http://www.turnguard.com/turnguard
  */
-public class HTMLTableWriter extends QueryResultWriterBase implements TupleQueryResultWriter {
+public class HTMLTableWriter extends AbstractQueryResultWriter implements TupleQueryResultWriter {
     
     public static TupleQueryResultFormat HTML_TABLE = new TupleQueryResultFormat(
             "TEXT/HTML", 

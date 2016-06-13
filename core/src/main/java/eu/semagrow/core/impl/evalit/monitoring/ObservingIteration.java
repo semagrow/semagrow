@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evalit.monitoring;
 
-import info.aduna.iteration.Iteration;
-import info.aduna.iteration.IterationWrapper;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.common.iteration.IterationWrapper;
 
 /**
  * Created by angel on 6/12/14.

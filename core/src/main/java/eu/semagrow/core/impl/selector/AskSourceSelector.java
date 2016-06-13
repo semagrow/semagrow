@@ -6,18 +6,18 @@ import eu.semagrow.core.source.Site;
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
 
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.sparql.SPARQLRepository;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import eu.semagrow.core.impl.sparql.SPARQLRepository;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -170,7 +170,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 	  * @return false if it has been established that {@code source} does not contain any matching triples, true otherwise
 	  */
 
-	 private boolean askPattern( StatementPattern pattern, URI source, boolean allow_select )
+	 private boolean askPattern( StatementPattern pattern, IRI source, boolean allow_select )
 	 {
 
 		 boolean retv;
@@ -188,7 +188,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			 rep.initialize();
 			 conn = rep.getConnection();
 		 }
-		 catch( org.openrdf.repository.RepositoryException ex ) {
+		 catch( org.eclipse.rdf4j.repository.RepositoryException ex ) {
 			 // Failed to contact source
 			 // Log a warnig and reply "true" just in case this is a transient failure
 			 logger.warn( "Failed to contact source to ASK about pattern {}. Exception: {}",
@@ -197,10 +197,10 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 		 if( conn!= null ) {
 			 try {
-				 retv = conn.hasStatement( (Resource)s, (URI)p, o, true );
+				 retv = conn.hasStatement( (Resource)s, (IRI)p, o, true );
 				 allow_select = false; // No need to use this any more
 			 }
-			 catch( org.openrdf.repository.RepositoryException ex ) {
+			 catch( org.eclipse.rdf4j.repository.RepositoryException ex ) {
 				 // Failed to contact source
 				 // Log a warnig and reply "true" just in case this is a transient failure
 				 logger.warn( "Failed to contact source to ASK about pattern {}. Exception: {}",
@@ -213,16 +213,16 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 			 TupleQuery q;
 			 try {
-				 q = conn.prepareTupleQuery( org.openrdf.query.QueryLanguage.SPARQL, qs );
+				 q = conn.prepareTupleQuery( org.eclipse.rdf4j.query.QueryLanguage.SPARQL, qs );
 				 if( s != null ) { q.setBinding( "S", s ); }
 				 if( p != null ) { q.setBinding( "P", p ); }
 				 if( o != null ) { q.setBinding( "O", o ); }
 			 }
-			 catch( org.openrdf.query.MalformedQueryException ex ) {
+			 catch( org.eclipse.rdf4j.query.MalformedQueryException ex ) {
 				 throw new AssertionError();
 				 // ASSERTION ERROR: This can never happen
 			 }
-			 catch( org.openrdf.repository.RepositoryException ex ) {
+			 catch( org.eclipse.rdf4j.repository.RepositoryException ex ) {
 				 // Failed to contact source
 				 // Log a warning and reply "true" just in case this is a transient failure
 				 logger.warn( "Failed to contact source to ASK about pattern {}. Exception: {}",
@@ -233,7 +233,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			 try {
 				 retv = q.evaluate().hasNext();
 			 }
-			 catch( org.openrdf.query.QueryEvaluationException ex ) {
+			 catch( org.eclipse.rdf4j.query.QueryEvaluationException ex ) {
 				 // Failed to contact source
 				 // Log a warnig and reply "true" just in case this is a transient failure
 				 logger.warn( "Failed to contact source to execute query {}. Exception: {}",
@@ -245,7 +245,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 		 try { conn.close(); }
 		 catch( NullPointerException ex ) { /* NPOP: the connection failed to open above */ }
-		 catch( org.openrdf.repository.RepositoryException ex ) { }
+		 catch( org.eclipse.rdf4j.repository.RepositoryException ex ) { }
 
 		 return retv;
 	 }

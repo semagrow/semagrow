@@ -6,27 +6,25 @@ import eu.semagrow.core.config.SemagrowSchema;
 import eu.semagrow.core.config.SourceSelectorConfigException;
 import eu.semagrow.core.config.SourceSelectorFactory;
 import eu.semagrow.core.config.SourceSelectorImplConfig;
-import org.openrdf.model.Literal;
-import org.openrdf.model.util.GraphUtil;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Value;
-import org.openrdf.model.util.GraphUtilException;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.sail.config.SailRepositoryConfig;
-import org.openrdf.sail.config.*;
-import org.openrdf.sail.inferencer.fc.config.ForwardChainingRDFSInferencerConfig;
-import org.openrdf.sail.memory.config.MemoryStoreConfig;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.repository.sail.config.SailRepositoryConfig;
+import org.eclipse.rdf4j.sail.config.*;
+import org.eclipse.rdf4j.sail.inferencer.fc.config.ForwardChainingRDFSInferencerConfig;
+import org.eclipse.rdf4j.sail.memory.config.MemoryStoreConfig;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by angel on 5/29/14.
  */
-public class SemagrowSailConfig extends SailImplConfigBase {
+public class SemagrowSailConfig extends AbstractSailImplConfig {
 
     private String metadataRepoId = "semagrow_metadata";
 
@@ -92,30 +90,31 @@ public class SemagrowSailConfig extends SailImplConfigBase {
     }
 
     @Override
-    public Resource export(Graph graph) {
+    public Resource export(Model graph) {
         Resource implNode = super.export(graph);
+        ValueFactory vf = SimpleValueFactory.getInstance();
         for (String file : filenames) {
-            graph.add(implNode, SemagrowSchema.METADATAINIT, graph.getValueFactory().createLiteral(file));
+            graph.add(implNode, SemagrowSchema.METADATAINIT, vf.createLiteral(file));
         }
 
         String queryTransfDB = getQueryTransformationDB();
         if (queryTransfDB != null) {
-            graph.add(implNode, SemagrowSchema.QUERYTRANSFORMDB, graph.getValueFactory().createLiteral(queryTransfDB));
-            graph.add(implNode, SemagrowSchema.QUERYTRANSFORMUSER, graph.getValueFactory().createLiteral(getQueryTransformationUser()));
-            graph.add(implNode, SemagrowSchema.QUERYTRANSFORMPASSWORD, graph.getValueFactory().createLiteral(getQueryTransformationPassword()));
+            graph.add(implNode, SemagrowSchema.QUERYTRANSFORMDB, vf.createLiteral(queryTransfDB));
+            graph.add(implNode, SemagrowSchema.QUERYTRANSFORMUSER, vf.createLiteral(getQueryTransformationUser()));
+            graph.add(implNode, SemagrowSchema.QUERYTRANSFORMPASSWORD, vf.createLiteral(getQueryTransformationPassword()));
         }
         return implNode;
     }
 
     @Override
-    public void parse(Graph graph, Resource node) throws SailConfigException {
+    public void parse(Model graph, Resource node) throws SailConfigException {
 
-        for (Value o : GraphUtil.getObjects(graph, node, SemagrowSchema.METADATAINIT))
+        for (Value o : graph.filter(node, SemagrowSchema.METADATAINIT, null).objects())
         {
             filenames.add(o.stringValue());
         }
 
-        for (Value o : GraphUtil.getObjects(graph, node, SemagrowSchema.EXECUTORBATCHSIZE)) {
+        for (Value o : graph.filter(node, SemagrowSchema.EXECUTORBATCHSIZE, null).objects()) {
             executorBatchSize = Integer.parseInt(o.stringValue());
         }
 
@@ -133,27 +132,22 @@ public class SemagrowSailConfig extends SailImplConfigBase {
         }
         */
 
-        try {
-            Literal sourceSelectorImplNode = GraphUtil.getOptionalObjectLiteral(graph, node, SemagrowSchema.SOURCESELECTOR);
+        Optional<Literal> sourceSelectorImplNode = Models.objectLiteral(graph.filter(node, SemagrowSchema.SOURCESELECTOR,null));
 
-            if (sourceSelectorImplNode != null) {
+        if (sourceSelectorImplNode.isPresent()) {
 
-                SourceSelectorFactory factory = SourceSelectorRegistry.getInstance().get(sourceSelectorImplNode.getLabel());
+            Optional<SourceSelectorFactory> factory = SourceSelectorRegistry.getInstance().get(sourceSelectorImplNode.get().getLabel());
 
-                if (factory == null) {
-                    throw new SailConfigException("Unsupported source selector type: " + sourceSelectorImplNode.getLabel());
-                }
-
-                sourceSelectorConfig = factory.getConfig();
-                try {
-                    sourceSelectorConfig.parse(graph, node);
-                } catch (SourceSelectorConfigException e) {
-                    throw new SailConfigException(e);
-                }
+            if (factory.isPresent()) {
+                throw new SailConfigException("Unsupported source selector type: " + sourceSelectorImplNode.get().getLabel());
             }
 
-        }catch(GraphUtilException e) {
-            throw new SailConfigException(e);
+            sourceSelectorConfig = factory.get().getConfig();
+            try {
+                sourceSelectorConfig.parse(graph, node);
+            } catch (SourceSelectorConfigException e) {
+                throw new SailConfigException(e);
+            }
         }
 
         super.parse(graph, node);

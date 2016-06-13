@@ -5,13 +5,13 @@ import eu.semagrow.core.plan.Plan;
 import eu.semagrow.core.eval.QueryExecutor;
 
 import eu.semagrow.core.source.Site;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.TripleSource;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
 import org.reactivestreams.Publisher;
 
 import rx.Observable;
@@ -34,7 +34,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
-            getStatements(Resource resource, URI uri, Value value, Resource... resources) throws QueryEvaluationException {
+            getStatements(Resource resource, IRI uri, Value value, Resource... resources) throws QueryEvaluationException {
                 throw new UnsupportedOperationException("Statement retrieval is not supported");
             }
 
@@ -46,7 +46,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     }
 
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor) {
-        this(queryExecutor, ValueFactoryImpl.getInstance());
+        this(queryExecutor, SimpleValueFactory.getInstance());
     }
 
 

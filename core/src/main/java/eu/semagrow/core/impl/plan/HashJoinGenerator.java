@@ -5,7 +5,7 @@ import eu.semagrow.core.plan.JoinImplGenerator;
 import eu.semagrow.core.plan.Plan;
 import eu.semagrow.core.plan.PlanGenerationContext;
 import eu.semagrow.core.source.LocalSite;
-import org.openrdf.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.Join;
 
 import java.util.Collection;
 import java.util.LinkedList;

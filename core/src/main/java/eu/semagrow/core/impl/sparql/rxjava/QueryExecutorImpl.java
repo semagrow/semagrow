@@ -1,20 +1,21 @@
-package eu.semagrow.core.impl.evaluation.rxjava;
+package eu.semagrow.core.impl.sparql.rxjava;
 
-import eu.semagrow.core.impl.evaluation.ConnectionManager;
+import eu.semagrow.core.impl.evaluation.rxjava.OnSubscribeTupleResults;
+import eu.semagrow.core.impl.sparql.ConnectionManager;
 import eu.semagrow.core.eval.BindingSetOps;
-import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
+import eu.semagrow.core.impl.sparql.SPARQLQueryStringUtil;
 import eu.semagrow.core.impl.evaluation.util.BindingSetOpsImpl;
 import eu.semagrow.core.eval.QueryExecutor;
 import eu.semagrow.core.impl.sparql.SPARQLSite;
 import eu.semagrow.core.source.Site;
-import org.openrdf.model.URI;
-import org.openrdf.query.*;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
-import org.openrdf.query.impl.EmptyBindingSet;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.reactivestreams.Publisher;
 
 import java.util.*;
@@ -158,7 +159,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
      */
     protected Set<String> computeVars(TupleExpr serviceExpression) {
         final Set<String> res = new HashSet<String>();
-        serviceExpression.visit(new QueryModelVisitorBase<RuntimeException>() {
+        serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 
             @Override
             public void meet(Var node)
@@ -200,7 +201,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     protected Observable<BindingSet>
-        sendTupleQueryReactive(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendTupleQueryReactive(IRI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);
@@ -214,7 +215,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     protected boolean
-        sendBooleanQueryReactive(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendBooleanQueryReactive(IRI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);

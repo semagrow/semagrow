@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.evaluation.rxjava;
 
-import org.openrdf.query.*;
+import org.eclipse.rdf4j.query.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import rx.Observable;

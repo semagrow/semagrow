@@ -1,6 +1,6 @@
 package eu.semagrow.core.source;
 
-import info.aduna.lang.service.ServiceRegistry;
+import org.eclipse.rdf4j.common.lang.service.ServiceRegistry;
 
 /**
  * Created by angel on 6/4/2016.

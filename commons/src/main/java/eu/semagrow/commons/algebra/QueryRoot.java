@@ -1,8 +1,8 @@
 package eu.semagrow.commons.algebra;
 
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.repository.sail.SailQuery;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.repository.sail.SailQuery;
 
 
 /**
@@ -19,7 +19,7 @@ import org.openrdf.repository.sail.SailQuery;
  * @author Stasinos Konstantopoulos
  */
 
-public class QueryRoot extends org.openrdf.query.algebra.QueryRoot
+public class QueryRoot extends org.eclipse.rdf4j.query.algebra.QueryRoot
 {
 	private org.slf4j.Logger logger =
 			org.slf4j.LoggerFactory.getLogger( QueryRoot.class );

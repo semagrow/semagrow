@@ -1,8 +1,8 @@
 package eu.semagrow.core.plan;
 
-import org.openrdf.query.algebra.OrderElem;
-import org.openrdf.query.algebra.ValueExpr;
-import org.openrdf.query.algebra.Var;
+import org.eclipse.rdf4j.query.algebra.OrderElem;
+import org.eclipse.rdf4j.query.algebra.ValueExpr;
+import org.eclipse.rdf4j.query.algebra.Var;
 
 import java.util.Iterator;
 import java.util.LinkedList;

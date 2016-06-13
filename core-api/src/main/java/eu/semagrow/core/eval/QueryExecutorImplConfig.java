@@ -1,7 +1,7 @@
 package eu.semagrow.core.eval;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 
 /**
  * Created by angel on 30/3/2016.
@@ -12,8 +12,8 @@ public interface QueryExecutorImplConfig {
 
     void validate() throws QueryExecutorConfigException;
 
-    Resource export(Graph graph);
+    Resource export(Model graph);
 
-    void parse(Graph graph, Resource resource) throws QueryExecutorConfigException;
+    void parse(Model graph, Resource resource) throws QueryExecutorConfigException;
 
 }

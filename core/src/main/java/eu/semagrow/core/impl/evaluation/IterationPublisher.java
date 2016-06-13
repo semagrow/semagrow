@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation;
 
-import info.aduna.iteration.Iteration;
-import info.aduna.iteration.Iterations;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;

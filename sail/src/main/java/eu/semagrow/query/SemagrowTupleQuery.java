@@ -1,6 +1,6 @@
 package eu.semagrow.query;
 
-import org.openrdf.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQuery;
 
 /**
  * Created by angel on 6/8/14.

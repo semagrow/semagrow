@@ -1,8 +1,8 @@
 package eu.semagrow.query;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.Query;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.Collection;
 
@@ -27,13 +27,13 @@ public interface SemagrowQuery extends Query
 
     TupleExpr getDecomposedQuery() ;
 
-    void addExcludedSource(URI source);
+    void addExcludedSource(IRI source);
 
-    void addIncludedSource(URI source);
+    void addIncludedSource(IRI source);
 
-    Collection<URI> getExcludedSources();
+    Collection<IRI> getExcludedSources();
 
-    Collection<URI> getIncludedSources();
+    Collection<IRI> getIncludedSources();
     
     /**
      * This method changes the current thread's {link org.slf4j.MDC}

@@ -1,20 +1,19 @@
 package eu.semagrow.commons.voidinfer.VOID;
 
 import eu.semagrow.commons.vocabulary.VOID;
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.Iterations;
-import org.openrdf.model.Model;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.Value;
-import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.model.impl.TreeModel;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.sail.SailConnectionListener;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.inferencer.InferencerConnection;
-import org.openrdf.sail.inferencer.InferencerConnectionWrapper;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.impl.TreeModel;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.sail.SailConnectionListener;
+import org.eclipse.rdf4j.sail.SailException;
+import org.eclipse.rdf4j.sail.inferencer.InferencerConnection;
+import org.eclipse.rdf4j.sail.inferencer.InferencerConnectionWrapper;
 
 import java.util.Iterator;
 

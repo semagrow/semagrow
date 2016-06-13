@@ -1,7 +1,7 @@
 package eu.semagrow.repository;
 
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryException;
 
 /**
  * Created by angel on 6/11/14.

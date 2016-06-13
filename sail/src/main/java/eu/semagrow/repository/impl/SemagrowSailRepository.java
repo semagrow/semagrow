@@ -2,10 +2,10 @@ package eu.semagrow.repository.impl;
 
 import eu.semagrow.repository.SemagrowRepository;
 import eu.semagrow.sail.SemagrowSail;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.base.RepositoryWrapper;
-import org.openrdf.repository.sail.SailRepository;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.base.RepositoryWrapper;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
 
 /**
  * Created by angel on 6/10/14.

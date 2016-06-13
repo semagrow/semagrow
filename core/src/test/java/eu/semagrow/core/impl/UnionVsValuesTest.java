@@ -1,13 +1,13 @@
 package eu.semagrow.core.impl;
 
-import info.aduna.iteration.Iterations;
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import junit.framework.TestCase;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.TupleQueryResult;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.sparql.SPARQLRepository;
+import org.eclipse.rdf4j.query.QueryLanguage;
+import org.eclipse.rdf4j.query.TupleQuery;
+import org.eclipse.rdf4j.query.TupleQueryResult;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.sparql.SPARQLRepository;
 
 /**
  * Created by antonis on 3/6/2015.

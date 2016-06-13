@@ -12,8 +12,7 @@ import eu.semagrow.core.plan.Plan;
 import eu.semagrow.core.source.LocalSite;
 import eu.semagrow.core.source.Site;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.*;
 
 /**
  * Created by angel on 4/28/14.

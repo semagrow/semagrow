@@ -2,8 +2,8 @@ package eu.semagrow.art;
 
 import java.util.UUID;
 
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.slf4j.MDC;
 
 //import eu.semagrow.commons.algebra.QueryRoot;

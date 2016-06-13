@@ -1,9 +1,9 @@
 package eu.semagrow.config;
 
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.sail.Sail;
-import org.openrdf.sail.config.SailImplConfig;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.sail.Sail;
+import org.eclipse.rdf4j.sail.config.SailImplConfig;
 
 /**
  * Created by angel on 11/2/14.

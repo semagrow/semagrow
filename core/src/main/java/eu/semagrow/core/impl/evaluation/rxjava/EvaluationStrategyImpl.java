@@ -5,18 +5,19 @@ import eu.semagrow.core.impl.evaluation.IterationPublisher;
 import eu.semagrow.core.eval.BindingSetOps;
 import eu.semagrow.core.impl.evaluation.util.BindingSetOpsImpl;
 import eu.semagrow.core.impl.evaluation.util.QueryEvaluationUtil;
-import info.aduna.iteration.Iteration;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
-import org.openrdf.query.algebra.evaluation.TripleSource;
-import org.openrdf.query.algebra.evaluation.impl.ExternalSet;
-import org.openrdf.query.algebra.evaluation.util.OrderComparator;
-import org.openrdf.query.algebra.evaluation.util.ValueComparator;
-import org.openrdf.util.iterators.Iterators;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
+import org.eclipse.rdf4j.query.algebra.evaluation.federation.FederatedServiceResolverImpl;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.ExternalSet;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.OrderComparator;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
+import org.eclipse.rdf4j.util.iterators.Iterators;
 import org.reactivestreams.Publisher;
 import rx.Observable;
 import rx.RxReactiveStreams;
@@ -29,17 +30,17 @@ import java.util.*;
 public class EvaluationStrategyImpl implements EvaluationStrategy
 {
 
-    private org.openrdf.query.algebra.evaluation.EvaluationStrategy evalStrategy;
+    private org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy evalStrategy;
     protected BindingSetOps bindingSetOps = BindingSetOpsImpl.getInstance();
 
     public EvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
 
-        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource, dataset);
+        evalStrategy = new org.eclipse.rdf4j.query.algebra.evaluation.impl.SimpleEvaluationStrategy(tripleSource, dataset, new FederatedServiceResolverImpl());
     }
 
     public EvaluationStrategyImpl(TripleSource tripleSource) {
 
-        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource);
+        evalStrategy = new org.eclipse.rdf4j.query.algebra.evaluation.impl.SimpleEvaluationStrategy(tripleSource, new FederatedServiceResolverImpl());
 
     }
 

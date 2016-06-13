@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation.rxjava;
 
-import info.aduna.iteration.Iteration;
-import info.aduna.iteration.Iterations;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import rx.Observable;
 import rx.Producer;
 import rx.Subscriber;

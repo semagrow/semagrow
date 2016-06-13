@@ -17,23 +17,25 @@ import eu.semagrow.sail.SemagrowSail;
 import eu.semagrow.core.impl.estimator.CardinalityEstimatorImpl;
 import eu.semagrow.core.impl.estimator.CostEstimatorImpl;
 
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.repository.config.RepositoryRegistry;
-import org.openrdf.repository.sail.config.RepositoryResolver;
-import org.openrdf.repository.sail.config.RepositoryResolverClient;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.Sail;
-import org.openrdf.sail.config.*;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryFactory;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.repository.config.RepositoryRegistry;
+import org.eclipse.rdf4j.repository.sail.config.RepositoryResolver;
+import org.eclipse.rdf4j.repository.sail.config.RepositoryResolverClient;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParserRegistry;
+import org.eclipse.rdf4j.sail.Sail;
+import org.eclipse.rdf4j.sail.config.*;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by angel on 5/29/14.
@@ -97,7 +99,7 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
             throws RepositoryConfigException
     {
         RepositoryRegistry registry = RepositoryRegistry.getInstance();
-        RepositoryFactory factory = registry.get(config.getType());
+        RepositoryFactory factory = registry.get(config.getType()).get();
 
         if (factory != null) {
             if (factory instanceof RepositoryResolverClient) {
@@ -139,9 +141,9 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
     public SourceSelector getSourceSelector(SourceSelectorImplConfig config)
             throws SourceSelectorConfigException
     {
-        SourceSelectorFactory factory = SourceSelectorRegistry.getInstance().get(config.getType());
-        if (factory != null) {
-            return factory.getSourceSelector(config);
+        Optional<SourceSelectorFactory> factory = SourceSelectorRegistry.getInstance().get(config.getType());
+        if (factory.isPresent()) {
+            return factory.get().getSourceSelector(config);
         } else {
             throw new SourceSelectorConfigException("Cannot find appropriate source selector factory");
         }
@@ -179,7 +181,7 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
             File file = new File(filename);
             metadata.initialize();
             conn = metadata.getConnection();
-            RDFFormat fileFormat = RDFFormat.forFileName(file.getAbsolutePath(), RDFFormat.NTRIPLES);
+            RDFFormat fileFormat = RDFFormat.matchFileName(file.getAbsolutePath(), RDFParserRegistry.getInstance().getKeys()).orElse(RDFFormat.NTRIPLES);
             conn.add(file, file.toURI().toString(), fileFormat);
         } finally {
             if (conn != null)

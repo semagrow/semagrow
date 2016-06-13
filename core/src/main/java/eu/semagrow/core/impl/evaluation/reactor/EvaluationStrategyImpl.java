@@ -5,23 +5,24 @@ import eu.semagrow.core.impl.evaluation.util.BindingSetOpsImpl;
 import eu.semagrow.core.impl.evaluation.util.QueryEvaluationUtil;
 import eu.semagrow.core.eval.EvaluationStrategy;
 import eu.semagrow.core.impl.evaluation.IterationPublisher;
-import info.aduna.iteration.Iteration;
-import org.openrdf.model.Literal;
-import org.openrdf.model.Value;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.datatypes.XMLDatatypeUtil;
-import org.openrdf.model.vocabulary.XMLSchema;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
-import org.openrdf.query.algebra.evaluation.TripleSource;
-import org.openrdf.query.algebra.evaluation.ValueExprEvaluationException;
-import org.openrdf.query.algebra.evaluation.impl.ExternalSet;
-import org.openrdf.query.algebra.evaluation.util.MathUtil;
-import org.openrdf.query.algebra.evaluation.util.OrderComparator;
-import org.openrdf.query.algebra.evaluation.util.ValueComparator;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.datatypes.XMLDatatypeUtil;
+import org.eclipse.rdf4j.model.vocabulary.XMLSchema;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
+import org.eclipse.rdf4j.query.algebra.evaluation.ValueExprEvaluationException;
+import org.eclipse.rdf4j.query.algebra.evaluation.federation.FederatedServiceResolverImpl;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.ExternalSet;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.MathUtil;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.OrderComparator;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 import org.reactivestreams.Publisher;
 import reactor.Environment;
 import reactor.core.Dispatcher;
@@ -38,21 +39,21 @@ import java.util.*;
 public class EvaluationStrategyImpl implements EvaluationStrategy {
 
     private ValueFactory vf;
-    private org.openrdf.query.algebra.evaluation.EvaluationStrategy evalStrategy;
+    private org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy evalStrategy;
     protected BindingSetOps bindingSetOps = BindingSetOpsImpl.getInstance();
 
     private Dispatcher dispatcher;
 
     public EvaluationStrategyImpl(TripleSource tripleSource) {
         vf = tripleSource.getValueFactory();
-        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource);
+        evalStrategy = new org.eclipse.rdf4j.query.algebra.evaluation.impl.SimpleEvaluationStrategy(tripleSource, new FederatedServiceResolverImpl());
         Environment.initializeIfEmpty();
         //dispatcher = new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public EvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
         vf = tripleSource.getValueFactory();
-        evalStrategy = new org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl(tripleSource,dataset);
+        evalStrategy = new org.eclipse.rdf4j.query.algebra.evaluation.impl.SimpleEvaluationStrategy(tripleSource,dataset,new FederatedServiceResolverImpl());
         Environment.initializeIfEmpty();
         //dispatcher = new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL));
     }
@@ -648,7 +649,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         private final Set<Value> distinctValues;
         private final ValueExpr arg;
 
-        public Aggregate(AggregateOperatorBase operator) {
+        public Aggregate(AbstractAggregateOperator operator) {
             this.arg = operator.getArg();
             if(operator.isDistinct()) {
                 this.distinctValues = new HashSet();

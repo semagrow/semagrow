@@ -1,9 +1,9 @@
 package eu.semagrow.core.estimator;
 
 import eu.semagrow.core.source.Site;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.ValueExpr;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.ValueExpr;
 
 
 /**

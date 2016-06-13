@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.plan.ops;
 
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.Union;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.Union;
 
 /**
  * Created by angel on 10/2/14.

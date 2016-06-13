@@ -15,20 +15,20 @@ import eu.semagrow.querylog.config.QueryLogFactory;
 import eu.semagrow.querylog.api.QueryLogWriter;
 import eu.semagrow.querylog.impl.rdf.config.RDFQueryLogConfig;
 import eu.semagrow.querylog.impl.rdf.config.RDFQueryLogFactory;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
-import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
-import org.openrdf.query.resultio.TupleQueryResultFormat;
-import org.openrdf.query.resultio.TupleQueryResultWriterFactory;
-import org.openrdf.query.resultio.TupleQueryResultWriterRegistry;
-import org.openrdf.repository.Repository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.sail.SailConnection;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.helpers.SailBase;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.impl.ConjunctiveConstraintSplitter;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriterFactory;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriterRegistry;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.sail.SailConnection;
+import org.eclipse.rdf4j.sail.SailException;
+import org.eclipse.rdf4j.sail.helpers.AbstractSail;
 
 import java.io.*;
 import java.util.Collection;
@@ -43,7 +43,7 @@ import java.util.concurrent.Executors;
  * TODO: estimate processing cost of subqueries to the sources (some sources may contain indexes etc
  * TODO: geosparql
  */
-public class SemagrowSail extends SailBase {
+public class SemagrowSail extends AbstractSail {
 
     private FederatedQueryEvaluation queryEvaluation;
     private QueryLogWriter handler;
@@ -66,7 +66,7 @@ public class SemagrowSail extends SailBase {
     }
 
     public ValueFactory getValueFactory() {
-        return ValueFactoryImpl.getInstance();
+        return SimpleValueFactory.getInstance();
     }
 
     public SailConnection getConnectionInternal() throws SailException {
@@ -87,7 +87,7 @@ public class SemagrowSail extends SailBase {
         return optimizer;
     }
 
-    public QueryDecomposer getDecomposer(Collection<URI> includeOnly, Collection<URI> exclude) {
+    public QueryDecomposer getDecomposer(Collection<IRI> includeOnly, Collection<IRI> exclude) {
         SourceSelector selector = getSourceSelector();
         selector = new RestrictiveSourceSelector(selector, includeOnly, exclude);
         CostEstimator costEstimator = getCostEstimator();
@@ -142,7 +142,7 @@ public class SemagrowSail extends SailBase {
         TupleQueryResultFormat resultFF = TupleQueryResultFormat.TSV;
 
         TupleQueryResultWriterRegistry  registry = TupleQueryResultWriterRegistry.getInstance();
-        TupleQueryResultWriterFactory writerFactory = registry.get(resultFF);
+        TupleQueryResultWriterFactory writerFactory = registry.get(resultFF).get();
         materializationManager = new FileManager(baseDir, writerFactory);
 
         try {

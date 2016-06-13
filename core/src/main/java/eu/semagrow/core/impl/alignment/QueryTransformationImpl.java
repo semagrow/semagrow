@@ -2,9 +2,9 @@ package eu.semagrow.core.impl.alignment;
 
 import eu.semagrow.core.transformation.QueryTransformation;
 import eu.semagrow.core.transformation.EquivalentURI;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,13 +41,13 @@ public class QueryTransformationImpl implements QueryTransformation {
     }
 
     public QueryTransformationImpl(String databaseUrl, String username, String password) {
-        this(ValueFactoryImpl.getInstance(), databaseUrl, username, password);
+        this(SimpleValueFactory.getInstance(), databaseUrl, username, password);
     }
         
     /**
 	* @return A list of equivalent URIs aligned with a certain confidence with the initial URI and belonging to a specific schema
 	*/
-    public Collection<EquivalentURI> retrieveEquivalentURIs(URI uri)
+    public Collection<EquivalentURI> retrieveEquivalentURIs(IRI uri)
     {
         Collection<EquivalentURI> list = new LinkedList<EquivalentURI>();
 
@@ -77,7 +77,7 @@ public class QueryTransformationImpl implements QueryTransformation {
                 int normalized = (int) (confidence * 1000);
                 int transformationID = rs.getInt("id");
 
-                EquivalentURI equri = createEquivalentURI(uri, vf.createURI(equri_raw), vf.createURI(onto1), vf.createURI(onto2), normalized, transformationID);
+                EquivalentURI equri = createEquivalentURI(uri, vf.createIRI(equri_raw), vf.createIRI(onto1), vf.createIRI(onto2), normalized, transformationID);
 
                 list.add(equri);
             }
@@ -105,9 +105,9 @@ public class QueryTransformationImpl implements QueryTransformation {
      * @param transformationID the id of the specific transformation that produced the equivalence
      * @return A URI that is equivalent to the source URI under transformationID
      */
-    public URI getURI(URI source, int transformationID) {
+    public IRI getURI(IRI source, int transformationID) {
 
-        URI response = null;
+        IRI response = null;
 
         String equri_raw = null;
 
@@ -156,7 +156,7 @@ public class QueryTransformationImpl implements QueryTransformation {
         if (equri_raw == null)
             return null;
 
-        response = vf.createURI(equri_raw);
+        response = vf.createIRI(equri_raw);
 
         return response;
     }
@@ -169,9 +169,9 @@ public class QueryTransformationImpl implements QueryTransformation {
     * @return A URI that is equivalent to the target URI under transformationID
     */
 
-    public URI getInvURI(URI target, int transformationID) {
+    public IRI getInvURI(IRI target, int transformationID) {
 
-        URI response = null;
+        IRI response = null;
         String equri_raw = null;
 
         double confidence;
@@ -216,12 +216,12 @@ public class QueryTransformationImpl implements QueryTransformation {
         if (equri_raw==null)
             return null;
 
-        response = vf.createURI(equri_raw);
+        response = vf.createIRI(equri_raw);
 
         return response;
     }
 
-    private EquivalentURI createEquivalentURI(URI source, URI target, URI sourceSchema, URI targetSchema, int proximity, int trasformationId) {
+    private EquivalentURI createEquivalentURI(IRI source, IRI target, IRI sourceSchema, IRI targetSchema, int proximity, int trasformationId) {
         return new EquivalentURIImpl(source, target, sourceSchema, targetSchema, proximity, trasformationId);
     }
 

@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.util;
 
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -9,7 +9,7 @@ import java.util.LinkedList;
 /**
  * Created by angel on 4/26/14.
  */
-public class BPGCollector extends QueryModelVisitorBase<RuntimeException> {
+public class BPGCollector extends AbstractQueryModelVisitor<RuntimeException> {
 
     private TupleExpr lastBGPNode;
 

@@ -1,9 +1,9 @@
 package eu.semagrow.core.impl.plan;
 
-import org.openrdf.query.algebra.BindingSetAssignment;
-import org.openrdf.query.algebra.Filter;
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.BindingSetAssignment;
+import org.eclipse.rdf4j.query.algebra.Filter;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +11,7 @@ import java.util.List;
 /**
  * Created by angel on 2/11/2015.
  */
-public class BindingSetAssignmentCollector extends QueryModelVisitorBase<RuntimeException> {
+public class BindingSetAssignmentCollector extends AbstractQueryModelVisitor<RuntimeException> {
 
     private List<BindingSetAssignment> stPatterns = new ArrayList();
 

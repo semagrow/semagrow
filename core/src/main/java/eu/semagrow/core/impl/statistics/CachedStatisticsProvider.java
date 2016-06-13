@@ -2,9 +2,9 @@ package eu.semagrow.core.impl.statistics;
 
 import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
 
 import java.util.HashMap;
 
@@ -15,7 +15,7 @@ public class CachedStatisticsProvider implements StatisticsProvider
 {
     private StatisticsProvider provider;
 
-    private HashMap<StatementPattern, HashMap<URI, Statistics>> cache = new HashMap<>();
+    private HashMap<StatementPattern, HashMap<IRI, Statistics>> cache = new HashMap<>();
 
     public CachedStatisticsProvider(StatisticsProvider provider)
     {
@@ -23,12 +23,12 @@ public class CachedStatisticsProvider implements StatisticsProvider
     }
 
     @Override
-    public long getTriplesCount(URI source) {
+    public long getTriplesCount(IRI source) {
         return provider.getTriplesCount(source);
     }
 
     @Override
-    public Statistics getStats(StatementPattern pattern, BindingSet bindings, URI source) {
+    public Statistics getStats(StatementPattern pattern, BindingSet bindings, IRI source) {
         Statistics stats = getCached(pattern, bindings, source);
         if (stats == null) {
             stats = provider.getStats(pattern, bindings, source);
@@ -38,14 +38,14 @@ public class CachedStatisticsProvider implements StatisticsProvider
         return stats;
     }
 
-    private Statistics getCached(StatementPattern pattern, BindingSet bindings, URI source) {
-        HashMap<URI, Statistics> h = cache.getOrDefault(pattern, new HashMap<URI, Statistics>());
+    private Statistics getCached(StatementPattern pattern, BindingSet bindings, IRI source) {
+        HashMap<IRI, Statistics> h = cache.getOrDefault(pattern, new HashMap<IRI, Statistics>());
         return h.getOrDefault(source,null);
     }
 
 
-    private void cache(StatementPattern pattern, BindingSet bindings, URI source, Statistics stats) {
-        HashMap<URI, Statistics> h = cache.getOrDefault(pattern, new HashMap<URI,Statistics>());
+    private void cache(StatementPattern pattern, BindingSet bindings, IRI source, Statistics stats) {
+        HashMap<IRI, Statistics> h = cache.getOrDefault(pattern, new HashMap<IRI,Statistics>());
         h.put(source,stats);
         cache.put(pattern, h);
     }

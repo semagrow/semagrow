@@ -10,12 +10,12 @@ import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;
 import eu.semagrow.core.impl.plan.ops.SourceQuery;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.helpers.VarNameCollector;
-import org.openrdf.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 
 import java.util.HashSet;
 import java.util.Iterator;
@@ -70,7 +70,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
     public long getCardinality(StatementPattern pattern, Site source) {
 
         if (source != null)
-            return statistics.getStats(pattern, EmptyBindingSet.getInstance(), (URI) source.getID()).getCardinality();
+            return statistics.getStats(pattern, EmptyBindingSet.getInstance(), (IRI) source.getID()).getCardinality();
         else
             return 0;
 
@@ -305,7 +305,7 @@ public class CardinalityEstimatorImpl implements CardinalityEstimator, Selectivi
      */
     public long getVarCardinality(String varName, StatementPattern pattern, Site source) {
 
-        Statistics stats = statistics.getStats(pattern, EmptyBindingSet.getInstance(), (URI) source.getID());
+        Statistics stats = statistics.getStats(pattern, EmptyBindingSet.getInstance(), (IRI) source.getID());
 
         return stats.getVarCardinality(varName);
     }

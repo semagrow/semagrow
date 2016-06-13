@@ -1,10 +1,10 @@
 package eu.semagrow.querylog.impl.rdf.vocabulary;
 
-import org.openrdf.model.Namespace;
-import org.openrdf.model.URI;
-import org.openrdf.model.ValueFactory;
-import org.openrdf.model.impl.NamespaceImpl;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Namespace;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleNamespace;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * Created by angel on 10/21/14.
@@ -15,44 +15,44 @@ public final class QFR {
 
     public static final String PREFIX = "qfr";
 
-    public static final Namespace NS = new NamespaceImpl(PREFIX, NAMESPACE);
+    public static final Namespace NS = new SimpleNamespace(PREFIX, NAMESPACE);
 
-    public static URI QUERYRECORD;
+    public static IRI QUERYRECORD;
 
-    public static URI CARDINALITY;
+    public static IRI CARDINALITY;
 
-    public static URI ENDPOINT;
+    public static IRI ENDPOINT;
 
-    public static URI RESULTFILE;
+    public static IRI RESULTFILE;
 
-    public static URI DURATION;
+    public static IRI DURATION;
 
-    public static URI START;
+    public static IRI START;
 
-    public static URI END;
+    public static IRI END;
 
-    public static URI SESSION;
+    public static IRI SESSION;
 
-    public static URI QUERY;
+    public static IRI QUERY;
 
-    public static URI PATTERN;
+    public static IRI PATTERN;
 
-    public static URI BINDING;
+    public static IRI BINDING;
 
     static {
-        ValueFactory factory = ValueFactoryImpl.getInstance();
-        QUERYRECORD = factory.createURI(QFR.NAMESPACE, "QueryRecord");
-        CARDINALITY = factory.createURI(QFR.NAMESPACE, "cardinality");
-        ENDPOINT = factory.createURI(QFR.NAMESPACE, "endpoint");
-        RESULTFILE = factory.createURI(QFR.NAMESPACE, "resultFile");
-        DURATION = factory.createURI(QFR.NAMESPACE, "duration");
-        START = factory.createURI(QFR.NAMESPACE, "start");
-        END = factory.createURI(QFR.NAMESPACE, "end");
-        DURATION = factory.createURI(QFR.NAMESPACE, "duration");
-        SESSION = factory.createURI(QFR.NAMESPACE, "session");
-        QUERY = factory.createURI(QFR.NAMESPACE, "query");
-        PATTERN = factory.createURI(QFR.NAMESPACE, "pattern");
-        BINDING = factory.createURI(QFR.NAMESPACE, "binding");
+        ValueFactory factory = SimpleValueFactory.getInstance();
+        QUERYRECORD = factory.createIRI(QFR.NAMESPACE, "QueryRecord");
+        CARDINALITY = factory.createIRI(QFR.NAMESPACE, "cardinality");
+        ENDPOINT = factory.createIRI(QFR.NAMESPACE, "endpoint");
+        RESULTFILE = factory.createIRI(QFR.NAMESPACE, "resultFile");
+        DURATION = factory.createIRI(QFR.NAMESPACE, "duration");
+        START = factory.createIRI(QFR.NAMESPACE, "start");
+        END = factory.createIRI(QFR.NAMESPACE, "end");
+        DURATION = factory.createIRI(QFR.NAMESPACE, "duration");
+        SESSION = factory.createIRI(QFR.NAMESPACE, "session");
+        QUERY = factory.createIRI(QFR.NAMESPACE, "query");
+        PATTERN = factory.createIRI(QFR.NAMESPACE, "pattern");
+        BINDING = factory.createIRI(QFR.NAMESPACE, "binding");
     }
 }
 

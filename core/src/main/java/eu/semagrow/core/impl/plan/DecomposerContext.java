@@ -2,7 +2,7 @@ package eu.semagrow.core.impl.plan;
 
 import eu.semagrow.core.plan.Ordering;
 import eu.semagrow.core.impl.util.FilterCollector;
-import org.openrdf.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.*;
 import java.util.Collection;
 
 

@@ -1,10 +1,10 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.Group;
-import org.openrdf.query.algebra.evaluation.EvaluationStrategy;
-import org.openrdf.query.algebra.evaluation.iterator.GroupIterator;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.Group;
+import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
+import org.eclipse.rdf4j.query.algebra.evaluation.iterator.GroupIterator;
 
 /**
  * Created by angel on 9/28/14.

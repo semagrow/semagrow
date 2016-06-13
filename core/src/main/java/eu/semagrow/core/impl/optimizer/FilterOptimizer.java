@@ -1,11 +1,11 @@
 package eu.semagrow.core.impl.optimizer;
 
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
-import org.openrdf.query.algebra.helpers.VarNameCollector;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
 
 import java.util.Set;
 
@@ -22,7 +22,7 @@ public class FilterOptimizer implements QueryOptimizer {
 	 * Inner class FilterFinder *
 	 *--------------------------*/
 
-    protected static class FilterFinder extends QueryModelVisitorBase<RuntimeException> {
+    protected static class FilterFinder extends AbstractQueryModelVisitor<RuntimeException> {
 
         protected final TupleExpr tupleExpr;
 
@@ -41,7 +41,7 @@ public class FilterOptimizer implements QueryOptimizer {
 	 * Inner class FilterRelocator *
 	 *-----------------------------*/
 
-    protected static class FilterRelocator extends QueryModelVisitorBase<RuntimeException> {
+    protected static class FilterRelocator extends AbstractQueryModelVisitor<RuntimeException> {
 
         public static void relocate(Filter filter) {
             filter.visit(new FilterRelocator(filter));

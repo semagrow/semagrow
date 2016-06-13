@@ -8,15 +8,15 @@ import eu.semagrow.core.plan.Plan;
 import eu.semagrow.core.eval.QueryExecutor;
 
 import eu.semagrow.core.source.Site;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.Union;
-import org.openrdf.query.algebra.evaluation.TripleSource;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.Union;
+import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
 import org.reactivestreams.Publisher;
 
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
-            getStatements(Resource resource, URI uri, Value value, Resource... resources) throws QueryEvaluationException {
+            getStatements(Resource resource, IRI uri, Value value, Resource... resources) throws QueryEvaluationException {
                 throw new UnsupportedOperationException("Statement retrieval is not supported");
             }
 
@@ -60,7 +60,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     }
 
     public FederatedEvaluationStrategyImpl(QueryExecutor queryExecutor) {
-        this(queryExecutor, ValueFactoryImpl.getInstance());
+        this(queryExecutor, SimpleValueFactory.getInstance());
     }
 
 

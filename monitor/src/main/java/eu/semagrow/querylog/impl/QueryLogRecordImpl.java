@@ -1,13 +1,9 @@
 package eu.semagrow.querylog.impl;
 
 import eu.semagrow.querylog.api.QueryLogRecord;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.MalformedQueryException;
-import org.openrdf.query.QueryLanguage;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.parser.QueryParserUtil;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.*;
 
@@ -23,7 +19,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
 
     private TupleExpr expr;
 
-    private URI endpoint;
+    private IRI endpoint;
 
     private List<String> bindingNames;
 
@@ -35,11 +31,11 @@ public class QueryLogRecordImpl implements QueryLogRecord {
 
     private long duration;
 
-    private URI results;
+    private IRI results;
 
     private BindingSet bindings;
 
-    public QueryLogRecordImpl(UUID session, URI endpoint, String query, BindingSet bindings) {
+    public QueryLogRecordImpl(UUID session, IRI endpoint, String query, BindingSet bindings) {
         this.session = session;
         this.endpoint = endpoint;
         this.query = query;
@@ -48,7 +44,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
         this.bindingNames = new LinkedList<String>();
     }
 
-    public QueryLogRecordImpl(UUID session, URI endpoint, TupleExpr query, BindingSet bindings) {
+    public QueryLogRecordImpl(UUID session, IRI endpoint, TupleExpr query, BindingSet bindings) {
         this.session = session;
         this.endpoint = endpoint;
         this.expr = query;
@@ -71,7 +67,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
         this.bindingNames = new LinkedList<String>(bindingNames);
     }*/
 
-    public QueryLogRecordImpl(UUID session, URI endpoint, String query, BindingSet bindings, Collection<String> bindingNames) {
+    public QueryLogRecordImpl(UUID session, IRI endpoint, String query, BindingSet bindings, Collection<String> bindingNames) {
         this.session = session;
         this.endpoint = endpoint;
         this.query = query;
@@ -80,7 +76,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
         this.bindingNames = new LinkedList<String>(bindingNames);
     }
 
-    public QueryLogRecordImpl(UUID session, URI endpoint, TupleExpr query, BindingSet bindings, Collection<String> bindingNames) {
+    public QueryLogRecordImpl(UUID session, IRI endpoint, TupleExpr query, BindingSet bindings, Collection<String> bindingNames) {
         this.session = session;
         this.endpoint = endpoint;
         this.expr = query;
@@ -91,7 +87,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
 
 
     @Override
-    public URI getEndpoint() { return endpoint; }
+    public IRI getEndpoint() { return endpoint; }
 
     @Override
     public String getQuery() { return query; }
@@ -127,7 +123,7 @@ public class QueryLogRecordImpl implements QueryLogRecord {
     }
 
     @Override
-    public void setResults(URI handle) { results = handle; }
+    public void setResults(IRI handle) { results = handle; }
 
     @Override
     public Date getStartTime() { return startTime; }
@@ -139,5 +135,5 @@ public class QueryLogRecordImpl implements QueryLogRecord {
     public long getDuration() { return duration; }
 
     @Override
-    public URI getResults() { return results; }
+    public IRI getResults() { return results; }
 }

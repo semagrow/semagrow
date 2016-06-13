@@ -8,9 +8,9 @@ import eu.semagrow.querylog.api.QueryLogException;
 import eu.semagrow.querylog.api.QueryLogHandler;
 import eu.semagrow.querylog.api.QueryLogRecord;
 import eu.semagrow.querylog.impl.QueryLogRecordImpl;
-import org.openrdf.model.URI;
-import org.openrdf.query.*;
-import org.openrdf.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     private String query;
     private UUID uuid;
     private int count;
-    private URI endpoint;
+    private IRI endpoint;
 
     private long start;
     private long end;
@@ -42,7 +42,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
     private QueryLogRecord queryLogRecord;
 
 
-    public LoggingTupleQueryResultHandler(String q, QueryResultHandler handler, QueryLogHandler qfrHandler, MaterializationManager mat, URI endpoint) {
+    public LoggingTupleQueryResultHandler(String q, QueryResultHandler handler, QueryLogHandler qfrHandler, MaterializationManager mat, IRI endpoint) {
         super(handler);
         this.mat = mat;
         this.qfrHandler = qfrHandler;
@@ -113,7 +113,7 @@ public class LoggingTupleQueryResultHandler extends QueryResultHandlerWrapper im
 
 
 
-    protected QueryLogRecordImpl createMetadata(URI endpoint, String expr, BindingSet bindings, List<String> bindingNames) {
+    protected QueryLogRecordImpl createMetadata(IRI endpoint, String expr, BindingSet bindings, List<String> bindingNames) {
         return new QueryLogRecordImpl(uuid, endpoint, expr, bindings, bindingNames);
     }
 

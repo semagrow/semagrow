@@ -1,6 +1,6 @@
 package eu.semagrow.core.transformation;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * For a URI this object holds its equivalent URI, the proximity of the
@@ -12,15 +12,15 @@ import org.openrdf.model.URI;
  */
 public interface EquivalentURI {
 
-    public URI getSourceURI();
+    IRI getSourceURI();
 
-    public URI getTargetURI();
+    IRI getTargetURI();
 
-    public URI getSourceSchema();
+    IRI getSourceSchema();
 
-    public URI getTargetSchema();
+    IRI getTargetSchema();
 
-    public int getTransformationID();
+    int getTransformationID();
 
 	/**
 	 * @return the equivalent URI
@@ -30,11 +30,11 @@ public interface EquivalentURI {
 	/**
 	 * @return the proximity to the original URI
 	 */
-	public int getProximity();
+	int getProximity();
 
 	/**
 	 * @return the identifier of the RDF schema of the equivalent URI
 	 */
-	//public URI getSchema();
+	//IRI getSchema();
 
 }

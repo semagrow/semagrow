@@ -2,8 +2,8 @@ package eu.semagrow.core.impl.evaluation;
 
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.querylog.api.QueryLogHandler;
-import org.openrdf.model.URI;
-import org.openrdf.query.*;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.*;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -27,11 +27,11 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
     private String queryStr;
     private QueryLogHandler qfrHandler;
     private MaterializationManager mat;
-    private URI endpoint;
+    private IRI endpoint;
 
     private static ExecutorService executorService = Executors.newCachedThreadPool();
 
-    public TupleQueryResultPublisher(TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URI endpoint) {
+    public TupleQueryResultPublisher(TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, IRI endpoint) {
         this.query = query;
         this.qfrHandler = qfrHandler;
         this.queryStr = queryStr;
@@ -52,9 +52,9 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         private boolean isEvaluating = false;
         private QueryLogHandler qfrHandler;
         private MaterializationManager mat;
-        private URI endpoint;
+        private IRI endpoint;
 
-        public TupleQueryResultProducer(Subscriber<? super BindingSet> o, TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URI endpoint) {
+        public TupleQueryResultProducer(Subscriber<? super BindingSet> o, TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, IRI endpoint) {
             this.subscriber = o;
             this.query = query;
             this.qfrHandler = qfrHandler;

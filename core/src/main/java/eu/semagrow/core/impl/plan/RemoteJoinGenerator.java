@@ -3,7 +3,7 @@ package eu.semagrow.core.impl.plan;
 import eu.semagrow.core.plan.*;
 import eu.semagrow.core.source.Site;
 import eu.semagrow.core.source.SourceCapabilities;
-import org.openrdf.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.Join;
 
 import java.util.Collection;
 import java.util.LinkedList;

@@ -1,10 +1,9 @@
 package eu.semagrow.querylog.api;
 
 
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.Date;
 import java.util.List;
@@ -13,7 +12,7 @@ import java.util.List;
  * Created by angel on 10/20/14.
  */
 public interface QueryLogRecord {
-    URI getEndpoint();
+    IRI getEndpoint();
 
     String getQuery();
 
@@ -31,7 +30,7 @@ public interface QueryLogRecord {
 
     void setDuration(long start, long end);
 
-    void setResults(URI handle);
+    void setResults(IRI handle);
 
     Date getStartTime();
 
@@ -39,5 +38,5 @@ public interface QueryLogRecord {
 
     long getDuration();
 
-    URI getResults();
+    IRI getResults();
 }

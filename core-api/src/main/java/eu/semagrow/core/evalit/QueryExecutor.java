@@ -1,10 +1,10 @@
 package eu.semagrow.core.evalit;
 
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 
 /**
@@ -24,11 +24,11 @@ public interface QueryExecutor
     void shutdown();
 
     CloseableIteration<BindingSet,QueryEvaluationException>
-    evaluate( URI endpoint, TupleExpr expr, BindingSet bindings )
+    evaluate( IRI endpoint, TupleExpr expr, BindingSet bindings )
     		throws QueryEvaluationException;
 
     CloseableIteration<BindingSet,QueryEvaluationException>
-    evaluate( URI endpoint, TupleExpr expr, CloseableIteration<BindingSet,QueryEvaluationException> bindingIter )
+    evaluate( IRI endpoint, TupleExpr expr, CloseableIteration<BindingSet,QueryEvaluationException> bindingIter )
     		throws QueryEvaluationException;
 
 }

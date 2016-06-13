@@ -13,11 +13,11 @@ import eu.semagrow.core.impl.optimizer.ExtensionOptimizer;
 import eu.semagrow.core.source.SourceSelector;
 import eu.semagrow.art.*;
 
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.evaluation.util.QueryOptimizerList;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
 
 import java.util.Collection;
 

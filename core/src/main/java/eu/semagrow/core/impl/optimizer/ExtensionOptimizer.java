@@ -5,12 +5,12 @@ import eu.semagrow.core.impl.plan.ops.HashJoin;
 import eu.semagrow.core.impl.plan.ops.MergeJoin;
 import eu.semagrow.core.impl.plan.ops.SourceQuery;
 import eu.semagrow.core.plan.Plan;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
-import org.openrdf.query.algebra.helpers.VarNameCollector;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,7 +30,7 @@ public class ExtensionOptimizer implements QueryOptimizer {
     }
 
 
-    protected static class ExtensionFinder extends QueryModelVisitorBase<RuntimeException> {
+    protected static class ExtensionFinder extends AbstractQueryModelVisitor<RuntimeException> {
 
         protected final TupleExpr tupleExpr;
 
@@ -60,7 +60,7 @@ public class ExtensionOptimizer implements QueryOptimizer {
 	 * Inner class ExtensionRelocator *
 	 *-----------------------------*/
 
-    protected static class ExtensionRelocator extends QueryModelVisitorBase<RuntimeException> {
+    protected static class ExtensionRelocator extends AbstractQueryModelVisitor<RuntimeException> {
 
         public static void relocate(Extension e) {
             e.visit(new ExtensionRelocator(e));

@@ -2,12 +2,12 @@ package eu.semagrow.core.impl.evalit.interceptors;
 
 import eu.semagrow.core.evalit.util.QueryExecutorWrapper;
 import eu.semagrow.core.evalit.QueryExecutor;
-import info.aduna.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -36,7 +36,7 @@ public class InterceptingQueryExecutorWrapper extends QueryExecutorWrapper
 
     @Override
     public CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluate(URI endpoint, TupleExpr expr, BindingSet bindings)
+        evaluate(IRI endpoint, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException {
 
         CloseableIteration<BindingSet, QueryEvaluationException> result = super.evaluate(endpoint, expr, bindings);
@@ -50,7 +50,7 @@ public class InterceptingQueryExecutorWrapper extends QueryExecutorWrapper
 
     @Override
     public CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluate(URI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter)
+        evaluate(IRI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter)
             throws QueryEvaluationException
     {
         CloseableIteration<BindingSet, QueryEvaluationException> result =

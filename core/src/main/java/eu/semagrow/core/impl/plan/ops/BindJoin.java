@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.plan.ops;
 
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 /**
  * Will evaluate the result of the leftArg and

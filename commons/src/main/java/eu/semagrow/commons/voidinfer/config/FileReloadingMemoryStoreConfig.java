@@ -1,11 +1,11 @@
 package eu.semagrow.commons.voidinfer.config;
 
-import org.openrdf.sail.config.SailImplConfigBase;
+import org.eclipse.rdf4j.sail.config.AbstractSailImplConfig;
 
 /**
  * Created by angel on 5/30/14.
  */
-public class FileReloadingMemoryStoreConfig extends SailImplConfigBase {
+public class FileReloadingMemoryStoreConfig extends AbstractSailImplConfig {
 
     private String filename;
 

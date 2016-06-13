@@ -1,6 +1,6 @@
 package eu.semagrow.core.source;
 
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Resource;
 
 /**
  * Created by angel on 5/4/2016.

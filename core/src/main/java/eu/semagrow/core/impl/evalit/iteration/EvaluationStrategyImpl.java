@@ -6,16 +6,17 @@ import eu.semagrow.core.impl.plan.ops.*;
 import eu.semagrow.core.plan.Plan;
 import eu.semagrow.core.impl.sparql.SPARQLSite;
 import eu.semagrow.core.source.Site;
-import info.aduna.iteration.*;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.TripleSource;
-import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
-import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
-import org.openrdf.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.common.iteration.*;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
+import org.eclipse.rdf4j.query.algebra.evaluation.federation.FederatedServiceResolverImpl;
+import org.eclipse.rdf4j.query.algebra.evaluation.federation.JoinExecutorBase;
+import org.eclipse.rdf4j.query.algebra.evaluation.iterator.CollectionIteration;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -28,7 +29,7 @@ import java.util.concurrent.ExecutorService;
  * @author acharal@iit.demokritos.gr
  */
 public class EvaluationStrategyImpl
-    extends  org.openrdf.query.algebra.evaluation.impl.EvaluationStrategyImpl
+    extends  org.eclipse.rdf4j.query.algebra.evaluation.impl.SimpleEvaluationStrategy
     implements FederatedEvaluationStrategy {
 
     private int batchSize = 10;
@@ -44,21 +45,21 @@ public class EvaluationStrategyImpl
     public EvaluationStrategyImpl(QueryExecutor queryExecutor, final ExecutorService executor, final ValueFactory vf) {
         super(new TripleSource() {
             public CloseableIteration<? extends Statement, QueryEvaluationException>
-            getStatements(Resource resource, URI uri, Value value, Resource... resources) throws QueryEvaluationException {
+            getStatements(Resource resource, IRI uri, Value value, Resource... resources) throws QueryEvaluationException {
                 throw new UnsupportedOperationException("Statement retrieval is not supported");
             }
 
             public ValueFactory getValueFactory() {
                 return vf;
             }
-        });
+        }, new FederatedServiceResolverImpl());
         setQueryExecutor(queryExecutor);
         this.executor = executor;
     }
 
     public EvaluationStrategyImpl(QueryExecutor queryExecutor, final ExecutorService executor)
     {
-        this(queryExecutor, executor, ValueFactoryImpl.getInstance());
+        this(queryExecutor, executor, SimpleValueFactory.getInstance());
     }
 
     public void setIncludeProvenance(boolean includeProvenance) { this.includeProvenance = includeProvenance; }
@@ -121,7 +122,7 @@ public class EvaluationStrategyImpl
     }
 
     private CloseableIteration<BindingSet,QueryEvaluationException>
-        evaluateSourceDelayed(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+        evaluateSourceDelayed(final IRI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException {
 
         return new DelayedIteration<BindingSet, QueryEvaluationException>() {
@@ -135,7 +136,7 @@ public class EvaluationStrategyImpl
 
 
     private CloseableIteration<BindingSet,QueryEvaluationException>
-        evaluateSourceAsync(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+        evaluateSourceAsync(final IRI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException {
 
         return new AsyncCursor<BindingSet, QueryEvaluationException>(executor) {
@@ -148,7 +149,7 @@ public class EvaluationStrategyImpl
     }
 
     private CloseableIteration<BindingSet,QueryEvaluationException>
-        evaluateSource(URI endpoint, TupleExpr expr, BindingSet bindings)
+        evaluateSource(IRI endpoint, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException {
 
         CloseableIteration<BindingSet,QueryEvaluationException> result =
@@ -277,7 +278,7 @@ public class EvaluationStrategyImpl
         evaluateInternal(SourceQuery expr, CloseableIteration<BindingSet, QueryEvaluationException> bIter)
             throws QueryEvaluationException {
 
-        URI endpoint = ((SPARQLSite)expr.getSources().get(0)).getURI();
+        IRI endpoint = ((SPARQLSite)expr.getSources().get(0)).getURI();
 
         CloseableIteration<BindingSet,QueryEvaluationException> result =
                 queryExecutor.evaluate(endpoint, expr.getArg(), bIter);

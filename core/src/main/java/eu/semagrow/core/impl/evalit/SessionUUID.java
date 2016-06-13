@@ -1,8 +1,8 @@
 package eu.semagrow.core.impl.evalit;
 
 import eu.semagrow.core.evalit.SessionId;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 import java.util.UUID;
 
@@ -32,5 +32,5 @@ public class SessionUUID implements SessionId {
     public String toString() { return id.toString(); }
 
 
-    public URI toURI() { return ValueFactoryImpl.getInstance().createURI("urn:"+toString()); }
+    public IRI toURI() { return SimpleValueFactory.getInstance().createIRI("urn:"+toString()); }
 }

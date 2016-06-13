@@ -1,7 +1,7 @@
 package eu.semagrow.core.source;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
 
 import java.util.Collection;
 import java.util.List;
@@ -35,7 +35,7 @@ public interface SourceMetadata {
 
     StatementPattern target();
 
-    Collection<URI> getSchema(String var);
+    Collection<IRI> getSchema(String var);
 
     /**
      *

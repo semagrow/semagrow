@@ -7,9 +7,9 @@ import eu.semagrow.core.plan.PlanCollection;
 import eu.semagrow.core.plan.PlanGenerator;
 import eu.semagrow.core.plan.PlanProperties;
 import eu.semagrow.core.impl.util.CombinationIterator;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.*;
 

@@ -4,14 +4,14 @@ import eu.semagrow.core.impl.plan.ops.BindJoin;
 import eu.semagrow.core.impl.plan.ops.HashJoin;
 import eu.semagrow.core.impl.plan.ops.SourceQuery;
 import eu.semagrow.core.plan.Plan;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.QueryModelNode;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 /**
  * Created by angel on 21/4/2015.
  */
-public class PlanVisitorBase<X extends Exception> extends QueryModelVisitorBase<X> {
+public class PlanVisitorBase<X extends Exception> extends AbstractQueryModelVisitor<X> {
 
 
     public PlanVisitorBase() {

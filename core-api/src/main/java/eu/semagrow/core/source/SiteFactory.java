@@ -1,6 +1,6 @@
 package eu.semagrow.core.source;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * Created by angel on 5/4/2016.
@@ -13,5 +13,5 @@ public interface SiteFactory {
 
     Site getSite(SiteConfig config);
 
-    Site getSite(URI endpoint);
+    Site getSite(IRI endpoint);
 }

@@ -1,6 +1,6 @@
 package eu.semagrow.core.plan;
 
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.*;
 

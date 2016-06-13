@@ -2,7 +2,7 @@
 # Sesame configuration for SemaGrow
 #
 # ATTENTION: the Sail implementing the sail:sailType must be published
-#            in META-INF/services/org.openrdf.sail.SailFactory
+#            in META-INF/services/org.eclipse.rdf4j.sail.SailFactory
 ################################################################################
 @prefix void: <http://rdfs.org/ns/void#>.
 @prefix rep:  <http://www.openrdf.org/config/repository#>.

@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.alignment;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * Created by angel on 12/2/14.
@@ -20,12 +20,12 @@ public class InvertTransformer<A,B> implements Transformer<A,B> {
     }
 
     @Override
-    public URI getSourceSchema() {
+    public IRI getSourceSchema() {
         return forwardTransformer.getTargetSchema();
     }
 
     @Override
-    public URI getTargetSchema() {
+    public IRI getTargetSchema() {
         return forwardTransformer.getSourceSchema();
     }
 

@@ -1,7 +1,7 @@
 package eu.semagrow.querylog.impl.rdf.config;
 
 import eu.semagrow.querylog.config.QueryLogConfig;
-import org.openrdf.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFFormat;
 
 /**
  * Created by kzam on 5/18/15.

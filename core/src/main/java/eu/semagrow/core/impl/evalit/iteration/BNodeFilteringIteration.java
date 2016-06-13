@@ -1,10 +1,10 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
-import info.aduna.iteration.FilterIteration;
-import info.aduna.iteration.Iteration;
-import org.openrdf.model.BNode;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
+import org.eclipse.rdf4j.common.iteration.FilterIteration;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
 
 import java.util.Set;
 

@@ -1,7 +1,7 @@
 package eu.semagrow.config;
 
 import eu.semagrow.core.config.SourceSelectorFactory;
-import info.aduna.lang.service.ServiceRegistry;
+import org.eclipse.rdf4j.common.lang.service.ServiceRegistry;
 
 
 /**

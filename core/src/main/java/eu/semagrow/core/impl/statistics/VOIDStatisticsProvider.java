@@ -3,13 +3,13 @@ package eu.semagrow.core.impl.statistics;
 import eu.semagrow.core.impl.selector.VOIDBase;
 import eu.semagrow.core.statistics.Statistics;
 import eu.semagrow.core.statistics.StatisticsProvider;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.repository.Repository;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.repository.Repository;
 
 import java.util.*;
 
@@ -22,7 +22,7 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
         super(voidRepository);
     }
 
-    public long getDistinctObjects(StatementPattern pattern, URI source) {
+    public long getDistinctObjects(StatementPattern pattern, IRI source) {
         Value pVal = pattern.getPredicateVar().getValue();
         Value sVal = pattern.getSubjectVar().getValue();
         Value oVal = pattern.getObjectVar().getValue();
@@ -39,10 +39,10 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
         Set<Resource> sDatasets = new HashSet<Resource>(datasets);
 
         if (pVal != null)
-            pDatasets.retainAll(getMatchingDatasetsOfPredicate((URI) pVal));
+            pDatasets.retainAll(getMatchingDatasetsOfPredicate((IRI) pVal));
 
-        if (sVal != null && sVal instanceof URI)
-            sDatasets.retainAll(getMatchingDatasetsOfSubject((URI)sVal));
+        if (sVal != null && sVal instanceof IRI)
+            sDatasets.retainAll(getMatchingDatasetsOfSubject((IRI)sVal));
 
         Set<Resource> spDatasets = new HashSet<Resource>(pDatasets);
         spDatasets.retainAll(sDatasets);
@@ -59,7 +59,7 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
         }
     }
 
-    public long getDistinctSubjects(StatementPattern pattern, URI source) {
+    public long getDistinctSubjects(StatementPattern pattern, IRI source) {
         Value pVal = pattern.getPredicateVar().getValue();
         Value sVal = pattern.getSubjectVar().getValue();
 
@@ -80,8 +80,8 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
 
         Set<Resource> pDatasets = new HashSet<Resource>(datasets);
 
-        if (pVal != null && pVal instanceof URI)
-            pDatasets.retainAll(getMatchingDatasetsOfPredicate((URI)pVal));
+        if (pVal != null && pVal instanceof IRI)
+            pDatasets.retainAll(getMatchingDatasetsOfPredicate((IRI)pVal));
 
         //TODO: check datasets that must subject uriRegexPattern
         //
@@ -93,7 +93,7 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
         }
     }
 
-    public long getDistinctPredicates(StatementPattern pattern, URI source){
+    public long getDistinctPredicates(StatementPattern pattern, IRI source){
         Value pVal = pattern.getPredicateVar().getValue();
         Value sVal = pattern.getSubjectVar().getValue();
 
@@ -109,8 +109,8 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
         Set<Resource> sDatasets = new HashSet<Resource>(datasets);
 
 
-        if (sVal != null && sVal instanceof URI)
-            sDatasets.retainAll(getMatchingDatasetsOfSubject((URI)sVal));
+        if (sVal != null && sVal instanceof IRI)
+            sDatasets.retainAll(getMatchingDatasetsOfSubject((IRI)sVal));
 
 
         if (sVal != null && !sDatasets.isEmpty()) {
@@ -121,7 +121,7 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
     }
 
     @Override
-    public Statistics getStats(final StatementPattern pattern, BindingSet bindings, final URI source) {
+    public Statistics getStats(final StatementPattern pattern, BindingSet bindings, final IRI source) {
         return new StatisticsImpl(pattern,
                 getPatternCount(pattern, source),
                 getDistinctSubjects(pattern, source),
@@ -129,7 +129,7 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
                 getDistinctObjects(pattern,source));
     }
 
-    public long getPatternCount(StatementPattern pattern, URI source) {
+    public long getPatternCount(StatementPattern pattern, IRI source) {
 
         Value sVal = pattern.getSubjectVar().getValue();
         Value pVal = pattern.getPredicateVar().getValue();
@@ -140,7 +140,7 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
 
 
         if (isTypeClass(pattern)) {
-            Set<Resource> datasets = getMatchingDatasetsOfClass((URI)pattern.getObjectVar().getValue());
+            Set<Resource> datasets = getMatchingDatasetsOfClass((IRI)pattern.getObjectVar().getValue());
             if (!datasets.isEmpty()) {
                 return getEntities(datasets);
             }
@@ -158,10 +158,10 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
         Set<Resource> sDatasets = new HashSet<Resource>(datasets);
 
         if (pVal != null)
-            pDatasets.retainAll(getMatchingDatasetsOfPredicate((URI) pVal));
+            pDatasets.retainAll(getMatchingDatasetsOfPredicate((IRI) pVal));
 
-        if (sVal != null && sVal instanceof URI)
-            sDatasets.retainAll(getMatchingDatasetsOfSubject((URI)sVal));
+        if (sVal != null && sVal instanceof IRI)
+            sDatasets.retainAll(getMatchingDatasetsOfSubject((IRI)sVal));
 
         Set<Resource> spDatasets = new HashSet<Resource>(pDatasets);
         spDatasets.retainAll(sDatasets);
@@ -205,7 +205,7 @@ public class VOIDStatisticsProvider extends VOIDBase implements StatisticsProvid
         }
     }
 
-    public long getTriplesCount(URI source) {
+    public long getTriplesCount(IRI source) {
 
         // get all triples statistics from datasets with property sparqlEndpoint = source
         // and get the maximum

@@ -4,17 +4,13 @@ import eu.semagrow.querylog.api.QueryLogException;
 import eu.semagrow.querylog.api.QueryLogRecord;
 import eu.semagrow.querylog.api.QueryLogWriter;
 import eu.semagrow.querylog.impl.rdf.vocabulary.*;
-import org.openrdf.model.*;
-import org.openrdf.model.impl.ValueFactoryImpl;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.TupleQuery;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.impl.EmptyBindingSet;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFWriter;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFWriter;
 
 import java.util.*;
 
@@ -24,7 +20,7 @@ import java.util.*;
 public class RDFQueryLogWriter implements QueryLogWriter {
 
     private RDFWriter handler;
-    private ValueFactory vf = ValueFactoryImpl.getInstance();
+    private ValueFactory vf = SimpleValueFactory.getInstance();
 
 
     public RDFQueryLogWriter(RDFWriter handler) {
@@ -46,7 +42,7 @@ public class RDFQueryLogWriter implements QueryLogWriter {
         createQueryRecord(queryLogRecord);
     }
 
-    private void createStatement(Resource subject, URI predicate, Value object)
+    private void createStatement(Resource subject, IRI predicate, Value object)
             throws QueryLogException
     {
         try {
@@ -60,7 +56,7 @@ public class RDFQueryLogWriter implements QueryLogWriter {
 
     private Value createQueryRecord(QueryLogRecord qr) throws QueryLogException {
 
-        Resource record = vf.createURI("urn:" + UUID.randomUUID().toString());
+        Resource record = vf.createIRI("urn:" + UUID.randomUUID().toString());
 
         createStatement(record, RDF.TYPE, QFR.QUERYRECORD);
        // createStatement(record, QFR.SESSION, qr.getSession().getSessionId().toURI());

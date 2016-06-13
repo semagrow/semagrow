@@ -2,13 +2,15 @@ package eu.semagrow.config;
 
 import eu.semagrow.repository.impl.SemagrowSailRepository;
 import eu.semagrow.sail.SemagrowSail;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.config.RepositoryConfigException;
-import org.openrdf.repository.config.RepositoryFactory;
-import org.openrdf.repository.config.RepositoryImplConfig;
-import org.openrdf.sail.config.SailConfigException;
-import org.openrdf.sail.config.SailFactory;
-import org.openrdf.sail.config.SailRegistry;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
+import org.eclipse.rdf4j.repository.config.RepositoryFactory;
+import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
+import org.eclipse.rdf4j.sail.config.SailFactory;
+import org.eclipse.rdf4j.sail.config.SailRegistry;
+
+import java.util.Optional;
 
 /**
  * Created by angel on 6/10/14.
@@ -31,12 +33,18 @@ public class SemagrowRepositoryFactory implements RepositoryFactory {
         assert repositoryImplConfig instanceof SemagrowRepositoryConfig;
 
         SemagrowRepositoryConfig config = (SemagrowRepositoryConfig) repositoryImplConfig;
-        SailFactory sailFactory = SailRegistry.getInstance().get(config.getSemagrowSailConfig().getType());
-        try {
-            SemagrowSail sail = (SemagrowSail) sailFactory.getSail(config.getSemagrowSailConfig());            
-            return new SemagrowSailRepository(sail);
-        } catch (SailConfigException e) {
-            throw new RepositoryConfigException(e);
+        Optional<SailFactory> sailFactory = SailRegistry.getInstance().get(config.getSemagrowSailConfig().getType());
+        if (sailFactory.isPresent()) {
+
+            try {
+
+                SemagrowSail sail = (SemagrowSail) sailFactory.get().getSail(config.getSemagrowSailConfig());
+                return new SemagrowSailRepository(sail);
+            } catch (SailConfigException e) {
+                throw new RepositoryConfigException(e);
+            }
         }
+
+        throw new RepositoryConfigException();
     }
 }

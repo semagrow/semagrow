@@ -2,13 +2,13 @@ package eu.semagrow.query.impl;
 
 import eu.semagrow.query.SemagrowTupleQuery;
 import eu.semagrow.sail.SemagrowSailConnection;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.query.*;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.impl.TupleQueryResultImpl;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.repository.sail.SailRepositoryConnection;
-import org.openrdf.sail.SailException;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.impl.IteratingTupleQueryResult;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
+import org.eclipse.rdf4j.sail.SailException;
 import org.reactivestreams.Publisher;
 import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
@@ -52,7 +52,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
             bindingsIter = enforceMaxQueryTime(bindingsIter);
 
-            return new TupleQueryResultImpl(new ArrayList<String>(tupleExpr.getBindingNames()), bindingsIter);
+            return new IteratingTupleQueryResult(new ArrayList<String>(tupleExpr.getBindingNames()), bindingsIter);
         }
         catch (SailException e) {
             throw new QueryEvaluationException(e.getMessage(), e);

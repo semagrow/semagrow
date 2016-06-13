@@ -2,9 +2,9 @@ package eu.semagrow.commons.voidinfer.VOID;
 
 import eu.semagrow.commons.vocabulary.SEVOD;
 import eu.semagrow.commons.vocabulary.VOID;
-import org.openrdf.model.vocabulary.RDFS;
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.inferencer.InferencerConnection;
+import org.eclipse.rdf4j.model.vocabulary.RDFS;
+import org.eclipse.rdf4j.sail.SailException;
+import org.eclipse.rdf4j.sail.inferencer.InferencerConnection;
 
 /**
  * Created by angel on 7/4/14.

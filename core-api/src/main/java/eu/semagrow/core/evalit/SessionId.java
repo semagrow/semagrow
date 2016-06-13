@@ -1,11 +1,11 @@
 package eu.semagrow.core.evalit;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * @author Angelos Charalambidis
  */
 public interface SessionId {
 
-    URI toURI();
+    IRI toURI();
 }

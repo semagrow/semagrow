@@ -1,8 +1,10 @@
 package eu.semagrow.core.config;
 
-import org.openrdf.model.BNode;
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.BNode;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  * @author Angelos Charalambidis
@@ -23,13 +25,14 @@ public class SourceSelectorImplConfigBase implements SourceSelectorImplConfig {
 
     }
 
-    public Resource export(Graph graph) {
-        BNode implNode = graph.getValueFactory().createBNode();
-        graph.add(implNode, SemagrowSchema.SOURCESELECTOR, graph.getValueFactory().createLiteral(getType()));
+    public Resource export(Model graph) {
+        ValueFactory vf = SimpleValueFactory.getInstance();
+        BNode implNode = vf.createBNode();
+        graph.add(implNode, SemagrowSchema.SOURCESELECTOR, vf.createLiteral(getType()));
         return implNode;
     }
 
-    public void parse(Graph graph, Resource resource) throws SourceSelectorConfigException {
+    public void parse(Model graph, Resource resource) throws SourceSelectorConfigException {
 
     }
 }

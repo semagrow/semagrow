@@ -1,22 +1,22 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
 import eu.semagrow.core.evalit.QueryExecutor;
-import eu.semagrow.core.impl.evaluation.ConnectionManager;
-import eu.semagrow.core.impl.evaluation.util.SPARQLQueryStringUtil;
-import info.aduna.iteration.*;
+import eu.semagrow.core.impl.sparql.ConnectionManager;
+import eu.semagrow.core.impl.sparql.SPARQLQueryStringUtil;
+import org.eclipse.rdf4j.common.iteration.*;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.*;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
-import org.openrdf.query.algebra.evaluation.federation.JoinExecutorBase;
-import org.openrdf.query.algebra.evaluation.federation.ServiceCrossProductIteration;
-import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
-import org.openrdf.query.impl.EmptyBindingSet;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sparql.query.InsertBindingSetCursor;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.query.algebra.evaluation.federation.JoinExecutorBase;
+import org.eclipse.rdf4j.query.algebra.evaluation.iterator.CollectionIteration;
+import org.eclipse.rdf4j.query.algebra.evaluation.iterator.CrossProductIteration;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.sparql.query.InsertBindingSetCursor;
 
 import java.util.*;
 
@@ -30,7 +30,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluate(final URI endpoint, final TupleExpr expr, final BindingSet bindings)
+        evaluate(final IRI endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException {
 
         CloseableIteration<BindingSet,QueryEvaluationException> result = null;
@@ -85,7 +85,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     private CloseableIteration<BindingSet, QueryEvaluationException>
-        askToIteration(URI endpoint, String sparqlQuery, BindingSet bindings, BindingSet relevantBindings)
+        askToIteration(IRI endpoint, String sparqlQuery, BindingSet bindings, BindingSet relevantBindings)
         throws QueryEvaluationException
     {
         try {
@@ -103,7 +103,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluate(URI endpoint, TupleExpr expr,
+        evaluate(IRI endpoint, TupleExpr expr,
                  CloseableIteration<BindingSet, QueryEvaluationException> bindingIter)
             throws QueryEvaluationException {
 
@@ -148,7 +148,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
 
 
     protected CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluateInternal(URI endpoint, TupleExpr expr, List<BindingSet> bindings)
+        evaluateInternal(IRI endpoint, TupleExpr expr, List<BindingSet> bindings)
             throws Exception {
 
         CloseableIteration<BindingSet, QueryEvaluationException> result = null;
@@ -175,7 +175,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
         }
         else {
 
-        	result = new ServiceCrossProductIteration(result, bindings);
+        	result = new CrossProductIteration(result, bindings);
 
         }
         return result;
@@ -217,7 +217,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
      */
     protected Set<String> computeVars(TupleExpr serviceExpression) {
         final Set<String> res = new HashSet<String>();
-        serviceExpression.visit(new QueryModelVisitorBase<RuntimeException>() {
+        serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 
             @Override
             public void meet(Var node)
@@ -234,7 +234,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     protected CloseableIteration<BindingSet, QueryEvaluationException>
-        sendTupleQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendTupleQuery(IRI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);
@@ -253,7 +253,7 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     }
 
     protected boolean
-        sendBooleanQuery(URI endpoint, String sparqlQuery, BindingSet bindings)
+        sendBooleanQuery(IRI endpoint, String sparqlQuery, BindingSet bindings)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
         RepositoryConnection conn = getConnection(endpoint);
@@ -271,10 +271,10 @@ public class QueryExecutorImpl extends ConnectionManager implements QueryExecuto
     protected class SequentialQueryIteration extends JoinExecutorBase<BindingSet> {
 
         private TupleExpr expr;
-        private URI endpoint;
+        private IRI endpoint;
         private Collection<BindingSet> bindings;
 
-        public SequentialQueryIteration(URI endpoint, TupleExpr expr, Collection<BindingSet> bindings)
+        public SequentialQueryIteration(IRI endpoint, TupleExpr expr, Collection<BindingSet> bindings)
                 throws QueryEvaluationException {
             super(null, null, EmptyBindingSet.getInstance());
             this.endpoint = endpoint;

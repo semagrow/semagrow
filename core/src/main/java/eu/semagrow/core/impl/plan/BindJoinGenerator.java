@@ -7,8 +7,8 @@ import eu.semagrow.core.plan.Plan;
 import eu.semagrow.core.plan.PlanGenerationContext;
 import eu.semagrow.core.source.LocalSite;
 import eu.semagrow.core.source.Site;
-import org.openrdf.query.algebra.Join;
-import org.openrdf.query.algebra.Union;
+import org.eclipse.rdf4j.query.algebra.Join;
+import org.eclipse.rdf4j.query.algebra.Union;
 
 import java.util.Collection;
 import java.util.LinkedList;

@@ -1,11 +1,11 @@
 package eu.semagrow.core.evalit.util;
 
 import eu.semagrow.core.evalit.QueryExecutor;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 /**
  * Created by angel on 6/20/14.
@@ -26,12 +26,12 @@ public class QueryExecutorWrapper implements QueryExecutor {
     public void shutdown() { getWrappedExecutor().shutdown(); }
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluate(URI endpoint, TupleExpr expr, BindingSet bindings) throws QueryEvaluationException {
+        evaluate(IRI endpoint, TupleExpr expr, BindingSet bindings) throws QueryEvaluationException {
         return getWrappedExecutor().evaluate(endpoint, expr, bindings);
     }
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
-        evaluate(URI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter) throws QueryEvaluationException {
+        evaluate(IRI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter) throws QueryEvaluationException {
         return getWrappedExecutor().evaluate(endpoint,expr,bindingIter);
     }
 }

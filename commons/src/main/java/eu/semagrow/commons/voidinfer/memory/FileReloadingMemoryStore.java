@@ -4,16 +4,16 @@ import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
-import org.openrdf.model.*;
-import org.openrdf.repository.Repository;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.sail.SailRepository;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.sail.*;
-import org.openrdf.sail.helpers.SailBase;
-import org.openrdf.sail.memory.MemoryStore;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.repository.Repository;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.sail.SailRepository;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.sail.*;
+import org.eclipse.rdf4j.sail.helpers.AbstractSail;
+import org.eclipse.rdf4j.sail.memory.MemoryStore;
 
 import java.io.*;
 import java.util.HashSet;
@@ -22,7 +22,7 @@ import java.util.Set;
 /**
  * Created by angel on 5/29/14.
  */
-public class FileReloadingMemoryStore extends SailBase implements NotifyingSail {
+public class FileReloadingMemoryStore extends AbstractSail implements NotifyingSail {
 
     private MemoryStore store = new MemoryStore();
     private String filename;

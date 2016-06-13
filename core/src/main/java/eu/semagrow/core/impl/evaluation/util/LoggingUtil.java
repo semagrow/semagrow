@@ -1,11 +1,12 @@
 package eu.semagrow.core.impl.evaluation.util;
 
 import eu.semagrow.core.impl.plan.ops.SourceQuery;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Query;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.repository.RepositoryConnection;
+import eu.semagrow.core.impl.sparql.SPARQLQueryStringUtil;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Query;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.slf4j.Logger;
 
 /**
@@ -22,24 +23,24 @@ public class LoggingUtil {
                 expr.getSources());
     }
 
-    public static void logFirstResult(Logger logger, String query, URI endpoint) {
+    public static void logFirstResult(Logger logger, String query, IRI endpoint) {
         logger.info("rq {} - Found first result.",
                 Math.abs((query + endpoint).hashCode()));
     }
 
-    public static void logResult(Logger logger, String query, URI endpoint, BindingSet bindingSet) {
+    public static void logResult(Logger logger, String query, IRI endpoint, BindingSet bindingSet) {
         logger.debug("rq {} - Found {}",
                 Math.abs((query + endpoint).hashCode()),
                 bindingSet);
     }
 
-    public static void logEnd(Logger logger, String query, URI endpoint, int results) {
+    public static void logEnd(Logger logger, String query, IRI endpoint, int results) {
         logger.info("rq {} - Found {} results.",
                 Math.abs((query + endpoint).hashCode()),
                 results);
     }
 
-    public static void logRemote(Logger logger, RepositoryConnection conn, String sparqlQuery, URI endpoint, TupleExpr expr, Query query) {
+    public static void logRemote(Logger logger, RepositoryConnection conn, String sparqlQuery, IRI endpoint, TupleExpr expr, Query query) {
         logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
                 conn.hashCode(),
                 Math.abs((sparqlQuery+endpoint).hashCode()),

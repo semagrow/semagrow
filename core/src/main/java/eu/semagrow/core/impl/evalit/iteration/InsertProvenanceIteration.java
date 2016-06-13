@@ -2,13 +2,13 @@ package eu.semagrow.core.impl.evalit.iteration;
 
 import eu.semagrow.core.impl.plan.ops.ProvenanceValue;
 
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.ConvertingIteration;
-import org.openrdf.model.Value;
-import org.openrdf.query.Binding;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.ConvertingIteration;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.Binding;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
 
 /**
  * Created by angel on 6/11/14.

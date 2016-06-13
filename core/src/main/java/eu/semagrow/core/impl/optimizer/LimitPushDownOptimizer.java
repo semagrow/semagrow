@@ -2,11 +2,11 @@ package eu.semagrow.core.impl.optimizer;
 
 import eu.semagrow.core.impl.plan.ops.SourceQuery;
 import eu.semagrow.core.plan.Plan;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.evaluation.QueryOptimizer;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 
 /**
  * A semantically-preserved optimizer that pushes down @{link Limit} nodes
@@ -22,7 +22,7 @@ public class LimitPushDownOptimizer implements QueryOptimizer {
     }
 
 
-    protected static class LimitFinder extends QueryModelVisitorBase<RuntimeException> {
+    protected static class LimitFinder extends AbstractQueryModelVisitor<RuntimeException> {
 
         @Override
         public void meet(Slice slice) {
@@ -32,7 +32,7 @@ public class LimitPushDownOptimizer implements QueryOptimizer {
     }
 
 
-    protected static class LimitRelocator extends QueryModelVisitorBase<RuntimeException> {
+    protected static class LimitRelocator extends AbstractQueryModelVisitor<RuntimeException> {
 
         protected Slice slice;
 

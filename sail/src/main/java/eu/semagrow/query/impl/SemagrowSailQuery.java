@@ -3,12 +3,12 @@ package eu.semagrow.query.impl;
 import eu.semagrow.query.SemagrowQuery;
 import eu.semagrow.sail.SemagrowSailConnection;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.repository.sail.SailQuery;
-import org.openrdf.repository.sail.SailRepositoryConnection;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.repository.sail.SailQuery;
+import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,8 +30,8 @@ import java.util.UUID;
 public class SemagrowSailQuery extends SailQuery implements SemagrowQuery
 {
 
-    private final Set<URI> excludedSources;
-    private final Set<URI> includeOnlySources;
+    private final Set<IRI> excludedSources;
+    private final Set<IRI> includeOnlySources;
     
     /* a copy of the MDC context map at the time of object instantiation */ 
     private final java.util.Map<String,String> contextMap;
@@ -40,8 +40,8 @@ public class SemagrowSailQuery extends SailQuery implements SemagrowQuery
     {
         super( parsedQuery, con );
 
-        this.excludedSources = new HashSet<URI>();
-        this.includeOnlySources = new HashSet<URI>();
+        this.excludedSources = new HashSet<IRI>();
+        this.includeOnlySources = new HashSet<IRI>();
 
 
     	/* All TupleExpr instances that are QueryRoot root instances must point back
@@ -78,13 +78,13 @@ public class SemagrowSailQuery extends SailQuery implements SemagrowQuery
         return conn.decompose(expr, dataset, getBindings(), getIncludedSources(), getExcludedSources());
     }
 
-    public void addExcludedSource(URI source) { excludedSources.add(source); }
+    public void addExcludedSource(IRI source) { excludedSources.add(source); }
 
-    public void addIncludedSource(URI source) { includeOnlySources.add(source); }
+    public void addIncludedSource(IRI source) { includeOnlySources.add(source); }
 
-    public Collection<URI> getExcludedSources() { return excludedSources; }
+    public Collection<IRI> getExcludedSources() { return excludedSources; }
 
-    public Collection<URI> getIncludedSources() { return includeOnlySources; }
+    public Collection<IRI> getIncludedSources() { return includeOnlySources; }
 
 	@Override
 	public void setMDC()

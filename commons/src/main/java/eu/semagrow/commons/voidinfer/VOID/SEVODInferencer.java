@@ -1,7 +1,7 @@
 package eu.semagrow.commons.voidinfer.VOID;
 
-import org.openrdf.sail.SailException;
-import org.openrdf.sail.inferencer.InferencerConnection;
+import org.eclipse.rdf4j.sail.SailException;
+import org.eclipse.rdf4j.sail.inferencer.InferencerConnection;
 
 /**
  * Created by angel on 7/4/14.

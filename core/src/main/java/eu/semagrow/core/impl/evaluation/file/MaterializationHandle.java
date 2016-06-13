@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.evaluation.file;
 
-import org.openrdf.model.URI;
-import org.openrdf.query.QueryResultHandler;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.QueryResultHandler;
 
 import java.io.IOException;
 
@@ -14,7 +14,7 @@ import java.io.IOException;
  */
 public interface MaterializationHandle extends QueryResultHandler {
 
-    public URI getId();
+    IRI getId();
 
-    public void destroy() throws IOException;
+    void destroy() throws IOException;
 }

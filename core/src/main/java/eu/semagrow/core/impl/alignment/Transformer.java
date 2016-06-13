@@ -1,6 +1,6 @@
 package eu.semagrow.core.impl.alignment;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * Created by angel on 12/2/14.
@@ -9,9 +9,9 @@ public interface Transformer<A,B> {
 
     int getId();
 
-    URI getSourceSchema();
+    IRI getSourceSchema();
 
-    URI getTargetSchema();
+    IRI getTargetSchema();
 
     double getProximity();
 

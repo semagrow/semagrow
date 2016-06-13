@@ -6,23 +6,25 @@ import eu.semagrow.querylog.api.QueryLogParser;
 import eu.semagrow.querylog.api.QueryLogRecord;
 import eu.semagrow.querylog.impl.QueryLogRecordImpl;
 import eu.semagrow.querylog.impl.rdf.vocabulary.QFR;
-import org.openrdf.model.*;
-import org.openrdf.model.vocabulary.RDF;
-import org.openrdf.query.*;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.impl.EmptyBindingSet;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.query.parser.QueryParserUtil;
-import org.openrdf.repository.sail.SailTupleQuery;
-import org.openrdf.repository.sparql.query.SPARQLTupleQuery;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.Rio;
+import org.eclipse.rdf4j.model.*;
+import org.eclipse.rdf4j.model.util.Models;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.query.parser.QueryParserUtil;
+import org.eclipse.rdf4j.repository.sail.SailTupleQuery;
+import org.eclipse.rdf4j.repository.sparql.query.SPARQLTupleQuery;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.Rio;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * Created by angel on 31/7/2015.
@@ -67,22 +69,22 @@ public class RDFQueryLogParser implements QueryLogParser {
 
     private QueryLogRecord parseQueryRecord(Resource qr, Model model) {
 
-        URI endpoint = model.filter(qr, QFR.ENDPOINT, null).objectURI();
-        URI results  = model.filter(qr, QFR.RESULTFILE, null).objectURI();
+        Optional<IRI> optionalEndpoint = Models.objectIRI(model.filter(qr, QFR.ENDPOINT, null));
+        Optional<IRI> optionalResults  = Models.objectIRI(model.filter(qr, QFR.RESULTFILE, null));
 
-        Date startTime = parseDate(model.filter(qr, QFR.START, null).objectLiteral(), model);
-        Date endTime = parseDate(model.filter(qr, QFR.END, null).objectLiteral(), model);
+        Date startTime = parseDate(Models.objectLiteral(model.filter(qr, QFR.START, null)).get(), model);
+        Date endTime = parseDate(Models.objectLiteral(model.filter(qr, QFR.END, null)).get(), model);
 
-        long cardinality = parseCardinality(model.filter(qr, QFR.CARDINALITY, null).objectLiteral(), model);
-        String expr = parseQuery(model.filter(qr, QFR.QUERY, null).objectValue(), model).toString();
+        long cardinality = parseCardinality(Models.objectLiteral(model.filter(qr, QFR.CARDINALITY, null)).get(), model);
+        String expr = parseQuery(Models.object(model.filter(qr, QFR.QUERY, null)).get(), model).toString();
 
-        QueryLogRecord r = new QueryLogRecordImpl(null, endpoint, expr , EmptyBindingSet.getInstance(), Collections.<String>emptyList());
+        QueryLogRecord r = new QueryLogRecordImpl(null, optionalEndpoint.get(), expr , EmptyBindingSet.getInstance(), Collections.<String>emptyList());
 
         //r.setDuration(startTime, endTime);
 
         r.setCardinality(cardinality);
         r.setDuration(startTime.getTime(), endTime.getTime());
-        r.setResults(results);
+        r.setResults(optionalResults.get());
         return r;
     }
 

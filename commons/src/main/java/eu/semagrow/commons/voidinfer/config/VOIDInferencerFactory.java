@@ -2,10 +2,10 @@ package eu.semagrow.commons.voidinfer.config;
 
 import eu.semagrow.commons.voidinfer.VOID.VOIDInferencer;
 import eu.semagrow.commons.voidinfer.VOID.VOIDInferencer;
-import org.openrdf.sail.Sail;
-import org.openrdf.sail.config.SailConfigException;
-import org.openrdf.sail.config.SailFactory;
-import org.openrdf.sail.config.SailImplConfig;
+import org.eclipse.rdf4j.sail.Sail;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
+import org.eclipse.rdf4j.sail.config.SailFactory;
+import org.eclipse.rdf4j.sail.config.SailImplConfig;
 
 /**
  * Created by angel on 5/29/14.

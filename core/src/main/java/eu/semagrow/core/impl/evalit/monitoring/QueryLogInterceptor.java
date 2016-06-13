@@ -8,15 +8,15 @@ import eu.semagrow.querylog.api.QueryLogHandler;
 import eu.semagrow.querylog.api.QueryLogRecord;
 import eu.semagrow.core.impl.evaluation.file.MaterializationManager;
 import eu.semagrow.querylog.impl.QueryLogRecordImpl;
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.DelayedIteration;
-import info.aduna.iteration.Iteration;
-import info.aduna.iteration.Iterations;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.impl.EmptyBindingSet;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.DelayedIteration;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.common.iteration.Iterations;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 
 import java.io.IOException;
 import java.util.*;
@@ -43,7 +43,7 @@ public class QueryLogInterceptor
 
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
-    afterExecution(URI endpoint, TupleExpr expr, BindingSet bindings, CloseableIteration<BindingSet, QueryEvaluationException> result) {
+    afterExecution(IRI endpoint, TupleExpr expr, BindingSet bindings, CloseableIteration<BindingSet, QueryEvaluationException> result) {
 
         QueryLogRecordImpl metadata = createMetadata(endpoint, expr, bindings, bindings.getBindingNames());
 
@@ -52,7 +52,7 @@ public class QueryLogInterceptor
 
 
     public CloseableIteration<BindingSet, QueryEvaluationException>
-    afterExecution(URI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter, CloseableIteration<BindingSet, QueryEvaluationException> result)
+    afterExecution(IRI endpoint, TupleExpr expr, CloseableIteration<BindingSet, QueryEvaluationException> bindingIter, CloseableIteration<BindingSet, QueryEvaluationException> result)
     {
 
         List<BindingSet> bindings = Collections.<BindingSet>emptyList();
@@ -72,7 +72,7 @@ public class QueryLogInterceptor
         return observe(metadata, result);
     }
 
-    protected QueryLogRecordImpl createMetadata(URI endpoint, TupleExpr expr, BindingSet bindings, Set<String> bindingNames) {
+    protected QueryLogRecordImpl createMetadata(IRI endpoint, TupleExpr expr, BindingSet bindings, Set<String> bindingNames) {
 
         return new QueryLogRecordImpl(UUID.randomUUID(), endpoint, expr, bindings, bindingNames);
     }

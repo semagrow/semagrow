@@ -3,7 +3,7 @@
  */
 package eu.semagrow.core.impl.alignment;
 
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 import eu.semagrow.core.transformation.EquivalentURI;
 
@@ -13,12 +13,12 @@ import eu.semagrow.core.transformation.EquivalentURI;
  */
 public class EquivalentURIImpl implements EquivalentURI {
 
-    private URI source, target;
-    private URI sourceSchema, targetSchema;
+    private IRI source, target;
+    private IRI sourceSchema, targetSchema;
     private int proximity;
     private int transformationID;
 
-    public EquivalentURIImpl(URI source, URI target, URI sourceSchema, URI targetSchema, int proximity, int transformationID) {
+    public EquivalentURIImpl(IRI source, IRI target, IRI sourceSchema, IRI targetSchema, int proximity, int transformationID) {
         this.source = source;
         this.target = target;
         this.sourceSchema = sourceSchema;
@@ -27,35 +27,35 @@ public class EquivalentURIImpl implements EquivalentURI {
         this.transformationID = transformationID;
     }
 
-    public URI getSourceURI() {
+    public IRI getSourceURI() {
         return source;
     }
 
-    public void setSourceURI(URI source) {
+    public void setSourceURI(IRI source) {
         this.source = source;
     }
 
-    public URI getTargetURI() {
+    public IRI getTargetURI() {
         return target;
     }
 
-    public void setTargetURI(URI target) {
+    public void setTargetURI(IRI target) {
         this.target = target;
     }
 
-    public URI getSourceSchema() {
+    public IRI getSourceSchema() {
         return sourceSchema;
     }
 
-    public void setSourceSchema(URI sourceSchema) {
+    public void setSourceSchema(IRI sourceSchema) {
         this.sourceSchema = sourceSchema;
     }
 
-    public URI getTargetSchema() {
+    public IRI getTargetSchema() {
         return targetSchema;
     }
 
-    public void setTargetSchema(URI targetSchema) {
+    public void setTargetSchema(IRI targetSchema) {
         this.targetSchema = targetSchema;
     }
 

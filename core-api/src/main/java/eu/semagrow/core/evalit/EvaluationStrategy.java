@@ -1,9 +1,9 @@
 package eu.semagrow.core.evalit;
 
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 
 /**
@@ -13,7 +13,7 @@ import org.openrdf.query.algebra.TupleExpr;
  * @author Angelos Charalambidis
  */
 
-public interface EvaluationStrategy extends org.openrdf.query.algebra.evaluation.EvaluationStrategy
+public interface EvaluationStrategy extends org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy
 {
 
     /**

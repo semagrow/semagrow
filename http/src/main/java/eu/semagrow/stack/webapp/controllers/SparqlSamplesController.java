@@ -11,16 +11,16 @@ import java.util.HashSet;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.servlet.http.HttpServletResponse;
-import org.openrdf.model.Resource;
-import org.openrdf.model.Statement;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParseException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.RDFHandlerBase;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.Statement;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParseException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.AbstractRDFHandler;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -37,7 +37,7 @@ public class SparqlSamplesController {
     public static final String ATTR_SAMPLES_RESULT = "samples";
     public static final String TEMPLATE_SAMPLES_RESULT = "sparqlsamples";
 
-    private HashMap<Resource, HashMap<URI,HashSet<Value>>> samplesData = null;
+    private HashMap<Resource, HashMap<IRI,HashSet<Value>>> samplesData = null;
     
     String sparqlSamplesFileName = "sparql.samples.ttl";
     File sparqlSamplesFile = null;
@@ -86,17 +86,17 @@ public class SparqlSamplesController {
             response.setStatus(HttpServletResponse.SC_ACCEPTED);
     }
     
-    private class HashMapHandler extends RDFHandlerBase {
-        private HashMap<Resource, HashMap<URI,HashSet<Value>>> samplesData = new HashMap<>();
+    private class HashMapHandler extends AbstractRDFHandler {
+        private HashMap<Resource, HashMap<IRI,HashSet<Value>>> samplesData = new HashMap<>();
 
-        public HashMap<Resource, HashMap<URI, HashSet<Value>>> getSamplesData() {
+        public HashMap<Resource, HashMap<IRI, HashSet<Value>>> getSamplesData() {
             return samplesData;
         }
         
         @Override
         public void handleStatement(Statement st) throws RDFHandlerException {            
             if(!this.samplesData.containsKey(st.getSubject())){
-                this.samplesData.put(st.getSubject(), new HashMap<URI,HashSet<Value>>());
+                this.samplesData.put(st.getSubject(), new HashMap<IRI,HashSet<Value>>());
             }
             
             if(!this.samplesData.get(st.getSubject()).containsKey(st.getPredicate())){

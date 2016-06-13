@@ -2,11 +2,11 @@ package eu.semagrow.core.impl.selector;
 
 import eu.semagrow.core.source.SourceMetadata;
 import eu.semagrow.core.source.SourceSelector;
-import org.openrdf.model.URI;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -18,9 +18,9 @@ import java.util.Set;
  */
 public class CollectionSourceSelector implements SourceSelector
 {
-    private Set<URI> endpoints;
+    private Set<IRI> endpoints;
 
-    public CollectionSourceSelector(Collection<URI> uriCollection) {
+    public CollectionSourceSelector(Collection<IRI> uriCollection) {
         this.endpoints = new HashSet<>(uriCollection);
     }
 
@@ -28,7 +28,7 @@ public class CollectionSourceSelector implements SourceSelector
         this.endpoints = new HashSet<>();
     }
 
-    public void addSource(URI source) {
+    public void addSource(IRI source) {
         this.endpoints.add(source);
     }
 

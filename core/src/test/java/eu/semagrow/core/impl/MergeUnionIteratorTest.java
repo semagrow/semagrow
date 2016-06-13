@@ -1,10 +1,10 @@
 package eu.semagrow.core.impl;
 
 import eu.semagrow.core.impl.evalit.iteration.MergeUnionIterator;
-import info.aduna.iteration.CloseableIteration;
-import info.aduna.iteration.Iterations;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.common.iteration.Iterations;
 import junit.framework.TestCase;
-import org.openrdf.query.algebra.evaluation.iterator.CollectionIteration;
+import org.eclipse.rdf4j.query.algebra.evaluation.iterator.CollectionIteration;
 
 import java.util.*;
 

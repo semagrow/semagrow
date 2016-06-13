@@ -1,7 +1,7 @@
 package eu.semagrow.commons.vocabulary;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 /**
  *
@@ -18,15 +18,15 @@ public final class SEMAGROW {
         public static final class SPARQL_SAMPLES {
             public static final String NAMESPACE = SEMAGROW.SYSTEM.NAMESPACE+"samples/";
             /* Classes */
-            public static final URI SPARQL_SAMPLE;
+            public static final IRI SPARQL_SAMPLE;
             /* Predicates */
             
             /*  http://schema.semagrow.eu/system/1.0.0/samples/sparqlSampleText */
-            public static final URI SPARQL_SAMPLE_TEXT;
+            public static final IRI SPARQL_SAMPLE_TEXT;
             
             static {
-                SPARQL_SAMPLE = ValueFactoryImpl.getInstance().createURI(SEMAGROW.SYSTEM.SPARQL_SAMPLES.NAMESPACE, "SparqlSample");
-                SPARQL_SAMPLE_TEXT = ValueFactoryImpl.getInstance().createURI(SEMAGROW.SYSTEM.SPARQL_SAMPLES.NAMESPACE, "sparqlSampleText"); 
+                SPARQL_SAMPLE = SimpleValueFactory.getInstance().createIRI(SEMAGROW.SYSTEM.SPARQL_SAMPLES.NAMESPACE, "SparqlSample");
+                SPARQL_SAMPLE_TEXT = SimpleValueFactory.getInstance().createIRI(SEMAGROW.SYSTEM.SPARQL_SAMPLES.NAMESPACE, "sparqlSampleText");
             }
         }
     }
@@ -41,22 +41,22 @@ public final class SEMAGROW {
             /**
              * SailType http://schema.semagrow.eu/sails/1.0.0/powder/PowderSail
              */
-            public static final URI POWDER_SAIL;
+            public static final IRI POWDER_SAIL;
             
             /* PREDICATES */
-            public static final URI POSTGRES_HOST;
-            public static final URI POSTGRES_PORT;
-            public static final URI POSTGRES_DATABASE;
-            public static final URI POSTGRES_USER;
-            public static final URI POSTGRES_PASSWORD;
+            public static final IRI POSTGRES_HOST;
+            public static final IRI POSTGRES_PORT;
+            public static final IRI POSTGRES_DATABASE;
+            public static final IRI POSTGRES_USER;
+            public static final IRI POSTGRES_PASSWORD;
             
             static {
-                POWDER_SAIL = ValueFactoryImpl.getInstance().createURI(NAMESPACE, "PowderSail");
-                POSTGRES_HOST = ValueFactoryImpl.getInstance().createURI(NAMESPACE, "postgresHost");
-                POSTGRES_PORT = ValueFactoryImpl.getInstance().createURI(NAMESPACE, "postgresPort");
-                POSTGRES_DATABASE = ValueFactoryImpl.getInstance().createURI(NAMESPACE, "postgresDatabase");
-                POSTGRES_USER = ValueFactoryImpl.getInstance().createURI(NAMESPACE, "postgresUser");
-                POSTGRES_PASSWORD = ValueFactoryImpl.getInstance().createURI(NAMESPACE, "postgresPassword");
+                POWDER_SAIL = SimpleValueFactory.getInstance().createIRI(NAMESPACE, "PowderSail");
+                POSTGRES_HOST = SimpleValueFactory.getInstance().createIRI(NAMESPACE, "postgresHost");
+                POSTGRES_PORT = SimpleValueFactory.getInstance().createIRI(NAMESPACE, "postgresPort");
+                POSTGRES_DATABASE = SimpleValueFactory.getInstance().createIRI(NAMESPACE, "postgresDatabase");
+                POSTGRES_USER = SimpleValueFactory.getInstance().createIRI(NAMESPACE, "postgresUser");
+                POSTGRES_PASSWORD = SimpleValueFactory.getInstance().createIRI(NAMESPACE, "postgresPassword");
             }
             
         }

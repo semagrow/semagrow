@@ -1,9 +1,9 @@
 package eu.semagrow.core.eval;
 
 import eu.semagrow.core.source.Site;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.reactivestreams.Publisher;
 
 import java.util.List;

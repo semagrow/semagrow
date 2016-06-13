@@ -26,41 +26,39 @@ import eu.semagrow.stack.webapp.controllers.exceptions.SemaGrowTimeOutException;
 import eu.semagrow.utils.queryresultio.HTMLTableWriter;
 import eu.semagrow.utils.sparqlutils.SparqlUtils;
 import org.apache.commons.lang.exception.ExceptionUtils;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.impl.LinkedHashModel;
 import org.slf4j.*;
-import org.openrdf.OpenRDFException;
-import org.openrdf.model.Graph;
-import org.openrdf.model.URI;
-import org.openrdf.model.impl.GraphImpl;
-import org.openrdf.query.*;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.evaluation.ValueExprEvaluationException;
-import org.openrdf.query.parser.ParsedOperation;
-import org.openrdf.query.parser.ParsedQuery;
-import org.openrdf.query.parser.ParsedUpdate;
-import org.openrdf.query.parser.QueryParserUtil;
-import org.openrdf.query.resultio.BooleanQueryResultFormat;
-import org.openrdf.query.resultio.BooleanQueryResultParserRegistry;
-import org.openrdf.query.resultio.TupleQueryResultFormat;
-import org.openrdf.query.resultio.TupleQueryResultParserRegistry;
-import org.openrdf.query.resultio.sparqljson.SPARQLResultsJSONWriter;
-import org.openrdf.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
-import org.openrdf.repository.RepositoryConnection;
-import org.openrdf.repository.RepositoryException;
-import org.openrdf.repository.config.*;
-import org.openrdf.repository.http.HTTPQueryEvaluationException;
-import org.openrdf.rio.RDFFormat;
-import org.openrdf.rio.RDFHandlerException;
-import org.openrdf.rio.RDFParser;
-import org.openrdf.rio.Rio;
-import org.openrdf.rio.helpers.StatementCollector;
-import org.openrdf.rio.n3.N3Writer;
-import org.openrdf.rio.rdfxml.util.RDFXMLPrettyWriter;
-import org.openrdf.rio.trig.TriGWriter;
-import org.openrdf.rio.trix.TriXWriter;
-import org.openrdf.rio.turtle.TurtleWriter;
-import org.openrdf.sail.config.SailConfigException;
-import org.openrdf.sail.rdbms.exceptions.RdbmsQueryEvaluationException;
-import org.openrdf.sail.rdbms.exceptions.UnsupportedRdbmsOperatorException;
+import org.eclipse.rdf4j.OpenRDFException;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.query.*;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.evaluation.ValueExprEvaluationException;
+import org.eclipse.rdf4j.query.parser.ParsedOperation;
+import org.eclipse.rdf4j.query.parser.ParsedQuery;
+import org.eclipse.rdf4j.query.parser.ParsedUpdate;
+import org.eclipse.rdf4j.query.parser.QueryParserUtil;
+import org.eclipse.rdf4j.query.resultio.BooleanQueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.BooleanQueryResultParserRegistry;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultFormat;
+import org.eclipse.rdf4j.query.resultio.TupleQueryResultParserRegistry;
+import org.eclipse.rdf4j.query.resultio.sparqljson.SPARQLResultsJSONWriter;
+import org.eclipse.rdf4j.query.resultio.sparqlxml.SPARQLResultsXMLWriter;
+import org.eclipse.rdf4j.repository.RepositoryConnection;
+import org.eclipse.rdf4j.repository.RepositoryException;
+import org.eclipse.rdf4j.repository.config.*;
+import org.eclipse.rdf4j.repository.http.HTTPQueryEvaluationException;
+import org.eclipse.rdf4j.rio.RDFFormat;
+import org.eclipse.rdf4j.rio.RDFHandlerException;
+import org.eclipse.rdf4j.rio.RDFParser;
+import org.eclipse.rdf4j.rio.Rio;
+import org.eclipse.rdf4j.rio.helpers.StatementCollector;
+import org.eclipse.rdf4j.rio.n3.N3Writer;
+import org.eclipse.rdf4j.rio.rdfxml.util.RDFXMLPrettyWriter;
+import org.eclipse.rdf4j.rio.trig.TriGWriter;
+import org.eclipse.rdf4j.rio.trix.TriXWriter;
+import org.eclipse.rdf4j.rio.turtle.TurtleWriter;
+import org.eclipse.rdf4j.sail.config.SailConfigException;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -84,18 +82,18 @@ public class SparqlController {
     @PostConstruct
     public void startUp() throws RepositoryException, RepositoryConfigException {
         SemagrowRepositoryConfig repoConfig = getConfig();
-        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get(repoConfig.getType());
+        RepositoryFactory repoFactory = RepositoryRegistry.getInstance().get(repoConfig.getType()).get();
         repository = (SemagrowRepository) repoFactory.getRepository(repoConfig);
         repository.initialize();
 
         // remove CSV and TSV format due to bug: literals are recognized as URIs if they contain a substring parsable as URI.
         TupleQueryResultParserRegistry registry = TupleQueryResultParserRegistry.getInstance();
-        registry.remove(registry.get(TupleQueryResultFormat.CSV));
-        registry.remove(registry.get(TupleQueryResultFormat.TSV));
-        registry.remove(registry.get(TupleQueryResultFormat.JSON));
+        registry.remove(registry.get(TupleQueryResultFormat.CSV).get());
+        registry.remove(registry.get(TupleQueryResultFormat.TSV).get());
+        registry.remove(registry.get(TupleQueryResultFormat.JSON).get());
 
         BooleanQueryResultParserRegistry booleanRegistry = BooleanQueryResultParserRegistry.getInstance();
-        booleanRegistry.remove(booleanRegistry.get(BooleanQueryResultFormat.JSON));
+        booleanRegistry.remove(booleanRegistry.get(BooleanQueryResultFormat.JSON).get());
     }
     
     @PreDestroy
@@ -109,7 +107,7 @@ public class SparqlController {
 
         try {
             File file = FileUtils.getFile("repository.ttl");
-            Graph configGraph = parseConfig(file);
+            Model configGraph = parseConfig(file);
             RepositoryConfig repConf = RepositoryConfig.create(configGraph, null);
             repConf.validate();
             RepositoryImplConfig implConf = repConf.getRepositoryImplConfig();
@@ -123,13 +121,13 @@ public class SparqlController {
         }
     }
 
-    protected Graph parseConfig(File file) throws SailConfigException, IOException {
+    protected Model parseConfig(File file) throws SailConfigException, IOException {
 
-        RDFFormat format = Rio.getParserFormatForFileName(file.getAbsolutePath());
+        RDFFormat format = Rio.getParserFormatForFileName(file.getAbsolutePath()).get();
         if (format==null)
             throw new SailConfigException("Unsupported file format: " + file.getAbsolutePath());
         RDFParser parser = Rio.createParser(format);
-        Graph model = new GraphImpl();
+        Model model = new LinkedHashModel();
         parser.setRDFHandler(new StatementCollector(model));
         InputStream stream = new FileInputStream(file);
 
@@ -190,10 +188,10 @@ public class SparqlController {
                     SemagrowSailTupleQuery qq = (SemagrowSailTupleQuery)q;
                     Dataset activeDataset = qq.getActiveDataset();
                     if (activeDataset != null) {
-                    	Set<URI> namedGraphs = qq.getActiveDataset().getNamedGraphs();
+                    	Set<IRI> namedGraphs = qq.getActiveDataset().getNamedGraphs();
                         // use named graph as include only sources
                         if (namedGraphs != null && !namedGraphs.isEmpty()) {
-                            for (URI u  : namedGraphs) {
+                            for (IRI u  : namedGraphs) {
                                 qq.addIncludedSource(u);
                             }
                         }
@@ -262,9 +260,9 @@ public class SparqlController {
                         SemagrowSailTupleQuery qq = (SemagrowSailTupleQuery)q;
                         Dataset activeDataset = qq.getActiveDataset();
                         if (activeDataset != null) {
-                        	 Set<URI> namedGraphs = activeDataset.getNamedGraphs();
+                        	 Set<IRI> namedGraphs = activeDataset.getNamedGraphs();
                              if (namedGraphs != null && !namedGraphs.isEmpty()) {
-                                 for (URI u  : namedGraphs) {
+                                 for (IRI u  : namedGraphs) {
                                      qq.addIncludedSource(u);
                                  }
                              }
@@ -361,13 +359,7 @@ public class SparqlController {
             } else
             if(t instanceof QueryDecompositionException){
                 throw new SemaGrowInternalException(e.getMessage()!=null?e.getMessage():"Internal Error",t);
-            } else 
-            if (t instanceof RdbmsQueryEvaluationException) {                
-                throw new SemaGrowExternalError(e.getMessage()!=null?e.getMessage():"Unknown error during RDBMS query evaluation in source", t);
-            } else 
-            if (t instanceof UnsupportedRdbmsOperatorException) {                
-                throw new SemaGrowBadRequestException(e.getMessage()!=null?e.getMessage():"Query cannot be handled by a RDBMS source", t);
-            } else 
+            } else
             if (t instanceof ValueExprEvaluationException) {                
                 throw new SemaGrowNotAcceptableException(e.getMessage()!=null?e.getMessage():"The requested value expression could not be handled by a source", t);
             } else 

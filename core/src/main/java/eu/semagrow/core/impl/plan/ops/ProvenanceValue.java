@@ -1,7 +1,7 @@
 package eu.semagrow.core.impl.plan.ops;
 
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
 
 import java.util.*;
 
@@ -10,28 +10,28 @@ import java.util.*;
  */
 public class ProvenanceValue implements Value {
 
-    private List<URI> provenances;
+    private List<IRI> provenances;
 
     private final String separator = ";";
 
-    public ProvenanceValue(URI provenance) {
-        provenances = new LinkedList<URI>();
+    public ProvenanceValue(IRI provenance) {
+        provenances = new LinkedList<IRI>();
         provenances.add(provenance);
     }
 
-    public ProvenanceValue(Collection<URI> provenances) {
+    public ProvenanceValue(Collection<IRI> provenances) {
 
-        this.provenances = new LinkedList<URI>(provenances);
+        this.provenances = new LinkedList<IRI>(provenances);
     }
 
     public ProvenanceValue(ProvenanceValue v) {
-        this.provenances = new LinkedList<URI>(v.provenances);
+        this.provenances = new LinkedList<IRI>(v.provenances);
     }
 
     public String stringValue() {
-        Set<URI> uniqueSet = new HashSet<URI>(this.provenances);
+        Set<IRI> uniqueSet = new HashSet<IRI>(this.provenances);
         StringBuilder sb = new StringBuilder();
-        Iterator<URI> iter = uniqueSet.iterator();
+        Iterator<IRI> iter = uniqueSet.iterator();
         if (iter.hasNext()) {
             sb.append(iter.next().stringValue());
             while (iter.hasNext()) {

@@ -1,17 +1,19 @@
-package eu.semagrow.core.impl.evaluation.util;
+package eu.semagrow.core.impl.sparql;
 
+import eu.semagrow.commons.PlainLiteral;
 import eu.semagrow.core.impl.evalit.iteration.InsertValuesBindingsIteration;
 import eu.semagrow.core.plan.Plan;
-import org.openrdf.model.Literal;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.*;
-import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
-import org.openrdf.query.parser.ParsedBooleanQuery;
-import org.openrdf.query.parser.ParsedTupleQuery;
-import org.openrdf.queryrender.sparql.SPARQLQueryRenderer;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.model.util.Literals;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.*;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
+import org.eclipse.rdf4j.query.parser.ParsedTupleQuery;
+import org.eclipse.rdf4j.query.parser.sparql.SPARQLUtil;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -393,19 +395,22 @@ public class SPARQLQueryStringUtil {
 
     private static StringBuilder appendValueAsString(StringBuilder sb, Value value)
     {
+        return sb.append(getReplacement(value));
+        /*
         // TODO check if there is some convenient method in Sesame!
 
         if (value == null)
             return sb.append("UNDEF"); // see grammar for BINDINGs def
 
-        else if (value instanceof URI)
-            return appendURI(sb, (URI)value);
+        else if (value instanceof IRI)
+            return appendURI(sb, (IRI)value);
 
         else if (value instanceof Literal)
             return appendLiteral(sb, (Literal)value);
 
         // XXX check for other types ? BNode ?
         throw new RuntimeException("Type not supported: " + value.getClass().getCanonicalName());
+        */
     }
 
 
@@ -416,7 +421,7 @@ public class SPARQLQueryStringUtil {
      * @param uri
      * @return the StringBuilder, for convenience
      */
-    private static StringBuilder appendURI(StringBuilder sb, URI uri)
+    private static StringBuilder appendURI(StringBuilder sb, IRI uri)
     {
         sb.append("<").append(uri.stringValue()).append(">");
         return sb;
@@ -457,7 +462,7 @@ public class SPARQLQueryStringUtil {
      */
     private static Set<String> computeVars(TupleExpr serviceExpression) {
         final Set<String> res = new HashSet<String>();
-        serviceExpression.visit(new QueryModelVisitorBase<RuntimeException>() {
+        serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 
             @Override
             public void meet(Var node)
@@ -471,5 +476,89 @@ public class SPARQLQueryStringUtil {
             // TODO special case handling for BIND
         });
         return res;
+    }
+
+
+
+    // TODO maybe add BASE declaration here as well?
+
+    /**
+     * Retrieve a modified queryString into which all bindings of the given
+     * argument are replaced.
+     *
+     * @param queryString
+     * @param bindings
+     * @return the modified queryString
+     */
+    public static String getQueryString(String queryString, BindingSet bindings) {
+        if (bindings.size() == 0) {
+            return queryString;
+        }
+
+        String qry = queryString;
+        int b = qry.indexOf('{');
+        String select = qry.substring(0, b);
+        String where = qry.substring(b);
+        for (String name : bindings.getBindingNames()) {
+            String replacement = getReplacement(bindings.getValue(name));
+            if (replacement != null) {
+                String pattern = "[\\?\\$]" + name + "(?=\\W)";
+                select = select.replaceAll(pattern, "(" + Matcher.quoteReplacement(replacement) + " as ?" + name
+                        + ")");
+
+                // we use Matcher.quoteReplacement to make sure things like newlines
+                // in literal values
+                // are preserved
+                where = where.replaceAll(pattern, Matcher.quoteReplacement(replacement));
+            }
+        }
+        return select + where;
+    }
+
+    private static String getReplacement(Value value) {
+        StringBuilder sb = new StringBuilder();
+        if (value instanceof IRI) {
+            return appendValue(sb, (IRI)value).toString();
+        }
+        else if (value instanceof PlainLiteral) {
+            return appendValue(sb, (PlainLiteral)value).toString();
+        }
+        else if (value instanceof Literal) {
+            return appendValue(sb, (Literal)value).toString();
+        }
+        else {
+            throw new IllegalArgumentException("BNode references not supported by SPARQL end-points");
+        }
+    }
+
+    private static StringBuilder appendValue(StringBuilder sb, IRI uri) {
+        sb.append("<").append(uri.stringValue()).append(">");
+        return sb;
+    }
+
+    private static StringBuilder appendValue(StringBuilder sb, Literal lit) {
+        sb.append('"');
+        sb.append(SPARQLUtil.encodeString(lit.getLabel()));
+        sb.append('"');
+
+        if (Literals.isLanguageLiteral(lit)) {
+            sb.append('@');
+            sb.append(lit.getLanguage().get());
+        }
+        else {
+            sb.append("^^<");
+            sb.append(lit.getDatatype().stringValue());
+            sb.append('>');
+        }
+        return sb;
+    }
+
+
+    private static StringBuilder appendValue(StringBuilder sb, PlainLiteral lit) {
+        sb.append('"');
+        sb.append(SPARQLUtil.encodeString(lit.getLabel()));
+        sb.append('"');
+
+        return sb;
     }
 }

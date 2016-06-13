@@ -1,7 +1,7 @@
 package eu.semagrow.core.config;
 
-import org.openrdf.model.Graph;
-import org.openrdf.model.Resource;
+import org.eclipse.rdf4j.model.Model;
+import org.eclipse.rdf4j.model.Resource;
 
 /**
  * @author Angelos Charalambidis
@@ -12,8 +12,8 @@ public interface SourceSelectorImplConfig {
 
     void validate() throws SourceSelectorConfigException;
 
-    Resource export(Graph graph);
+    Resource export(Model graph);
 
-    void parse(Graph graph, Resource resource) throws SourceSelectorConfigException;
+    void parse(Model graph, Resource resource) throws SourceSelectorConfigException;
 
 }

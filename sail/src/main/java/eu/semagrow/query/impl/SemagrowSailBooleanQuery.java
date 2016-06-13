@@ -2,14 +2,14 @@ package eu.semagrow.query.impl;
 
 import eu.semagrow.query.SemagrowBooleanQuery;
 import eu.semagrow.sail.SemagrowSailConnection;
-import info.aduna.iteration.CloseableIteration;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.parser.ParsedBooleanQuery;
-import org.openrdf.repository.sail.SailRepositoryConnection;
-import org.openrdf.sail.SailException;
+import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.parser.ParsedBooleanQuery;
+import org.eclipse.rdf4j.repository.sail.SailRepositoryConnection;
+import org.eclipse.rdf4j.sail.SailException;
 
 /**
  * Created by angel on 6/13/14.

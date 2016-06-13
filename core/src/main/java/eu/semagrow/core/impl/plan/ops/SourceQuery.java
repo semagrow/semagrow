@@ -1,9 +1,9 @@
 package eu.semagrow.core.impl.plan.ops;
 
 import eu.semagrow.core.source.Site;
-import org.openrdf.query.algebra.QueryModelVisitor;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.UnaryTupleOperator;
+import org.eclipse.rdf4j.query.algebra.QueryModelVisitor;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
 
 import java.util.LinkedList;
 import java.util.List;

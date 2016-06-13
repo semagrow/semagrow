@@ -1,7 +1,7 @@
 package eu.semagrow.core.source;
 
-import org.openrdf.model.Resource;
-import org.openrdf.model.impl.ValueFactoryImpl;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 
 
 /**
@@ -16,7 +16,7 @@ public class LocalSite implements Site {
         return "SEMAGROW" ;
     }
 
-    public Resource getID() { return ValueFactoryImpl.getInstance().createBNode(); }
+    public Resource getID() { return SimpleValueFactory.getInstance().createBNode(); }
 
     @Override
     public boolean isLocal() {

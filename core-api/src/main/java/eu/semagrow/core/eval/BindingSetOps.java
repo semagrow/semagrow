@@ -1,6 +1,6 @@
 package eu.semagrow.core.eval;
 
-import org.openrdf.query.BindingSet;
+import org.eclipse.rdf4j.query.BindingSet;
 
 import java.util.Collection;
 

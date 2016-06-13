@@ -1,22 +1,22 @@
 package eu.semagrow.core.impl.alignment;
 
 import eu.semagrow.core.transformation.QueryTransformation;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * Created by angel on 12/2/14.
  */
-public class URITransformer implements Transformer<URI,URI> {
+public class URITransformer implements Transformer<IRI,IRI> {
 
     private QueryTransformation transformationService;
 
     private int id;
 
-    private URI sourceSchema, targetSchema;
+    private IRI sourceSchema, targetSchema;
 
     private double proximity = 1.0;
 
-    public URITransformer(QueryTransformation transformationService, int id, URI sourceSchema, URI targetSchema) {
+    public URITransformer(QueryTransformation transformationService, int id, IRI sourceSchema, IRI targetSchema) {
         this.transformationService = transformationService;
         this.id = id;
         this.sourceSchema = sourceSchema;
@@ -27,10 +27,10 @@ public class URITransformer implements Transformer<URI,URI> {
     public int getId() { return id; }
 
 
-    public URI getSourceSchema() { return this.sourceSchema; }
+    public IRI getSourceSchema() { return this.sourceSchema; }
 
 
-    public URI getTargetSchema() { return this.targetSchema; }
+    public IRI getTargetSchema() { return this.targetSchema; }
 
 
     public double getProximity() { return proximity; }
@@ -38,12 +38,12 @@ public class URITransformer implements Transformer<URI,URI> {
     public void setProximity(double proximity) { this.proximity = proximity; }
 
 
-    public URI transform(URI source) {
+    public IRI transform(IRI source) {
         return transformationService.getURI(source, getId());
     }
 
 
-    public URI transformBack(URI target) {
+    public IRI transformBack(IRI target) {
         return transformationService.getInvURI(target, getId());
     }
 

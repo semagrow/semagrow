@@ -1,13 +1,13 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
 import eu.semagrow.core.impl.alignment.Transformer;
-import info.aduna.iteration.ConvertingIteration;
-import info.aduna.iteration.Iteration;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.QueryEvaluationException;
-import org.openrdf.query.algebra.evaluation.QueryBindingSet;
+import org.eclipse.rdf4j.common.iteration.ConvertingIteration;
+import org.eclipse.rdf4j.common.iteration.Iteration;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
 
 import java.util.Map;
 
@@ -17,9 +17,9 @@ import java.util.Map;
 public class TransformIteration extends
         ConvertingIteration<BindingSet,BindingSet,QueryEvaluationException> {
 
-    private Map<String, Transformer<URI,URI>> transfomers;
+    private Map<String, Transformer<IRI,IRI>> transfomers;
 
-    public TransformIteration(Map<String, Transformer<URI,URI>> transformers,
+    public TransformIteration(Map<String, Transformer<IRI,IRI>> transformers,
                               Iteration<? extends BindingSet, ? extends QueryEvaluationException> iter)
     {
         super(iter);
@@ -34,10 +34,10 @@ public class TransformIteration extends
         for (String bindingName : bindings.getBindingNames()) {
             Value v = bindings.getValue(bindingName);
 
-            if (v instanceof URI) {
-                Transformer<URI, URI> t = getTransformer(bindingName);
+            if (v instanceof IRI) {
+                Transformer<IRI, IRI> t = getTransformer(bindingName);
                 if (t != null) {
-                    URI transformed = t.transform((URI) v);
+                    IRI transformed = t.transform((IRI) v);
                     if (transformed != null) {
                         bindingSet.setBinding(bindingName, transformed);
                         continue;
@@ -50,7 +50,7 @@ public class TransformIteration extends
         return bindingSet;
     }
 
-    private Transformer<URI,URI> getTransformer(String name) {
+    private Transformer<IRI,IRI> getTransformer(String name) {
         return transfomers.get(name);
     }
 }

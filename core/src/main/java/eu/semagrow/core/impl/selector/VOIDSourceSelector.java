@@ -4,15 +4,15 @@ import eu.semagrow.art.Loggable;
 import eu.semagrow.core.impl.sparql.SPARQLSite;
 import eu.semagrow.core.impl.sparql.SPARQLSiteFactory;
 import eu.semagrow.core.source.*;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
-import org.openrdf.model.Value;
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.StatementPattern;
-import org.openrdf.query.algebra.TupleExpr;
-import org.openrdf.query.algebra.helpers.StatementPatternCollector;
-import org.openrdf.repository.Repository;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.IRI;
+import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.StatementPattern;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
+import org.eclipse.rdf4j.repository.Repository;
 
 import java.util.*;
 
@@ -71,14 +71,14 @@ public class VOIDSourceSelector extends VOIDBase
 
         Set<Resource> datasets = new HashSet<Resource>();
 
-        if (pVal != null && pVal instanceof URI)
-            datasets.addAll(getMatchingDatasetsOfPredicate((URI)pVal));
+        if (pVal != null && pVal instanceof IRI)
+            datasets.addAll(getMatchingDatasetsOfPredicate((IRI)pVal));
 
-        if (sVal != null && sVal instanceof URI)
-            datasets.addAll(getMatchingDatasetsOfSubject((URI)sVal));
+        if (sVal != null && sVal instanceof IRI)
+            datasets.addAll(getMatchingDatasetsOfSubject((IRI)sVal));
 
-        if (oVal != null && oVal instanceof URI)
-            datasets.addAll(getMatchingDatasetsOfObject((URI)oVal));
+        if (oVal != null && oVal instanceof IRI)
+            datasets.addAll(getMatchingDatasetsOfObject((IRI)oVal));
 
         return datasets;
     }
@@ -86,9 +86,9 @@ public class VOIDSourceSelector extends VOIDBase
     private Collection<SourceMetadata> datasetsToSourceMetadata(StatementPattern pattern,
             Collection<Resource> datasets) {
 
-        Set<URI> endpoints = new HashSet<URI>();
+        Set<IRI> endpoints = new HashSet<IRI>();
         for (Resource dataset : datasets) {
-            URI endpoint = getEndpoint(dataset);
+            IRI endpoint = getEndpoint(dataset);
             if (endpoint != null) {
                 endpoints.add(endpoint);
             }
@@ -99,22 +99,22 @@ public class VOIDSourceSelector extends VOIDBase
         }
 
         Collection<SourceMetadata> metadata = new LinkedList<SourceMetadata>();
-        for (URI endpoint : endpoints) {
+        for (IRI endpoint : endpoints) {
             metadata.add(createSourceMetadata(pattern, endpoint));
         }
 
         return metadata;
     }
 
-    private Collection<SourceMetadata> uritoSourceMetadata(StatementPattern pattern, Collection<URI> endpoints) {
+    private Collection<SourceMetadata> uritoSourceMetadata(StatementPattern pattern, Collection<IRI> endpoints) {
         Collection<SourceMetadata> metadata = new LinkedList<SourceMetadata>();
-        for (URI e : endpoints) {
+        for (IRI e : endpoints) {
             metadata.add(createSourceMetadata(pattern, e));
         }
         return metadata;
     }
 
-    private SourceMetadata createSourceMetadata(final StatementPattern pattern, final URI endpoint) {
+    private SourceMetadata createSourceMetadata(final StatementPattern pattern, final IRI endpoint) {
 
         return new SourceMetadataImpl(pattern, endpoint);
     }
@@ -126,20 +126,20 @@ public class VOIDSourceSelector extends VOIDBase
 
         private StatementPattern pattern;
 
-        private Map<String, Collection<URI>> schemaMappings;
+        private Map<String, Collection<IRI>> schemaMappings;
 
-        public SourceMetadataImpl(StatementPattern pattern, URI endpoint) {
+        public SourceMetadataImpl(StatementPattern pattern, IRI endpoint) {
             this.pattern = pattern;
             SiteFactory siteFactory;
             if (endpoint.stringValue().contains("cassandra")) {
-                siteFactory = SiteRegistry.getInstance().get("CASSANDRA");
+                siteFactory = SiteRegistry.getInstance().get("CASSANDRA").get();
             } else {
 
-                siteFactory = SiteRegistry.getInstance().get("SPARQL");
+                siteFactory = SiteRegistry.getInstance().get("SPARQL").get();
             }
             //FIXME (not appropriate sitefactory)
             endpoints.add(siteFactory.getSite(endpoint));
-            schemaMappings = new HashMap<String, Collection<URI>>();
+            schemaMappings = new HashMap<String, Collection<IRI>>();
         }
 
         public List<Site> getSites() { return endpoints; }
@@ -158,7 +158,7 @@ public class VOIDSourceSelector extends VOIDBase
             return 1.0;
         }
 
-        public Collection<URI> getSchema(String var) {
+        public Collection<IRI> getSchema(String var) {
             if (schemaMappings.containsKey(var)) {
                 return schemaMappings.get(var);
             }

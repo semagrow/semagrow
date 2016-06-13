@@ -14,9 +14,9 @@ import eu.semagrow.core.impl.evalit.iteration.QueryExecutorImpl;
 import eu.semagrow.querylog.api.QueryLogHandler;
 import eu.semagrow.core.impl.evalit.monitoring.QueryLogInterceptor;
 
-import org.openrdf.query.BindingSet;
-import org.openrdf.query.Dataset;
-import org.openrdf.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.BindingSet;
+import org.eclipse.rdf4j.query.Dataset;
+import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

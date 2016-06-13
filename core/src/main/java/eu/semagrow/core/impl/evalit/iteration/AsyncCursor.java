@@ -1,14 +1,12 @@
 package eu.semagrow.core.impl.evalit.iteration;
 
-import info.aduna.iteration.*;
-import org.openrdf.query.QueryEvaluationException;
-
+import org.eclipse.rdf4j.common.iteration.*;
 import java.util.concurrent.*;
 
 /**
  * Created by angel on 6/5/14.
  */
-public abstract class AsyncCursor<E,X extends Exception> extends CloseableIterationBase<E,X> {
+public abstract class AsyncCursor<E,X extends Exception> extends AbstractCloseableIteration<E,X> {
 
     protected Future<Iteration<E, X>> future;
 

@@ -3,17 +3,17 @@ package eu.semagrow.core.impl.sparql;
 import eu.semagrow.core.source.Site;
 import eu.semagrow.core.source.SourceCapabilities;
 import eu.semagrow.core.source.SourceCapabilitiesBase;
-import org.openrdf.model.Resource;
-import org.openrdf.model.URI;
+import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.IRI;
 
 /**
  * @author Angelos Charalambidis
  */
 public class SPARQLSite implements Site {
 
-    private URI endpointURI;
+    private IRI endpointURI;
 
-    public SPARQLSite(URI uri) { this.endpointURI = uri; }
+    public SPARQLSite(IRI uri) { this.endpointURI = uri; }
 
     public SPARQLSite() { this.endpointURI = null; }
 
@@ -27,7 +27,7 @@ public class SPARQLSite implements Site {
         return !isLocal();
     }
 
-    public URI getURI() { return endpointURI; }
+    public IRI getURI() { return endpointURI; }
 
     public Resource getID() { return getURI(); }
 
