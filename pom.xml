@@ -4,7 +4,7 @@
 
     <groupId>eu.semagrow</groupId>
     <artifactId>semagrow</artifactId>
-    <version>1.4.1</version>
+    <version>1.5</version>
     <packaging>pom</packaging>
     <name>semagrow</name>
     <url>http://semagrow.eu</url>
@@ -272,6 +272,5 @@
         <module>monitor</module>
         <module>sail</module>
         <module>http</module>
-        <module>quetsal</module>
     </modules>
 </project>

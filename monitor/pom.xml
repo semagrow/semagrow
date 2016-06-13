@@ -4,11 +4,10 @@
   <parent>
     <artifactId>semagrow</artifactId>
     <groupId>eu.semagrow</groupId>
-    <version>1.4.1</version>
+    <version>1.5</version>
   </parent>
 
   <artifactId>semagrow-monitor</artifactId>
-  <version>1.4.1</version>
   <packaging>jar</packaging>
 
   <name>semagrow-monitor</name>
