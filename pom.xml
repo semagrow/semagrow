@@ -4,7 +4,7 @@
 
     <groupId>eu.semagrow</groupId>
     <artifactId>semagrow</artifactId>
-    <version>1.5</version>
+    <version>1.5.1</version>
     <packaging>pom</packaging>
     <name>semagrow</name>
     <url>http://semagrow.eu</url>

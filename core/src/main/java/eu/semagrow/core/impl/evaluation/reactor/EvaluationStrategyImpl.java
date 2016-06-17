@@ -302,7 +302,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
     public Stream<BindingSet> evaluateReactorInternal(LeftJoin expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        Stream<BindingSet> r = evaluateReactorInternal(expr.getRightArg(), bindings);
+        //Stream<BindingSet> r = evaluateReactorInternal(expr.getRightArg(), bindings);
 
         Set<String> joinAttributes = expr.getLeftArg().getBindingNames();
         joinAttributes.retainAll(expr.getRightArg().getBindingNames());

@@ -1,12 +1,11 @@
 package eu.semagrow.core.impl.evaluation.reactor;
 
+import eu.semagrow.core.eval.QueryExecutor;
 import eu.semagrow.core.eval.QueryExecutorResolver;
 import eu.semagrow.core.impl.evaluation.StaticQueryExecutorResolver;
 import eu.semagrow.core.impl.evaluation.util.LoggingUtil;
 import eu.semagrow.core.impl.plan.ops.*;
 import eu.semagrow.core.plan.Plan;
-import eu.semagrow.core.eval.QueryExecutor;
-
 import eu.semagrow.core.source.Site;
 import info.aduna.iteration.CloseableIteration;
 import org.openrdf.model.*;
@@ -16,15 +15,17 @@ import org.openrdf.query.QueryEvaluationException;
 import org.openrdf.query.algebra.Join;
 import org.openrdf.query.algebra.TupleExpr;
 import org.openrdf.query.algebra.Union;
+import org.openrdf.query.algebra.Var;
 import org.openrdf.query.algebra.evaluation.TripleSource;
+import org.openrdf.query.algebra.helpers.QueryModelVisitorBase;
 import org.reactivestreams.Publisher;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import reactor.Environment;
 import reactor.rx.Stream;
 import reactor.rx.Streams;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -198,7 +199,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        Set<String> free = expr.getBindingNames();
+        Set<String> free = computeVars(expr);
         BindingSet relevant = bindingSetOps.project(free, bindings);
         QueryExecutor executor = this.queryExecutorResolver.resolve(source);
 
@@ -216,7 +217,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
-        Set<String> free = expr.getBindingNames();
+        Set<String> free = computeVars(expr);
         QueryExecutor executor = queryExecutorResolver.resolve(source);
 
         return Streams.from(bindings)
@@ -281,7 +282,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateReactiveDefault(TupleExpr expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
-        Set<String> freeVars = expr.getBindingNames();
+        Set<String> freeVars = computeVars(expr);
 
 
         return Streams.from(bindingList)
@@ -307,6 +308,23 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                 }})
                 .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
                 .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
+    }
+
+    protected Set<String> computeVars(TupleExpr serviceExpression) {
+        final Set<String> res = new HashSet<String>();
+        serviceExpression.visit(new QueryModelVisitorBase<RuntimeException>() {
+
+            @Override
+            public void meet(Var node)
+                    throws RuntimeException {
+                // take only real vars, i.e. ignore blank nodes
+                if (!node.hasValue() && !node.isAnonymous())
+                    res.add(node.getName());
+            }
+            // TODO maybe stop tree traversal in nested SERVICE?
+            // TODO special case handling for BIND
+        });
+        return res;
     }
 }
 
