@@ -3,24 +3,16 @@
   <modelVersion>4.0.0</modelVersion>
   <parent>
     <artifactId>semagrow</artifactId>
-    <groupId>eu.semagrow</groupId>
-    <version>2.0</version>
+    <groupId>org.semagrow</groupId>
+    <version>2.0-SNAPSHOT</version>
   </parent>
 
   <artifactId>semagrow-monitor</artifactId>
   <packaging>jar</packaging>
 
-  <name>semagrow-monitor</name>
+  <name>SemaGrow Monitoring Tools</name>
     <build>
         <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-                <configuration>
-                    <debug>true</debug>
-                </configuration>
-            </plugin>
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>aspectj-maven-plugin</artifactId>
@@ -44,17 +36,12 @@
 
     <dependencies>
       <dependency>
-        <groupId>com.lmax</groupId>
-        <artifactId>disruptor</artifactId>
-        <version>3.2.1</version>
-      </dependency>
-      <dependency>
         <groupId>org.apache.commons</groupId>
         <artifactId>commons-lang3</artifactId>
         <version>3.0</version>
       </dependency>
       <dependency>
-        <groupId>eu.semagrow</groupId>
+        <groupId>${project.groupId}</groupId>
         <artifactId>semagrow-commons</artifactId>
         <version>${project.version}</version>
       </dependency>
@@ -73,7 +60,16 @@
          <artifactId>aspectjrt</artifactId>
          <version>1.8.7</version>
       </dependency>
-
+      <dependency>
+        <groupId>org.eclipse.rdf4j</groupId>
+        <artifactId>rdf4j-queryresultio-api</artifactId>
+        <version>${rdf4j.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>org.eclipse.rdf4j</groupId>
+        <artifactId>rdf4j-queryparser-api</artifactId>
+        <version>${rdf4j.version}</version>
+      </dependency>
     </dependencies>
 
 

@@ -1,3 +1,2 @@
-eu.semagrow.commons.voidinfer.config.FileReloadingMemoryStoreFactory
-eu.semagrow.commons.voidinfer.config.VOIDInferencerFactory
-eu.semagrow.commons.voidinfer.config.SEVODInferencerFactory
+org.semagrow.sail.VOID.config.VOIDInferencerFactory
+org.semagrow.sail.SEVOD.config.SEVODInferencerFactory

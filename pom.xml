@@ -2,12 +2,36 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>eu.semagrow</groupId>
+    <groupId>org.semagrow</groupId>
     <artifactId>semagrow</artifactId>
-    <version>2.0</version>
+    <version>2.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>semagrow</name>
-    <url>http://semagrow.eu</url>
+    <name>SemaGrow</name>
+    <url>http://semagrow.github.io</url>
+
+    <organization>
+        <name>SemaGrow</name>
+        <url>http://www.semagrow.org</url>
+    </organization>
+
+    <licenses>
+        <license>
+            <name>Apache 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
+        </license>
+    </licenses>
+
+    <modules>
+        <module>commons</module>
+        <module>core-api</module>
+        <module>monitor</module>
+        <module>core</module>
+        <module>sparql</module>
+        <module>rdf4j</module>
+        <module>http-endpoint</module>
+        <module>webgui</module>
+        <module>assembly</module>
+    </modules>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -22,22 +46,11 @@
         <distribution.mvn>/var/www/mvn</distribution.mvn>
     </properties>
 
-    <organization>
-        <name>SemaGrow - FP7</name>
-        <url>http://www.semagrow.eu</url>
-    </organization>
-
-    <licenses>
-        <license>
-            <name>Apache 2.0</name>
-            <url>http://www.apache.org/licenses/LICENSE-2.0.html</url>
-        </license>
-    </licenses>
 
     <developers>
         <developer>
             <id>turnguard</id>
-            <name>Jürgen W. Jakobitsch A</name>
+            <name>Jürgen W. Jakobitsch</name>
             <url>http://www.turnguard.com/turnguard</url>
             <email>j.jakobitsch@semantic-web.at</email>
         </developer>
@@ -81,22 +94,10 @@
     <!-- REPOSITORIES -->
 
     <repositories>
-        <!--
-                <repository>
-                    <id>swc-semagrow</id>
-                    <name>SWC SemaGrow Repository</name>
-                    <url>http://semagrow.semantic-web.at/mvn/</url>
-                    <snapshots>
-                        <updatePolicy>always</updatePolicy>
-                        <enabled>true</enabled>
-                    </snapshots>
-                </repository>
-        -->
         <repository>
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2</url>
         </repository>
-
         <repository>
             <id>spring-milestone</id>
             <name>Spring Milestones</name>
@@ -128,52 +129,35 @@
     </distributionManagement>
 
     <dependencies>
-        <!-- OPENRDF SESAME -->
+        <!-- RDF4J -->
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-runtime</artifactId>
+            <artifactId>rdf4j-queryparser-api</artifactId>
             <version>${rdf4j.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-queryrender</artifactId>
+            <artifactId>rdf4j-queryparser-sparql</artifactId>
             <version>${rdf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-trig</artifactId>
-            <version>${rdf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-trix</artifactId>
-            <version>${rdf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-rdfxml</artifactId>
-            <version>${rdf4j.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-rio-n3</artifactId>
-            <version>${rdf4j.version}</version>
-        </dependency>
-        <!--
-        <dependency>
-            <groupId>org.eclipse.rdf4j.sesame</groupId>
-            <artifactId>sesame-sail-rdbms</artifactId>
-            <version>${sesame.version}</version>
-        </dependency>-->
-        <dependency>
-            <groupId>org.eclipse.rdf4j</groupId>
-            <artifactId>rdf4j-queryresultio-sparqljson</artifactId>
-            <version>${rdf4j.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>${slf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>${slf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>runtime</scope>
         </dependency>
 
         <!-- TEST DEPENDENCIES -->
@@ -211,9 +195,9 @@
                   <aggregate>true</aggregate>
                   <additionalparam>-Xdoclint:none</additionalparam>
                   <show>public</show>
-                  <header>semagrow, ${project.version}</header>
-                  <footer>semagrow, ${project.version}</footer>
-                  <doctitle>semagrow, ${project.version}</doctitle>
+                  <header>SemaGrow, ${project.version}</header>
+                  <footer>SemaGrow, ${project.version}</footer>
+                  <doctitle>SemaGrow, ${project.version}</doctitle>
                   <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
                   <destDir>api-${javadoc.version}</destDir>
                 </configuration>
@@ -234,45 +218,4 @@
             </plugin>
         </plugins>
     </build>
-<!--
-    <reporting>
-      <plugins>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-javadoc-plugin</artifactId>
-            <version>2.10.3</version>
-            <configuration>
-              <aggregate>true</aggregate>
-              <additionalparam>-Xdoclint:none</additionalparam>
-              <show>public</show>
-              <header>semagrow, ${project.version}</header>
-              <footer>semagrow, ${project.version}</footer>
-              <doctitle>semagrow, ${project.version}</doctitle>
-            </configuration>
-        </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-scm-publish-plugin</artifactId>
-            <version>1.0</version>
-            <configuration>
-                <checkoutDirectory>${project.build.directory}/scmpublish</checkoutDirectory>
-                <checkinComment>Publishing javadoc for ${project.artifactId}:${project.version}</checkinComment>
-                <content>${project.reporting.outputDirectory}/apidocs</content>
-                <skipDeletedFiles>false</skipDeletedFiles>
-                <pubScmUrl>scm:git:git@github.com:semagrow/semagrow.git</pubScmUrl>
-                <scmBranch>gh-pages</scmBranch>
-            </configuration>
-        </plugin>
-      </plugins>
-    </reporting>
--->
-    <modules>
-        <module>commons</module>
-        <module>core-api</module>
-        <module>core</module>
-        <module>monitor</module>
-        <module>sail</module>
-        <module>http</module>
-        <!--<module>quetsal</module>-->
-    </modules>
 </project>

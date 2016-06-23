@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.5.xsd">
+
+
+    <bean id="semagrowQueryMapping"
+          class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="order" value="2" />
+        <property name="alwaysUseFullPath" value="true" />
+        <property name="mappings">
+            <props>
+                <prop key="/query">semagrowQueryController</prop>
+                <prop key="/sparql">semagrowQueryController</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="semagrowExplainQueryMapping"
+          class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+        <property name="order" value="2" />
+        <property name="alwaysUseFullPath" value="true" />
+        <property name="mappings">
+            <props>
+                <prop key="/sparql/decompose">semagrowExplainQueryController</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="semagrowQueryController" class="org.semagrow.http.controllers.QueryController" />
+    <bean id="semagrowExplainQueryController" class="org.semagrow.http.controllers.ExplainQueryController" />
+    <bean id="openrdfHandlerExceptionResolver" class="org.eclipse.rdf4j.http.server.ProtocolExceptionResolver" />
+
+</beans>
