@@ -199,9 +199,18 @@
                   <footer>SemaGrow, ${project.version}</footer>
                   <doctitle>SemaGrow, ${project.version}</doctitle>
                   <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
-                  <destDir>api-${javadoc.version}</destDir>
+                  <destDir>api-${project.version}</destDir>
                 </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
+            <!--
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-scm-publish-plugin</artifactId>
@@ -216,6 +225,7 @@
                     <scmBranch>gh-pages</scmBranch>
                 </configuration>
             </plugin>
+            -->
         </plugins>
     </build>
 </project>

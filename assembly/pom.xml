@@ -43,7 +43,7 @@
                         <version>2.1</version>
                         <executions>
                             <execution>
-                                <phase>package</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>shade</goal>
                                 </goals>
@@ -56,7 +56,7 @@
                         <version>2.6</version>
                         <executions>
                             <execution>
-                                <phase>package</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>war</goal>
                                 </goals>
@@ -99,10 +99,34 @@
                         </configuration>
                         <executions>
                             <execution>
-                                <phase>package</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>single</goal>
                                 </goals>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>build-helper-maven-plugin</artifactId>
+                        <version>1.11</version>
+                        <executions>
+                            <execution>
+                                <id>attach-artifacts</id>
+                                <phase>prepare-package</phase>
+                                <goals>
+                                    <goal>attach-artifact</goal>
+                                </goals>
+                                <configuration>
+                                    <artifacts>
+                                        <artifact>
+                                            <file>${project.build.directory}/${project.artifactId}-${project.version}-tomcat-bundle.tar.gz</file>
+
+                                            <classifier>tomcat-bundle</classifier>
+                                            <type>tar.gz</type>
+                                        </artifact>
+                                    </artifacts>
+                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -116,7 +140,7 @@
                   <plugin>
                       <groupId>org.codehaus.mojo</groupId>
                       <artifactId>properties-maven-plugin</artifactId>
-                      <version>1.0-alpha-2</version>
+                      <version>1.0.0</version>
                       <executions>
                           <execution>
                               <phase>validate</phase>
@@ -137,7 +161,7 @@
                         <version>2.8</version>
                         <executions>
                             <execution>
-                                <phase>validate</phase>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>unpack</goal>
                                 </goals>
@@ -324,7 +348,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>properties-maven-plugin</artifactId>
-                <version>1.0-alpha-2</version>
+                <version>1.0.0</version>
                 <executions>
                     <execution>
                         <phase>validate</phase>
