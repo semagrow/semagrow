@@ -123,7 +123,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 			 Callable<SourceMetadata> f = () -> {
 				 if (sources.get(0) instanceof SPARQLSite) {
-					 boolean ask = askPattern(pattern, ((SPARQLSite) sources.get(0)).getURI(), false);
+					 boolean ask = askPattern(pattern, ((SPARQLSite) sources.get(0)).getURI(), true);
 					 return ask ? m : null;
 				 }
 				 else {
@@ -209,7 +209,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 }
 
 		 if( allow_select && (conn!=null) ) {
-			 String qs = "SELECT * WHERE { ?S ?P ?P } LIMIT 1";
+			 String qs = "SELECT * WHERE { ?S ?P ?O } LIMIT 1";
 
 			 TupleQuery q;
 			 try {
