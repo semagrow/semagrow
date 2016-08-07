@@ -210,7 +210,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 }
 
 		 if( allow_select && (conn!=null) ) {
-			 String qs = "SELECT * WHERE { ?S ?P ?P } LIMIT 1";
+			 String qs = "SELECT * WHERE { ?S ?P ?O } LIMIT 1";
 
 			 TupleQuery q;
 			 try {
