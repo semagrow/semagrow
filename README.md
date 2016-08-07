@@ -1,5 +1,5 @@
 # Semagrow Stack
-
+[![Build Status](https://travis-ci.org/semagrow/semagrow.svg?branch=main)](https://travis-ci.org/semagrow/semagrow)
 
 ## System Requirements
 
