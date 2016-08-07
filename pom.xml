@@ -199,7 +199,7 @@
                   <footer>SemaGrow, ${project.version}</footer>
                   <doctitle>SemaGrow, ${project.version}</doctitle>
                   <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
-                  <destDir>api-${project.version}</destDir>
+                  <destDir>${project.build.directory}/api-${project.version}</destDir>
                 </configuration>
                 <executions>
                     <execution>
