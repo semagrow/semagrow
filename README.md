@@ -21,7 +21,7 @@ federation.
 
 ### Building
 
-Building Semagrow from sources requires to have a system with JDK8 and maven 3. 
+Building Semagrow from sources requires to have a system with JDK8 and Maven 3.1 or higher.  
 Optionally, you may need a PostgreSQL as a requirement for the query transformation 
 functionality.
 
