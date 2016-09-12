@@ -38,7 +38,7 @@ the `http` module that can be deployed to the Servlet server of your choice.
 Moreover, Semagrow can be build pre-bundled with the Apache Tomcat servlet server.
 To achieve that you could issue
 ```bash
-$ mvn clean package -Psemagrow-stack-webapp-distribution
+$ mvn clean package -P tomcat-bundle
 ```
 from the top-leve directory of the project. This will result in a 
 zip file in `./http/target` containing a fully equipped Apache Tomcat 
@@ -74,17 +74,17 @@ SemaGrow can be accessed at `http://localhost:8080/SemaGrow/`.
 Semagrow has an [official docker repository](https://github.com/semagrow/docker-semagrow).
 
 You can also test your build deployed in a docker image. To do so run:
-
-`mvn clean package -P tomcat-bundle,docker`
-
+```bash
+$ mvn clean package -P docker
+```
 The produced image will be tagged as `semagrow` and will contain Tomcat with Semagrow deployed. To run it issue
-
-`docker run semagrow`
-
+```bash
+$ docker run semagrow
+```
 or if you want to test Semagrow with your configuration files (`repository.ttl` and `metadata.ttl`) issue
-
-`docker run -v /path/to/configuration:/etc/default/semagrow semagrow`
-
+```bash
+$ docker run -v /path/to/configuration:/etc/default/semagrow semagrow`
+```
 Then you can access Semagrow at `http://<CONTAINER_IP>:8080/SemaGrow/`
 
 If you get error `INFO: I/O exception (java.io.IOException) caught when processing request to {}->unix://localhost:80: Permission denied` during the build it probably means that you don't have permission to access the docker daemon. To fix this try to run maven as root.
