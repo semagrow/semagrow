@@ -46,7 +46,7 @@ with pre-installed Semagrow.
 However, please note that external dependencies such as the
 PostgresSQL database needs to be installed and run separately.
 
-### Building a Docker image from sources
+#### Building a Docker image from sources
 
 You can also test your build deployed in a docker image. To do so run:
 ```bash
@@ -97,7 +97,7 @@ To run semagrow using the latest official docker image you should execute
 ```bash
 $ docker run semagrow/semagrow
 ```
-Howeover, you can also build your own docker image using the steps described in Section [Building](### Build a Docker image from sources)
+Howeover, you can also build your own docker image using the steps described in Section [Building](#### Building a Docker image from sources)
 The produced image will be tagged as `semagrow` and will contain Tomcat with Semagrow deployed.
 
 To run the newly produced image you should execute
@@ -106,7 +106,7 @@ $ docker run semagrow
 ```
 or if you want to test Semagrow with your configuration files (`repository.ttl` and `metadata.ttl`) issue
 ```bash
-$ docker run -v /path/to/configuration:/etc/default/semagrow semagrow`
+$ docker run -v /path/to/configuration:/etc/default/semagrow semagrow
 ```
 
 In either case you can access Semagrow at `http://<CONTAINER_IP>:8080/SemaGrow/`
