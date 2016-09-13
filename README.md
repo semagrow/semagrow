@@ -46,7 +46,7 @@ with pre-installed Semagrow.
 However, please note that external dependencies such as the
 PostgresSQL database needs to be installed and run separately.
 
-### Build a Docker image from sources
+### Building a Docker image from sources
 
 You can also test your build deployed in a docker image. To do so run:
 ```bash
@@ -55,11 +55,13 @@ $ mvn clean package -P docker
 The produced image will be tagged as `semagrow` and will contain Tomcat with Semagrow deployed.
 
 If you get the following error
-   `INFO: I/O exception (java.io.IOException) caught when processing request to {}->unix://localhost:80: Permission denied`
+
+> `INFO: I/O exception (java.io.IOException) caught when processing request to {}->unix://localhost:80: Permission denied`
+
 during the build it probably means that you don't have permission to access the
 docker daemon. To fix this try to run maven as root.
 
-The `Dockerfile` is located at `assembly/src/docker`.
+The `Dockerfile` is located at [`assembly/src/docker`](assembly/src/docker).
 
 ### Configuration
 
@@ -76,6 +78,8 @@ Samples of these configuration files can be found as
 
 ### Running Semagrow
 
+#### Running Semagrow from the Apache Tomcat bundle
+
 In order to run the bundle of Apache Tomcat with SemaGrow you should
 
 1. uncompress the generated zip,
@@ -86,14 +90,16 @@ SemaGrow can be accessed at `http://localhost:8080/SemaGrow/`.
 
 #### Running Semagrow using Docker
 
-Semagrow has an [official docker repository](https://github.com/semagrow/docker-semagrow).
+Semagrow has an [official docker repository](https://github.com/semagrow/docker-semagrow)
 and official docker images are available in [Docker Hub](https://hub.docker.com/r/semagrow/semagrow/).
+
 To run semagrow using the latest official docker image you should execute
 ```bash
 $ docker run semagrow/semagrow
 ```
 Howeover, you can also build your own docker image using the steps described in Section [Building](### Build a Docker image from sources)
 The produced image will be tagged as `semagrow` and will contain Tomcat with Semagrow deployed.
+
 To run the newly produced image you should execute
 ```bash
 $ docker run semagrow
@@ -105,7 +111,7 @@ $ docker run -v /path/to/configuration:/etc/default/semagrow semagrow`
 
 In either case you can access Semagrow at `http://<CONTAINER_IP>:8080/SemaGrow/`
 where `<CONTAINER_IP>` is the address assigned to the semagrow container and can
-be retrieved using `docker inspect`
+be retrieved using [`docker inspect`](https://docs.docker.com/engine/reference/commandline/inspect/)
 
 ## Known issues
 
