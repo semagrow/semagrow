@@ -52,7 +52,7 @@ You can also test your build deployed in a docker image. To do so run:
 ```bash
 $ mvn clean package -P docker
 ```
-The produced image will be tagged as `semagrow` and will contain Tomcat with Semagrow deployed.
+The produced image will be tagged as `semagrow:latest` and will contain Tomcat with Semagrow deployed.
 
 If you get the following error
 
