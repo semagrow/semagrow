@@ -36,9 +36,4 @@
   <user username="both" password="tomcat" roles="tomcat,role1"/>
   <user username="role1" password="tomcat" roles="role1"/>
 -->
-    <role rolename="SemaGrowAdmin"/>
-    <role rolename="SemaGrowUser"/>
-    <role rolename="logout"/>
-    <user password="turnguard" roles="SemaGrowUser,SemaGrowAdmin,logout,manager-script,admin" username="turnguard"/>
-    <user username="log" password="out" roles="logout"/>
 </tomcat-users>
