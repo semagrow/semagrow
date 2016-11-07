@@ -31,8 +31,7 @@ public class TupleQueryResultView extends QueryResultView {
         return INSTANCE;
     }
 
-    private TupleQueryResultView() {
-    }
+    private TupleQueryResultView() { }
 
     public String getContentType() {
         return null;

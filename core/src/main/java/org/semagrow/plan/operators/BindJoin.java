@@ -4,9 +4,12 @@ import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 /**
- * Will evaluate the result of the leftArg and
- * substitute the bindings to the rightArg.
- * The right argument must be of a certain time (e.g. SourceQuery, Service etc)
+ * BindJoin is a king of join implementation similar to the Nested Loop Join.
+ * Evaluates the left operand and then evaluates the right operand given the
+ * result set of the left as {@link org.eclipse.rdf4j.query.BindingSet}s.
+ * <p />
+ * The right argument must be of a certain type (e.g. {@link SourceQuery},
+ * {@link org.eclipse.rdf4j.query.algebra.Service}).
  */
 public class BindJoin extends Join {
 

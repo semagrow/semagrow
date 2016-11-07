@@ -1,5 +1,6 @@
 package org.semagrow.evaluation.reactor;
 
+import org.semagrow.algebra.TupleExprs;
 import org.semagrow.evaluation.QueryExecutorResolver;
 import org.semagrow.evaluation.SimpleQueryExecutorResolver;
 import org.semagrow.evaluation.util.BindingSetUtil;
@@ -183,7 +184,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        Set<String> free = computeVars(expr);
+        Set<String> free = TupleExprs.getFreeVariables(expr);
         BindingSet relevant = bindingSetOps.project(free, bindings);
         QueryExecutor executor = queryExecutorResolver.resolve(source)
                 .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
@@ -202,7 +203,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
-        Set<String> free = computeVars(expr);
+        Set<String> free = TupleExprs.getFreeVariables(expr);
         QueryExecutor executor = queryExecutorResolver.resolve(source)
                 .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
 
@@ -252,7 +253,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Stream<BindingSet> evaluateReactiveDefault(TupleExpr expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
-        Set<String> freeVars = computeVars(expr);
+        Set<String> freeVars = TupleExprs.getFreeVariables(expr);
 
 
         return Streams.from(bindingList)
@@ -280,21 +281,5 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                 .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
     }
 
-    protected Set<String> computeVars(TupleExpr serviceExpression) {
-        final Set<String> res = new HashSet<String>();
-        serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
-
-            @Override
-            public void meet(Var node)
-                    throws RuntimeException {
-                // take only real vars, i.e. ignore blank nodes
-                if (!node.hasValue() && !node.isAnonymous())
-                    res.add(node.getName());
-            }
-            // TODO maybe stop tree traversal in nested SERVICE?
-            // TODO special case handling for BIND
-        });
-        return res;
-    }
 }
 

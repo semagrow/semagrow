@@ -15,6 +15,7 @@ import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
  * retrieve only limited query answers.
  * @author Angelos Charalambidis
  */
+@Deprecated
 public class LimitPushDownOptimizer implements QueryOptimizer {
 
     public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {

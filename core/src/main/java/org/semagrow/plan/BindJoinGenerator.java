@@ -12,7 +12,8 @@ import java.util.LinkedList;
 import java.util.Set;
 
 /**
- * Created by angel on 31/3/2016.
+ * A {@link JoinImplGenerator} that creates Join trees using {@link BindJoin}
+ * @author acharal
  */
 class BindJoinGenerator implements JoinImplGenerator {
 
@@ -45,7 +46,7 @@ class BindJoinGenerator implements JoinImplGenerator {
     }
 
 
-    private class IsBindableVisitor extends PlanVisitorBase<RuntimeException> {
+    private class IsBindableVisitor extends AbstractPlanVisitor<RuntimeException> {
         boolean condition = false;
 
         @Override

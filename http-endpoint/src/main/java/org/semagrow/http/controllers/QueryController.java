@@ -14,6 +14,8 @@ import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.semagrow.http.views.GraphQueryResultView;
 import org.semagrow.http.views.TupleQueryResultView;
 import org.semagrow.http.views.BooleanQueryResultView;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.View;
 
@@ -85,6 +87,11 @@ public class QueryController extends AbstractQueryController {
                 throw new ServerHTTPException("Query evaluation error: " + e.getMessage());
             }
         }
+        catch (Exception e) {
+            logger.info("I/O error", e);
+            throw new ServerHTTPException("Input output error: " + e.getMessage());
+        }
+
         Object factory = ProtocolUtil.getAcceptableService(request, response, registry);
 
         Map<String, Object> model = new HashMap<String, Object>();
@@ -95,6 +102,5 @@ public class QueryController extends AbstractQueryController {
 
         return new ModelAndView(view, model);
     }
-
 
 }

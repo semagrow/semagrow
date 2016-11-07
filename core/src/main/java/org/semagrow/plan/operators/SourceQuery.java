@@ -5,21 +5,19 @@ import org.eclipse.rdf4j.query.algebra.QueryModelVisitor;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.UnaryTupleOperator;
 
-
 /**
- * Created by angel on 4/26/14.
+ * Source query represents the operation of executing its argument using
+ * an appropriate {@link org.semagrow.evaluation.QueryExecutor} to a
+ * specific site and fetch the result of the execution to the local site.
+ *
+ * @see org.semagrow.evaluation.QueryExecutor
+ * @see org.semagrow.evaluation.QueryExecutorResolver
+ * @see org.semagrow.local.LocalSite
+ * @author acharal
  */
 public class SourceQuery extends UnaryTupleOperator {
 
-    Site site;
-    // method to access sources (parallel, sequential) and with what order.
-    // we choose parallel if we need the union (completeness of the result)
-    // we choose sequential with the hope that some of the sources will not be needed eventually
-    // (because of some LIMIT)
-
-    public SourceQuery(TupleExpr expr) {
-        super(expr);
-    }
+    private Site site;
 
     public SourceQuery(TupleExpr expr, Site fromSite) {
         super(expr);

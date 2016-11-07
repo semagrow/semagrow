@@ -3,7 +3,8 @@ package org.semagrow.evaluation;
 import org.eclipse.rdf4j.common.lang.service.ServiceRegistry;
 
 /**
- * Created by angel on 30/3/2016.
+ *
+ * @author acharal
  */
 public class QueryExecutorRegistry extends ServiceRegistry<String, QueryExecutorFactory> {
 

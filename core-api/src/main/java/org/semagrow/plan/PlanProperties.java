@@ -3,27 +3,64 @@ package org.semagrow.plan;
 import org.semagrow.selector.Site;
 
 /**
- * Created by angel on 14/6/2016.
+ * A structure that contains the {@link Plan} properties needed
+ * by the {@link PlanOptimizer}.
+ *
+ * @author acharal
  */
-public interface PlanProperties {
+public class PlanProperties {
 
-    long getCardinality();
+    private Cost nodeCost;
 
-    void setCardinality(long card);
+    private long cardinality;
 
-    Cost getCost();
+    private Site site;
 
-    void setCost(Cost cost);
+    private DataProperties dataProps;
 
-    Site getSite();
+    public long getCardinality() { return cardinality; }
 
-    void setSite(Site site);
+    public void setCardinality(long card) { this.cardinality = card;}
 
-    Ordering getOrdering();
+    public Cost getCost() { return nodeCost; }
 
-    void setOrdering(Ordering o);
+    public void setCost(Cost cost) { this.nodeCost = cost; }
 
-    boolean isComparable(PlanProperties properties);
+    public Site getSite() { return site; }
 
-    PlanProperties clone();
+    public void setSite(Site site) { this.site = site; }
+
+    public DataProperties getDataProperties() {
+        return dataProps;
+    }
+
+    public void setDataProperties(DataProperties dataProps) {
+        this.dataProps = dataProps;
+    }
+
+    public static PlanProperties defaultProperties() {
+        PlanProperties p = new PlanProperties();
+        //p.setSite(LocalSite.getInstance());
+        p.setCost(new Cost(0));
+        return p;
+    }
+
+    public PlanProperties clone() {
+        PlanProperties p = new PlanProperties();
+        p.nodeCost = this.nodeCost;
+        p.dataProps = this.dataProps;
+        p.site = this.site;
+        return p;
+    }
+
+    public boolean isComparable(PlanProperties props) {
+        return (props.getSite().equals(this.getSite()));
+    }
+
+    public boolean isCoveredBy(PlanProperties props) {
+        return this.getSite().equals(props.getSite())
+                && this.getDataProperties().isCoveredBy(props.getDataProperties())
+                && this.getCost().compareTo(props.getCost()) >= 0;
+    }
+
 }

@@ -8,7 +8,7 @@ import org.eclipse.rdf4j.query.algebra.TupleExpr;
  * <p>Interface for any component that estimates the number
  * of results expected when executing a given expression.</p>
  *
- * @author Angelos Charalambidis
+ * @author acharal
  */
 public interface CardinalityEstimator {
 
@@ -19,9 +19,9 @@ public interface CardinalityEstimator {
      * This method call is not valid for all types of expressions,
      * as some expressions can only be estimated in reference to a
      * specific data source.
-     * @param expr
-     * @return
+     * @param expr a logical or physical tree of expressions
+     * @return an estimated number of results
      */
-    long getCardinality( TupleExpr expr );
+    long getCardinality(TupleExpr expr);
 
 }

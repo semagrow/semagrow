@@ -1,12 +1,12 @@
 package org.semagrow.sail;
 
+import org.semagrow.plan.QueryCompiler;
 import org.semagrow.plan.QueryDecomposer;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
 import org.semagrow.estimator.SelectivityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
 import org.semagrow.evaluation.file.FileManager;
 import org.semagrow.evaluation.file.MaterializationManager;
-import org.semagrow.plan.DPQueryDecomposer;
 import org.semagrow.selector.RestrictiveSourceSelector;
 import org.semagrow.selector.SourceSelector;
 import org.semagrow.querylog.api.QueryLogException;
@@ -89,7 +89,16 @@ public class SemagrowSail extends AbstractSail {
         selector = new RestrictiveSourceSelector(selector, includeOnly, exclude);
         CostEstimatorResolver costEstimatorResolver = getCostEstimatorResolver();
         CardinalityEstimatorResolver cardinalityEstimatorResolver = getCardinalityEstimatorResolver();
-        return new DPQueryDecomposer(costEstimatorResolver, cardinalityEstimatorResolver, selector);
+        //return new DPQueryDecomposer(costEstimatorResolver, cardinalityEstimatorResolver, selector);
+        return new org.semagrow.plan.querygraph.QueryGraphDecomposer(costEstimatorResolver, cardinalityEstimatorResolver, selector);
+    }
+
+    public QueryCompiler getCompiler(Collection<IRI> includeOnly, Collection<IRI> exclude) {
+        SourceSelector selector = getSourceSelector();
+        selector = new RestrictiveSourceSelector(selector, includeOnly, exclude);
+        CostEstimatorResolver costEstimatorResolver = getCostEstimatorResolver();
+        CardinalityEstimatorResolver cardinalityEstimatorResolver = getCardinalityEstimatorResolver();
+        return new org.semagrow.plan.SimpleQueryCompiler(costEstimatorResolver, cardinalityEstimatorResolver, selector);
     }
 
     public SourceSelector getSourceSelector() { return sourceSelector; }

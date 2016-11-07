@@ -2,6 +2,7 @@ package org.semagrow.sail.config;
 
 
 import org.semagrow.config.*;
+import org.semagrow.connector.sparql.selector.AskSourceSelector;
 import org.semagrow.estimator.*;
 import org.semagrow.alignment.QueryTransformationImpl;
 import org.semagrow.sail.SemagrowSail;
@@ -126,7 +127,7 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
             if (transformation != null)
                 selector = new SourceSelectorWithQueryTransform(selector, transformation);
 
-            //selector = new AskSourceSelector(selector);
+            selector = new AskSourceSelector(selector);
             selector = new CachedSourceSelector(selector);
 
             return selector;

@@ -12,6 +12,7 @@ import java.util.Set;
 /**
  *
  */
+@Deprecated
 public class FilterOptimizer implements QueryOptimizer {
 
     public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings) {

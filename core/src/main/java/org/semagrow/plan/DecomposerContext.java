@@ -16,11 +16,12 @@ import java.util.Collection;
  * @author Angelos Charalambidis
  * @author Stasinos Konstantopoulos
  */
-
+@Deprecated
 public class DecomposerContext
 {
 	public static final long LIMIT_NONE = -2;
-	public static final long LIMIT_OVERFLOW = -1;
+
+    public static final long LIMIT_OVERFLOW = -1;
 
 	private Ordering ordering;
 
@@ -28,15 +29,15 @@ public class DecomposerContext
 
     private long limit = DecomposerContext.LIMIT_NONE;
 
-	DecomposerContext( TupleExpr expr )
+	protected DecomposerContext( TupleExpr expr )
 	{
-		this.filters = FilterCollector.process( expr );
+        this.filters = FilterCollector.process( expr );
 	}
 
     public Ordering getOrdering() { return this.ordering; }
 
     public Collection<ValueExpr> getFilters() { return this.filters; }
-    
+
     /**
      * Gets the value of the LIMIT modifier
      * @return long the value of the LIMIT modifier, if any; -2 if there is no LIMIT modifier; -1 if the LIMIT modifier overflows long

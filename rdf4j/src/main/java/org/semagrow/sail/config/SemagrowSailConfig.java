@@ -3,7 +3,6 @@ package org.semagrow.sail.config;
 import org.semagrow.config.*;
 import org.semagrow.selector.SourceSelectorRegistry;
 import org.semagrow.util.FileUtils;
-import org.semagrow.sail.SEVOD.config.SEVODInferencerConfig;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.util.Models;
@@ -51,7 +50,7 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
 
     public RepositoryImplConfig getMetadataConfig() {
 
-        SailImplConfig sailConfig = new SEVODInferencerConfig(
+        SailImplConfig sailConfig = new org.semagrow.sail.SEVOD.config.SEVODInferencerConfig(
                 new ForwardChainingRDFSInferencerConfig(
                         new MemoryStoreConfig()));
 

@@ -11,7 +11,7 @@ import org.eclipse.rdf4j.query.algebra.ValueExpr;
  * <p>Interface for any component that estimates the selectivity of
  * a given expression.</p>
  *
- * @author Angelos Charalambidis
+ * @author acharal
  */
 public interface SelectivityEstimator {
 

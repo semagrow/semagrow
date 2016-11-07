@@ -8,7 +8,9 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
- * Created by angel on 31/3/2016.
+ * A {@JoinImplGenerator} that creates Join trees using {@link MergeJoin}.
+ * Both operant plans are enforced to the ordering that is needed from the {@link MergeJoin}.
+ * @author acharal
  */
 class MergeJoinGenerator implements JoinImplGenerator {
 

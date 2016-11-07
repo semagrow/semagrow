@@ -2,48 +2,35 @@ package org.semagrow.http.controllers;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
-import org.eclipse.rdf4j.common.lang.FileFormat;
-import org.eclipse.rdf4j.common.lang.service.FileFormatServiceRegistry;
 import org.eclipse.rdf4j.common.webapp.util.HttpServerUtil;
-import org.eclipse.rdf4j.http.protocol.Protocol;
 import org.eclipse.rdf4j.http.protocol.error.ErrorInfo;
 import org.eclipse.rdf4j.http.protocol.error.ErrorType;
 import org.eclipse.rdf4j.http.server.ClientHTTPException;
 import org.eclipse.rdf4j.http.server.HTTPException;
 import org.eclipse.rdf4j.http.server.ProtocolUtil;
-import org.eclipse.rdf4j.http.server.ServerHTTPException;
-import org.eclipse.rdf4j.http.server.repository.BooleanQueryResultView;
-import org.eclipse.rdf4j.http.server.repository.GraphQueryResultView;
-import org.eclipse.rdf4j.http.server.repository.QueryResultView;
-import org.eclipse.rdf4j.http.server.repository.TupleQueryResultView;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.impl.SimpleDataset;
-import org.eclipse.rdf4j.query.resultio.BooleanQueryResultWriterRegistry;
-import org.eclipse.rdf4j.query.resultio.TupleQueryResultWriterRegistry;
 import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.config.RepositoryResolver;
-import org.eclipse.rdf4j.rio.RDFWriterRegistry;
 import org.semagrow.repository.SemagrowRepositoryResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.View;
-import org.springframework.web.servlet.mvc.Controller;
-import org.springframework.web.servlet.support.WebContentGenerator;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
 
 import static javax.servlet.http.HttpServletResponse.*;
 import static org.eclipse.rdf4j.http.protocol.Protocol.*;
+
+import org.springframework.web.servlet.mvc.Controller;
+import org.springframework.web.servlet.support.WebContentGenerator;
 
 /**
  * Created by angel on 17/6/2016.
@@ -65,7 +52,6 @@ public abstract class AbstractQueryController extends WebContentGenerator implem
 
     protected abstract ModelAndView handleQuery(Query query, boolean headersOnly, HttpServletRequest request, HttpServletResponse response)  throws HTTPException;
 
-    @Override
     public ModelAndView handleRequest(HttpServletRequest request, HttpServletResponse response)
             throws Exception
     {

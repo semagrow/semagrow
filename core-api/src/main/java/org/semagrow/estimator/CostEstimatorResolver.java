@@ -5,10 +5,18 @@ import org.semagrow.selector.Site;
 import java.util.Optional;
 
 /**
- * Created by angel on 15/6/2016.
+ * The interface of a resolver of {@link CostEstimator}s
+ * @author acharal
+ * @since 2.0
  */
 public interface CostEstimatorResolver {
 
+    /**
+     * Selects the appropriate {@link CostEstimator} for a specific {@code site}
+     * @param site a given {@link Site}
+     * @return an object that implements the {@link CostEstimator}
+     *         or nothing if there is nothing appropriate for the given {@code site}
+     */
     Optional<CostEstimator> resolve(Site site);
 
 }

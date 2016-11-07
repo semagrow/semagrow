@@ -8,7 +8,8 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
- * Created by angel on 31/3/2016.
+ * A {@JoinImplGenerator} that creates Join trees using {@link HashJoin}
+ * @author acharal
  */
 class HashJoinGenerator implements JoinImplGenerator {
 

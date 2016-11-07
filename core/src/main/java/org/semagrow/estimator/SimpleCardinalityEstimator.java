@@ -112,7 +112,8 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
         double sel = selectivityEstimator.getJoinSelectivity(dummyJoin);
 
         // TODO: check the second half of the equation
-        return (long)(card1 * card2 * sel) + (long)(card1 * (1/sel));
+        return (long)(card1 * card2 * sel) + (long)Math.max(0, card1*(1 - sel));
+
     }
 
     public long getCardinality(SourceQuery query) {

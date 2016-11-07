@@ -122,7 +122,7 @@ public class SimpleCostEstimator implements CostEstimator {
         return new Cost((leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY);
     }
 
-    public Cost getCost(Order order, Site source){
+    public Cost getCost(Order order){
         long card = cardinalityEstimator.getCardinality(order.getArg());
         return getCost(order.getArg()).add(Cost.cpuCost(card * Math.log(card)));
     }

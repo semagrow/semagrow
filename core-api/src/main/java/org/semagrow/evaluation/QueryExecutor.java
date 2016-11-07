@@ -9,7 +9,7 @@ import org.reactivestreams.Publisher;
 import java.util.List;
 
 /**
- * Created by angel on 3/26/15.
+ * @author acharal
  */
 public interface QueryExecutor {
 

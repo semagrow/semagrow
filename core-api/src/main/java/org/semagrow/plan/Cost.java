@@ -2,7 +2,7 @@ package org.semagrow.plan;
 
 /**
  * A simple data structure for describing a cost of an execution plan.
- * @author Angelos Charalambidis
+ * @author acharal
  */
 public class Cost implements Comparable<Cost> {
 

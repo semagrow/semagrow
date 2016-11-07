@@ -36,7 +36,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <javadoc.version>1.4</javadoc.version>
-        <rdf4j.version>2.0M2</rdf4j.version>
+        <rdf4j.version>2.1.1</rdf4j.version>
         <slf4j.version>1.7.7</slf4j.version>
         <logback.version>1.1.3</logback.version>
         <groovy.version>2.4.0</groovy.version>
@@ -161,13 +161,37 @@
         </dependency>
 
         <!-- TEST DEPENDENCIES -->
-        <dependency>
+        <!--<dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>${junit.version}</version>
             <scope>test</scope>
-        </dependency>
+        </dependency>-->
 
+        <dependency>
+            <groupId>org.spockframework</groupId>
+            <artifactId>spock-core</artifactId>
+            <version>1.0-groovy-2.4</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency> <!-- enables mocking of classes (in addition to interfaces) -->
+            <groupId>cglib</groupId>
+            <artifactId>cglib-nodep</artifactId>
+            <version>3.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency> <!-- enables mocking of classes without default constructor (together with CGLIB) -->
+            <groupId>org.objenesis</groupId>
+            <artifactId>objenesis</artifactId>
+            <version>2.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.nagternal</groupId>
+            <artifactId>spock-genesis</artifactId>
+            <version>0.5.0</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -198,7 +222,6 @@
                   <header>SemaGrow, ${project.version}</header>
                   <footer>SemaGrow, ${project.version}</footer>
                   <doctitle>SemaGrow, ${project.version}</doctitle>
-                  <reportOutputDirectory>${project.reporting.outputDirectory}</reportOutputDirectory>
                   <destDir>${project.build.directory}/api-${project.version}</destDir>
                 </configuration>
                 <executions>
@@ -209,6 +232,34 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+
+            <!-- The gmavenplus plugin is used to compile Groovy code. To learn more about this plugin,
+        visit https://github.com/groovy/GMavenPlus/wiki -->
+            <plugin>
+                <groupId>org.codehaus.gmavenplus</groupId>
+                <artifactId>gmavenplus-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>compile</goal>
+                            <goal>testCompile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <!-- Optional plugins for using Spock -->
+            <!-- Only required if names of spec classes don't match default Surefire patterns (`*Test` etc.) -->
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <useFile>false</useFile>
+                    <includes>
+                        <include>**/*Spec.java</include>
+                    </includes>
+                </configuration>
             </plugin>
             <!--
             <plugin>

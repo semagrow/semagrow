@@ -4,7 +4,10 @@ import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 /**
- * Created by angel on 4/30/14.
+ * Hash join is a join implementation that hash the result set
+ * of the left operand and probe each result tuple of the right operand
+ * against that hash table.
+ * @author acharal
  */
 public class HashJoin extends Join {
 

@@ -5,7 +5,9 @@ import org.semagrow.selector.Site;
 import java.util.Optional;
 
 /**
- * Created by antonis on 21/3/2016.
+ *
+ * @author acharal
+ * @since 2.0
  */
 public interface QueryExecutorResolver {
 

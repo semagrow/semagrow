@@ -13,7 +13,7 @@ import java.util.*;
  * search for an optimal plan with respect to a CostEstimator
  * @author Angelos Charalambidis
  */
-public class DPPlanOptimizer implements PlanOptimizer
+public class DPPlanOptimizer
 {
 
     final private org.slf4j.Logger logger =
@@ -21,7 +21,7 @@ public class DPPlanOptimizer implements PlanOptimizer
 
     private PlanGenerator planGenerator;
 
-    private PlanProperties properties = SimplePlanProperties.defaultProperties();
+    private PlanProperties properties = PlanProperties.defaultProperties();
 
     public DPPlanOptimizer(PlanGenerator planGenerator)
     {
@@ -87,37 +87,39 @@ public class DPPlanOptimizer implements PlanOptimizer
     }
 
     @Loggable
-    public Optional<Plan> getBestPlan(TupleExpr expr, BindingSet bindings, Dataset dataset) {
+    public Optional<Plan> getBestPlan(Collection<TupleExpr> exprs, BindingSet bindings, Dataset dataset) {
 
+        Map<Set<Integer>,PlanCollection> optPlans = new HashMap<>();
         // optPlans is a function from (Set of Expressions) to (Set of Plans)
-        PlanCollection optPlans = new PlanCollection();
 
-        Collection<Plan> accessPlans = planGenerator.accessPlans(expr, bindings, dataset);
+        Integer currentId = 1;
+        Set<Integer> r = new HashSet<>();
 
-        optPlans.addPlan(accessPlans);
+        for (TupleExpr a : exprs) {
+            Set<Integer> id = Collections.singleton(currentId);
+            PlanCollection p = planGenerator.accessPlans(a, bindings, dataset);
+            optPlans.put(id, p);
+            r.addAll(id);
+            currentId++;
+        }
 
-        // plans.getExpressions() get basic expressions
-        // subsets S of size i
-        //
-        Set<TupleExpr> r = optPlans.getExpressions();
-
-        for (Pair<Set<TupleExpr>, Set<TupleExpr>> p : pairsubsets(r)) {
-            Set<TupleExpr> o1 = p.getFirst();
-            Set<TupleExpr> o2 = p.getSecond();
-            Set<TupleExpr> s = new HashSet<>(o1);
+        for (Pair<Set<Integer>, Set<Integer>> p : pairsubsets(r)) {
+            Set<Integer> o1 = p.getFirst();
+            Set<Integer> o2 = p.getSecond();
+            Set<Integer> s = new HashSet<>(o1);
             s.addAll(o2);
 
-            Collection<Plan> plans1 = optPlans.get(o1);
-            Collection<Plan> plans2 = optPlans.get(o2);
+            PlanCollection plans1 = optPlans.get(o1);
+            PlanCollection plans2 = optPlans.get(o2);
 
-            Collection<Plan> newPlans = planGenerator.joinPlans(plans1, plans2);
+            PlanCollection newPlans = planGenerator.joinPlans(plans1, plans2);
 
-            optPlans.addPlan(newPlans);
+            optPlans.put(s, newPlans);
 
             prunePlans(optPlans.get(s));
         }
 
-        Collection<Plan> fullPlans = optPlans.get(r);
+        PlanCollection fullPlans = optPlans.get(r);
         fullPlans = planGenerator.finalizePlans(fullPlans, properties);
         prunePlans(fullPlans);
 
@@ -133,7 +135,7 @@ public class DPPlanOptimizer implements PlanOptimizer
     /**
      * Returns the best plan out of a collection of plans
      * @param plans a collection of equivalent plans
-     * @return the prefered plan
+     * @return the preferred plan
      */
     private Optional<Plan> getBestPlan(Collection<Plan> plans)
     {
@@ -153,8 +155,7 @@ public class DPPlanOptimizer implements PlanOptimizer
         return new PairSubsetIterator<T>(s);
     }
 
-    static private class Pair<A, B>
-    {
+    static private class Pair<A, B> {
 
         final private A first;
 
@@ -176,8 +177,7 @@ public class DPPlanOptimizer implements PlanOptimizer
 
     }
 
-    static public class SubsetsIterator<T> implements Iterator<Set<T>>
-    {
+    static public class SubsetsIterator<T> implements Iterator<Set<T>> {
 
         private final Set<T> elements;
         private int k = 0;
@@ -221,8 +221,7 @@ public class DPPlanOptimizer implements PlanOptimizer
         }
     }
 
-    static public class PairSubsetIterator<T> implements Iterator<Pair<Set<T>, Set<T>>>, Iterable<Pair<Set<T>,Set<T>>>
-    {
+    static public class PairSubsetIterator<T> implements Iterator<Pair<Set<T>, Set<T>>>, Iterable<Pair<Set<T>,Set<T>>>  {
         private Set<T> items;
 
         private Iterator<Set<T>> outer;
@@ -302,4 +301,5 @@ public class DPPlanOptimizer implements PlanOptimizer
             return this;
         }
     }
+
 }

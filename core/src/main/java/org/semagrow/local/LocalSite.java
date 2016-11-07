@@ -37,4 +37,8 @@ public class LocalSite implements Site {
     public static Site getInstance() {
         return sharedInstance;
     }
+
+    @Override
+    public String toString() { return "local-semagrow"; }
+
 }

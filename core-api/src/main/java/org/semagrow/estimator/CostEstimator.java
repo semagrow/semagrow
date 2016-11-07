@@ -5,15 +5,15 @@ import org.semagrow.plan.Cost;
 
 /**
  * The interface of the cost estimator
- * @author Angelos Charalambidis
+ * @author acharal
  */
 public interface CostEstimator {
 
     /**
-     * Computes the cost of the execution plan {@code expr}
+     * Computes the cost of a given tree of physical operators
      *
-     * @param expr the execution plan
-     * @return an estimated cost
+     * @param expr a tree of physical operators
+     * @return the estimated cost
      */
     Cost getCost(TupleExpr expr);
 

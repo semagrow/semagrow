@@ -69,7 +69,10 @@ SemaGrowPage = {
             "localData":{
                 "onSuccess":function(oRequestData, response){
                     document.getElementById("sparqlContent").innerHTML=response.responseText;
-                    var yasgui = YASGUI(document.getElementById("sparqlContainer"), {endpoint: "sparql"});
+                    var yasgui = YASGUI(document.getElementById("sparqlContainer"), {
+                        endpoint: "sparql",
+
+                    });
                 }
             }
         };

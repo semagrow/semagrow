@@ -4,7 +4,10 @@ import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
 /**
- * Created by angel on 10/2/14.
+ * Merge join assumes that the results of its operands are ordered with
+ * respect to their common variables. The result of the merge join is also
+ * ordered with respect to those variables.
+ * @author acharal
  */
 public class MergeJoin extends Join {
 
@@ -14,7 +17,7 @@ public class MergeJoin extends Join {
 
     @Override
     public int hashCode() {
-        return "hash".hashCode() + super.hashCode();
+        return "mergejoin".hashCode() + super.hashCode();
     }
 
     @Override

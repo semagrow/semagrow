@@ -8,7 +8,10 @@ import java.util.Collection;
 import java.util.LinkedList;
 
 /**
- * Created by angel on 31/3/2016.
+ * A {@link JoinImplGenerator} that pushes the {@Join} to the site if
+ * the capabilities of the site allows joining and if the site of the plans
+ * of the two operands is the same.
+ * @author acharal
  */
 class RemoteJoinGenerator implements JoinImplGenerator {
 

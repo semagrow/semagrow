@@ -21,6 +21,7 @@ import java.util.Set;
  * custom functions that can be executed only by the remote sources.
  * @author Angelos Charalambidis
  */
+@Deprecated
 public class ExtensionOptimizer implements QueryOptimizer {
 
 

@@ -210,6 +210,7 @@ var Tab = function(yasgui, id, name, endpoint) {
             };
             YASGUI.YASR.plugins.error.defaults.tryQueryLink = getQueryString;
             tab.yasr = YASGUI.YASR(yasrContainer[0], $.extend({
+                outputPlugins: ["error", "boolean", "rawResponse", "table"],
                 //this way, the URLs in the results are prettified using the defined prefixes in the query
                 getUsedPrefixes: tab.yasqe.getPrefixesFromQuery
             }, persistentOptions.yasr));
@@ -394,7 +395,7 @@ var Tab = function(yasgui, id, name, endpoint) {
             //instantiate yasr (without rendering results, to avoid load)
             //this way, we can clear the yasr persistent results
             tab.yasr = YASGUI.YASR(yasrContainer[0], {
-                outputPlugins: []
+                outputPlugins:  ["error", "boolean", "rawResponse", "table"]
             }, '');
         }
         yUtils.storage.removeAll(function(key, val) {

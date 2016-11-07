@@ -1,6 +1,8 @@
 package org.semagrow.sail;
 
 import org.semagrow.model.SemagrowValueFactory;
+import org.semagrow.plan.Plan;
+import org.semagrow.plan.QueryCompiler;
 import org.semagrow.plan.QueryDecomposer;
 import org.semagrow.plan.QueryDecompositionException;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
@@ -209,27 +211,27 @@ public class SemagrowSailConnection extends AbstractSailConnection {
         }
     }
 
-    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings)
+    public Plan decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings)
             throws QueryDecompositionException
     {
         return decompose(tupleExpr, dataset, bindings,
                 Collections.<IRI>emptySet(), Collections.<IRI>emptySet());
     }
 
-    public TupleExpr decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
+    public Plan decompose(TupleExpr tupleExpr, Dataset dataset, BindingSet bindings,
                                Collection<IRI> includeOnlySources, Collection<IRI> excludeSources)
     {
         QueryOptimizer optimizer = semagrowSail.getOptimizer();
         optimizer.optimize(tupleExpr, dataset, bindings);
 
-        QueryDecomposer decomposer = semagrowSail.getDecomposer(includeOnlySources, excludeSources);
+        QueryCompiler decomposer = semagrowSail.getCompiler(includeOnlySources, excludeSources);
         
         // TupleExpr used here must have been instantiated by the 
         // SemagrowSailQuery constructor and be QueryRoot
         assert tupleExpr instanceof QueryRoot;
-        decomposer.decompose(tupleExpr, dataset, bindings);
+        Plan p = decomposer.compile((QueryRoot)tupleExpr, dataset, bindings);
 
-        return tupleExpr;
+        return p;
     }
 
     @Override

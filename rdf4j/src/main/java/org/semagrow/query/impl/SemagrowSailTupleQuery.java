@@ -150,12 +150,15 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
         public void onNext(BindingSet bindings) {
             try {
                 if (!isStarted) {
-                    handler.startQueryResult(new ArrayList<>(bindings.getBindingNames()));
+                    synchronized (handler) {
+                        handler.startQueryResult(new ArrayList<>(bindings.getBindingNames()));
+                    }
                     isStarted = true;
                     logger.info("Found first result.");
                 }
-
-                handler.handleSolution(bindings);
+                synchronized (handler) {
+                    handler.handleSolution(bindings);
+                }
                 logger.info("-> Found " + bindings);
                 resultsCount++;
             } catch (TupleQueryResultHandlerException e) {
@@ -170,45 +173,52 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
             errorThrown = throwable;
 
             logger.error("Evaluation error", throwable);
-            latch.countDown();
 
             if (isStarted) {
                 try {
-                    handler.endQueryResult();
+                    synchronized (handler) {
+                        handler.endQueryResult();
+                    }
                 } catch (TupleQueryResultHandlerException e) {
                     logger.error("Tuple handle solution error", e);
                 }
             } else {
                 try {
-                    handler.startQueryResult(Collections.emptyList());
-
-                    handler.endQueryResult();
+                    synchronized (handler) {
+                        handler.startQueryResult(Collections.emptyList());
+                        handler.endQueryResult();
+                    }
                 } catch (TupleQueryResultHandlerException e) {
                     logger.error("Tuple handle solution error", e);
                 }
             }
             subscription.cancel();
+            latch.countDown();
         }
 
 
         public void onComplete() {
-            latch.countDown();
             logger.info("Found " + resultsCount + " results.");
             if (isStarted) {
                 try {
-                    handler.endQueryResult();
+                    synchronized (handler) {
+                        handler.endQueryResult();
+                    }
                 } catch (TupleQueryResultHandlerException e) {
                     logger.error("Tuple handle solution error", e);
                 }
             } else {
                 try {
-                    handler.startQueryResult(Collections.emptyList());
-                    handler.endQueryResult();
+                    synchronized (handler) {
+                        handler.startQueryResult(Collections.emptyList());
+                        handler.endQueryResult();
+                    }
                 } catch (TupleQueryResultHandlerException e) {
                     logger.error("Tuple handle solution error", e);
                 }
             }
             subscription.cancel();
+            latch.countDown();
         }
     }
 }
