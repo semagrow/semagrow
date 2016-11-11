@@ -644,16 +644,16 @@ public class SelectBlock extends AbstractQueryBlock {
 
             if (getDuplicateStrategy() == OutputStrategy.ENFORCE && p.hasDuplicates()) {
 
-                RequestedDataProperties groupingProps = RequestedDataProperties.forGrouping(getOutputVariables());
-
                 Stream<Plan> output = Stream.of(context.asPlan(new Distinct(p)));
 
-                /*
+                RequestedDataProperties groupingProps = RequestedDataProperties.forGrouping(getOutputVariables());
+
                 if (groupingProps.isCoveredBy(p.getProperties().getDataProperties())) {
                     output = Stream.concat(output, Stream.of(context.asPlan(new Reduced(p))));
                 }
-                */
+
                 return output;
+
             } else {
                 return Stream.of(p);
             }
