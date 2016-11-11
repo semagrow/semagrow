@@ -648,9 +648,11 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 Stream<Plan> output = Stream.of(context.asPlan(new Distinct(p)));
 
+                /*
                 if (groupingProps.isCoveredBy(p.getProperties().getDataProperties())) {
                     output = Stream.concat(output, Stream.of(context.asPlan(new Reduced(p))));
                 }
+                */
                 return output;
             } else {
                 return Stream.of(p);
