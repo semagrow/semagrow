@@ -9,6 +9,9 @@ import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.RoundingMode;
 import java.util.Iterator;
 
 /**
@@ -30,7 +33,7 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
     }
 
     @Loggable
-    public long getCardinality(TupleExpr expr)  {
+    public BigInteger getCardinality(TupleExpr expr)  {
 
         if (expr instanceof StatementPattern)
             return getCardinality((StatementPattern)expr);
@@ -55,80 +58,87 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
         else if (expr instanceof Plan)
             return ((Plan)expr).getProperties().getCardinality();
 
-        return 0;
+        return BigInteger.ZERO;
 
     }
 
-    public long getCardinality(StatementPattern pattern) {
+    public BigInteger getCardinality(StatementPattern pattern) {
 
-        return statistics.getStats(pattern, EmptyBindingSet.getInstance()).getCardinality();
+        return BigInteger.valueOf(statistics.getStats(pattern, EmptyBindingSet.getInstance()).getCardinality());
 
     }
 
-    public long getCardinality(Union union) {
-        return getCardinality(union.getLeftArg()) +
-               getCardinality(union.getRightArg());
+    public BigInteger getCardinality(Union union) {
+        return getCardinality(union.getLeftArg())
+                .add(getCardinality(union.getRightArg()));
     }
 
-    public long getCardinality(Filter filter) {
-        double sel = selectivityEstimator.getConditionSelectivity(filter.getCondition(), filter.getArg());
-        return (long) (getCardinality(filter.getArg()) * sel);
+    public BigInteger getCardinality(Filter filter) {
+        BigDecimal sel = BigDecimal.valueOf(selectivityEstimator.getConditionSelectivity(filter.getCondition(), filter.getArg()));
+        return new BigDecimal(getCardinality(filter.getArg())).multiply(sel).toBigInteger();
     }
 
-    public long getCardinality(Projection projection) {
+    public BigInteger getCardinality(Projection projection) {
         return getCardinality(projection.getArg());
     }
 
-    public long getCardinality(Slice slice) {
-        long card = getCardinality(slice.getArg());
-        long sliceCard = slice.getOffset() + slice.getLimit();
-        return (card > sliceCard)? sliceCard : card;
+    public BigInteger getCardinality(Slice slice) {
+        BigInteger card = getCardinality(slice.getArg());
+        BigInteger sliceCard = BigInteger.valueOf(slice.getOffset() + slice.getLimit());
+        if (card.compareTo(sliceCard) >= 0)
+            return sliceCard;
+        else
+            return card;
     }
 
-    public long getCardinality(Join join){
+    public BigInteger getCardinality(Join join){
 
-        long card1 = getCardinality(join.getLeftArg());
+        BigInteger card1 = getCardinality(join.getLeftArg());
 
-        long card2 = getCardinality(join.getRightArg());
+        BigInteger card2 = getCardinality(join.getRightArg());
 
-        double sel = selectivityEstimator.getJoinSelectivity(join);
+        BigDecimal sel = BigDecimal.valueOf(selectivityEstimator.getJoinSelectivity(join));
 
-        double t = card1 * card2 * sel;
-        long tt = (long)Math.ceil(t);
+        BigInteger tt = new BigDecimal(card1.multiply(card2)).multiply(sel).setScale(0, RoundingMode.CEILING).toBigInteger();
 
-        if (tt < 0)
-            return 0;
+        if (tt.compareTo(BigInteger.ZERO) < 0)
+            return BigInteger.ZERO;
 
         return tt;
     }
 
-    public long getCardinality(LeftJoin join) {
-        long card1 = getCardinality(join.getLeftArg());
-        long card2 = getCardinality(join.getRightArg());
+    public BigInteger getCardinality(LeftJoin join) {
+        BigInteger card1 = getCardinality(join.getLeftArg());
+        BigInteger card2 = getCardinality(join.getRightArg());
 
         // A left merge B is semantically equiv to (A merge B) union (A - B)
 
         Join dummyJoin = new Join(join.getLeftArg().clone(), join.getRightArg().clone());
-        double sel = selectivityEstimator.getJoinSelectivity(dummyJoin);
+
+        BigDecimal sel = BigDecimal.valueOf(selectivityEstimator.getJoinSelectivity(dummyJoin));
+
+        BigInteger card1card2 = new BigDecimal(card1.multiply(card2)).multiply(sel).toBigInteger();
+
+        BigInteger card1compl = new BigDecimal(card1).multiply(BigDecimal.ONE.subtract(sel)).toBigInteger();
 
         // TODO: check the second half of the equation
-        return (long)(card1 * card2 * sel) + (long)Math.max(0, card1*(1 - sel));
+        return card1card2.add( BigInteger.ZERO.max(card1compl) );
 
     }
 
-    public long getCardinality(SourceQuery query) {
+    public BigInteger getCardinality(SourceQuery query) {
         return cardinalityEstimatorResolver
                 .resolve(query.getSite())
                 .map(c -> c.getCardinality(query.getArg()))
-                .orElse((long)0);
+                .orElse(BigInteger.ZERO);
     }
 
-    public long getCardinality(EmptySet set) {
-        return 0;
+    public BigInteger getCardinality(EmptySet set) {
+        return BigInteger.ONE;
     }
 
 
-    public long getCardinality(BindingSetAssignment assignment){
+    public BigInteger getCardinality(BindingSetAssignment assignment){
         Iterator<BindingSet> it = assignment.getBindingSets().iterator();
 
         int i = 0;
@@ -138,7 +148,7 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
             i++;
         }
 
-        return i;
+        return BigInteger.valueOf(i);
     }
 
 }

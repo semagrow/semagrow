@@ -51,7 +51,7 @@ public class SimpleCostEstimator implements CostEstimator {
         else if (expr instanceof BindingSetAssignment)
             return getCost((BindingSetAssignment)expr);
         else
-            return new Cost(cardinalityEstimator.getCardinality(expr));
+            return new Cost(cardinalityEstimator.getCardinality(expr).intValue());
     }
 
     public Cost getCost(SourceQuery expr) {
@@ -65,7 +65,7 @@ public class SimpleCostEstimator implements CostEstimator {
         //totalCost = processingCost(subexpr) + communicationCost(count, source) + initializationCostOfQuery;
 
         double communCost = C_TRANSFER_QUERY +
-                cardinalityEstimator.getCardinality(expr.getArg()) * C_TRANSFER_TUPLE;
+                cardinalityEstimator.getCardinality(expr.getArg()).longValue() * C_TRANSFER_TUPLE;
 
         Cost cost = new Cost(communCost);
         return cost;
@@ -83,9 +83,9 @@ public class SimpleCostEstimator implements CostEstimator {
         // long resultsPerQuery = cardinalityAll / queries;
         // totalCost = costLeftArgument + queries * costOfRightArgumentWithBinding
 
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
-        long joinCard = cardinalityEstimator.getCardinality(join);
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg()).longValue();
+        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg()).longValue();
+        long joinCard = cardinalityEstimator.getCardinality(join).longValue();
 
         double commuCost = C_TRANSFER_QUERY +
                 leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE)
@@ -95,8 +95,8 @@ public class SimpleCostEstimator implements CostEstimator {
     }
 
     public Cost getCost(HashJoin join) {
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg()).longValue();
+        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg()).longValue();
 
         //return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
         return Cost.cpuCost(C_HASH_TUPLE*leftCard + C_PROBE_TUPLE*rightCard);
@@ -116,14 +116,14 @@ public class SimpleCostEstimator implements CostEstimator {
         else if (join instanceof MergeJoin)
             return getCost((MergeJoin)join);
 
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg()).longValue();
+        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg()).longValue();
 
         return new Cost((leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY);
     }
 
     public Cost getCost(Order order){
-        long card = cardinalityEstimator.getCardinality(order.getArg());
+        long card = cardinalityEstimator.getCardinality(order.getArg()).longValue();
         return getCost(order.getArg()).add(Cost.cpuCost(card * Math.log(card)));
     }
 
