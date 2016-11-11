@@ -21,7 +21,7 @@ public class SimpleCostEstimator implements CostEstimator {
     private CardinalityEstimator cardinalityEstimator;
 
     private static double C_TRANSFER_TUPLE = 50;
-    private static double C_TRANSFER_QUERY = 100;
+    private static double C_TRANSFER_QUERY = 1000;
 
     private static double C_PROBE_TUPLE = 0.001;   //cost to probe a tuple against a hash table
     private static double C_HASH_TUPLE = 0.003;    //cost to hash a tuple to a hash table

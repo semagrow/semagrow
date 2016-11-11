@@ -57,15 +57,27 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
             return getCardinality((BindingSetAssignment)expr);
         else if (expr instanceof Plan)
             return ((Plan)expr).getProperties().getCardinality();
+        else if (expr instanceof Distinct)
+            return getCardinality((Distinct)expr);
+        else if (expr instanceof Reduced)
+            return getCardinality((Reduced)expr);
+        else if (expr instanceof Group)
+            return getCardinality((Group)expr);
 
         return BigInteger.ZERO;
 
     }
 
     public BigInteger getCardinality(StatementPattern pattern) {
-
         return BigInteger.valueOf(statistics.getStats(pattern, EmptyBindingSet.getInstance()).getCardinality());
+    }
 
+    public BigInteger getCardinality(Distinct distinct) {
+        return getCardinality(distinct.getArg());
+    }
+
+    public BigInteger getCardinality(Reduced reduced) {
+        return getCardinality(reduced.getArg());
     }
 
     public BigInteger getCardinality(Union union) {
@@ -101,10 +113,7 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
 
         BigInteger tt = new BigDecimal(card1.multiply(card2)).multiply(sel).setScale(0, RoundingMode.CEILING).toBigInteger();
 
-        if (tt.compareTo(BigInteger.ZERO) < 0)
-            return BigInteger.ZERO;
-
-        return tt;
+        return tt.max(BigInteger.ZERO);
     }
 
     public BigInteger getCardinality(LeftJoin join) {
