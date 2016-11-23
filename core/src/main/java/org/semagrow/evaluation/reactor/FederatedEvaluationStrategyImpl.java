@@ -17,17 +17,12 @@ import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.Join;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.Union;
-import org.eclipse.rdf4j.query.algebra.Var;
 import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
-import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.reactivestreams.Publisher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.Environment;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
+import reactor.core.publisher.Flux;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -56,8 +51,6 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
         this.queryExecutorResolver = new SimpleQueryExecutorResolver();
 
-        if (!Environment.alive())
-            Environment.initialize();
     }
 
 
@@ -70,7 +63,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     }
 
     @Override
-    public Stream<BindingSet> evaluateReactorInternal(TupleExpr expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         if (expr instanceof SourceQuery) {
@@ -88,7 +81,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
 
     @Override
-    public Stream<BindingSet> evaluateReactorInternal(Join expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Join expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         if (expr instanceof BindJoin) {
@@ -154,7 +147,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     }
     */
 
-    public Stream<BindingSet> evaluateReactorInternal(BindJoin expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(BindJoin expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return this.evaluateReactorInternal(expr.getLeftArg(), bindings)
@@ -163,13 +156,12 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                     try {
                         return evaluateReactorInternal(expr.getRightArg(), b);
                     } catch (Exception e) {
-                        return Streams.fail(e);
+                        return Flux.error(e);
                     }
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
-                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
+                });
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         logger.info("sq {} - Source query [{}] at source {}",
@@ -181,7 +173,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     }
 
 
-    public Stream<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         Set<String> free = TupleExprs.getFreeVariables(expr);
@@ -190,44 +182,40 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                 .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
 
         if (BindingSetUtil.hasBNode(relevant))
-            return Streams.empty();
+            return Flux.empty();
         else {
             //Publisher<BindingSet> result = queryExecutor.evaluate(source, expr, bindings);
             Publisher<BindingSet> result = executor.evaluate(source, expr, bindings);
-            return Streams.wrap(result)
-                    .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
-                    .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
+            return Flux.from(result);
         }
     }
 
-    public Stream<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, List<BindingSet> bindings)
+    public Flux<BindingSet> evaluateSourceReactive(Site source, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
         Set<String> free = TupleExprs.getFreeVariables(expr);
         QueryExecutor executor = queryExecutorResolver.resolve(source)
                 .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
 
-        return Streams.from(bindings)
+        return Flux.fromIterable(bindings)
                 .filter((b) -> !BindingSetUtil.hasBNode(bindingSetOps.project(free, b)))
                 .buffer()
                 .flatMap((bl) -> {
                     Publisher<BindingSet> result = null;
                     if (bl.isEmpty())
-                        return Streams.empty();
+                        return Flux.empty();
                     try {
                         //result = queryExecutor.evaluate(source, expr, bl);
                         result = executor.evaluate(source, expr, bl);
-                        return Streams.wrap(result);
+                        return Flux.from(result);
                     } catch (QueryEvaluationException e) {
-                        return Streams.fail(e);
+                        return Flux.error(e);
                     }
 
-                })
-                .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
-                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
+                });
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(TupleExpr expr, List<BindingSet> bindingList)
+    public Flux<BindingSet> evaluateReactorInternal(TupleExpr expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
         if (expr instanceof Plan)
@@ -240,7 +228,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             return evaluateReactiveDefault(expr, bindingList);
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(SourceQuery expr, List<BindingSet> bindingList)
+    public Flux<BindingSet> evaluateReactorInternal(SourceQuery expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
         LoggingUtil.logSourceQuery(logger, expr);
@@ -250,35 +238,33 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
     }
 
-    public Stream<BindingSet> evaluateReactiveDefault(TupleExpr expr, List<BindingSet> bindingList)
+    public Flux<BindingSet> evaluateReactiveDefault(TupleExpr expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
         Set<String> freeVars = TupleExprs.getFreeVariables(expr);
 
 
-        return Streams.from(bindingList)
+        return Flux.fromIterable(bindingList)
                 .filter((b) -> !BindingSetUtil.hasBNode(bindingSetOps.project(freeVars,b)))
                 .flatMap(b -> {
                     try {
                         return evaluateReactorInternal(expr, b);
                     } catch (Exception e) {
-                        return Streams.fail(e);
+                        return Flux.error(e);
                     }
                 });
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Union expr, List<BindingSet> bindingList)
+    public Flux<BindingSet> evaluateReactorInternal(Union expr, List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
-        return Streams.just(expr.getLeftArg(), expr.getRightArg())
+        return Flux.just(expr.getLeftArg(), expr.getRightArg())
                 .flatMap(e -> {
                     try {
                         return evaluateReactorInternal(e, bindingList);
                     } catch (Exception x) {
-                        return Streams.fail(x);
-                }})
-                .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
-                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
+                        return Flux.error(x);
+                }});
     }
 
 }

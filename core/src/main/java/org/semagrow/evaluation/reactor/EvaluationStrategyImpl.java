@@ -25,11 +25,9 @@ import org.eclipse.rdf4j.query.algebra.evaluation.util.MathUtil;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.OrderComparator;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 import org.reactivestreams.Publisher;
-import reactor.Environment;
-import reactor.core.Dispatcher;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
-import reactor.rx.stream.GroupedStream;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.GroupedFlux;
+import reactor.core.publisher.Mono;
 
 import java.util.*;
 
@@ -43,19 +41,18 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
     private org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy evalStrategy;
     protected BindingSetOps bindingSetOps = SimpleBindingSetOps.getInstance();
 
-    private Dispatcher dispatcher;
 
     public EvaluationStrategyImpl(TripleSource tripleSource) {
         vf = tripleSource.getValueFactory();
         evalStrategy = new org.eclipse.rdf4j.query.algebra.evaluation.impl.SimpleEvaluationStrategy(tripleSource, new FederatedServiceResolverImpl());
-        Environment.initializeIfEmpty();
+        //Environment.initializeIfEmpty();
         //dispatcher = new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
     public EvaluationStrategyImpl(TripleSource tripleSource, Dataset dataset) {
         vf = tripleSource.getValueFactory();
         evalStrategy = new org.eclipse.rdf4j.query.algebra.evaluation.impl.SimpleEvaluationStrategy(tripleSource,dataset,new FederatedServiceResolverImpl());
-        Environment.initializeIfEmpty();
+        //Environment.initializeIfEmpty();
         //dispatcher = new MDCAwareDispatcher(Environment.dispatcher(Environment.THREAD_POOL));
     }
 
@@ -85,7 +82,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         return evaluate(expr, bindings);
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(TupleExpr expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(TupleExpr expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         if (expr instanceof StatementPattern) {
@@ -123,7 +120,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         }
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(UnaryTupleOperator expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(UnaryTupleOperator expr, BindingSet bindings)
             throws QueryEvaluationException
     {
 
@@ -171,7 +168,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         }
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(BinaryTupleOperator expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(BinaryTupleOperator expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         if (expr instanceof Union) {
@@ -197,53 +194,53 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         }
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(SingletonSet expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(SingletonSet expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return Streams.just(bindings);
+        return Flux.just(bindings);
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(EmptySet expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(EmptySet expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return Streams.empty();
+        return Flux.empty();
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(StatementPattern expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(StatementPattern expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(BindingSetAssignment expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(BindingSetAssignment expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return Streams.from(expr.getBindingSets())
+        return Flux.fromIterable(expr.getBindingSets())
                 .filter((b) -> BindingSetUtil.agreesOn(bindings, b))
                 .map((b) -> bindingSetOps.merge(bindings, b));
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(ExternalSet expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(ExternalSet expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
-    public Stream<BindingSet> evaluateReactorInternal(ZeroLengthPath expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(ZeroLengthPath expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
-    public Stream<BindingSet> evaluateReactorInternal(ArbitraryLengthPath expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(ArbitraryLengthPath expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Filter expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Filter expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         QueryBindingSet scopeBindings = new QueryBindingSet(bindings);
@@ -258,37 +255,35 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                 });
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Projection expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Projection expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return evaluateReactorInternal(expr.getArg(), bindings)
                 .map((b) -> QueryEvaluationUtil.project(expr.getProjectionElemList(), b, bindings));
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Extension expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Extension expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return evaluateReactorInternal(expr.getArg(), bindings)
                 .flatMap((b) -> {
                     try {
-                        return Streams.just(QueryEvaluationUtil.extend(this, expr.getElements(), b));
+                        return Flux.just(QueryEvaluationUtil.extend(this, expr.getElements(), b));
                     } catch (Exception e) {
-                        return Streams.fail(e);
+                        return Flux.error(e);
                     }
                 });
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Union expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Union expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return Streams.merge(
+        return Flux.merge(
                 this.evaluateReactorInternal(expr.getLeftArg(), bindings),
-                this.evaluateReactorInternal(expr.getRightArg(), bindings))
-                    .subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
-                    .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
+                this.evaluateReactorInternal(expr.getRightArg(), bindings));
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Join expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Join expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         return evaluateReactorInternal(expr.getLeftArg(), bindings)
@@ -296,12 +291,12 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                     try {
                         return this.evaluateReactorInternal(expr.getRightArg(), b);
                     } catch (Exception e) {
-                        return Streams.fail(e);
+                        return Flux.error(e);
                     }
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)));
+                });
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(LeftJoin expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(LeftJoin expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         //Stream<BindingSet> r = evaluateReactorInternal(expr.getRightArg(), bindings);
@@ -314,31 +309,30 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                     try {
                         return this.evaluateReactorInternal(expr.getRightArg(), b).defaultIfEmpty(b);
                     } catch (Exception e) {
-                        return Streams.fail(e);
+                        return Flux.error(e);
                     }
-                }).subscribeOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.WORK_QUEUE)))
-                .dispatchOn(new MDCAwareDispatcher(Environment.dispatcher(Environment.SHARED)));
+                });
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Group expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Group expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         Set<String> groupByBindings = expr.getGroupBindingNames();
 
-        Stream<BindingSet> s = evaluateReactorInternal(expr.getArg(), bindings);
+        Flux<BindingSet> s = evaluateReactorInternal(expr.getArg(), bindings);
 
-        Stream<GroupedStream<BindingSet, BindingSet>> g = s.groupBy((b) -> bindingSetOps.project(groupByBindings, b, bindings));
+        Flux<GroupedFlux<BindingSet, BindingSet>> g = s.groupBy((b) -> bindingSetOps.project(groupByBindings, b, bindings));
 
         //return g.flatMap((gs) -> Streams.just(gs.key()));
         return g.flatMap((gs) -> aggregate(gs, expr, bindings));
     }
 
-    public Stream<BindingSet> aggregate(GroupedStream<BindingSet, BindingSet> g, Group expr, BindingSet parentBindings) {
+    public Flux<BindingSet> aggregate(GroupedFlux<BindingSet, BindingSet> g, Group expr, BindingSet parentBindings) {
         BindingSet k = g.key();
 
         try {
             Entry e = new Entry(k, parentBindings, expr);
-            Stream<Entry> s = g.reduce( e, (e1, b) -> {
+            Mono<Entry> s = g.reduce( e, (e1, b) -> {
                 try { e1.addSolution(b);
                     return e1;
                 }
@@ -350,19 +344,19 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                 QueryBindingSet b = new QueryBindingSet(k);
                 try {
                     ee.bindSolution(b);
-                    return Streams.just(b);
+                    return Flux.just(b);
                 } catch(Exception x) {
-                    return Streams.fail(x);
+                    return Flux.error(x);
                 }
             });
 
         }catch(QueryEvaluationException e)
         {
-            return Streams.fail(e);
+            return Flux.error(e);
         }
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Order expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Order expr, BindingSet bindings)
             throws QueryEvaluationException
     {
         ValueComparator vcmp = new ValueComparator();
@@ -374,9 +368,9 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                 .sort(cmp::compare);
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Slice expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Slice expr, BindingSet bindings)
             throws QueryEvaluationException {
-        Stream<BindingSet> result = evaluateReactorInternal(expr.getArg(), bindings);
+        Flux<BindingSet> result = evaluateReactorInternal(expr.getArg(), bindings);
 
         if (expr.hasOffset())
             result = result.skip((int) expr.getOffset());
@@ -387,42 +381,42 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         return result;
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Distinct expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Distinct expr, BindingSet bindings)
             throws QueryEvaluationException {
 
         return evaluateReactorInternal(expr.getArg(), bindings).distinct();
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Reduced expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Reduced expr, BindingSet bindings)
             throws QueryEvaluationException {
 
         return evaluateReactorInternal(expr.getArg(), bindings).distinctUntilChanged();
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(DescribeOperator expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(DescribeOperator expr, BindingSet bindings)
             throws QueryEvaluationException {
         return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
-    public Stream<BindingSet> evaluateReactorInternal(Intersection expr, BindingSet bindings)
-            throws QueryEvaluationException {
-        return fromIteration(evalStrategy.evaluate(expr, bindings));
-    }
-
-
-    public Stream<BindingSet> evaluateReactorInternal(Difference expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Intersection expr, BindingSet bindings)
             throws QueryEvaluationException {
         return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
 
-    public Stream<BindingSet> evaluateReactorInternal(Service expr, BindingSet bindings)
+    public Flux<BindingSet> evaluateReactorInternal(Difference expr, BindingSet bindings)
             throws QueryEvaluationException {
         return fromIteration(evalStrategy.evaluate(expr, bindings));
     }
 
-    protected <T> Stream<T> fromIteration(Iteration<T, ? extends Exception> it) {
-        return Streams.wrap(new IterationPublisher(it));
+
+    public Flux<BindingSet> evaluateReactorInternal(Service expr, BindingSet bindings)
+            throws QueryEvaluationException {
+        return fromIteration(evalStrategy.evaluate(expr, bindings));
+    }
+
+    protected <T> Flux<T> fromIteration(Iteration<T, ? extends Exception> it) {
+        return Flux.from(new IterationPublisher(it));
     }
 
     private class ConcatAggregate extends Aggregate {

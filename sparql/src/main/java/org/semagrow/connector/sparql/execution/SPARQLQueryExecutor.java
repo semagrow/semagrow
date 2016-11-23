@@ -19,8 +19,7 @@ import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.reactivestreams.Publisher;
-import reactor.rx.Stream;
-import reactor.rx.Streams;
+import reactor.core.publisher.Flux;
 
 import java.net.URL;
 import java.util.*;
@@ -93,11 +92,11 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
      * @return Stream with the evaluation results
      * @throws QueryEvaluationException
      */
-    public Stream<BindingSet>
+    public Flux<BindingSet>
         evaluateReactorImpl(final SPARQLSite endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException
     {
-        Stream<BindingSet> result = null;
+        Flux<BindingSet> result = null;
 
         try {
             Set<String> freeVars = computeVars(expr);
@@ -112,14 +111,14 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
 
                 final BindingSet relevantBindings = bindingSetOps.project(computeVars(expr), bindings);
 
-                result = Streams.just(bindings).flatMap(b -> {
+                result = Flux.just(bindings).flatMap(b -> {
                     try {
                         if (sendBooleanQuery(endpoint.getURL(), sparqlQuery, relevantBindings, expr))
-                            return Streams.just(b);
+                            return Flux.just(b);
                         else
-                            return Streams.empty();
+                            return Flux.empty();
                     } catch (Exception e) {
-                        return Streams.fail(e);
+                        return Flux.error(e);
                     }
                 });
 
@@ -152,7 +151,7 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
      * @return Stream with the evaluation results
      * @throws QueryEvaluationException
      */
-    protected Stream<BindingSet>
+    protected Flux<BindingSet>
         evaluateReactorImpl(SPARQLSite endpoint, TupleExpr expr, List<BindingSet> bindings)
             throws QueryEvaluationException
     {
@@ -160,7 +159,7 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
         if (bindings.size() == 1)
             return evaluateReactorImpl(endpoint, expr, bindings.get(0));
 
-        Stream<BindingSet> result = null;
+        Flux<BindingSet> result = null;
 
         Set<String> exprVars = computeVars(expr);
 
@@ -181,7 +180,7 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
         }
     }
 
-    private Stream<BindingSet> convertUnionBindings(BindingSet rightBindings, List<BindingSet> leftBindings) {
+    private Flux<BindingSet> convertUnionBindings(BindingSet rightBindings, List<BindingSet> leftBindings) {
 
         /*
         QueryBindingSet joinBindings = new QueryBindingSet();
@@ -224,7 +223,7 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
             bmap.put(y, joinBindings);
         }
 
-        return Streams.from(bmap.entrySet())
+        return Flux.fromIterable(bmap.entrySet())
                 .map((join) -> bindingSetOps.merge(join.getValue(), leftBindings.get(join.getKey())));
     }
 
@@ -240,7 +239,7 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
      * @throws MalformedQueryException
      * @throws RepositoryException
      */
-    protected Stream<BindingSet>
+    protected Flux<BindingSet>
         sendTupleQuery(URL endpoint, String sparqlQuery, BindingSet bindings, TupleExpr expr)
             throws QueryEvaluationException, MalformedQueryException, RepositoryException {
 
@@ -252,8 +251,8 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
 
         LoggingUtil.logRemote(logger, conn, sparqlQuery, endpoint, expr, query);
 
-        return Streams.wrap(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat, endpoint))
-                .finallyDo((s) -> closeQuietly(conn));
+        return Flux.from(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat, endpoint))
+                .doAfterTerminate(() -> closeQuietly(conn));
     }
 
     /**
