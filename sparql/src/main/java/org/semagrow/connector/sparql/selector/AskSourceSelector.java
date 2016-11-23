@@ -179,7 +179,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 Value s = pattern.getSubjectVar().getValue();
 		 Value p = pattern.getPredicateVar().getValue();
 		 Value o = pattern.getObjectVar().getValue();
-		 Value c = pattern.getContextVar().getValue();
+		 Value c = pattern.getContextVar() != null ? pattern.getContextVar().getValue() : null;
 
 		 Repository rep;
 
