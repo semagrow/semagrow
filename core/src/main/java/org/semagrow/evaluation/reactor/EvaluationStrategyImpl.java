@@ -25,6 +25,7 @@ import org.eclipse.rdf4j.query.algebra.evaluation.util.MathUtil;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.OrderComparator;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.ValueComparator;
 import org.reactivestreams.Publisher;
+import org.semagrow.plan.operators.CrossProduct;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.GroupedFlux;
 import reactor.core.publisher.Mono;
@@ -174,6 +175,9 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
         if (expr instanceof Union) {
             return evaluateReactorInternal((Union) expr, bindings);
         }
+        else if (expr instanceof CrossProduct) {
+            return evaluateReactorInternal((CrossProduct) expr, bindings);
+        }
         else if (expr instanceof Join) {
             return evaluateReactorInternal((Join) expr, bindings);
         }
@@ -294,6 +298,18 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
                         return Flux.error(e);
                     }
                 });
+    }
+
+    public Flux<BindingSet> evaluateReactorInternal(CrossProduct expr, BindingSet bindings)
+            throws QueryEvaluationException
+    {
+        //expr.getLeftArg();
+        //expr.getRightArg();
+        Mono<List<BindingSet>> left = evaluateReactorInternal(expr.getLeftArg(), bindings).collectList();
+
+        return evaluateReactorInternal(expr.getRightArg(), bindings)
+                        .flatMap(b -> left.flatMap( bb -> Flux.fromIterable(bb).map( bbb -> bindingSetOps.merge(b,bbb)) ) );
+
     }
 
     public Flux<BindingSet> evaluateReactorInternal(LeftJoin expr, BindingSet bindings)
