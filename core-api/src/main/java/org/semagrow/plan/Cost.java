@@ -53,7 +53,7 @@ public class Cost implements Comparable<Cost> {
      * @return
      */
 
-    public static Cost cpuCost(double cpuCost) { return new Cost(cpuCost); }
+    public static Cost cpuCost(BigDecimal cpuCost) { return new Cost(cpuCost); }
 
     public static Cost networkCost(long networkCost) {
         Cost c = new Cost();
