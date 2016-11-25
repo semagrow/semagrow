@@ -90,6 +90,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
                 new SameTermFilterOptimizer(),          // rename variables or replace with constants if filtered with SameTerm
                 new ConjunctiveConstraintSplitter(),    // splits Filters And to consecutive applications
                 new DisjunctiveConstraintOptimizer(),   // split Filters Or to Union
+                new FilterOptimizer(),                  // push Filters as deep as possible
                 new QueryModelNormalizer()              // remove emptysets, singletonsets, transform to DNF (union before joins)
         );
 
