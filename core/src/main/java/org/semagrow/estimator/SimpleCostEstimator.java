@@ -12,6 +12,8 @@ import org.semagrow.selector.Site;
 
 import org.eclipse.rdf4j.query.algebra.*;
 
+import java.math.BigDecimal;
+
 /**
  * Created by angel on 4/28/14.
  */
@@ -20,8 +22,8 @@ public class SimpleCostEstimator implements CostEstimator {
     private CostEstimatorResolver resolver;
     private CardinalityEstimator cardinalityEstimator;
 
-    private static double C_TRANSFER_TUPLE = 50;
-    private static double C_TRANSFER_QUERY = 1000;
+    private static double C_TRANSFER_TUPLE = 5;
+    private static double C_TRANSFER_QUERY = 5000;
 
     private static double C_PROBE_TUPLE = 0.001;   //cost to probe a tuple against a hash table
     private static double C_HASH_TUPLE = 0.003;    //cost to hash a tuple to a hash table
@@ -51,7 +53,7 @@ public class SimpleCostEstimator implements CostEstimator {
         else if (expr instanceof BindingSetAssignment)
             return getCost((BindingSetAssignment)expr);
         else
-            return new Cost(cardinalityEstimator.getCardinality(expr).intValue());
+            return new Cost(new BigDecimal(cardinalityEstimator.getCardinality(expr)));
     }
 
     public Cost getCost(SourceQuery expr) {
