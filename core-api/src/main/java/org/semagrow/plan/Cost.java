@@ -1,12 +1,14 @@
 package org.semagrow.plan;
 
+import java.math.BigDecimal;
+
 /**
  * A simple data structure for describing a cost of an execution plan.
  * @author acharal
  */
 public class Cost implements Comparable<Cost> {
 
-    private double cpuCost;
+    private BigDecimal cpuCost;
 
     private long memoryCost;
 
@@ -15,23 +17,19 @@ public class Cost implements Comparable<Cost> {
     private long networkCost;
 
 
-    public Cost(double cpu) { cpuCost = cpu; }
+    public Cost(double cpu) { this(BigDecimal.valueOf(cpu)); }
+    public Cost(BigDecimal cpu) { cpuCost = cpu; }
 
     private Cost() { }
 
     @Override
     public int compareTo(Cost o) {
-        if (this.cpuCost < o.cpuCost)
-            return -1;
-        else if (this.cpuCost > o.cpuCost)
-            return 1;
-        else
-            return 0;
+        return this.cpuCost.compareTo(o.cpuCost);
     }
 
     public Cost add(Cost c) {
         Cost a        = new Cost();
-        a.cpuCost     = this.cpuCost + c.cpuCost;
+        a.cpuCost     = this.cpuCost.add(c.cpuCost);
         a.memoryCost  = this.memoryCost + c.memoryCost;
         a.ioCost      = this.ioCost + c.ioCost;
         a.networkCost = this.networkCost + c.networkCost;
@@ -40,7 +38,7 @@ public class Cost implements Comparable<Cost> {
 
     public Cost multiply(long factor) {
         Cost a        = new Cost();
-        a.cpuCost     = this.cpuCost * factor;
+        a.cpuCost     = this.cpuCost.multiply(BigDecimal.valueOf(factor));
         a.memoryCost  = this.memoryCost  * factor;
         a.ioCost      = this.ioCost  * factor;
         a.networkCost = this.networkCost  * factor;
@@ -55,9 +53,7 @@ public class Cost implements Comparable<Cost> {
      * @return
      */
 
-    public double getOverallCost() { return this.cpuCost; }
-
-    public static Cost cpuCost(double cpuCost) { return new Cost(cpuCost); }
+    public static Cost cpuCost(BigDecimal cpuCost) { return new Cost(cpuCost); }
 
     public static Cost networkCost(long networkCost) {
         Cost c = new Cost();
