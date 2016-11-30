@@ -57,6 +57,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
         props.setSite(LocalSite.getInstance());
 
         plans = getContext().enforceProps(plans, props);
+        getContext().prune(plans);
 
         if (plans.isEmpty())
             return null;
