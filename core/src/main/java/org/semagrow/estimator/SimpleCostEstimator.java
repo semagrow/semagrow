@@ -23,7 +23,7 @@ public class SimpleCostEstimator implements CostEstimator {
     private CostEstimatorResolver resolver;
     private CardinalityEstimator cardinalityEstimator;
 
-    private static double C_TRANSFER_TUPLE = 5;
+    private static double C_TRANSFER_TUPLE = 0.00001;
     private static double C_TRANSFER_QUERY = 5000;
 
     private static double C_PROBE_TUPLE = 0.001;   //cost to probe a tuple against a hash table
@@ -91,8 +91,9 @@ public class SimpleCostEstimator implements CostEstimator {
         BigInteger joinCard = cardinalityEstimator.getCardinality(join);
 
         BigDecimal commuCost = BigDecimal.valueOf(C_TRANSFER_QUERY)
-                .add(new BigDecimal(leftCard).multiply(BigDecimal.valueOf(C_TRANSFER_QUERY + C_TRANSFER_TUPLE)))
-                .add(new BigDecimal(joinCard).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE)));
+                .add(new BigDecimal(leftCard).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE)))
+                .add(new BigDecimal(joinCard).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE)))
+                .add(new BigDecimal(leftCard.divide(BigInteger.valueOf(20))).multiply(BigDecimal.valueOf(C_TRANSFER_QUERY)));
 
         return getCost(join.getLeftArg()).add(new Cost(commuCost));
     }
