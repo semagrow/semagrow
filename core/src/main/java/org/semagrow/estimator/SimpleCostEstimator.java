@@ -1,7 +1,10 @@
 package org.semagrow.estimator;
 
 import org.semagrow.art.Loggable;
-import org.semagrow.plan.operators.*;
+import org.semagrow.plan.operators.BindJoin;
+import org.semagrow.plan.operators.HashJoin;
+import org.semagrow.plan.operators.MergeJoin;
+import org.semagrow.plan.operators.SourceQuery;
 import org.semagrow.plan.Cost;
 import org.semagrow.plan.Plan;
 import org.semagrow.local.LocalSite;
@@ -109,11 +112,6 @@ public class SimpleCostEstimator implements CostEstimator {
         return cost1.add(cost2);
     }
 
-    public Cost getCost(CrossProduct cp) {
-        return getCost(cp.getLeftArg())
-                .add(getCost(cp.getRightArg()));
-    }
-
     public Cost getCost(Join join) {
         if (join instanceof BindJoin)
             return getCost((BindJoin)join);
@@ -121,8 +119,6 @@ public class SimpleCostEstimator implements CostEstimator {
             return getCost((HashJoin)join);
         else if (join instanceof MergeJoin)
             return getCost((MergeJoin)join);
-        else if (join instanceof CrossProduct)
-            return getCost((CrossProduct)join);
 
         BigInteger leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
         BigInteger rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
@@ -130,8 +126,8 @@ public class SimpleCostEstimator implements CostEstimator {
         return new Cost(new BigDecimal(leftCard.add(rightCard)).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE))
                 .add(BigDecimal.valueOf(C_TRANSFER_QUERY))
                 .add(BigDecimal.valueOf(C_TRANSFER_QUERY)));
-    }
 
+    }
 
     public Cost getCost(Order order){
         BigInteger card = cardinalityEstimator.getCardinality(order.getArg());

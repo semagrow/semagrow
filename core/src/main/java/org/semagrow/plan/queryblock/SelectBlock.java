@@ -173,9 +173,11 @@ public class SelectBlock extends AbstractQueryBlock {
                 return Collections.emptyList();
         }
 
-        if (planList.size() == 1)
-            return applicator.finalize(planList.iterator().next());
-        else {
+        if (planList.size() == 1) {
+            Collection<Plan> completePlans = applicator.finalize(planList.iterator().next());
+            context.prune(completePlans);
+            return completePlans;
+        } else {
             Optional<Pair<Collection<Quantifier>, Collection<Plan>>> result =  planList.stream().reduce(applicator::compose);
             if (result.isPresent()) {
                 Collection<Plan> completePlans = new LinkedList<>(result.get().getSecond());
