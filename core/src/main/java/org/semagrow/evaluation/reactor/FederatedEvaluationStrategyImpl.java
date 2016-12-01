@@ -69,9 +69,6 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
         if (expr instanceof SourceQuery) {
             return evaluateReactorInternal((SourceQuery) expr, bindings);
         }
-        else if (expr instanceof Join) {
-            return evaluateReactorInternal((Join) expr, bindings);
-        }
         else if (expr instanceof Plan) {
             return evaluateReactorInternal(((Plan) expr).getArg(), bindings);
         }
