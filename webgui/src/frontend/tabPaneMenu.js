@@ -134,7 +134,7 @@ module.exports = function(yasgui, tab) {
         $acceptSelect.selectize({ class: 'form-control', placeholder: "JSON"});
 
         //URL args headers
-        var $urlArgsRow = $('<br><div style="margin-top:20px;float:left;">', {
+        var $urlArgsRow = $('<div style="margin-top:20px;float:left;">', {
             class: 'form-group'
         }).appendTo($reqPanel);
         $('<label>').appendTo($urlArgsRow).text('URL Arguments');
