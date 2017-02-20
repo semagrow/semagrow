@@ -2,7 +2,7 @@ SemaGrowFederationMonitorer = function() {
 };
 
 SemaGrowFederationMonitorer.prototype = {
-	serviceEndpoint:"http://localhost/SemaGrow/monitoring",
+	serviceEndpoint:"http://"+window.location.host+"/SemaGrow/monitoring",
 	containerElement:"container",
 	detailElement:"detail",
 	queryElement:"queryContainer",
