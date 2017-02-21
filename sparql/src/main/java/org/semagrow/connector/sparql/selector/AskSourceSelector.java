@@ -179,6 +179,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 		 Value s = pattern.getSubjectVar().getValue();
 		 Value p = pattern.getPredicateVar().getValue();
 		 Value o = pattern.getObjectVar().getValue();
+		 Value c = pattern.getContextVar() != null ? pattern.getContextVar().getValue() : null;
 
 		 Repository rep;
 
@@ -198,19 +199,27 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 		 if( conn!= null ) {
 			 try {
-				 retv = conn.hasStatement( (Resource)s, (IRI)p, o, true );
+
+				 retv = (c != null && c instanceof IRI) ?
+						 conn.hasStatement( (Resource)s, (IRI)p, o, true, (IRI) c ) :
+						 conn.hasStatement( (Resource)s, (IRI)p, o, true);
+
 				 allow_select = false; // No need to use this any more
 			 }
 			 catch( org.eclipse.rdf4j.repository.RepositoryException ex ) {
 				 // Failed to contact source
-				 // Log a warnig and reply "true" just in case this is a transient failure
+				 // Log a warning and reply "true" just in case this is a transient failure
 				 logger.warn( "Failed to contact source to ASK about pattern {}. Exception: {}",
 						 pattern.toString(), ex.getMessage() );
 			 }
 		 }
 
 		 if( allow_select && (conn!=null) ) {
+
 			 String qs = "SELECT * WHERE { ?S ?P ?O } LIMIT 1";
+
+			 if (c != null)
+				 qs = "SELECT * WHERE { GRAPH ?C { ?S ?P ?O } } LIMIT 1";
 
 			 TupleQuery q;
 			 try {
@@ -218,6 +227,7 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 				 if( s != null ) { q.setBinding( "S", s ); }
 				 if( p != null ) { q.setBinding( "P", p ); }
 				 if( o != null ) { q.setBinding( "O", o ); }
+				 if (c != null ) { q.setBinding( "C", c ); }
 			 }
 			 catch( org.eclipse.rdf4j.query.MalformedQueryException ex ) {
 				 throw new AssertionError();

@@ -2,6 +2,8 @@ package org.semagrow.estimator;
 
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 
+import java.math.BigInteger;
+
 /**
  * Cardinality Estimator
  *
@@ -22,6 +24,6 @@ public interface CardinalityEstimator {
      * @param expr a logical or physical tree of expressions
      * @return an estimated number of results
      */
-    long getCardinality(TupleExpr expr);
+    BigInteger getCardinality(TupleExpr expr);
 
 }

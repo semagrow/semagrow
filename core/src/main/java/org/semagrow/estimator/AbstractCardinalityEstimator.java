@@ -3,6 +3,7 @@ package org.semagrow.estimator;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.semagrow.selector.Site;
 
+import java.math.BigInteger;
 import java.util.Optional;
 
 /**
@@ -22,6 +23,6 @@ public abstract class AbstractCardinalityEstimator implements CardinalityEstimat
         return this.resolver.resolve(s);
     }
 
-    public abstract long getCardinality(TupleExpr expr);
+    public abstract BigInteger getCardinality(TupleExpr expr);
 
 }

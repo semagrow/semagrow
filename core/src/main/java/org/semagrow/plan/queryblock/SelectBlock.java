@@ -173,9 +173,11 @@ public class SelectBlock extends AbstractQueryBlock {
                 return Collections.emptyList();
         }
 
-        if (planList.size() == 1)
-            return applicator.finalize(planList.iterator().next());
-        else {
+        if (planList.size() == 1) {
+            Collection<Plan> completePlans = applicator.finalize(planList.iterator().next());
+            context.prune(completePlans);
+            return completePlans;
+        } else {
             Optional<Pair<Collection<Quantifier>, Collection<Plan>>> result =  planList.stream().reduce(applicator::compose);
             if (result.isPresent()) {
                 Collection<Plan> completePlans = new LinkedList<>(result.get().getSecond());
@@ -644,14 +646,16 @@ public class SelectBlock extends AbstractQueryBlock {
 
             if (getDuplicateStrategy() == OutputStrategy.ENFORCE && p.hasDuplicates()) {
 
-                RequestedDataProperties groupingProps = RequestedDataProperties.forGrouping(getOutputVariables());
-
                 Stream<Plan> output = Stream.of(context.asPlan(new Distinct(p)));
+
+                RequestedDataProperties groupingProps = RequestedDataProperties.forGrouping(getOutputVariables());
 
                 if (groupingProps.isCoveredBy(p.getProperties().getDataProperties())) {
                     output = Stream.concat(output, Stream.of(context.asPlan(new Reduced(p))));
                 }
+
                 return output;
+
             } else {
                 return Stream.of(p);
             }

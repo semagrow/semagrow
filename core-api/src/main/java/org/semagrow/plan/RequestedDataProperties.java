@@ -47,7 +47,8 @@ public class RequestedDataProperties {
                 // is grouped at least at the same fields
                 // or the rest of the fields are unique.
                 return other.groupedFields.get().containsAll(groupedFields.get());
-            }
+            } else
+                return false;
         }
 
         return true;

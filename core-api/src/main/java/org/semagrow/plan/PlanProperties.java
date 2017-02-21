@@ -2,6 +2,8 @@ package org.semagrow.plan;
 
 import org.semagrow.selector.Site;
 
+import java.math.BigInteger;
+
 /**
  * A structure that contains the {@link Plan} properties needed
  * by the {@link PlanOptimizer}.
@@ -12,15 +14,15 @@ public class PlanProperties {
 
     private Cost nodeCost;
 
-    private long cardinality;
+    private BigInteger cardinality;
 
     private Site site;
 
     private DataProperties dataProps;
 
-    public long getCardinality() { return cardinality; }
+    public BigInteger getCardinality() { return cardinality; }
 
-    public void setCardinality(long card) { this.cardinality = card;}
+    public void setCardinality(BigInteger card) { this.cardinality = card;}
 
     public Cost getCost() { return nodeCost; }
 

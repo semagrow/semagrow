@@ -12,6 +12,9 @@ import org.semagrow.selector.Site;
 
 import org.eclipse.rdf4j.query.algebra.*;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+
 /**
  * Created by angel on 4/28/14.
  */
@@ -20,8 +23,8 @@ public class SimpleCostEstimator implements CostEstimator {
     private CostEstimatorResolver resolver;
     private CardinalityEstimator cardinalityEstimator;
 
-    private static double C_TRANSFER_TUPLE = 50;
-    private static double C_TRANSFER_QUERY = 100;
+    private static double C_TRANSFER_TUPLE = 0.00001;
+    private static double C_TRANSFER_QUERY = 5000;
 
     private static double C_PROBE_TUPLE = 0.001;   //cost to probe a tuple against a hash table
     private static double C_HASH_TUPLE = 0.003;    //cost to hash a tuple to a hash table
@@ -51,7 +54,7 @@ public class SimpleCostEstimator implements CostEstimator {
         else if (expr instanceof BindingSetAssignment)
             return getCost((BindingSetAssignment)expr);
         else
-            return new Cost(cardinalityEstimator.getCardinality(expr));
+            return new Cost(new BigDecimal(cardinalityEstimator.getCardinality(expr)));
     }
 
     public Cost getCost(SourceQuery expr) {
@@ -65,7 +68,7 @@ public class SimpleCostEstimator implements CostEstimator {
         //totalCost = processingCost(subexpr) + communicationCost(count, source) + initializationCostOfQuery;
 
         double communCost = C_TRANSFER_QUERY +
-                cardinalityEstimator.getCardinality(expr.getArg()) * C_TRANSFER_TUPLE;
+                cardinalityEstimator.getCardinality(expr.getArg()).longValue() * C_TRANSFER_TUPLE;
 
         Cost cost = new Cost(communCost);
         return cost;
@@ -83,23 +86,25 @@ public class SimpleCostEstimator implements CostEstimator {
         // long resultsPerQuery = cardinalityAll / queries;
         // totalCost = costLeftArgument + queries * costOfRightArgumentWithBinding
 
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
-        long joinCard = cardinalityEstimator.getCardinality(join);
+        BigInteger leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        BigInteger rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+        BigInteger joinCard = cardinalityEstimator.getCardinality(join);
 
-        double commuCost = C_TRANSFER_QUERY +
-                leftCard * (C_TRANSFER_QUERY + C_TRANSFER_TUPLE)
-                + joinCard * C_TRANSFER_TUPLE;
+        BigDecimal commuCost = BigDecimal.valueOf(C_TRANSFER_QUERY)
+                .add(new BigDecimal(leftCard).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE)))
+                .add(new BigDecimal(joinCard).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE)))
+                .add(new BigDecimal(leftCard.divide(BigInteger.valueOf(20))).multiply(BigDecimal.valueOf(C_TRANSFER_QUERY)));
 
         return getCost(join.getLeftArg()).add(new Cost(commuCost));
     }
 
     public Cost getCost(HashJoin join) {
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+        BigInteger leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        BigInteger rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
 
         //return (leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY;
-        return Cost.cpuCost(C_HASH_TUPLE*leftCard + C_PROBE_TUPLE*rightCard);
+        return Cost.cpuCost(new BigDecimal(leftCard).multiply(BigDecimal.valueOf(C_HASH_TUPLE))
+                            .add(new BigDecimal(rightCard).multiply(BigDecimal.valueOf(C_PROBE_TUPLE))));
     }
 
     public Cost getCost(MergeJoin join) {
@@ -116,15 +121,19 @@ public class SimpleCostEstimator implements CostEstimator {
         else if (join instanceof MergeJoin)
             return getCost((MergeJoin)join);
 
-        long leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
-        long rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+        BigInteger leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        BigInteger rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
 
-        return new Cost((leftCard + rightCard) * C_TRANSFER_TUPLE + 2 * C_TRANSFER_QUERY);
+        return new Cost(new BigDecimal(leftCard.add(rightCard)).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE))
+                .add(BigDecimal.valueOf(C_TRANSFER_QUERY))
+                .add(BigDecimal.valueOf(C_TRANSFER_QUERY)));
+
     }
 
     public Cost getCost(Order order){
-        long card = cardinalityEstimator.getCardinality(order.getArg());
-        return getCost(order.getArg()).add(Cost.cpuCost(card * Math.log(card)));
+        BigInteger card = cardinalityEstimator.getCardinality(order.getArg());
+        // FIXME: compute log of BigDecimal
+        return getCost(order.getArg()).add(Cost.cpuCost(new BigDecimal(card).multiply(new BigDecimal(card))));
     }
 
     public Cost getCost(UnaryTupleOperator expr) {

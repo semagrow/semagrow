@@ -57,6 +57,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
         props.setSite(LocalSite.getInstance());
 
         plans = getContext().enforceProps(plans, props);
+        getContext().prune(plans);
 
         if (plans.isEmpty())
             return null;
@@ -90,6 +91,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
                 new SameTermFilterOptimizer(),          // rename variables or replace with constants if filtered with SameTerm
                 new ConjunctiveConstraintSplitter(),    // splits Filters And to consecutive applications
                 new DisjunctiveConstraintOptimizer(),   // split Filters Or to Union
+                new FilterOptimizer(),                  // push Filters as deep as possible
                 new QueryModelNormalizer()              // remove emptysets, singletonsets, transform to DNF (union before joins)
         );
 
