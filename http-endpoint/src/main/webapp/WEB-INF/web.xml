@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+
+<web-app xmlns="http://java.sun.com/xml/ns/j2ee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/j2ee http://java.sun.com/xml/ns/j2ee/web-app_2_4.xsd"
+         version="2.4">
+
+    <display-name>SemaGrow</display-name>
+    <description>SemaGrow</description>
+
+
+    <servlet>
+        <servlet-name>semagrow-http-endpoint</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>/WEB-INF/semagrow-http-endpoint-servlet.xml</param-value>
+        </init-param>
+        <load-on-startup>100</load-on-startup>
+    </servlet>
+
+
+    <servlet-mapping>
+        <servlet-name>semagrow-http-endpoint</servlet-name>
+        <url-pattern>/query</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>semagrow-http-endpoint</servlet-name>
+        <url-pattern>/sparql</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>semagrow-http-endpoint</servlet-name>
+        <url-pattern>/sparql/decompose</url-pattern>
+    </servlet-mapping>
+
+
+</web-app>
