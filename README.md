@@ -30,8 +30,8 @@ To build Semagrow you should type:
 $ mvn clean install
 ```
 in the top-level project directory. This will result in jar file
-in the target directory of the respective module and in a war file for
-the `http` module that can be deployed to the Servlet server of your choice.
+in the target directory of the respective module and in a war file in the target directory of
+the `webgui` module that can be deployed to the Servlet server of your choice.
 
 #### Bundled with Apache Tomcat
 
@@ -40,9 +40,9 @@ To achieve that you could issue
 ```bash
 $ mvn clean package -P tomcat-bundle
 ```
-from the top-leve directory of the project. This will result in a
-zip file in `./http/target` containing a fully equipped Apache Tomcat
-with pre-installed Semagrow.
+from the top-level directory of the project. This will result in a
+compressed file in the target directory of the `assembly` module 
+containing a fully equipped Apache Tomcat with Semagrow pre-installed.
 However, please note that external dependencies such as the
 PostgresSQL database needs to be installed and run separately.
 
