@@ -15,8 +15,10 @@ import org.slf4j.MDC;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * Created by antonis on 9/4/2015.
@@ -42,21 +44,97 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
     }
 
     public void subscribe(Subscriber<? super BindingSet> subscriber) {
-        subscriber.onSubscribe(new TupleQueryResultProducer(subscriber, query, queryStr, qfrHandler, mat, endpoint));
+        subscriber.onSubscribe(new TupleQuerySubscription(subscriber, query, queryStr, qfrHandler, mat, endpoint));
     }
 
-    public static final class TupleQueryResultProducer implements Subscription {
+    static class TupleQueryProducer implements Runnable {
+
+        private TupleQuery query;
+        private Subscriber<? super BindingSet> subscriber;
+
+        private long requested = 0;
+        private Boolean shutdownFlag = false;
+        private CountDownLatch latch = new CountDownLatch(0);
+
+        final private Object syncRequest = new Object();
+
+        public TupleQueryProducer(Subscriber<? super BindingSet> o, TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URL endpoint) {
+            this.query = query;
+            this.subscriber = o;
+        }
+
+        public void requestMore(long n) {
+            latch.countDown();
+            synchronized (syncRequest) {
+                requested += n;
+            }
+        }
+
+        public void fullfillOne() {
+            synchronized (syncRequest) {
+                assert requested > 0;
+                requested--;
+            }
+        }
+
+        public void awaitForRequests() throws InterruptedException {
+            synchronized (syncRequest) {
+                if (requested == 0)
+                    latch.await();
+            }
+        }
+
+        public void run() {
+
+            TupleQueryResult result = null;
+
+            try {
+                awaitForRequests();
+                result = query.evaluate();
+
+                while(result.hasNext()) {
+                    awaitForRequests();
+                    BindingSet b = result.next();
+                    logger.debug("found " + b);
+                    fullfillOne();
+                    subscriber.onNext(b);
+                }
+
+                if (!result.hasNext()) {
+                    subscriber.onComplete();
+                }
+
+            } catch (QueryEvaluationException e) {
+                subscriber.onError(e);
+
+            } catch (InterruptedException i) {
+
+            } finally {
+                if (result != null)
+                    result.close();
+            }
+        }
+
+        public void shutdown() {
+            shutdownFlag = true;
+        }
+
+    }
+
+    public static final class TupleQuerySubscription implements Subscription {
 
 
         private Subscriber<? super BindingSet> subscriber;
         private TupleQuery query;
         private String queryStr;
-        private boolean isEvaluating = false;
         private QueryLogHandler qfrHandler;
         private MaterializationManager mat;
         private URL endpoint;
+        private Future<?> f;
 
-        public TupleQueryResultProducer(Subscriber<? super BindingSet> o, TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URL endpoint) {
+        private TupleQueryProducer producer;
+
+        public TupleQuerySubscription(Subscriber<? super BindingSet> o, TupleQuery query, String queryStr, QueryLogHandler qfrHandler, MaterializationManager mat, URL endpoint) {
             this.subscriber = o;
             this.query = query;
             this.qfrHandler = qfrHandler;
@@ -71,80 +149,29 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
         @Override
         public void request(long l) {
 
-            logger.debug("Requesting {} results and isEvaluating = {} ", l, isEvaluating);
-            if (!isEvaluating) {
-                try {
-                    if (logger.isDebugEnabled())
-                        logger.debug("Sending query {} with {}", query.toString().replace("\n", " "), query.getBindings());
+            if (producer == null) {
 
-                    isEvaluating = true;
+                if (logger.isDebugEnabled())
+                    logger.debug("Sending query {} with {}", query.toString().replace("\n", " "), query.getBindings());
 
-                    final Map<String,String> contextMap = MDC.getCopyOfContextMap();
+                producer = new TupleQueryProducer(subscriber, query, queryStr, qfrHandler, mat, endpoint);
+                //executorService.execute(producer);
+                Future<?> f = executorService.submit(producer);
+                producer.requestMore(l);
 
-                    Runnable task = new Runnable() {
-                        @Override
-                        public void run() {
-                            MDC.setContextMap(contextMap);
-                            TupleQueryResultHandler handler = new SubscribedQueryResultHandler(subscriber);
-
-                            //handler = new LoggingTupleQueryResultHandler(queryStr, handler, qfrHandler, mat, endpoint);
-                            handler = new LoggingTupleQueryResultHandler(queryStr, handler, null, mat, endpoint);
-                            try {
-                                query.evaluate(handler);
-                            } catch (Exception e) {
-                            subscriber.onError(e);
-                            }
-                        }
-                    };
-
-                    executorService.execute(task);
-
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                }
+            } else {
+                producer.requestMore(l);
             }
         }
 
         @Override
         public void cancel() {
-            isEvaluating = false;
-        }
 
-
-        private class SubscribedQueryResultHandler implements TupleQueryResultHandler
-        {
-
-            private final Subscriber<? super BindingSet> subscriber;
-
-            public SubscribedQueryResultHandler(Subscriber<? super BindingSet> subscriber) {
-                this.subscriber = subscriber;
-            }
-
-            @Override
-            public void handleBoolean(boolean b) throws QueryResultHandlerException {
-
-            }
-
-            @Override
-            public void handleLinks(List<String> list) throws QueryResultHandlerException {
-
-            }
-
-            @Override
-            public void startQueryResult(List<String> list) throws TupleQueryResultHandlerException {
-            }
-
-            @Override
-            public void endQueryResult() throws TupleQueryResultHandlerException {
-                subscriber.onComplete();
-            }
-
-            @Override
-            public void handleSolution(BindingSet bindingSet) throws TupleQueryResultHandlerException {
-                logger.debug("found " + bindingSet);
-                subscriber.onNext(bindingSet);
+            if (producer != null) {
+                producer.shutdown();
+                assert f != null;
+                f.cancel(true);
             }
         }
-
     }
 }
