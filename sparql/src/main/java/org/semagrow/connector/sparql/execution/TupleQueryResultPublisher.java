@@ -108,7 +108,10 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
                 subscriber.onError(e);
 
             } catch (InterruptedException i) {
-
+                if (shutdownFlag)
+                    logger.info("Subscription shutdown by subscriber. Interrupted.");
+                else
+                    logger.warn("SubQuery thread interrupted.");
             } finally {
                 if (result != null)
                     result.close();
