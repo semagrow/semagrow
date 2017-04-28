@@ -173,7 +173,8 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
             if (producer != null) {
                 producer.shutdown();
                 assert f != null;
-                f.cancel(true);
+                if (!f.isDone() && !f.isCancelled())
+                    f.cancel(true);
             }
         }
     }

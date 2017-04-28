@@ -192,7 +192,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     logger.error("Tuple handle solution error", e);
                 }
             }
-            subscription.cancel();
+            //subscription.cancel();
             latch.countDown();
         }
 
@@ -217,7 +217,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     logger.error("Tuple handle solution error", e);
                 }
             }
-            subscription.cancel();
+            //subscription.cancel();
             latch.countDown();
         }
     }
