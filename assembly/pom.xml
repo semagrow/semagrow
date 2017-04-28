@@ -411,6 +411,7 @@
                               <directory>${project.basedir}/src/main/resources</directory>
                               <include>metadata.ttl</include>
                               <include>repository.ttl</include>
+                              <include>logback.groovy</include>
                             </resource>
                           </resources>
                         </configuration>
