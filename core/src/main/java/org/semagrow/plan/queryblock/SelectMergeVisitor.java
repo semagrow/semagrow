@@ -193,14 +193,13 @@ public class SelectMergeVisitor extends AbstractQueryBlockVisitor<RuntimeExcepti
                         boolean inNullProducingSide = jp.getTo().getQuantifier().equals(entry.getKey().getQuantifier());
 
                         Quantifier qTo = jp.getTo().getQuantifier();
-                        SelectBlock qb = (SelectBlock) qTo.getBlock();
-                        Collection<Quantifier> qs = qb.getQuantifiers();
 
                         jp.replaceVarWith(entry.getKey(), (Quantifier.Var) entry.getValue());
 
                         if (inNullProducingSide) {
+                            SelectBlock qb = (SelectBlock) qTo.getBlock();
                             jp.getEEL().remove(q);
-                            jp.getEEL().addAll(qs);
+                            jp.getEEL().addAll(qb.getQuantifiers());
                         } else {
                             jp.getEEL().remove(q);
                             jp.getEEL().add(((Quantifier.Var) entry.getValue()).getQuantifier());
