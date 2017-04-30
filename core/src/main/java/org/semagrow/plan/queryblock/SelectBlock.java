@@ -178,7 +178,7 @@ public class SelectBlock extends AbstractQueryBlock {
             context.prune(completePlans);
             return completePlans;
         } else {
-            Optional<Pair<Collection<Quantifier>, Collection<Plan>>> result =  planList.stream().reduce(applicator::compose);
+            Optional<Pair<Collection<Quantifier>, Collection<Plan>>> result =  planList.stream().reduce(applicator::combine);
             if (result.isPresent()) {
                 Collection<Plan> completePlans = new LinkedList<>(result.get().getSecond());
                 context.prune(completePlans);
@@ -424,17 +424,29 @@ public class SelectBlock extends AbstractQueryBlock {
             if (!predicates.isEmpty()) {
                 Collection<Plan> plans = apply(left.getSecond(), right.getSecond(), predicates);
                 return new Pair<>(all, plans);
-            } else if (relevant.isEmpty()) {
+            } /*else if (relevant.isEmpty()) {
+                // FIXME: it is not always valid to crossProduct plans if there are no applicable Predicates.
+                //        separate this functionality with "combine" unless we get any better idea.
                 // if there is no relevant predicates then it is a cross product
                 Collection<Plan> plans = crossProduct(left, right);
                 return new Pair<>(all, plans);
-            } else {
+            }*/ else {
                 // there are relevant predicates but not applicable (yet?)
                 // so produce an empty collection of plans to signal that those
                 // quantifiers cannot be composed yet.
                 // quantifiers cannot be composed yet.
                 return new Pair<>(all, new LinkedList<>());
             }
+        }
+
+        public Pair<Collection<Quantifier>, Collection<Plan>> combine(Pair<Collection<Quantifier>, Collection<Plan>> left,
+                                                                      Pair<Collection<Quantifier>, Collection<Plan>> right)
+        {
+            Collection<Quantifier> all = new HashSet<>(left.getFirst().size() + right.getFirst().size());
+            all.addAll(left.getFirst());
+            all.addAll(right.getFirst());
+            Collection<Plan> plans = crossProduct(left, right);
+            return new Pair<>(all, plans);
         }
 
         boolean isRelevant(Predicate p, Collection<Quantifier> input) {
