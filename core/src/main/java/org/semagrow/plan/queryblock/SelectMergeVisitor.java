@@ -57,15 +57,15 @@ public class SelectMergeVisitor extends AbstractQueryBlockVisitor<RuntimeExcepti
 
             SelectBlock lower = (SelectBlock) q.getBlock();
 
-            // move quantifiers in q.getBlock() to parent
-            for (Quantifier qq : new HashSet<>(lower.getQuantifiers()))
-                upper.moveQuantifier(qq);
-
             // move predicates in q.getBlock() to parent
             for (Predicate p : new HashSet<>(lower.getPredicates()))
                 upper.movePredicate(p);
 
             upper.visit(new PredicateProcessor(q));
+
+            // move quantifiers in q.getBlock() to parent
+            for (Quantifier qq : new HashSet<>(lower.getQuantifiers()))
+                upper.moveQuantifier(qq);
 
             // process outputVariables and duplicate strategy
             processHead(upper, q);
