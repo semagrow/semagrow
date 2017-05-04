@@ -521,7 +521,7 @@ public class SelectBlock extends AbstractQueryBlock {
                     .collect(Collectors.toList());
         }
 
-        private Stream<Plan> apply(Plan p, Collection<Predicate> predicates) {
+        Stream<Plan> apply(Plan p, Collection<Predicate> predicates) {
 
             final RepReplacer repReplacer = new RepReplacer();
 
@@ -783,26 +783,51 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 Collection<Plan> plans = new LinkedList<>();
 
-                if (isBindable(p2, p1.getOutputVariables())) {
-                    RequestedPlanProperties props = new RequestedPlanProperties();
-                    props.setSite(LocalSite.getInstance());
+                Collection<Predicate> innerPreds = preds.stream()
+                        .filter(p -> (p instanceof InnerJoinPredicate))
+                        .collect(Collectors.toList());
 
-                    Collection<Plan> pp1c = context.enforceProps(p1, props);
+                Collection<Predicate> otherPreds = preds.stream()
+                        .filter(p -> !(p instanceof InnerJoinPredicate))
+                        .collect(Collectors.toList());
+
+                RequestedPlanProperties props = new RequestedPlanProperties();
+                props.setSite(LocalSite.getInstance());
+
+                Collection<Plan> pp1c = context.enforceProps(p1, props);
+
+                if (isBindable(p2, p1.getOutputVariables())) {
+
                     Collection<Plan> pp2c = context.enforceProps(p2, props);
 
-                    for (Plan pp1 : pp1c) {
-                        for (Plan pp2 : pp2c) {
-                            BindJoin b = new BindJoin(pp1, pp2);
-                            // find remaining thetajoin predicates and also apply then in b
-                            plans.add(context.asPlan(b));
-                            // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                    if (!innerPreds.isEmpty()) {
+                        for (Plan pp1 : pp1c) {
+                            for (Plan pp2 : pp2c) {
+                                BindJoin b = new BindJoin(pp1, pp2);
+                                // find remaining thetajoin predicates and also apply then in b
+                                plans.add(context.asPlan(b));
+                                // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                            }
+                        }
+                        plans = PredicateApplicator.this.apply(plans, otherPreds);
+                    }
+
+                    if (!otherPreds.isEmpty()) {
+                        Collection<Plan> p2f  = PredicateApplicator.this.apply(p2, otherPreds).collect(Collectors.toList());
+                        Collection<Plan> pp2fc = context.enforceProps(p2f, props);
+
+                        for (Plan pp1 : pp1c) {
+                            for (Plan pp2 : pp2fc) {
+                                BindJoin b = new BindJoin(pp1, pp2);
+                                // find remaining thetajoin predicates and also apply then in b
+                                plans.add(context.asPlan(b));
+                                // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                            }
                         }
                     }
                 }
 
-                preds = preds.stream().filter(p -> !(p instanceof InnerJoinPredicate)).collect(Collectors.toList());
-
-                return PredicateApplicator.this.apply(plans, preds);
+                return plans;
             }
 
             private boolean isBindable(Plan p, Set<String> bindingNames) {
