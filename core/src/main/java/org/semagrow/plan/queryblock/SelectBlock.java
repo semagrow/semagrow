@@ -4,10 +4,7 @@ import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.semagrow.local.LocalSite;
 import org.semagrow.plan.*;
-import org.semagrow.plan.operators.BindJoin;
-import org.semagrow.plan.operators.CrossProduct;
-import org.semagrow.plan.operators.HashJoin;
-import org.semagrow.plan.operators.SourceQuery;
+import org.semagrow.plan.operators.*;
 import org.semagrow.selector.Site;
 import org.semagrow.util.CombinationIterator;
 import org.semagrow.util.PartitionedSet;
@@ -823,6 +820,7 @@ public class SelectBlock extends AbstractQueryBlock {
                                 plans.add(context.asPlan(b));
                                 // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
                             }
+
                         }
                     }
                 }
@@ -967,7 +965,7 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 for (Plan pp1 : pp1c) {
                     for (Plan pp2 : pp2c) {
-                        LeftJoin b = new LeftJoin(pp1, pp2);
+                        LeftJoin b = new BindLeftJoin(pp1, pp2);
                         // find remaining thetajoin predicates and also apply then in b
                         plans.add(context.asPlan(b));
 

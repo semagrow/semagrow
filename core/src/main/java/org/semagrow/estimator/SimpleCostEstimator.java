@@ -1,10 +1,7 @@
 package org.semagrow.estimator;
 
 import org.semagrow.art.Loggable;
-import org.semagrow.plan.operators.BindJoin;
-import org.semagrow.plan.operators.HashJoin;
-import org.semagrow.plan.operators.MergeJoin;
-import org.semagrow.plan.operators.SourceQuery;
+import org.semagrow.plan.operators.*;
 import org.semagrow.plan.Cost;
 import org.semagrow.plan.Plan;
 import org.semagrow.local.LocalSite;
@@ -41,6 +38,8 @@ public class SimpleCostEstimator implements CostEstimator {
             return getCost((SourceQuery)expr);
         else if (expr instanceof Join)
             return getCost((Join)expr);
+        else if (expr instanceof LeftJoin)
+            return getCost((LeftJoin)expr);
         else if (expr instanceof Order)
             return getCost((Order)expr);
         else if (expr instanceof Plan)
@@ -76,6 +75,27 @@ public class SimpleCostEstimator implements CostEstimator {
 
     public Cost getCost(Filter filter) {
         return getCost(filter.getArg());
+    }
+
+
+    public Cost getCost(BindLeftJoin join) {
+        // long cardinalityOfLeft = cardinalityEstimator.getCardinality(merge.getLeftArg());
+        // long costLeftArgument = estimateCost(merge.getLeftArg());
+        // long cardinalityAll = cardinalityEstimator.getCardinality(merge);
+        // long queries = cardinalityOfLeft / bindingsPerQuery;
+        // long resultsPerQuery = cardinalityAll / queries;
+        // totalCost = costLeftArgument + queries * costOfRightArgumentWithBinding
+
+        BigInteger leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        BigInteger rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+        BigInteger joinCard = cardinalityEstimator.getCardinality(join);
+
+        BigDecimal commuCost = BigDecimal.valueOf(C_TRANSFER_QUERY)
+                .add(new BigDecimal(leftCard).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE)))
+                .add(new BigDecimal(joinCard).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE)))
+                .add(new BigDecimal(leftCard.divide(BigInteger.valueOf(20))).multiply(BigDecimal.valueOf(C_TRANSFER_QUERY)));
+
+        return getCost(join.getLeftArg()).add(new Cost(commuCost));
     }
 
     public Cost getCost(BindJoin join) {
@@ -120,6 +140,20 @@ public class SimpleCostEstimator implements CostEstimator {
             return getCost((HashJoin)join);
         else if (join instanceof MergeJoin)
             return getCost((MergeJoin)join);
+
+        BigInteger leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
+        BigInteger rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
+
+        return new Cost(new BigDecimal(leftCard.add(rightCard)).multiply(BigDecimal.valueOf(C_TRANSFER_TUPLE))
+                .add(BigDecimal.valueOf(C_TRANSFER_QUERY))
+                .add(BigDecimal.valueOf(C_TRANSFER_QUERY)));
+
+    }
+
+    public Cost getCost(LeftJoin join) {
+
+        if (join instanceof BindLeftJoin)
+            return getCost((BindLeftJoin)join);
 
         BigInteger leftCard = cardinalityEstimator.getCardinality(join.getLeftArg());
         BigInteger rightCard = cardinalityEstimator.getCardinality(join.getRightArg());
