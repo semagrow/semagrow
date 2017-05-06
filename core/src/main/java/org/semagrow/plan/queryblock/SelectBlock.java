@@ -843,37 +843,36 @@ public class SelectBlock extends AbstractQueryBlock {
                 return v.condition;
             }
 
+        }
 
-            private class IsBindableVisitor extends AbstractPlanVisitor<RuntimeException> {
-                boolean condition = false;
+        private class IsBindableVisitor extends AbstractPlanVisitor<RuntimeException> {
+            boolean condition = false;
 
-                @Override
-                public void meet(Union union) {
-                    union.getLeftArg().visit(this);
+            @Override
+            public void meet(Union union) {
+                union.getLeftArg().visit(this);
 
-                    if (condition)
-                        union.getRightArg().visit(this);
-                }
-
-                @Override
-                public void meet(Join join) {
-                    condition = false;
-                }
-
-                @Override
-                public void meet(Plan e) {
-                    if (e.getProperties().getSite().isRemote())
-                        condition = true;
-                    else
-                        e.getArg().visit(this);
-                }
-
-                @Override
-                public void meet(SourceQuery query) {
-                    condition = true;
-                }
+                if (condition)
+                    union.getRightArg().visit(this);
             }
 
+            @Override
+            public void meet(Join join) {
+                condition = false;
+            }
+
+            @Override
+            public void meet(Plan e) {
+                if (e.getProperties().getSite().isRemote())
+                    condition = true;
+                else
+                    e.getArg().visit(this);
+            }
+
+            @Override
+            public void meet(SourceQuery query) {
+                condition = true;
+            }
         }
 
         public class RemoteJoinImplGenerator implements JoinImplGenerator {
@@ -947,6 +946,9 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 return PredicateApplicator.this.apply(plans, preds);
             }
+
+
+
         }
 
 
@@ -957,25 +959,43 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 Collection<Plan> plans = new LinkedList<>();
 
-                RequestedPlanProperties props = new RequestedPlanProperties();
-                props.setSite(LocalSite.getInstance());
+                if (isBindable(p2, p1.getOutputVariables())) {
 
-                Collection<Plan> pp1c = context.enforceProps(p1, props);
-                Collection<Plan> pp2c = context.enforceProps(p2, props);
+                    RequestedPlanProperties props = new RequestedPlanProperties();
+                    props.setSite(LocalSite.getInstance());
 
-                for (Plan pp1 : pp1c) {
-                    for (Plan pp2 : pp2c) {
-                        LeftJoin b = new BindLeftJoin(pp1, pp2);
-                        // find remaining thetajoin predicates and also apply then in b
-                        plans.add(context.asPlan(b));
+                    Collection<Plan> pp1c = context.enforceProps(p1, props);
+                    Collection<Plan> pp2c = context.enforceProps(p2, props);
 
-                        // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                    for (Plan pp1 : pp1c) {
+                        for (Plan pp2 : pp2c) {
+                            LeftJoin b = new BindLeftJoin(pp1, pp2);
+                            // find remaining thetajoin predicates and also apply then in b
+                            plans.add(context.asPlan(b));
+
+                            // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                        }
                     }
                 }
 
                 preds = preds.stream().filter(p -> !(p instanceof LeftJoinPredicate)).collect(Collectors.toList());
 
                 return PredicateApplicator.this.apply(plans, preds);
+            }
+
+            private boolean isBindable(Plan p, Set<String> bindingNames) {
+
+                IsBindableVisitor v = new IsBindableVisitor();
+
+                p.visit(v);
+                if( v.condition ) {
+                    Site s = p.getProperties().getSite();
+                    if (s.isRemote()) {
+                        return s.getCapabilities().acceptsBindings(p, bindingNames);
+                    }
+                }
+
+                return v.condition;
             }
         }
     }
