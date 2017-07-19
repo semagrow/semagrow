@@ -1,4 +1,3 @@
-package org.semagrow
 
 import ch.qos.logback.core.db.DriverManagerConnectionSource
 import org.semagrow.art.DbAppender

@@ -9,4 +9,6 @@ COPY metadata.ttl /etc/default/semagrow/
 
 COPY semagrow-assembly-*.war $CATALINA_HOME/webapps/SemaGrow.war
 
+COPY logback.groovy $CATALINA_HOME/libs
+
 CMD catalina.sh run

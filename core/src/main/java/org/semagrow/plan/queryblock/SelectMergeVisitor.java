@@ -57,15 +57,15 @@ public class SelectMergeVisitor extends AbstractQueryBlockVisitor<RuntimeExcepti
 
             SelectBlock lower = (SelectBlock) q.getBlock();
 
-            // move quantifiers in q.getBlock() to parent
-            for (Quantifier qq : new HashSet<>(lower.getQuantifiers()))
-                upper.moveQuantifier(qq);
-
             // move predicates in q.getBlock() to parent
             for (Predicate p : new HashSet<>(lower.getPredicates()))
                 upper.movePredicate(p);
 
             upper.visit(new PredicateProcessor(q));
+
+            // move quantifiers in q.getBlock() to parent
+            for (Quantifier qq : new HashSet<>(lower.getQuantifiers()))
+                upper.moveQuantifier(qq);
 
             // process outputVariables and duplicate strategy
             processHead(upper, q);
@@ -192,15 +192,16 @@ public class SelectMergeVisitor extends AbstractQueryBlockVisitor<RuntimeExcepti
                     if (entry.getValue() instanceof Quantifier.Var) {
                         boolean inNullProducingSide = jp.getTo().getQuantifier().equals(entry.getKey().getQuantifier());
 
+                        Quantifier qTo = jp.getTo().getQuantifier();
+
                         jp.replaceVarWith(entry.getKey(), (Quantifier.Var) entry.getValue());
-                        jp.getEEL().remove(q);
 
                         if (inNullProducingSide) {
-                            Quantifier q = jp.getTo().getQuantifier();
-                            SelectBlock qb = (SelectBlock) q.getBlock();
-                            Collection<Quantifier> qs = qb.getQuantifiers();
-                            jp.getEEL().addAll(qs);
+                            SelectBlock qb = (SelectBlock) qTo.getBlock();
+                            jp.getEEL().remove(q);
+                            jp.getEEL().addAll(qb.getQuantifiers());
                         } else {
+                            jp.getEEL().remove(q);
                             jp.getEEL().add(((Quantifier.Var) entry.getValue()).getQuantifier());
                         }
 

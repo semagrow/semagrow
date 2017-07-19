@@ -4,10 +4,7 @@ import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.semagrow.local.LocalSite;
 import org.semagrow.plan.*;
-import org.semagrow.plan.operators.BindJoin;
-import org.semagrow.plan.operators.CrossProduct;
-import org.semagrow.plan.operators.HashJoin;
-import org.semagrow.plan.operators.SourceQuery;
+import org.semagrow.plan.operators.*;
 import org.semagrow.selector.Site;
 import org.semagrow.util.CombinationIterator;
 import org.semagrow.util.PartitionedSet;
@@ -178,7 +175,7 @@ public class SelectBlock extends AbstractQueryBlock {
             context.prune(completePlans);
             return completePlans;
         } else {
-            Optional<Pair<Collection<Quantifier>, Collection<Plan>>> result =  planList.stream().reduce(applicator::compose);
+            Optional<Pair<Collection<Quantifier>, Collection<Plan>>> result =  planList.stream().reduce(applicator::combine);
             if (result.isPresent()) {
                 Collection<Plan> completePlans = new LinkedList<>(result.get().getSecond());
                 context.prune(completePlans);
@@ -424,17 +421,29 @@ public class SelectBlock extends AbstractQueryBlock {
             if (!predicates.isEmpty()) {
                 Collection<Plan> plans = apply(left.getSecond(), right.getSecond(), predicates);
                 return new Pair<>(all, plans);
-            } else if (relevant.isEmpty()) {
+            } /*else if (relevant.isEmpty()) {
+                // FIXME: it is not always valid to crossProduct plans if there are no applicable Predicates.
+                //        separate this functionality with "combine" unless we get any better idea.
                 // if there is no relevant predicates then it is a cross product
                 Collection<Plan> plans = crossProduct(left, right);
                 return new Pair<>(all, plans);
-            } else {
+            }*/ else {
                 // there are relevant predicates but not applicable (yet?)
                 // so produce an empty collection of plans to signal that those
                 // quantifiers cannot be composed yet.
                 // quantifiers cannot be composed yet.
                 return new Pair<>(all, new LinkedList<>());
             }
+        }
+
+        public Pair<Collection<Quantifier>, Collection<Plan>> combine(Pair<Collection<Quantifier>, Collection<Plan>> left,
+                                                                      Pair<Collection<Quantifier>, Collection<Plan>> right)
+        {
+            Collection<Quantifier> all = new HashSet<>(left.getFirst().size() + right.getFirst().size());
+            all.addAll(left.getFirst());
+            all.addAll(right.getFirst());
+            Collection<Plan> plans = crossProduct(left, right);
+            return new Pair<>(all, plans);
         }
 
         boolean isRelevant(Predicate p, Collection<Quantifier> input) {
@@ -509,7 +518,7 @@ public class SelectBlock extends AbstractQueryBlock {
                     .collect(Collectors.toList());
         }
 
-        private Stream<Plan> apply(Plan p, Collection<Predicate> predicates) {
+        Stream<Plan> apply(Plan p, Collection<Predicate> predicates) {
 
             final RepReplacer repReplacer = new RepReplacer();
 
@@ -771,26 +780,52 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 Collection<Plan> plans = new LinkedList<>();
 
-                if (isBindable(p2, p1.getOutputVariables())) {
-                    RequestedPlanProperties props = new RequestedPlanProperties();
-                    props.setSite(LocalSite.getInstance());
+                Collection<Predicate> innerPreds = preds.stream()
+                        .filter(p -> (p instanceof InnerJoinPredicate))
+                        .collect(Collectors.toList());
 
-                    Collection<Plan> pp1c = context.enforceProps(p1, props);
+                Collection<Predicate> otherPreds = preds.stream()
+                        .filter(p -> !(p instanceof InnerJoinPredicate))
+                        .collect(Collectors.toList());
+
+                RequestedPlanProperties props = new RequestedPlanProperties();
+                props.setSite(LocalSite.getInstance());
+
+                Collection<Plan> pp1c = context.enforceProps(p1, props);
+
+                if (isBindable(p2, p1.getOutputVariables())) {
+
                     Collection<Plan> pp2c = context.enforceProps(p2, props);
 
-                    for (Plan pp1 : pp1c) {
-                        for (Plan pp2 : pp2c) {
-                            BindJoin b = new BindJoin(pp1, pp2);
-                            // find remaining thetajoin predicates and also apply then in b
-                            plans.add(context.asPlan(b));
-                            // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                    if (!innerPreds.isEmpty()) {
+                        for (Plan pp1 : pp1c) {
+                            for (Plan pp2 : pp2c) {
+                                BindJoin b = new BindJoin(pp1, pp2);
+                                // find remaining thetajoin predicates and also apply then in b
+                                plans.add(context.asPlan(b));
+                                // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                            }
+                        }
+                        plans = PredicateApplicator.this.apply(plans, otherPreds);
+                    }
+
+                    if (!otherPreds.isEmpty()) {
+                        Collection<Plan> p2f  = PredicateApplicator.this.apply(p2, otherPreds).collect(Collectors.toList());
+                        Collection<Plan> pp2fc = context.enforceProps(p2f, props);
+
+                        for (Plan pp1 : pp1c) {
+                            for (Plan pp2 : pp2fc) {
+                                BindJoin b = new BindJoin(pp1, pp2);
+                                // find remaining thetajoin predicates and also apply then in b
+                                plans.add(context.asPlan(b));
+                                // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                            }
+
                         }
                     }
                 }
 
-                preds = preds.stream().filter(p -> !(p instanceof InnerJoinPredicate)).collect(Collectors.toList());
-
-                return PredicateApplicator.this.apply(plans, preds);
+                return plans;
             }
 
             private boolean isBindable(Plan p, Set<String> bindingNames) {
@@ -808,37 +843,36 @@ public class SelectBlock extends AbstractQueryBlock {
                 return v.condition;
             }
 
+        }
 
-            private class IsBindableVisitor extends AbstractPlanVisitor<RuntimeException> {
-                boolean condition = false;
+        private class IsBindableVisitor extends AbstractPlanVisitor<RuntimeException> {
+            boolean condition = false;
 
-                @Override
-                public void meet(Union union) {
-                    union.getLeftArg().visit(this);
+            @Override
+            public void meet(Union union) {
+                union.getLeftArg().visit(this);
 
-                    if (condition)
-                        union.getRightArg().visit(this);
-                }
-
-                @Override
-                public void meet(Join join) {
-                    condition = false;
-                }
-
-                @Override
-                public void meet(Plan e) {
-                    if (e.getProperties().getSite().isRemote())
-                        condition = true;
-                    else
-                        e.getArg().visit(this);
-                }
-
-                @Override
-                public void meet(SourceQuery query) {
-                    condition = true;
-                }
+                if (condition)
+                    union.getRightArg().visit(this);
             }
 
+            @Override
+            public void meet(Join join) {
+                condition = false;
+            }
+
+            @Override
+            public void meet(Plan e) {
+                if (e.getProperties().getSite().isRemote())
+                    condition = true;
+                else
+                    e.getArg().visit(this);
+            }
+
+            @Override
+            public void meet(SourceQuery query) {
+                condition = true;
+            }
         }
 
         public class RemoteJoinImplGenerator implements JoinImplGenerator {
@@ -912,6 +946,9 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 return PredicateApplicator.this.apply(plans, preds);
             }
+
+
+
         }
 
 
@@ -922,25 +959,43 @@ public class SelectBlock extends AbstractQueryBlock {
 
                 Collection<Plan> plans = new LinkedList<>();
 
-                RequestedPlanProperties props = new RequestedPlanProperties();
-                props.setSite(LocalSite.getInstance());
+                if (isBindable(p2, p1.getOutputVariables())) {
 
-                Collection<Plan> pp1c = context.enforceProps(p1, props);
-                Collection<Plan> pp2c = context.enforceProps(p2, props);
+                    RequestedPlanProperties props = new RequestedPlanProperties();
+                    props.setSite(LocalSite.getInstance());
 
-                for (Plan pp1 : pp1c) {
-                    for (Plan pp2 : pp2c) {
-                        LeftJoin b = new LeftJoin(pp1, pp2);
-                        // find remaining thetajoin predicates and also apply then in b
-                        plans.add(context.asPlan(b));
+                    Collection<Plan> pp1c = context.enforceProps(p1, props);
+                    Collection<Plan> pp2c = context.enforceProps(p2, props);
 
-                        // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                    for (Plan pp1 : pp1c) {
+                        for (Plan pp2 : pp2c) {
+                            LeftJoin b = new BindLeftJoin(pp1, pp2);
+                            // find remaining thetajoin predicates and also apply then in b
+                            plans.add(context.asPlan(b));
+
+                            // apply thetajoin predicates in pp2 and then bindjoin (pp1, filter(pp2))
+                        }
                     }
                 }
 
                 preds = preds.stream().filter(p -> !(p instanceof LeftJoinPredicate)).collect(Collectors.toList());
 
                 return PredicateApplicator.this.apply(plans, preds);
+            }
+
+            private boolean isBindable(Plan p, Set<String> bindingNames) {
+
+                IsBindableVisitor v = new IsBindableVisitor();
+
+                p.visit(v);
+                if( v.condition ) {
+                    Site s = p.getProperties().getSite();
+                    if (s.isRemote()) {
+                        return s.getCapabilities().acceptsBindings(p, bindingNames);
+                    }
+                }
+
+                return v.condition;
             }
         }
     }

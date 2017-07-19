@@ -76,6 +76,9 @@ public class TupleQueryResultView extends QueryResultView {
             } catch (TupleQueryResultHandlerException var18) {
                 this.logger.error("Serialization error", var18);
                 response.sendError(500, "Serialization error: " + var18.getMessage());
+            } catch (Exception e) {
+                this.logger.error("Unknown internal error", e);
+                response.sendError(500, "Internal error: " + e.getMessage());
             } finally {
                 out.close();
             }
