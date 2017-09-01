@@ -148,8 +148,10 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             throws QueryEvaluationException
     {
         return this.evaluateReactorInternal(expr.getLeftArg(), bindings)
-                .buffer(getBatchSize())
-                .flatMap((b) -> {
+                //.buffer(getBatchSize())
+                .buffer(1) // batches of 1.
+                .concatMap((b) -> {
+                //.flatMap((b) -> {
                     try {
                         return evaluateReactorInternal(expr.getRightArg(), b);
                     } catch (Exception e) {
