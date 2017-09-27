@@ -38,10 +38,10 @@ logger( "org.semagrow.core", DEBUG, ["PROCFLOW"], false )
 logger( "org.semagrow.query", DEBUG, ["PROCFLOW"], false )
 logger( "org.semagrow.sail", DEBUG, ["PROCFLOW"], false )
 
-logger( "org.semagrow.query.impl.SemagrowSailTupleQuery",  INFO, ["DB"], false )
-logger( "org.semagrow.plan.DPQueryDecomposer", INFO, ["DB"], false )
-logger( "org.semagrow.sparql.execution.SPARQLQueryExecutor", INFO, ["DB"], false )
-logger( "org.semagrow.evaluation.LoggingTupleQueryResultHandler", INFO, ["DB"], false )
+logger( "org.semagrow.query.impl.SemagrowSailTupleQuery",  INFO, ["CONSOLE"], false )
+logger( "org.semagrow.plan.DPQueryDecomposer", INFO, ["CONSOLE"], false )
+logger( "org.semagrow.sparql.execution.SPARQLQueryExecutor", INFO, ["CONSOLE"], false )
+logger( "org.semagrow.evaluation.LoggingTupleQueryResultHandler", INFO, ["CONSOLE"], false )
 
 logger( "reactor", TRACE, ["PROCFLOW"], false )
 
