@@ -159,7 +159,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                     } catch (Exception e) {
                         return Flux.error(e);
                     }
-                });
+                }));
     }
 
     public Flux<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
