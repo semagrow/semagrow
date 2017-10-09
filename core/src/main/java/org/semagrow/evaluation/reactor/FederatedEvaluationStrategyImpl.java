@@ -152,7 +152,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                 //.buffer(1) // batches of 1.
                 //.concatMap((b) -> {
                 .buffer(10)
-                .concatMap(bs -> Flux.fromIterable(bs).buffer(1).flatMap((b) -> {
+                .flatMap(bs -> Flux.fromIterable(bs).buffer(1).flatMap((b) -> {
                 //.flatMap((b) -> {
                     try {
                         return evaluateReactorInternal(expr.getRightArg(), b);
