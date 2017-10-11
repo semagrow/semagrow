@@ -149,15 +149,17 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     {
         return this.evaluateReactorInternal(expr.getLeftArg(), bindings)
                 //.buffer(getBatchSize())
-                .buffer(1) // batches of 1.
-                .concatMap((b) -> {
+                //.buffer(1) // batches of 1.
+                //.concatMap((b) -> {
+                .buffer(10)
+                .flatMap(bs -> Flux.fromIterable(bs).buffer(1).flatMap((b) -> {
                 //.flatMap((b) -> {
                     try {
                         return evaluateReactorInternal(expr.getRightArg(), b);
                     } catch (Exception e) {
                         return Flux.error(e);
                     }
-                });
+                }));
     }
 
     public Flux<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
