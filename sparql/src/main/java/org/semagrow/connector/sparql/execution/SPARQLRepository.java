@@ -36,7 +36,7 @@ public class SPARQLRepository extends org.eclipse.rdf4j.repository.sparql.SPARQL
     @Override
     protected SparqlSession createHTTPClient() {
         SparqlSession session = super.createHTTPClient();
-        session.setConnectionTimeout(10000);
+        session.setConnectionTimeout(100);
         session.setValueFactory(getValueFactory());
         return session;
     }
