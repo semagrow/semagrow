@@ -48,6 +48,8 @@ public class UnionBlock extends AbstractQueryBlock {
 
     public void addAll(Collection<QueryBlock> bs) { blocks.addAll(bs); }
 
+    public void removeAll(Collection<QueryBlock> bs) { blocks.removeAll(bs); }
+
     public boolean hasDuplicates() { return true; }
 
 
