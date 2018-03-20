@@ -114,9 +114,9 @@ public class CsvCreator {
 
 
         } catch(SQLException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } catch (ClassNotFoundException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         } finally {
             try {
                 if (stmt != null)
