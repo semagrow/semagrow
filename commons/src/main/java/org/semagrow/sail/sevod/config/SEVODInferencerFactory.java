@@ -1,10 +1,10 @@
-package org.semagrow.sail.SEVOD.config;
+package org.semagrow.sail.sevod.config;
 
 import org.eclipse.rdf4j.sail.Sail;
 import org.eclipse.rdf4j.sail.config.SailConfigException;
 import org.eclipse.rdf4j.sail.config.SailFactory;
 import org.eclipse.rdf4j.sail.config.SailImplConfig;
-import org.semagrow.sail.SEVOD.SEVODInferencer;
+import org.semagrow.sail.sevod.SEVODInferencer;
 
 /**
  * Created by angel on 7/4/14.
