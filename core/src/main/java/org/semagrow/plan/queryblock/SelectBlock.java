@@ -143,7 +143,7 @@ public class SelectBlock extends AbstractQueryBlock {
 
     public void addProjection(String var, ValueExpr expr) {
         if (var == null)
-            throw new IllegalArgumentException("Quantified variable " + var.toString() + " not a member of the block");
+            throw new IllegalArgumentException("Quantified variable null and not a member of the block");
 
         outputVars.put(var, expr);
     }
