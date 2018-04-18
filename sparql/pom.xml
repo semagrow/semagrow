@@ -10,7 +10,6 @@
     <artifactId>semagrow-connector-sparql</artifactId>
     <name>SemaGrow SPARQL Connector</name>
     <build>
-        <pluginManagement>
             <plugins>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
@@ -18,10 +17,10 @@
                     <version>${aspectj-maven.version}</version>
                     <configuration>
                         <aspectLibraries>
--                           <aspectLibrary>
--                              <groupId>${project.groupId}</groupId>
--                              <artifactId>semagrow-monitor</artifactId>
--                           </aspectLibrary>
+                            <aspectLibrary>
+                               <groupId>${project.groupId}</groupId>
+                               <artifactId>semagrow-monitor</artifactId>
+                            </aspectLibrary>
                         </aspectLibraries>
                         <complianceLevel>1.8</complianceLevel>
                         <source>1.8</source>
@@ -37,7 +36,6 @@
                     </executions>
                 </plugin>
             </plugins>
-        </pluginManagement>
     </build>
     <dependencies>
         <dependency>
