@@ -39,8 +39,9 @@
         <rdf4j.version>2.1.1</rdf4j.version>
         <slf4j.version>1.7.7</slf4j.version>
         <logback.version>1.1.3</logback.version>
-        <groovy.version>2.4.0</groovy.version>
+        <groovy.version>2.4.15</groovy.version>
         <junit.version>4.11</junit.version>
+        <aspectj-maven.version>1.11</aspectj-maven.version>
         <semagrow.version>${project.version}</semagrow.version>
         <distribution.site>/var/www/docs/${project.artifactId}/${project.version}</distribution.site>
         <distribution.mvn>/var/www/mvn</distribution.mvn>
@@ -235,20 +236,20 @@
             </plugin>
 
             <!-- The gmavenplus plugin is used to compile Groovy code. To learn more about this plugin,
-        visit https://github.com/groovy/GMavenPlus/wiki -->
-            <plugin>
-                <groupId>org.codehaus.gmavenplus</groupId>
-                <artifactId>gmavenplus-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>compile</goal>
-                            <goal>testCompile</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
+        	visit https://github.com/groovy/GMavenPlus/wiki -->
+			<plugin>
+				<groupId>org.codehaus.gmaven</groupId>
+				<artifactId>groovy-maven-plugin</artifactId>
+                                <version>2.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.codehaus.groovy</groupId>
+						<artifactId>groovy-all</artifactId>
+						<version>${groovy.version}</version>
+					</dependency>
+				</dependencies>
+			</plugin>
+
             <!-- Optional plugins for using Spock -->
             <!-- Only required if names of spec classes don't match default Surefire patterns (`*Test` etc.) -->
             <plugin>

@@ -1,4 +1,4 @@
-package org.semagrow.sail.SEVOD;
+package org.semagrow.sail.sevod;
 
 import org.semagrow.sail.VOID.VOIDInferencerConnection;
 import org.semagrow.model.vocabulary.SEVOD;

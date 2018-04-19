@@ -1,4 +1,4 @@
-package org.semagrow.sail.SEVOD;
+package org.semagrow.sail.sevod;
 
 import org.eclipse.rdf4j.sail.SailException;
 import org.eclipse.rdf4j.sail.inferencer.InferencerConnection;
