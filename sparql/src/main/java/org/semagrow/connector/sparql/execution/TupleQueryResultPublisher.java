@@ -105,6 +105,7 @@ public class TupleQueryResultPublisher implements Publisher<BindingSet> {
                 }
 
             } catch (QueryEvaluationException e) {
+                logger.warn("Error while evaluating subquery", e);
                 subscriber.onError(e);
 
             } catch (InterruptedException i) {
