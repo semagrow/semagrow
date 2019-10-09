@@ -66,7 +66,7 @@
     "bootstrap": "^3.3.1",
     "codemirror": "^4.7.0",
     "connect-livereload": "^0.5.2",
-    "deep-extend": "^0.3.2",
+    "deep-extend": "^0.6.0",
     "express": "^4.11.1",
     "follow-redirects": "0.0.3",
     "gulp-express": "^0.1.7",
