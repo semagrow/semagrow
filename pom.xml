@@ -31,6 +31,7 @@
         <module>http-endpoint</module>
         <module>webgui</module>
         <module>assembly</module>
+        <module>geospatial</module>
     </modules>
 
     <properties>
@@ -140,6 +141,12 @@
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryparser-sparql</artifactId>
+            <version>${rdf4j.version}</version>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.eclipse.rdf4j</groupId>
+            <artifactId>rdf4j-queryalgebra-geosparql</artifactId>
             <version>${rdf4j.version}</version>
             <scope>runtime</scope>
         </dependency>
