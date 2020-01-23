@@ -1,9 +1,9 @@
 package org.semagrow.connector.sparql.execution;
 
+import org.eclipse.rdf4j.http.client.SPARQLProtocolSession;
 import org.semagrow.connector.sparql.query.SPARQLTupleQuery;
 import org.semagrow.connector.sparql.query.SPARQLBooleanQuery;
 import org.semagrow.connector.sparql.query.SPARQLGraphQuery;
-import org.eclipse.rdf4j.http.client.SparqlSession;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.query.parser.QueryParserUtil;
 import org.eclipse.rdf4j.repository.RepositoryException;
@@ -14,9 +14,9 @@ import org.eclipse.rdf4j.repository.RepositoryException;
  */
 public class SPARQLConnection extends org.eclipse.rdf4j.repository.sparql.SPARQLConnection {
 
-    private final SparqlSession client;
+    private final SPARQLProtocolSession client;
 
-    public SPARQLConnection(SPARQLRepository repository, SparqlSession client, boolean quadMode) {
+    public SPARQLConnection(SPARQLRepository repository, SPARQLProtocolSession client, boolean quadMode) {
         super(repository, client, quadMode);
         this.client = client;
 
