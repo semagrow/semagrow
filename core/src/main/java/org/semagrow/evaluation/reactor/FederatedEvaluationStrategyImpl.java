@@ -55,7 +55,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
 
     public void setBatchSize(int b) {
-        batchSize = b;
+
     }
 
     public int getBatchSize() {

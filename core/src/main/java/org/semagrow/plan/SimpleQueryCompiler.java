@@ -13,6 +13,7 @@ import org.semagrow.estimator.SimpleCardinalityEstimatorResolver;
 import org.semagrow.estimator.SimpleCostEstimatorResolver;
 import org.semagrow.local.LocalSite;
 import org.semagrow.plan.queryblock.*;
+import org.semagrow.selector.QueryAwareSourceSelector;
 import org.semagrow.selector.SourceSelector;
 
 import java.util.Collection;
@@ -45,6 +46,10 @@ public class SimpleQueryCompiler implements QueryCompiler {
 
         // split query to queryblocks.
         QueryBlock blockRoot = blockify(query, dataset, bindings);
+
+        if (sourceSelector instanceof QueryAwareSourceSelector) {
+            ((QueryAwareSourceSelector) sourceSelector).processTupleExpr(query);
+        }
 
         // infer interesting properties for each query block.
         blockRoot.visit(new InterestingPropertiesVisitor());     // infer interesting properties for each block

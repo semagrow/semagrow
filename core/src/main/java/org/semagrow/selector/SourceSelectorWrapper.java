@@ -12,7 +12,7 @@ import java.util.Collection;
  * used to remove all the boilerplate code in the inherited classes
  * @author Angelos Charalambidis
  */
-public class SourceSelectorWrapper  implements SourceSelector {
+public class SourceSelectorWrapper  implements SourceSelector, QueryAwareSourceSelector {
 
     private SourceSelector wrappedSelector;
 
@@ -34,5 +34,12 @@ public class SourceSelectorWrapper  implements SourceSelector {
 
     public Collection<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
         return getWrappedSelector().getSources(expr, dataset, bindings);
+    }
+
+    @Override
+    public void processTupleExpr(TupleExpr expr) {
+        if (wrappedSelector instanceof QueryAwareSourceSelector) {
+            ((QueryAwareSourceSelector) wrappedSelector).processTupleExpr(expr);
+        }
     }
 }
