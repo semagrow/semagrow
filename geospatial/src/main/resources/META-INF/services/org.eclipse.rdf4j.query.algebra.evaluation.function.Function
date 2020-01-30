@@ -17,3 +17,4 @@ org.semagrow.geospatial.algebra.strdf.StUnion
 org.semagrow.geospatial.algebra.strdf.StDifference
 org.semagrow.geospatial.algebra.strdf.StSymDifference
 org.semagrow.geospatial.algebra.strdf.StSrid
+org.semagrow.geospatial.algebra.strdf.StArea
