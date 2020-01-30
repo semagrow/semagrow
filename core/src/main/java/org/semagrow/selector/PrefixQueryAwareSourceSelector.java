@@ -38,21 +38,21 @@ public class PrefixQueryAwareSourceSelector extends SourceSelectorWrapper implem
 
     private void processBPG(TupleExpr expr) {
 
-        Map<StatementPattern,Map<SourceMetadata,Map<String,String>>> phatMap = new HashMap<>();
+        Map<StatementPattern,Map<SourceMetadata,Map<String,Collection<String>>>> phatMap = new HashMap<>();
 
         for (StatementPattern pattern:  StatementPatternCollector.process(expr)) {
-            Map<SourceMetadata,Map<String,String>> sourceMap = new HashMap<>();
+            Map<SourceMetadata,Map<String,Collection<String>>> sourceMap = new HashMap<>();
 
             for (SourceMetadata source: getWrappedSelector().getSources(pattern, null, EmptyBindingSet.getInstance())) {
-                Map<String,String> varMap = new HashMap<>();
+                Map<String,Collection<String>> varMap = new HashMap<>();
 
                 if (!(pattern.getSubjectVar().hasValue())) {
-                    String prefix = prefixBase.getSubjectRegexPattern(pattern, endpointOfSource(source));
-                    varMap.put(pattern.getSubjectVar().getName(), prefix);
+                    Collection<String> prefixes = prefixBase.getSubjectRegexPattern(pattern, endpointOfSource(source));
+                    varMap.put(pattern.getSubjectVar().getName(), prefixes);
                 }
                 if (!(pattern.getObjectVar().hasValue())) {
-                    String prefix = prefixBase.getObjectRegexPattern(pattern, endpointOfSource(source));
-                    varMap.put(pattern.getObjectVar().getName(), prefix);
+                    Collection<String> prefixes = prefixBase.getObjectRegexPattern(pattern, endpointOfSource(source));
+                    varMap.put(pattern.getObjectVar().getName(), prefixes);
                 }
                 sourceMap.put(source,varMap);
             }
@@ -75,10 +75,15 @@ public class PrefixQueryAwareSourceSelector extends SourceSelectorWrapper implem
                             for (SourceMetadata s1 : phatMap.get(p1).keySet()) {
                                 boolean delete = true;
                                 for (SourceMetadata s2 : phatMap.get(p2).keySet()) {
-                                    String prf1 = phatMap.get(p1).get(s1).get(var.getName());
-                                    String prf2 = phatMap.get(p2).get(s2).get(var.getName());
+                                    Collection<String> prf1 = phatMap.get(p1).get(s1).get(var.getName());
+                                    Collection<String> prf2 = phatMap.get(p2).get(s2).get(var.getName());
 
-                                    if (prf1.startsWith(prf2) || prf2.startsWith(prf1)) {
+                                    // FIXME: assume that prefixes are disjoint
+
+                                    Set<String> commonPrf = new HashSet<>(prf1);
+                                    commonPrf.retainAll(prf2);
+
+                                    if (!(commonPrf.isEmpty())) {
                                         delete = false;
                                     }
                                 }

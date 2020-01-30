@@ -19,9 +19,7 @@ import org.eclipse.rdf4j.sparqlbuilder.graphpattern.TriplePattern;
 import org.semagrow.model.vocabulary.SEVOD;
 import org.semagrow.model.vocabulary.VOID;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 public class PrefixBase {
 
@@ -31,7 +29,7 @@ public class PrefixBase {
         this.metadata = metadata;
     }
 
-    public String getSubjectRegexPattern(StatementPattern pattern, Resource endpoint) {
+    public Collection<String> getSubjectRegexPattern(StatementPattern pattern, Resource endpoint) {
 
         if (pattern.getPredicateVar().hasValue()) {
 
@@ -55,9 +53,9 @@ public class PrefixBase {
 
                 SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
 
-                String result = runQuery(selectQuery.getQueryString());
+                Collection<String> result = runQuery(selectQuery.getQueryString());
 
-                if (result != null) {
+                if (!result.isEmpty()) {
                     return result;
                 }
             }
@@ -76,9 +74,9 @@ public class PrefixBase {
 
             SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
 
-            String result = runQuery(selectQuery.getQueryString());
+            Collection<String> result = runQuery(selectQuery.getQueryString());
 
-            if (result != null) {
+            if (!result.isEmpty()) {
                 return result;
             }
         }
@@ -94,15 +92,15 @@ public class PrefixBase {
 
         SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
 
-        String result = runQuery(selectQuery.getQueryString());
+        Collection<String> result = runQuery(selectQuery.getQueryString());
 
-        if (result != null) {
+        if (!result.isEmpty()) {
             return result;
         }
-        return "^";
+        return Collections.singletonList("");
     }
 
-    public String getObjectRegexPattern(StatementPattern pattern, Resource endpoint) {
+    public Collection<String> getObjectRegexPattern(StatementPattern pattern, Resource endpoint) {
 
         if (pattern.getPredicateVar().hasValue()) {
 
@@ -122,9 +120,9 @@ public class PrefixBase {
 
             SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
 
-            String result = runQuery(selectQuery.getQueryString());
+            Collection<String> result = runQuery(selectQuery.getQueryString());
 
-            if (result != null) {
+            if (!result.isEmpty()) {
                 return result;
             }
         }
@@ -140,30 +138,31 @@ public class PrefixBase {
 
         SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
 
-        String result = runQuery(selectQuery.getQueryString());
+        Collection<String> result = runQuery(selectQuery.getQueryString());
 
-        if (result != null) {
+        if (!result.isEmpty()) {
             return result;
         }
-        return "^";
+        return Collections.singletonList("");
     }
 
-    private String runQuery(String qStr){
+    private Collection<String> runQuery(String qStr){
         RepositoryConnection conn = null;
+        List<String> result = new ArrayList<>();
         try {
             conn = metadata.getConnection();
             TupleQuery q = conn.prepareTupleQuery(QueryLanguage.SPARQL, qStr);
             TupleQueryResult r = q.evaluate();
-            if (!r.hasNext())
-                return null;
-            else
-                return r.next().getBinding("prefix").getValue().stringValue();
+            while (r.hasNext()) {
+                result.add(r.next().getBinding("prefix").getValue().stringValue());
+            }
+            return result;
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
             if (conn != null)
                 try { conn.close(); } catch (Exception e){ }
         }
-        return null;
+        return Collections.emptyList();
     }
 }
