@@ -12,7 +12,7 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 
-public final class SimpleShapeConverter {
+public final class SimpleGeometryConverter {
 
     private static final WKTReader wktReader = new WKTReader();
     private static final GMLReader gmlReader = new GMLReader();
@@ -20,9 +20,9 @@ public final class SimpleShapeConverter {
     private static final GMLWriter gmlWriter = new GMLWriter();
     private static final GeometryFactory factory = new GeometryFactory();
 
-    private static final SimpleShapeConverter instance = new SimpleShapeConverter();
+    private static final SimpleGeometryConverter instance = new SimpleGeometryConverter();
 
-    public static SimpleShapeConverter getInstance() {
+    public static SimpleGeometryConverter getInstance() {
         return instance;
     }
 
