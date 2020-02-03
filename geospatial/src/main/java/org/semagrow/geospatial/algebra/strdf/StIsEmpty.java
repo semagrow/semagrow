@@ -3,7 +3,6 @@ package org.semagrow.geospatial.algebra.strdf;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.query.algebra.evaluation.ValueExprEvaluationException;
 import org.eclipse.rdf4j.query.algebra.evaluation.function.Function;
@@ -13,6 +12,7 @@ import org.semagrow.geospatial.commons.SimpleShapeFactory;
 import org.semagrow.geospatial.vocabulary.STRDF;
 
 public class StIsEmpty implements Function {
+	
     @Override
     public String getURI() {
         return STRDF.isEmpty.toString();
@@ -34,8 +34,8 @@ public class StIsEmpty implements Function {
         } catch (IllegalGeometryException e) {
             throw new ValueExprEvaluationException("Illegal WKT format", e);
         }
-        boolean isEmpty = shape.isEmpty();
-        Value value = SimpleValueFactory.getInstance().createLiteral(isEmpty);
+        boolean empty = shape.isEmpty();
+        Value value = valueFactory.createLiteral(empty);
         return  value;
     }
 }

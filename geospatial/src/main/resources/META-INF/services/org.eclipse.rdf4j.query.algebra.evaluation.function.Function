@@ -18,3 +18,16 @@ org.semagrow.geospatial.algebra.strdf.StDifference
 org.semagrow.geospatial.algebra.strdf.StSymDifference
 org.semagrow.geospatial.algebra.strdf.StSrid
 org.semagrow.geospatial.algebra.strdf.StArea
+org.semagrow.geospatial.algebra.strdf.StIsEmpty
+org.semagrow.geospatial.algebra.strdf.StMbb
+org.semagrow.geospatial.algebra.strdf.StMbbIntersects
+org.semagrow.geospatial.algebra.strdf.StMbbEquals
+org.semagrow.geospatial.algebra.strdf.StMbbWithin
+org.semagrow.geospatial.algebra.strdf.StMbbContains
+org.semagrow.geospatial.algebra.strdf.StIsSimple
+org.semagrow.geospatial.algebra.strdf.StGeometryType
+org.semagrow.geospatial.algebra.strdf.StDimension
+org.semagrow.geospatial.algebra.strdf.StLeft
+org.semagrow.geospatial.algebra.strdf.StRight
+org.semagrow.geospatial.algebra.strdf.StAbove
+org.semagrow.geospatial.algebra.strdf.StBelow
