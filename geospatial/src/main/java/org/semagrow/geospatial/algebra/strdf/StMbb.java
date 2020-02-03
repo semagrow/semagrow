@@ -7,11 +7,8 @@ import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.query.algebra.evaluation.ValueExprEvaluationException;
 import org.eclipse.rdf4j.query.algebra.evaluation.function.Function;
 import org.locationtech.jts.geom.Geometry;
-import org.locationtech.spatial4j.shape.Rectangle;
-import org.locationtech.spatial4j.shape.Shape;
 import org.semagrow.geospatial.commons.IllegalGeometryException;
 import org.semagrow.geospatial.commons.SimpleGeometryFactory;
-import org.semagrow.geospatial.commons.SimpleShapeFactory;
 import org.semagrow.geospatial.vocabulary.STRDF;
 
 public class StMbb implements Function {
@@ -31,18 +28,16 @@ public class StMbb implements Function {
         }
 
         String wktString = values[0].stringValue();
-        Shape shape = null;
         Geometry geometry = null;
         try {
-            shape = SimpleShapeFactory.getInstance().createShape(wktString);
-            Rectangle mbb = shape.getBoundingBox();
-            geometry = SimpleGeometryFactory.getInstance().createGeometry(mbb);
+        	geometry = SimpleGeometryFactory.getInstance().createGeometry(wktString);
         } catch (IllegalGeometryException e) {
             throw new ValueExprEvaluationException("Illegal WKT format", e);
         } catch (RuntimeException e) {
 			throw new ValueExprEvaluationException(e);
 		}
-        wktString = geometry.toText();
+        Geometry mbb = geometry.getEnvelope();
+        wktString = mbb.toText();
         Value value = valueFactory.createLiteral(wktString);
         return value;
     }

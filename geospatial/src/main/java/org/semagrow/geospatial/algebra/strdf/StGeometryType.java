@@ -21,7 +21,7 @@ public class StGeometryType implements Function {
     @Override
     public Value evaluate(ValueFactory valueFactory, Value... values) throws ValueExprEvaluationException {
     	if (values.length != 1) {
-            throw new ValueExprEvaluationException("Wrong number of arguments");
+            throw new ValueExprEvaluationException(getURI() + " requires exactly 1 argument, got " + values.length);
         }
         if (!(values[0] instanceof Literal && ((Literal) values[0]).getDatatype().equals(GEO.WKT_LITERAL))) {
             throw new ValueExprEvaluationException("Illegal argument format");
