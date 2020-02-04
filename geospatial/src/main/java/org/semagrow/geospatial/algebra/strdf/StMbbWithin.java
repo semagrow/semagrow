@@ -19,8 +19,8 @@ public class StMbbWithin implements Function {
 			throw new ValueExprEvaluationException(getURI() + " requires exactly 2 arguments, got " + values.length);
 		}
 
-        Value value1 = new StMbb().evaluate(valueFactory, values[0]);
-        Value value2 = new StMbb().evaluate(valueFactory, values[1]);
+        Value value1 = new StEnvelope().evaluate(valueFactory, values[0]);
+        Value value2 = new StEnvelope().evaluate(valueFactory, values[1]);
         return new StWithin().evaluate(valueFactory, value1, value2);
     }
 }

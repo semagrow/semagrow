@@ -5,7 +5,7 @@ import org.locationtech.jts.geom.Geometry;
 
 public class SimpleGeometryCoordinates {
 	/* What happens if Geometry is empty? */
-
+	
     public static double maxX(Geometry mbb) {
         Coordinate[] coords = mbb.getCoordinates();
         double maxX = 0;
