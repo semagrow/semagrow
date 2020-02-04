@@ -16,8 +16,7 @@ public class StEnvelope implements Function {
 
     @Override
     public Value evaluate(ValueFactory valueFactory, Value... values) throws ValueExprEvaluationException {
-        Value value = new Envelope().evaluate(valueFactory, values);
-    	return value;
+    	return new Envelope().evaluate(valueFactory, values);
     }
     
 }

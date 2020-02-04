@@ -16,8 +16,7 @@ public class StExtent implements Function {
     @Override
     public Value evaluate(ValueFactory valueFactory, Value... values) throws ValueExprEvaluationException {
         Value sets = new StUnion().evaluate(valueFactory, values);
-        Value ret = new StEnvelope().evaluate(valueFactory, sets);
-    	return ret;
+    	return new StEnvelope().evaluate(valueFactory, sets);
     }
     
 }
