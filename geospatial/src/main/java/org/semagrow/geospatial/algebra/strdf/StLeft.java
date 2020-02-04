@@ -4,10 +4,10 @@ import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.query.algebra.evaluation.ValueExprEvaluationException;
 import org.eclipse.rdf4j.query.algebra.evaluation.function.Function;
-import org.locationtech.spatial4j.shape.Rectangle;
-import org.locationtech.spatial4j.shape.Shape;
+import org.locationtech.jts.geom.Geometry;
 import org.semagrow.geospatial.commons.IllegalGeometryException;
-import org.semagrow.geospatial.commons.SimpleShapeFactory;
+import org.semagrow.geospatial.commons.SimpleGeometryCoordinates;
+import org.semagrow.geospatial.commons.SimpleGeometryFactory;
 import org.semagrow.geospatial.vocabulary.STRDF;
 
 public class StLeft implements Function {
@@ -16,7 +16,7 @@ public class StLeft implements Function {
     public String getURI() {
         return STRDF.left.toString();
     }
-
+    
     @Override
     public Value evaluate(ValueFactory valueFactory, Value... values) throws ValueExprEvaluationException {
     	if (values.length != 2) {
@@ -28,16 +28,17 @@ public class StLeft implements Function {
         
         String wktString1 = value1.stringValue();
         String wktString2 = value2.stringValue();
-        Shape mbb1 = null, mbb2 = null;
+        Geometry mbb1 = null, mbb2 = null;
         try {
-        	mbb1 = SimpleShapeFactory.getInstance().createShape(wktString1);
-        	mbb2 = SimpleShapeFactory.getInstance().createShape(wktString2);
+        	mbb1 = SimpleGeometryFactory.getInstance().createGeometry(wktString1);
+        	mbb2 = SimpleGeometryFactory.getInstance().createGeometry(wktString2);
         } catch (IllegalGeometryException e) {
             throw new ValueExprEvaluationException("Illegal WKT format", e);
         } catch (RuntimeException e) {
 			throw new ValueExprEvaluationException(e);
 		}
-        boolean left = ((Rectangle) mbb1).getMaxX() <= ((Rectangle) mbb2).getMinX();
+        
+        boolean left = SimpleGeometryCoordinates.maxX(mbb1) < SimpleGeometryCoordinates.minX(mbb2);
         Value value = valueFactory.createLiteral(left);
         return value;
     }
