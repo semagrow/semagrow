@@ -35,7 +35,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
     public QueryExecutorResolver queryExecutorResolver;
 
-    private int batchSize = 10;
+    private int batchSize = 1;
 
     public FederatedEvaluationStrategyImpl(final ValueFactory vf) {
         super(new TripleSource() {
@@ -196,7 +196,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
 
         return Flux.fromIterable(bindings)
                 .filter((b) -> !BindingSetUtil.hasBNode(bindingSetOps.project(free, b)))
-                .buffer()
+                .buffer(getBatchSize())
                 .flatMap((bl) -> {
                     Publisher<BindingSet> result = null;
                     if (bl.isEmpty())

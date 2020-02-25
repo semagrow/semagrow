@@ -282,7 +282,7 @@ public class EvaluationStrategyImpl implements EvaluationStrategy {
     public Flux<BindingSet> evaluateReactorInternal(Union expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        return Flux.merge(
+        return Flux.concat(
                 this.evaluateReactorInternal(expr.getLeftArg(), bindings),
                 this.evaluateReactorInternal(expr.getRightArg(), bindings));
     }

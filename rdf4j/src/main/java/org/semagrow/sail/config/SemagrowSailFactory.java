@@ -20,7 +20,7 @@ import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 import org.eclipse.rdf4j.repository.config.RepositoryFactory;
 import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryRegistry;
-import org.eclipse.rdf4j.repository.sail.config.RepositoryResolver;
+import org.eclipse.rdf4j.repository.RepositoryResolver;
 import org.eclipse.rdf4j.repository.sail.config.RepositoryResolverClient;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -202,5 +202,4 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
     public void setRepositoryResolver(RepositoryResolver repositoryResolver) {
         this.repositoryResolver = repositoryResolver;
     }
-
 }
