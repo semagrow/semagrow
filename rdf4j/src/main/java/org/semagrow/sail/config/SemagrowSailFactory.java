@@ -129,6 +129,8 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
 
             selector = new AskSourceSelector(selector);
             selector = new CachedSourceSelector(selector);
+            selector = new PrefixQueryAwareSourceSelector(selector);
+            ((PrefixQueryAwareSourceSelector) selector).setMetadataRepository(metadata);
 
             return selector;
         }
