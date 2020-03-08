@@ -13,6 +13,10 @@
     <artifactId>semagrow-geospatial</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <semagrow.version>${project.version}</semagrow.version>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>
@@ -29,6 +33,12 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryalgebra-geosparql</artifactId>
             <version>${rdf4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.semagrow</groupId>
+            <artifactId>semagrow-core</artifactId>
+            <version>${semagrow.version}</version>
+            <scope>compile</scope>
         </dependency>
     </dependencies>
 
