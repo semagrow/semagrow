@@ -32,7 +32,7 @@ public class BoundingBoxBase {
 
         TriplePattern t1 = dataset.has(RDF.TYPE, VOID.DATASET);
         TriplePattern t2 = dataset.has(VOID.SPARQLENDPOINT, endpoint);
-        TriplePattern t3 = dataset.has(SEVOD_GEO.DATASET_BOUNDING_BOX, mbb);
+        TriplePattern t3 = dataset.has(SEVOD_GEO.DATASET_BOUNDING_POLYGON, mbb);
 
         GraphPattern body = GraphPatterns.and(t1,t2,t3);
         SelectQuery selectQuery = Queries.SELECT().select(mbb).where(body);

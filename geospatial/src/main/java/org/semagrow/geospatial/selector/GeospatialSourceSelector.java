@@ -62,25 +62,29 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
             if (patternAsWKT.getPredicateVar().hasValue() && patternAsWKT.getPredicateVar().getValue().equals(GEO.AS_WKT)) {
                 /* we found a ?s geo:asWKT ?o */
 
-                Set<SourceMetadata> sources = new HashSet<>();
+                Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(patternAsWKT, null, EmptyBindingSet.getInstance());
+                Set<SourceMetadata> prunedSources = new HashSet<>();
 
                 /* search for corresponding filter */
                 for (ValueExpr filter: filters) {
                     Set<String> filterVars = VarNameCollector.process(filter);
-                    if (filterVars.contains(patternAsWKT.getObjectVar().getName()) && filterVars.size() == 1) {
+                    String varName = patternAsWKT.getObjectVar().getName();
 
-                        Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(patternAsWKT, null, EmptyBindingSet.getInstance());
+                    if (filterVars.contains(varName) && filterVars.size() == 1) {
                         for (SourceMetadata source: candidateSources) {
                             Literal boundingBox = boundingBoxBase.getDatasetBoundingBox(endpointOfSource(source));
                             if (boundingBox != null) {
-                                /* check if can prune source */
+                               if (BoundingBoxPruner.prune(filter, varName, boundingBox)) {
+                                   prunedSources.add(source);
+                               }
                             }
-                            sources.add(source);
                         }
-
-                        break; // use only first filter
                     }
                 }
+                Set<SourceMetadata> sources = new HashSet<>();
+                sources.addAll(candidateSources);
+                sources.removeAll(prunedSources);
+
                 selectorMap.put(patternAsWKT, sources);
 
                 /* search for corresponding hasGeometry pattern */
