@@ -23,6 +23,7 @@ import org.semagrow.selector.SourceSelector;
 import org.semagrow.selector.SourceSelectorWrapper;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class GeospatialSourceSelector extends SourceSelectorWrapper implements QueryAwareSourceSelector  {
 
@@ -57,18 +58,20 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
 
         Collection<StatementPattern> patterns = StatementPatternCollector.process(expr);
         Collection<ValueExpr> filters = FilterCollector.process(expr);
+        Map<String,Set<Resource>> hasGeoMap = new HashMap<>();
 
-        for (StatementPattern patternAsWKT: patterns) {
-            if (patternAsWKT.getPredicateVar().hasValue() && patternAsWKT.getPredicateVar().getValue().equals(GEO.AS_WKT)) {
+        for (StatementPattern pattern: patterns) {
+            if (pattern.getPredicateVar().hasValue() && pattern.getPredicateVar().getValue().equals(GEO.AS_WKT)) {
                 /* we found a ?s geo:asWKT ?o */
 
-                Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(patternAsWKT, null, EmptyBindingSet.getInstance());
+                Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(pattern, null, EmptyBindingSet.getInstance());
                 Set<SourceMetadata> prunedSources = new HashSet<>();
+                Set<Resource> endpoints = candidateSources.stream().map(s -> endpointOfSource(s)).collect(Collectors.toSet());
 
                 /* search for corresponding filter */
                 for (ValueExpr filter: filters) {
                     Set<String> filterVars = VarNameCollector.process(filter);
-                    String varName = patternAsWKT.getObjectVar().getName();
+                    String varName = pattern.getObjectVar().getName();
 
                     if (filterVars.contains(varName) && filterVars.size() == 1) {
                         for (SourceMetadata source: candidateSources) {
@@ -76,6 +79,7 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
                             if (boundingBox != null) {
                                if (BoundingBoxPruner.prune(filter, varName, boundingBox)) {
                                    prunedSources.add(source);
+                                   endpoints.remove(endpointOfSource(source));
                                }
                             }
                         }
@@ -85,16 +89,25 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
                 sources.addAll(candidateSources);
                 sources.removeAll(prunedSources);
 
-                selectorMap.put(patternAsWKT, sources);
+                selectorMap.put(pattern, sources);
+                hasGeoMap.put(pattern.getSubjectVar().getName(), endpoints);
+            }
+        }
 
-                /* search for corresponding hasGeometry pattern */
-                for (StatementPattern patternHasGeometry: patterns) {
-                    if (patternHasGeometry.getPredicateVar().hasValue() &&
-                            patternHasGeometry.getPredicateVar().getValue().equals(HAS_GEOMETRY) &&
-                            patternHasGeometry.getObjectVar().getName().equals(patternAsWKT.getSubjectVar().getName())) {
-                        selectorMap.put(patternHasGeometry, sources);
+        /* search for corresponding hasGeometry patterns */
+        for (StatementPattern pattern: patterns) {
+            if (pattern.getPredicateVar().hasValue() && pattern.getPredicateVar().getValue().equals(HAS_GEOMETRY)) {
+                /* we found a ?s geo:hasGeometry ?g */
+
+                Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(pattern, null, EmptyBindingSet.getInstance());
+                Set<SourceMetadata> prunedSources = new HashSet<>();
+
+                for (SourceMetadata source: candidateSources) {
+                    if (hasGeoMap.get(pattern.getObjectVar().getName()).contains(endpointOfSource(source))) {
+                        prunedSources.add(source);
                     }
                 }
+                selectorMap.put(pattern, prunedSources);
             }
         }
     }
