@@ -58,7 +58,7 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
 
         Collection<StatementPattern> patterns = StatementPatternCollector.process(expr);
         Collection<ValueExpr> filters = FilterCollector.process(expr);
-        Map<String,Set<Resource>> hasGeoMap = new HashMap<>();
+        //Map<String,Set<Resource>> hasGeoMap = new HashMap<>();
 
         for (StatementPattern pattern: patterns) {
             if (pattern.getPredicateVar().hasValue() && pattern.getPredicateVar().getValue().equals(GEO.AS_WKT)) {
@@ -90,14 +90,15 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
                 sources.removeAll(prunedSources);
 
                 selectorMap.put(pattern, sources);
-                hasGeoMap.put(pattern.getSubjectVar().getName(), endpoints);
+                //hasGeoMap.put(pattern.getSubjectVar().getName(), endpoints);
             }
         }
 
         /* search for corresponding hasGeometry patterns */
+        /*
         for (StatementPattern pattern: patterns) {
             if (pattern.getPredicateVar().hasValue() && pattern.getPredicateVar().getValue().equals(HAS_GEOMETRY)) {
-                /* we found a ?s geo:hasGeometry ?g */
+                // we found a ?s geo:hasGeometry ?g
 
                 Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(pattern, null, EmptyBindingSet.getInstance());
                 Set<SourceMetadata> prunedSources = new HashSet<>();
@@ -110,6 +111,7 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
                 selectorMap.put(pattern, prunedSources);
             }
         }
+        */
     }
 
     private Resource endpointOfSource(SourceMetadata source) {
