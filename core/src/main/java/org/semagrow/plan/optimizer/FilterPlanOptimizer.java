@@ -23,7 +23,7 @@ public class FilterPlanOptimizer implements QueryOptimizer {
 
         public void meet(Filter filter) {
             super.meet(filter);
-            FilterOptimizer.FilterRelocator.relocate(filter);
+            FilterRelocator.relocate(filter);
         }
     }
 
