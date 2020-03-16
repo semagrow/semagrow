@@ -63,7 +63,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
         plans = getContext().enforceProps(plans, props);
         getContext().prune(plans);
 
-        Plan plan = (plans.isEmpty()) ? null : plans.iterator().next();
+        Plan plan = (plans.isEmpty()) ? new Plan(new EmptySet()) : plans.iterator().next();
 
         optimize(plan, dataset, bindings);
 
