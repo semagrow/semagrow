@@ -1,4 +1,6 @@
-FROM maven:3.3.3-jdk-8 as build
+#syntax=docker/dockerfile:experimental
+
+FROM maven:3.6-jdk-8 as build
 
 LABEL maintainer="Giannis Mouchakis <gmouchakis@iit.demokritos.gr>"
 
@@ -6,7 +8,7 @@ WORKDIR /semagrow
 
 COPY . /semagrow
 
-RUN mvn clean package
+RUN --mount=type=cache,target=/root/.m2 mvn clean install
 
 
 FROM tomcat:8.5-jre8-alpine
