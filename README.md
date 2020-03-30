@@ -48,9 +48,9 @@ PostgresSQL database needs to be installed and run separately.
 
 #### Building a Docker image from sources
 
-You can also test your build deployed in a docker image. To do so run at the project root directory:
+You can also test your build deployed in a docker image (Docker 18.09 or newer required for building). To do so run at the project root directory:
 ```bash
-$ docker build -t semagrow .
+$ DOCKER_BUILDKIT=1 docker build -t semagrow .
 ```
 The produced image will be tagged as `semagrow:latest` and will contain Tomcat with Semagrow deployed.
 
