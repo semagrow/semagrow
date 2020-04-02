@@ -29,6 +29,9 @@ public class PrefixQueryAwareSourceSelector extends SourceSelectorWrapper implem
 
     @Override
     public void processTupleExpr(TupleExpr expr) {
+        if (getWrappedSelector() instanceof QueryAwareSourceSelector) {
+            ((QueryAwareSourceSelector) getWrappedSelector()).processTupleExpr(expr);
+        }
         Collection<TupleExpr> bpgs = BPGCollector.process(expr);
         for (TupleExpr bpg: bpgs) {
             processBPG(bpg);

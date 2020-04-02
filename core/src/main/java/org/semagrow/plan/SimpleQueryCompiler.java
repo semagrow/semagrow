@@ -9,9 +9,8 @@ import org.eclipse.rdf4j.query.algebra.evaluation.impl.*;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
-import org.semagrow.estimator.SimpleCardinalityEstimatorResolver;
-import org.semagrow.estimator.SimpleCostEstimatorResolver;
 import org.semagrow.local.LocalSite;
+import org.semagrow.plan.optimizer.FilterPlanOptimizer;
 import org.semagrow.plan.queryblock.*;
 import org.semagrow.selector.QueryAwareSourceSelector;
 import org.semagrow.selector.SourceSelector;
@@ -64,10 +63,11 @@ public class SimpleQueryCompiler implements QueryCompiler {
         plans = getContext().enforceProps(plans, props);
         getContext().prune(plans);
 
-        if (plans.isEmpty())
-            return null;
-        else
-            return plans.iterator().next();
+        Plan plan = (plans.isEmpty()) ? new Plan(new EmptySet()) : plans.iterator().next();
+
+        optimize(plan, dataset, bindings);
+
+        return plan;
     }
 
     private QueryBlock blockify(QueryRoot query, Dataset dataset, BindingSet bindings) {
@@ -98,6 +98,15 @@ public class SimpleQueryCompiler implements QueryCompiler {
                 new DisjunctiveConstraintOptimizer(),   // split Filters Or to Union
                 new FilterOptimizer(),                  // push Filters as deep as possible
                 new QueryModelNormalizer()              // remove emptysets, singletonsets, transform to DNF (union before joins)
+        );
+
+        queryOptimizer.optimize(expr, dataset, bindings);
+    }
+
+    protected void optimize(TupleExpr expr, Dataset dataset, BindingSet bindings) {
+
+        QueryOptimizer queryOptimizer =  new QueryOptimizerList(
+                new FilterPlanOptimizer()
         );
 
         queryOptimizer.optimize(expr, dataset, bindings);
