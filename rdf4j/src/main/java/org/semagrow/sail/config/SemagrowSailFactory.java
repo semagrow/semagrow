@@ -5,6 +5,7 @@ import org.semagrow.config.*;
 import org.semagrow.connector.sparql.selector.AskSourceSelector;
 import org.semagrow.estimator.*;
 import org.semagrow.alignment.QueryTransformationImpl;
+import org.semagrow.geospatial.selector.GeospatialSourceSelector;
 import org.semagrow.sail.SemagrowSail;
 import org.semagrow.selector.*;
 import org.semagrow.alignment.SourceSelectorWithQueryTransform;
@@ -131,6 +132,8 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
             selector = new CachedSourceSelector(selector);
             selector = new PrefixQueryAwareSourceSelector(selector);
             ((PrefixQueryAwareSourceSelector) selector).setMetadataRepository(metadata);
+            selector = new GeospatialSourceSelector(selector);
+            ((GeospatialSourceSelector) selector).setMetadataRepository(metadata);
 
             return selector;
         }
