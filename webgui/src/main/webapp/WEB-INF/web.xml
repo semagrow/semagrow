@@ -60,6 +60,7 @@
         <url-pattern>/sparql/decompose</url-pattern>
     </servlet-mapping>
 
+<!--
     <security-constraint>
         <web-resource-collection>
             <web-resource-name>*</web-resource-name>
@@ -99,5 +100,7 @@
     <login-config>
         <realm-name>SemaGrow</realm-name>
         <auth-method>BASIC</auth-method> 
-    </login-config>    
+    </login-config>
+-->
+
 </web-app>

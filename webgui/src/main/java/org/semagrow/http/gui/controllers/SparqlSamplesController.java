@@ -50,8 +50,8 @@ public class SparqlSamplesController {
     }
     
     @PostConstruct
-    public void startUp() throws IOException, RDFParseException, RDFHandlerException  {
-        if(this.sparqlSamplesFile!=null){
+    public void startUp() /**throws IOException, RDFParseException, RDFHandlerException*/ {
+        /**if(this.sparqlSamplesFile!=null){
             HashMapHandler handler = new HashMapHandler();
             RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
             parser.setRDFHandler(handler);
@@ -65,7 +65,7 @@ public class SparqlSamplesController {
                     fis.close();
                 }
             }            
-        }
+        }*/
     }
     
     @PreDestroy

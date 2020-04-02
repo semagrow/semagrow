@@ -116,3 +116,5 @@ be retrieved using [`docker inspect`](https://docs.docker.com/engine/reference/c
 ## Known issues
 
 * SemaGrow uses UNION instead of VALUES to implement the BindJoin operator. This fails in 4store 1.1.5 and previous versions in the  presence of FILTER clauses due to an unsafe optimization by 4store.
+* When deploying in Glassfish 4 by coping the SemaGrow.war file in the autodeploy directory, Semagrow is accessible at `http://DOMAIN/SemaGrow/index.jsp` instead of `http://DOMAIN/SemaGrow/`
+
