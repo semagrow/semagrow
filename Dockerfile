@@ -11,7 +11,7 @@ COPY . /semagrow
 RUN --mount=type=cache,target=/root/.m2 mvn clean install
 
 
-FROM tomcat/8.5-jre8-slim
+FROM tomcat:8.5-jre8-slim
 
 RUN mkdir -p /etc/default/semagrow
 
