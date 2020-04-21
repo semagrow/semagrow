@@ -1,5 +1,6 @@
 package org.semagrow.http.controllers;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.eclipse.rdf4j.common.webapp.util.HttpServerUtil;
@@ -16,6 +17,7 @@ import org.eclipse.rdf4j.repository.Repository;
 import org.eclipse.rdf4j.repository.RepositoryConnection;
 import org.eclipse.rdf4j.repository.RepositoryException;
 import org.eclipse.rdf4j.repository.sail.config.RepositoryResolver;
+import org.semagrow.art.LogUtils;
 import org.semagrow.repository.SemagrowRepositoryResolver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,24 +79,18 @@ public abstract class AbstractQueryController extends WebContentGenerator implem
             }
         }
 
-        int qryCode = 0;
-        if (logger.isInfoEnabled() || logger.isDebugEnabled()) {
-            qryCode = String.valueOf(queryStr).hashCode();
-        }
-
         boolean headersOnly = false;
         if (METHOD_GET.equals(reqMethod)) {
-            logger.info("GET query {}", qryCode);
+            logger.info("GET query {}", queryStr);
         }
         else if (METHOD_HEAD.equals(reqMethod)) {
-            logger.info("HEAD query {}", qryCode);
+            logger.info("HEAD query {}", queryStr);
             headersOnly = true;
         }
         else if (METHOD_POST.equals(reqMethod)) {
-            logger.info("POST query {}", qryCode);
+            logger.info("POST query {}", queryStr);
         }
-
-        logger.debug("query {} = {}", qryCode, queryStr);
+        logger.info("[{}] New query with MD5: {}", LogUtils.getNewQueryID(), DigestUtils.md5Hex(queryStr));
 
         if (queryStr != null) {
 

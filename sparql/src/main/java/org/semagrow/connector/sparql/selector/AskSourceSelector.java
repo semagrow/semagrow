@@ -1,6 +1,5 @@
 package org.semagrow.connector.sparql.selector;
 
-import org.semagrow.art.Loggable;
 import org.semagrow.selector.Site;
 import org.semagrow.selector.SourceMetadata;
 import org.semagrow.selector.SourceSelector;
@@ -111,7 +110,6 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 	 * @param list The list of candidate data sources
 	 * @return The subset of the data sources in list that contain triples matching the pattern
 	 */
-	 @Loggable
 	 private Collection<SourceMetadata> restrictSourceList( StatementPattern pattern, Collection<SourceMetadata> list )
 	 {
 		 Collection<SourceMetadata> restrictedList = new LinkedList<SourceMetadata>();

@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.query.algebra.QueryRoot;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.*;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
+import org.semagrow.art.Loggable;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
 import org.semagrow.local.LocalSite;
@@ -38,6 +39,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
     }
 
     @Override
+    @Loggable
     public Plan compile(QueryRoot query, Dataset dataset, BindingSet bindings) {
 
         // transformations on logical query.
@@ -46,9 +48,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
         // split query to queryblocks.
         QueryBlock blockRoot = blockify(query, dataset, bindings);
 
-        if (sourceSelector instanceof QueryAwareSourceSelector) {
-            ((QueryAwareSourceSelector) sourceSelector).processTupleExpr(query);
-        }
+        performSourceSelection(query);
 
         // infer interesting properties for each query block.
         blockRoot.visit(new InterestingPropertiesVisitor());     // infer interesting properties for each block
@@ -68,6 +68,13 @@ public class SimpleQueryCompiler implements QueryCompiler {
         optimize(plan, dataset, bindings);
 
         return plan;
+    }
+
+    @Loggable
+    private void performSourceSelection(QueryRoot query) {
+        if (sourceSelector instanceof QueryAwareSourceSelector) {
+            ((QueryAwareSourceSelector) sourceSelector).processTupleExpr(query);
+        }
     }
 
     private QueryBlock blockify(QueryRoot query, Dataset dataset, BindingSet bindings) {
