@@ -90,7 +90,7 @@ public abstract class AbstractQueryController extends WebContentGenerator implem
         else if (METHOD_POST.equals(reqMethod)) {
             logger.info("POST query {}", queryStr);
         }
-        logger.info("[{}] New query with MD5: {}", LogUtils.getNewQueryID(), DigestUtils.md5Hex(queryStr));
+        logger.info("Query MD5: {}", DigestUtils.md5Hex(queryStr));
 
         if (queryStr != null) {
 

@@ -132,7 +132,7 @@ public class SemagrowSailConnection extends AbstractSailConnection {
         decomposed = decompose(tupleExpr, dataset, bindings, includeOnlySources, excludeSources);
 
         logger.debug("Query decomposed to " + decomposed.toString());
-        logger.info("Decomposed query: " + decomposed.toString());
+        logger.info("Decomposed query: \n" + decomposed.toString());
 
         throw new SailException("Closeableiteration is not implemented. Please use the queryhandler");
         //return evaluateOnly(decomposed, dataset, bindings, b, p);

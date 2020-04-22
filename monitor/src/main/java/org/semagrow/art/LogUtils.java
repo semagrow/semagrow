@@ -6,12 +6,13 @@ import java.util.UUID;
 
 public final class LogUtils {
 
-    public static String getNewQueryID() {
-        MDC.put("qid", UUID.randomUUID().toString().substring(0,8));
-        return MDC.get("qid");
+    public static void setMDCifNull() {
+        if (MDC.get("uuid") == null) {
+            setMDC();
+        }
     }
 
-    public static String getQueryID() {
-        return MDC.get("qid");
+    public static void setMDC() {
+        MDC.put("uuid", UUID.randomUUID().toString());
     }
 }

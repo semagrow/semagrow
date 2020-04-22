@@ -26,9 +26,9 @@ public class MethodLogger {
             Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
             Logger logger = LoggerFactory.getLogger(method.getDeclaringClass());
             LogExprProcessing event = new LogExprProcessing();
-            logger.info( "[{}] Enter {}", LogUtils.getQueryID(), method.getName());
+            logger.info( "Enter {}", method.getName());
             result = point.proceed();
-            logger.info( "[{}] Exit  {}", LogUtils.getQueryID(), method.getName());
+            logger.info( "Exit  {}", method.getName());
             event.finalize();
         } catch (Throwable throwable) {
             throwable.printStackTrace();

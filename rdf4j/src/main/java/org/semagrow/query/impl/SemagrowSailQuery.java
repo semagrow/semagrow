@@ -1,5 +1,6 @@
 package org.semagrow.query.impl;
 
+import org.semagrow.art.LogUtils;
 import org.semagrow.query.SemagrowQuery;
 import org.semagrow.sail.SemagrowSailConnection;
 
@@ -60,7 +61,7 @@ public class SemagrowSailQuery extends SailQuery implements SemagrowQuery
          * SemagrowSailTupleQuery sets a new context for this thread; this instance
          * maintains a copy, which is passed to worker threads.
          */
-        org.slf4j.MDC.put( "uuid", UUID.randomUUID().toString() );
+        LogUtils.setMDCifNull();
 
         this.contextMap = org.slf4j.MDC.getCopyOfContextMap();
     }

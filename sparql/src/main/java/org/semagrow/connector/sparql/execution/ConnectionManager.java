@@ -47,7 +47,7 @@ public class ConnectionManager {
             repo.initialize();
 
         RepositoryConnection conn = repo.getConnection();
-        logger.info("Open [{}] (currently open={})", conn, countconn);
+        logger.debug("Open [{}] (currently open={})", conn, countconn);
         synchronized(this) { countconn++; }
         return conn;
     }
@@ -57,7 +57,7 @@ public class ConnectionManager {
             if (conn.isOpen()) {
                 conn.close();
                 synchronized (this) { countconn--; }
-                logger.info("Close [{}]", conn);
+                logger.debug("Close [{}]", conn);
             }
         } catch (RepositoryException e) {
             logger.warn("Connection [{}] cannot be closed", conn, e);

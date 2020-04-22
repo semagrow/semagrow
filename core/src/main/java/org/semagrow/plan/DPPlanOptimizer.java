@@ -122,7 +122,7 @@ public class DPPlanOptimizer
         prunePlans(fullPlans);
 
         if (!fullPlans.isEmpty()) {
-            logger.info("Found {} complete optimal plans", fullPlans.size());
+            logger.debug("Found {} complete optimal plans", fullPlans.size());
         } else {
             logger.warn("Found no complete plans");
         }

@@ -1,6 +1,6 @@
 package org.semagrow.query.impl;
 
-import org.semagrow.art.LogUtils;
+import org.semagrow.art.Loggable;
 import org.semagrow.query.SemagrowTupleQuery;
 import org.semagrow.sail.SemagrowSailConnection;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
@@ -71,6 +71,12 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
         logger.info("SemaGrow query evaluate with handler {}", this.queryString.replace('\n',' '));
         TupleExpr tupleExpr = getParsedQuery().getTupleExpr();
 
+        evaluate(tupleExpr, handler);
+    }
+
+    @Loggable
+    public void evaluate(TupleExpr tupleExpr, TupleQueryResultHandler handler)
+            throws QueryEvaluationException, TupleQueryResultHandlerException {
         try {
             Publisher<? extends BindingSet> result;
 
@@ -81,8 +87,6 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     getIncludedSources(), getExcludedSources());
 
             //result = enforceMaxQueryTime(bindingsIter);
-
-            logger.info("[{}] Query evaluation Start.", LogUtils.getQueryID());
 
             CountDownLatch latch = new CountDownLatch(1);
 
@@ -102,8 +106,6 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                 else
                     throw new QueryEvaluationException(subscriberAdapter.errorThrown);
             }
-
-            logger.info("[{}] Query evaluation End.", LogUtils.getQueryID());
         }
         catch (SailException e) {
             throw new QueryEvaluationException(e.getMessage(), e);
