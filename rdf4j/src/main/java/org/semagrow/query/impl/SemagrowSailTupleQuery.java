@@ -154,12 +154,12 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                         handler.startQueryResult(new ArrayList<>(bindings.getBindingNames()));
                     }
                     isStarted = true;
-                    logger.info("Found first result");
+                    logger.debug("Found first result");
                 }
                 synchronized (handler) {
                     handler.handleSolution(bindings);
                 }
-                logger.info("Found {}", bindings);
+                logger.debug("Found {}", bindings);
                 resultsCount++;
             } catch (TupleQueryResultHandlerException e) {
                 subscription.cancel();
@@ -198,7 +198,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
 
         public void onComplete() {
-            logger.info("Found {} results", resultsCount);
+            logger.debug("Found {} results", resultsCount);
             if (isStarted) {
                 try {
                     synchronized (handler) {
