@@ -15,6 +15,8 @@ import org.semagrow.plan.optimizer.FilterPlanOptimizer;
 import org.semagrow.plan.queryblock.*;
 import org.semagrow.selector.QueryAwareSourceSelector;
 import org.semagrow.selector.SourceSelector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 
@@ -24,6 +26,8 @@ import java.util.Collection;
  * @since 2.0
  */
 public class SimpleQueryCompiler implements QueryCompiler {
+
+    protected final Logger logger = LoggerFactory.getLogger(SimpleQueryCompiler.class);
 
     private CostEstimatorResolver costEstimatorResolver;
     private CardinalityEstimatorResolver cardinalityEstimatorResolver;
@@ -66,6 +70,8 @@ public class SimpleQueryCompiler implements QueryCompiler {
         Plan plan = (plans.isEmpty()) ? new Plan(new EmptySet()) : plans.iterator().next();
 
         optimize(plan, dataset, bindings);
+
+        logger.info("Query execution plan: {}", plan);
 
         return plan;
     }
