@@ -1,6 +1,5 @@
 package org.semagrow.query.impl;
 
-import org.semagrow.art.Loggable;
 import org.semagrow.query.SemagrowTupleQuery;
 import org.semagrow.sail.SemagrowSailConnection;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
@@ -61,22 +60,16 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
     }
 
     public void evaluate(TupleQueryResultHandler handler)
-            throws QueryEvaluationException, TupleQueryResultHandlerException
+            throws QueryEvaluationException, TupleQueryResultHandlerException 
     {
         /*
         TupleQueryResult queryResult = evaluate();
         QueryResults.report(queryResult, handler);
         */
 
-        logger.info("SemaGrow query evaluate with handler {}", this.queryString.replace('\n',' '));
+        logger.info("Evaluate query with handler");
         TupleExpr tupleExpr = getParsedQuery().getTupleExpr();
 
-        evaluate(tupleExpr, handler);
-    }
-
-    @Loggable
-    public void evaluate(TupleExpr tupleExpr, TupleQueryResultHandler handler)
-            throws QueryEvaluationException, TupleQueryResultHandlerException {
         try {
             Publisher<? extends BindingSet> result;
 
@@ -87,6 +80,8 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     getIncludedSources(), getExcludedSources());
 
             //result = enforceMaxQueryTime(bindingsIter);
+
+            logger.info( "Enter execute");
 
             CountDownLatch latch = new CountDownLatch(1);
 
@@ -106,6 +101,8 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                 else
                     throw new QueryEvaluationException(subscriberAdapter.errorThrown);
             }
+
+            logger.info( "Exit  execute");
         }
         catch (SailException e) {
             throw new QueryEvaluationException(e.getMessage(), e);
@@ -157,12 +154,12 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                         handler.startQueryResult(new ArrayList<>(bindings.getBindingNames()));
                     }
                     isStarted = true;
-                    logger.info("Found first result.");
+                    logger.info("Found first result");
                 }
                 synchronized (handler) {
                     handler.handleSolution(bindings);
                 }
-                logger.info("-> Found " + bindings);
+                logger.info("Found {}", bindings);
                 resultsCount++;
             } catch (TupleQueryResultHandlerException e) {
                 subscription.cancel();
@@ -201,7 +198,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
 
         public void onComplete() {
-            logger.info("Found " + resultsCount + " results.");
+            logger.info("Found {} results", resultsCount);
             if (isStarted) {
                 try {
                     synchronized (handler) {

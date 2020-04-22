@@ -79,6 +79,7 @@ public abstract class AbstractQueryController extends WebContentGenerator implem
             }
         }
 
+        LogUtils.setMDC();
         boolean headersOnly = false;
         if (METHOD_GET.equals(reqMethod)) {
             logger.info("GET query {}", queryStr);
