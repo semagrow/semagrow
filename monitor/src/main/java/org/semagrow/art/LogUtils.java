@@ -25,8 +25,8 @@ public final class LogUtils {
     public static String getKobeQueryDesc(String query) {
         String keyword = "#kobeQueryDesc ";
         assert hasKobeQueryDesc(query);
-        int i = keyword.length() - 1;
-        int j = query.indexOf('\n') - 1;
+        int i = keyword.length();
+        int j = query.indexOf('\n');
         return query.substring(i,j);
     }
 }
