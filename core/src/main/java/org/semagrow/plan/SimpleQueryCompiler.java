@@ -73,7 +73,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
         optimize(plan, dataset, bindings);
 
         logger.info("Query execution plan: {}", plan);
-        logger.info("Sources: {}", EndpointCollector.process(plan));
+        logger.info("Sources: {}", EndpointCollector.process(plan).size());
 
         return plan;
     }
