@@ -1,6 +1,5 @@
 package org.semagrow.http.controllers;
 
-import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
 import org.eclipse.rdf4j.common.webapp.util.HttpServerUtil;
@@ -91,9 +90,11 @@ public abstract class AbstractQueryController extends WebContentGenerator implem
         else if (METHOD_POST.equals(reqMethod)) {
             logger.info("POST query {}", queryStr);
         }
-        logger.info("Query MD5: {}", DigestUtils.md5Hex(queryStr));
 
         if (queryStr != null) {
+            if (LogUtils.hasKobeQueryDesc(queryStr)) {
+                logger.info(LogUtils.getKobeQueryDesc(queryStr));
+            }
 
             Repository repository = getRepository(request);
             RepositoryConnection repositoryCon = getRepositoryConnection(request);
