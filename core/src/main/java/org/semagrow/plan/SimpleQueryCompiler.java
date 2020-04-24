@@ -13,6 +13,7 @@ import org.semagrow.estimator.CostEstimatorResolver;
 import org.semagrow.local.LocalSite;
 import org.semagrow.plan.optimizer.FilterPlanOptimizer;
 import org.semagrow.plan.queryblock.*;
+import org.semagrow.plan.util.EndpointCollector;
 import org.semagrow.selector.QueryAwareSourceSelector;
 import org.semagrow.selector.SourceSelector;
 import org.slf4j.Logger;
@@ -72,6 +73,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
         optimize(plan, dataset, bindings);
 
         logger.info("Query execution plan: {}", plan);
+        logger.info("Sources: {}", EndpointCollector.process(plan));
 
         return plan;
     }
