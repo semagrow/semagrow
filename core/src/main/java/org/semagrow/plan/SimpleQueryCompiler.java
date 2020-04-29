@@ -53,7 +53,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
         // split query to queryblocks.
         QueryBlock blockRoot = blockify(query, dataset, bindings);
 
-        performSourceSelection(query);
+        sourceSelection(query);
 
         // infer interesting properties for each query block.
         blockRoot.visit(new InterestingPropertiesVisitor());     // infer interesting properties for each block
@@ -72,14 +72,14 @@ public class SimpleQueryCompiler implements QueryCompiler {
 
         optimize(plan, dataset, bindings);
 
-        logger.info("Query execution plan: {}", plan);
-        logger.info("Sources: {}", EndpointCollector.process(plan).size());
+        logger.info("execution plan: {}", plan);
+        logger.info("sources: {}", EndpointCollector.process(plan).size());
 
         return plan;
     }
 
     @Loggable
-    private void performSourceSelection(QueryRoot query) {
+    private void sourceSelection(QueryRoot query) {
         if (sourceSelector instanceof QueryAwareSourceSelector) {
             ((QueryAwareSourceSelector) sourceSelector).processTupleExpr(query);
         }

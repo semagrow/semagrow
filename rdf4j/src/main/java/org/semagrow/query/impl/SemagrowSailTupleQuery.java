@@ -81,7 +81,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
 
             //result = enforceMaxQueryTime(bindingsIter);
 
-            logger.info( "Enter execute");
+            long start = System.currentTimeMillis();
 
             CountDownLatch latch = new CountDownLatch(1);
 
@@ -102,7 +102,8 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
                     throw new QueryEvaluationException(subscriberAdapter.errorThrown);
             }
 
-            logger.info( "Exit  execute");
+            long duration = System.currentTimeMillis() - start;
+            logger.info( "execution time: {}", duration);
         }
         catch (SailException e) {
             throw new QueryEvaluationException(e.getMessage(), e);
