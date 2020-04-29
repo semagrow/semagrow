@@ -31,7 +31,7 @@ public class MethodLogger {
             result = point.proceed();
             long duration = System.currentTimeMillis() - start;
             logger.debug( "Exit  {}", method.getName());
-            logger.info("{} time: " + duration);
+            logger.info("{} time: {}", method.getName(), duration);
             event.finalize();
         } catch (Throwable throwable) {
             throwable.printStackTrace();

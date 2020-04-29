@@ -67,7 +67,7 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
         QueryResults.report(queryResult, handler);
         */
 
-        logger.info("Evaluate query with handler");
+        logger.debug("Evaluate query with handler");
         TupleExpr tupleExpr = getParsedQuery().getTupleExpr();
 
         try {
