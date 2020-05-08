@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.query.algebra.QueryRoot;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.*;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
+import org.semagrow.art.LogUtils;
 import org.semagrow.art.Loggable;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
@@ -53,7 +54,11 @@ public class SimpleQueryCompiler implements QueryCompiler {
         // split query to queryblocks.
         QueryBlock blockRoot = blockify(query, dataset, bindings);
 
+        long t1 = System.currentTimeMillis();
+
         sourceSelection(query);
+
+        long t2 = System.currentTimeMillis();
 
         // infer interesting properties for each query block.
         blockRoot.visit(new InterestingPropertiesVisitor());     // infer interesting properties for each block
@@ -72,8 +77,15 @@ public class SimpleQueryCompiler implements QueryCompiler {
 
         optimize(plan, dataset, bindings);
 
+        long t3 = System.currentTimeMillis();
+
+        String compilationReport = "" +
+                "Source Selection Time: " + (t2-t1) + ", " +
+                "Compile Time: " + (t3-t2) + ", " +
+                "Sources: " + EndpointCollector.process(plan).size();
+        LogUtils.appendKobeReport(compilationReport);
+
         logger.info("execution plan: {}", plan);
-        logger.info("sources: {}", EndpointCollector.process(plan).size());
 
         return plan;
     }

@@ -29,4 +29,16 @@ public final class LogUtils {
         int j = query.indexOf('\n');
         return query.substring(i,j);
     }
+
+    public static void initKobeReport() {
+        MDC.put("kobeReport", "");
+    }
+
+    public static String getKobeReport() {
+        return MDC.get("kobeReport");
+    }
+
+    public static void appendKobeReport(String s) {
+        MDC.put("kobeReport", getKobeReport() + ", " + s);
+    }
 }

@@ -93,7 +93,10 @@ public abstract class AbstractQueryController extends WebContentGenerator implem
 
         if (queryStr != null) {
             if (LogUtils.hasKobeQueryDesc(queryStr)) {
-                logger.info(LogUtils.getKobeQueryDesc(queryStr));
+                String kobeQueryDesc = LogUtils.getKobeQueryDesc(queryStr);
+                logger.debug(kobeQueryDesc);
+                LogUtils.initKobeReport();
+                LogUtils.appendKobeReport(kobeQueryDesc);
             }
 
             Repository repository = getRepository(request);

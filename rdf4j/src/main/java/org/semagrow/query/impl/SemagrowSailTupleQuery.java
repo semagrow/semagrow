@@ -1,5 +1,6 @@
 package org.semagrow.query.impl;
 
+import org.semagrow.art.LogUtils;
 import org.semagrow.query.SemagrowTupleQuery;
 import org.semagrow.sail.SemagrowSailConnection;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
@@ -14,6 +15,7 @@ import org.reactivestreams.Subscriber;
 import org.reactivestreams.Subscription;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.rmi.runtime.Log;
 
 import java.util.*;
 import java.util.concurrent.CountDownLatch;
@@ -103,7 +105,10 @@ public class SemagrowSailTupleQuery extends SemagrowSailQuery implements Semagro
             }
 
             long duration = System.currentTimeMillis() - start;
-            logger.info( "execution time: {}", duration);
+            LogUtils.appendKobeReport("Execution time: " + duration);
+
+            logger.debug( "execution time: {}", duration);
+            logger.info(LogUtils.getKobeReport());
         }
         catch (SailException e) {
             throw new QueryEvaluationException(e.getMessage(), e);
