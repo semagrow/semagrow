@@ -39,6 +39,6 @@ public final class LogUtils {
     }
 
     public static void appendKobeReport(String s) {
-        MDC.put("kobeReport", getKobeReport() + ", " + s);
+        MDC.put("kobeReport", getKobeReport() + " - " + s);
     }
 }

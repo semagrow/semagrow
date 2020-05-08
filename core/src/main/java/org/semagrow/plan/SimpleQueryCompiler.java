@@ -80,8 +80,8 @@ public class SimpleQueryCompiler implements QueryCompiler {
         long t3 = System.currentTimeMillis();
 
         String compilationReport = "" +
-                "Source Selection Time: " + (t2-t1) + ", " +
-                "Compile Time: " + (t3-t2) + ", " +
+                "Source Selection Time: " + (t2-t1) + " - " +
+                "Compile Time: " + (t3-t2) + " - " +
                 "Sources: " + EndpointCollector.process(plan).size();
         LogUtils.appendKobeReport(compilationReport);
 
