@@ -1,10 +1,9 @@
-package org.semagrow.connector.postgis.config;
+package org.semagrow.postgis;
 
+import org.semagrow.postgis.PostGISQueryExecutor;
 import org.semagrow.evaluation.QueryExecutor;
-import org.semagrow.evaluation.QueryExecutorConfigException;
 import org.semagrow.evaluation.QueryExecutorFactory;
 import org.semagrow.evaluation.QueryExecutorImplConfig;
-import org.semagrow.connector.postgis.execution.PostGISQueryExecutor;
 
 public class PostGISQueryExecutorFactory implements QueryExecutorFactory {
 	
@@ -19,7 +18,9 @@ public class PostGISQueryExecutorFactory implements QueryExecutorFactory {
     }
 
     @Override
-    public QueryExecutor getQueryExecutor(QueryExecutorImplConfig config) throws QueryExecutorConfigException {
-        return new PostGISQueryExecutor(null, null);
+    public QueryExecutor getQueryExecutor(QueryExecutorImplConfig config) {
+//        return new PostGISQueryExecutor(null, null);
+        return new PostGISQueryExecutor();
     }
+    
 }

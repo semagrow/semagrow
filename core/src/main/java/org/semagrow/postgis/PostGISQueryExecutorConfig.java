@@ -1,4 +1,4 @@
-package org.semagrow.connector.postgis.config;
+package org.semagrow.postgis;
 
 import org.semagrow.evaluation.QueryExecutorConfigException;
 import org.semagrow.evaluation.QueryExecutorImplConfig;
@@ -15,9 +15,7 @@ public class PostGISQueryExecutorConfig implements QueryExecutorImplConfig {
     }
 
     @Override
-    public void validate() throws QueryExecutorConfigException {
-
-    }
+    public void validate() throws QueryExecutorConfigException { }
 
     @Override
     public Resource export(Model graph) {
@@ -25,7 +23,6 @@ public class PostGISQueryExecutorConfig implements QueryExecutorImplConfig {
     }
 
     @Override
-    public void parse(Model graph, Resource resource) throws QueryExecutorConfigException {
-
-    }
+    public void parse(Model graph, Resource resource) throws QueryExecutorConfigException { }
+    
 }

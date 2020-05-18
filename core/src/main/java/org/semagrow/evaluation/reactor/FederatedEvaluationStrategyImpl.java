@@ -9,6 +9,7 @@ import org.semagrow.plan.Plan;
 import org.semagrow.evaluation.QueryExecutor;
 
 import org.semagrow.plan.operators.*;
+import org.semagrow.postgis.PostGISQueryExecutor;
 import org.semagrow.selector.Site;
 import org.eclipse.rdf4j.common.iteration.CloseableIteration;
 import org.eclipse.rdf4j.model.*;
@@ -175,8 +176,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     {
         Set<String> free = TupleExprs.getFreeVariables(expr);
         BindingSet relevant = bindingSetOps.project(free, bindings);
-        QueryExecutor executor = queryExecutorResolver.resolve(source)
-                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
+        QueryExecutor executor = new PostGISQueryExecutor();
+//        QueryExecutor executor = queryExecutorResolver.resolve(source)
+//                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
 
         if (BindingSetUtil.hasBNode(relevant))
             return Flux.empty();
@@ -191,8 +193,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             throws QueryEvaluationException
     {
         Set<String> free = TupleExprs.getFreeVariables(expr);
-        QueryExecutor executor = queryExecutorResolver.resolve(source)
-                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
+        QueryExecutor executor = new PostGISQueryExecutor();
+//        QueryExecutor executor = queryExecutorResolver.resolve(source)
+//                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
 
         return Flux.fromIterable(bindings)
                 .filter((b) -> !BindingSetUtil.hasBNode(bindingSetOps.project(free, b)))

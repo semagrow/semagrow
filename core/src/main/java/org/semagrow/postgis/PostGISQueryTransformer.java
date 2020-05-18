@@ -1,9 +1,8 @@
-package org.semagrow.connector.postgis.execution;
+package org.semagrow.postgis;
 
 import java.util.Collections;
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;

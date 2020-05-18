@@ -1,12 +1,9 @@
-package org.semagrow.connector.postgis.config;
+package org.semagrow.postgis;
 
-import org.semagrow.connector.postgis.PostGISSite;
+import org.semagrow.postgis.PostGISSite;
 import org.semagrow.selector.Site;
 import org.semagrow.selector.SiteConfig;
 import org.semagrow.selector.SiteFactory;
-
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class PostGISSiteFactory implements SiteFactory {
 
@@ -22,12 +19,12 @@ public class PostGISSiteFactory implements SiteFactory {
 
     @Override
     public Site getSite(SiteConfig config) {
-        try {
-            URL u = new URL(config.getSiteId());
-            return new PostGISSite(u);
-        } catch (MalformedURLException e) {
-            throw new IllegalArgumentException("Configuration is not a valid URL");
-        }
+    	if (config instanceof PostGISSiteConfig) {
+    		PostGISSiteConfig postgisSiteConfig = (PostGISSiteConfig)config;
+            return new PostGISSite(postgisSiteConfig.getEndpoint());
+    	}
+        else
+        	throw new IllegalArgumentException("config is not of type PostGISSiteConfig");
     }
 
 }
