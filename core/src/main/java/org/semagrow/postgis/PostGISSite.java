@@ -1,42 +1,68 @@
 package org.semagrow.postgis;
 
-import org.eclipse.rdf4j.model.IRI;
+import java.net.URL;
+
 import org.eclipse.rdf4j.model.Resource;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.semagrow.selector.Site;
 import org.semagrow.selector.SiteCapabilities;
 
 public class PostGISSite implements Site {
 	
-	static final String TYPE = "POSTGIS";
+	static final String TYPE = "SQL";
 		
-    private final IRI endpoint;
+//    private final IRI endpoint;
+    
+    private URL endpointURI;
 
-    public PostGISSite(IRI endpoint) {
-        this.endpoint = endpoint;
+//    public PostGISSite(IRI endpoint) {
+//        this.endpoint = endpoint;
+//    }
+    
+    public PostGISSite(URL uri) {
+        assert uri != null;
+        this.endpointURI = uri;
     }
     
+//    public Resource getID() { 
+//    	return getURI(); 
+//    }
+    
     public Resource getID() { 
-    	return getURI(); 
+    	return SimpleValueFactory.getInstance().createURI(getURL().toString()); 
     }
     
     public String getType() { 
     	return TYPE; 
     }
     
-    public IRI getURI() { 
-    	return endpoint; 
+//    public IRI getURI() { 
+//    	return endpoint; 
+//    }
+    
+    public URL getURL() { 
+    	return endpointURI; 
     }
 
     @Override
     public boolean isRemote() {
-        return endpoint != null;
+        return endpointURI != null;
     }
 
+//    @Override
+//    public boolean equals(Object o) {
+//        if (o instanceof PostGISSite) {
+//        	PostGISSite s = (PostGISSite)o;
+//            return (s.getURI().equals(this.getURI()));
+//        }
+//        return false;
+//    }
+    
     @Override
     public boolean equals(Object o) {
         if (o instanceof PostGISSite) {
         	PostGISSite s = (PostGISSite)o;
-            return (s.getURI().equals(this.getURI()));
+            return (s.getURL().equals(this.getURL()));
         }
         return false;
     }
@@ -67,8 +93,14 @@ public class PostGISSite implements Site {
 //        return getPostGISSchema().getKeyspace();
 //    }
     
+//    @Override
+//    public String toString() { 
+//    	return endpoint.toString(); 
+//    }
+    
     @Override
     public String toString() { 
-    	return endpoint.toString(); 
+    	return getURL().toString(); 
     }
+    
 }

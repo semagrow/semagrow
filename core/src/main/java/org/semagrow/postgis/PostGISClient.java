@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public class PostGISClient {
 
-	private final Logger logger = LoggerFactory.getLogger(PostGISClient.class);
+	private final static Logger logger = LoggerFactory.getLogger(PostGISClient.class);
     
     private String url;
     private String user;
@@ -26,6 +26,7 @@ public class PostGISClient {
     private PostGISClient() {}
 
     public static PostGISClient getInstance(String url, String user, String password) {
+    	logger.info("getInstance!!!");
         if (instance == null) {
             instance = new PostGISClient();
             instance.setCredentials(url, user, password);
@@ -35,12 +36,14 @@ public class PostGISClient {
     }
     
     private void setCredentials(String url, String user, String password) {
+    	logger.info("setCredentials!!!");
         this.url = url;
         this.user = user;
         this.password = password;
     }
 
     private void connect() {
+    	logger.info("connect!!!");
     	try {
 			Class.forName("org.postgresql.Driver");
 			database = DriverManager.getConnection(url, user, password);
@@ -55,6 +58,7 @@ public class PostGISClient {
     }
 
     private void close() {
+    	logger.info("close!!!");
 //        session.close();
 //        cluster.close();
         try {
@@ -67,6 +71,7 @@ public class PostGISClient {
     }
 
     public ResultSet execute(String query) {
+    	logger.info("execute!!!");
         logger.info("Sending query: {}", query);
         ResultSet results = null;
 		try {

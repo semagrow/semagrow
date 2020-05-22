@@ -37,6 +37,13 @@ public class SemagrowMyTest extends TestCase {
 				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				"}";
 		
+		String q3 = "" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom9 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/1> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom1 .\n" +
+				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"}";
+		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
 		Repository repo = new SemagrowSailRepository((SemagrowSail) factory.getSail(config));
