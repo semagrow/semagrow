@@ -3,6 +3,7 @@ package org.semagrow.postgis;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -80,6 +81,7 @@ public class PostGISClient {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		logger.info("results: {}", results);
         return results;
     }
 }

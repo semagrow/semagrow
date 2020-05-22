@@ -132,6 +132,12 @@
             <artifactId>rdf4j-queryrender</artifactId>
             <version>${rdf4j.version}</version>
         </dependency>
+        <!-- https://mvnrepository.com/artifact/postgresql/postgresql -->
+		<dependency>
+		    <groupId>org.postgresql</groupId>
+		    <artifactId>postgresql</artifactId>
+		    <version>42.2.12</version>
+		</dependency>
         
     </dependencies>
 
