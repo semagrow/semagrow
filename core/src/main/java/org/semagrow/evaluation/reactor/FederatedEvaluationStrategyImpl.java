@@ -176,6 +176,8 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     {
         Set<String> free = TupleExprs.getFreeVariables(expr);
         BindingSet relevant = bindingSetOps.project(free, bindings);
+        
+        logger.info("evaluateSourceReactive source {}", source.toString());
         QueryExecutor executor = new PostGISQueryExecutor();
 //        QueryExecutor executor = queryExecutorResolver.resolve(source)
 //                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));

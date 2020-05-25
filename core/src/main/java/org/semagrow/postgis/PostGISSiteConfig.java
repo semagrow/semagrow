@@ -10,7 +10,7 @@ public class PostGISSiteConfig implements SiteConfig {
 
     public static String TYPE = "POSTGIS";
     private String siteId;
-    private IRI endpoint;
+//    private IRI endpoint;
 
     @Override
     public String getType() {
@@ -28,7 +28,7 @@ public class PostGISSiteConfig implements SiteConfig {
     @Override
     public void setSiteId(String id) {
         siteId = id;
-        setEndpoint(SimpleValueFactory.getInstance().createIRI(id));
+//        setEndpoint(SimpleValueFactory.getInstance().createIRI(id));
     }
 
     public Resource export(Model graph) {
@@ -37,11 +37,11 @@ public class PostGISSiteConfig implements SiteConfig {
 
     public void parse(Model graph, Resource resource) { }
     
-    public IRI getEndpoint() {
-        return endpoint;
-    }
-
-    public void setEndpoint(IRI endpoint) {
-        this.endpoint = endpoint;
-    }
+//    public IRI getEndpoint() {
+//        return endpoint;
+//    }
+//
+//    public void setEndpoint(IRI endpoint) {
+//        this.endpoint = endpoint;
+//    }
 }

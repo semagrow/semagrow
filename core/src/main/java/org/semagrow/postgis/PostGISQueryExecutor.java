@@ -1,6 +1,7 @@
 package org.semagrow.postgis;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import org.postgresql.Driver;
@@ -92,7 +93,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		else {
 			String sqlQuery = buildSqlQuery(expr, freeVars);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint.toString());
-			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost/semdb", "postgres", "postgres");
+			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost:5432/semdb", "postgres", "postgres");
 			ResultSet rs = client.execute(sqlQuery);
 			BindingSet results = bindingSetOps.transform(rs);
 			result = Flux.just(results);
@@ -157,36 +158,41 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	
 	protected String buildSqlQuery(TupleExpr expr, Set<String> vars) {
 		Set<String> subAndPred = computeSubAndPred(expr);
-//		logger.info("subAndPred:: ");
-//		logger.info(subAndPred.toString());
+		logger.info("subAndPred:: {}", subAndPred.toString());
 		String column = null;
 		Pair<String, String> tableAndGid = null;
 		for (String temp : subAndPred) {
 			if (temp.contains("#")) {
-//				logger.info("predicate:: ");
-//				logger.info(temp);
+				logger.info("predicate:: {}", temp);
 				column = predDecompose(temp);
 			}
 			else {
-//				logger.info("subject:: ");
-//				logger.info(temp);
+				logger.info("subject:: {}", temp);
 				tableAndGid = subDecompose(temp);
-//				logger.info("table and gid:: ");
-//				logger.info(tableAndGid.getLeft());
-//				logger.info(tableAndGid.getRight());
+				logger.info("table and gid:: {} - {}", tableAndGid.getLeft(), tableAndGid.getRight());
 			}
 		}
 		
 		if (column == null) logger.error("No \"asWKT\" predicate.");
-		if (vars.size() > 1) logger.error("More than one variables.");
 		
-		String sqlQuery = "SELECT " + column + 
-				" AS " + vars.iterator().next() + 
-				" FROM " + tableAndGid.getLeft() + 
-				" WHERE gid = " + tableAndGid.getRight() + ";";
-		  
-		logger.info("sqlQuery:: ");
-		logger.info(sqlQuery);
+		String sqlQuery = null;
+		if (vars.size() == 1 && tableAndGid != null) {
+			logger.info("table and gid:: {} - {}", tableAndGid.getLeft(), tableAndGid.getRight());
+			sqlQuery = "SELECT " + column + 
+					" AS " + vars.iterator().next() + 
+					" FROM " + tableAndGid.getLeft() + 
+					" WHERE gid = " + tableAndGid.getRight() + ";";
+		}
+		else {
+			logger.info("vars.size(): {} ", vars.size() );
+			Iterator<String> var = vars.iterator();
+			logger.info("vars: {}, {}", var.next(), vars.iterator().next());
+			sqlQuery = "SELECT gid AS " + var.next() + ", " + 
+					column + " AS " + vars.iterator().next() + 
+					" FROM lucas;";
+		}
+		
+		logger.info("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
 	}
 	

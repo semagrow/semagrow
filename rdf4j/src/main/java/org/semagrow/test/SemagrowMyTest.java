@@ -44,6 +44,19 @@ public class SemagrowMyTest extends TestCase {
 				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				"}";
 		
+		String q4 = "" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
+				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"}";
+		
+		String q5 = "" +
+				"SELECT * WHERE {\n" +
+				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"}";
+		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
 		Repository repo = new SemagrowSailRepository((SemagrowSail) factory.getSail(config));
@@ -99,6 +112,6 @@ public class SemagrowMyTest extends TestCase {
     
 		writer.close();
 		
-		assertEquals(37, count[0]);
+//		assertEquals(37, count[0]);
 	}
 }

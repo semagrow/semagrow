@@ -9,7 +9,7 @@ import org.semagrow.selector.SiteCapabilities;
 
 public class PostGISSite implements Site {
 	
-	static final String TYPE = "SQL";
+	static final String TYPE = "POSTGIS";
 		
 //    private final IRI endpoint;
     
@@ -22,6 +22,15 @@ public class PostGISSite implements Site {
     public PostGISSite(URL uri) {
         assert uri != null;
         this.endpointURI = uri;
+    }
+    
+    @Override
+    public boolean isRemote() {
+        return endpointURI != null;
+    }
+    
+    public URL getURL() { 
+    	return endpointURI; 
     }
     
 //    public Resource getID() { 
@@ -40,15 +49,6 @@ public class PostGISSite implements Site {
 //    	return endpoint; 
 //    }
     
-    public URL getURL() { 
-    	return endpointURI; 
-    }
-
-    @Override
-    public boolean isRemote() {
-        return endpointURI != null;
-    }
-
 //    @Override
 //    public boolean equals(Object o) {
 //        if (o instanceof PostGISSite) {
