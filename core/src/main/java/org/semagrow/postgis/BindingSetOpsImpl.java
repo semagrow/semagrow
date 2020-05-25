@@ -1,14 +1,51 @@
 package org.semagrow.postgis;
 
 import org.semagrow.evaluation.BindingSetOps;
+import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.eclipse.rdf4j.model.ValueFactory;
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
 
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
 import java.util.Collection;
 
 public class BindingSetOpsImpl implements BindingSetOps {
 
+	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
+	private static final ValueFactory vf = SimpleValueFactory.getInstance();
+	
+	/**
+     * Transform a bindingSet from a resultSet.
+     * @param rs
+     * @return A binding set that contains the results from the result set.
+     */
+	public BindingSet transform(ResultSet rs) {
+        QueryBindingSet result = new QueryBindingSet();
+
+        try {
+			ResultSetMetaData rsmd = rs.getMetaData();
+			int columnsNumber = rsmd.getColumnCount();
+			while (rs.next()) {
+				for (int i = 1; i <= columnsNumber; i++) {
+					String columnValue = rs.getString(i);
+					vf.createLiteral(columnValue);
+					result.addBinding(rsmd.getColumnName(i), vf.createLiteral(columnValue));
+					logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
+				}
+			}
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return result;
+    }
+	
     /**
      * Merge two bindingSet into one. If some bindings of the second set refer to
      * variable names of the first binding then prefer the bindings of the first set.

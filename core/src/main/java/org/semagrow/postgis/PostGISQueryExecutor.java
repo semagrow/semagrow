@@ -12,6 +12,7 @@ import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.Var;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.reactivestreams.Publisher;
+import org.reactivestreams.Subscriber;
 import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
@@ -31,7 +32,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	
-	protected BindingSetOps bindingSetOps = new BindingSetOpsImpl();
+	protected BindingSetOpsImpl bindingSetOps = new BindingSetOpsImpl();
 	
 	public PostGISQueryExecutor() {
 		logger.info("PostGISQueryExecutor!!!");
@@ -76,11 +77,12 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	public Flux<BindingSet>
 		evaluateReactorImpl(final PostGISSite endpoint, final TupleExpr expr, final BindingSet bindings)
 				throws QueryEvaluationException {
-	Flux<BindingSet> result = null;
+		Flux<BindingSet> result = null;
 		logger.info("evaluateReactorImpl!!!");
 		logger.info(endpoint.toString());
 		
 		Set<String> freeVars = computeVars(expr);
+		logger.info("freeVars: {}", freeVars.toString());
 		
 		freeVars.removeAll(bindings.getBindingNames());
 		
@@ -88,24 +90,32 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.error("No variables in query.");
 		} 
 		else {
-			String sqlQuery = buildSqlQuery(expr);
-			logger.info("Sending SQL query: {} to {}", sqlQuery, endpoint.toString());
+			String sqlQuery = buildSqlQuery(expr, freeVars);
+			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint.toString());
 			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost/semdb", "postgres", "postgres");
-			ResultSet results = client.execute(sqlQuery);
-			try {
-				ResultSetMetaData rsmd = results.getMetaData();
-				int columnsNumber = rsmd.getColumnCount();
-				while (results.next()) {
-					for (int i = 1; i <= columnsNumber; i++) {
-						String columnValue = results.getString(i);
-						logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
-					}
-				}
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			ResultSet rs = client.execute(sqlQuery);
+			BindingSet results = bindingSetOps.transform(rs);
+			result = Flux.just(results);
+			
+//			try {
+//				ResultSetMetaData rsmd = rs.getMetaData();
+//				int columnsNumber = rsmd.getColumnCount();
+//				while (rs.next()) {
+//					for (int i = 1; i <= columnsNumber; i++) {
+//						String columnValue = rs.getString(i);
+//						logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
+//					}
+//				}
+//			} catch (SQLException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+			
+//			result = Flux.just(client.execute(sqlQuery));
             
+				
+				
+				
 //			result = sendSqlQuery(endpoint.getURL(), sqlQuery, expr);
 			
 			
@@ -145,7 +155,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		return null;
 //	}
 	
-	protected String buildSqlQuery(TupleExpr expr) {
+	protected String buildSqlQuery(TupleExpr expr, Set<String> vars) {
 		Set<String> subAndPred = computeSubAndPred(expr);
 //		logger.info("subAndPred:: ");
 //		logger.info(subAndPred.toString());
@@ -168,10 +178,12 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		}
 		
 		if (column == null) logger.error("No \"asWKT\" predicate.");
-		  	
-		String sqlQuery = "select " + column + 
-				" from " + tableAndGid.getLeft() + 
-				" where gid = " + tableAndGid.getRight() + ";";
+		if (vars.size() > 1) logger.error("More than one variables.");
+		
+		String sqlQuery = "SELECT " + column + 
+				" AS " + vars.iterator().next() + 
+				" FROM " + tableAndGid.getLeft() + 
+				" WHERE gid = " + tableAndGid.getRight() + ";";
 		  
 		logger.info("sqlQuery:: ");
 		logger.info(sqlQuery);
