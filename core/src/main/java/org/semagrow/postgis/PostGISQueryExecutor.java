@@ -34,7 +34,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	
-	protected BindingSetOpsImpl bindingSetOps = new BindingSetOpsImpl();
+//	protected BindingSetOpsImpl bindingSetOps = new BindingSetOpsImpl();
 	
 	public PostGISQueryExecutor() {
 		logger.info("PostGISQueryExecutor!!!");
@@ -98,51 +98,12 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint.toString());
 			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost:5432/semdb", "postgres", "postgres");
 			ResultSet rs = client.execute(sqlQuery);
-			BindingSet results = bindingSetOps.transform(rs);
-			result = Flux.just(results);
-			
-//			try {
-//				ResultSetMetaData rsmd = rs.getMetaData();
-//				int columnsNumber = rsmd.getColumnCount();
-//				while (rs.next()) {
-//					for (int i = 1; i <= columnsNumber; i++) {
-//						String columnValue = rs.getString(i);
-//						logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
-//					}
-//				}
-//			} catch (SQLException e) {
-//				// TODO Auto-generated catch block
-//				e.printStackTrace();
-//			}
-			
-//			result = Flux.just(client.execute(sqlQuery));
-            
-				
-				
-				
-//			result = sendSqlQuery(endpoint.getURL(), sqlQuery, expr);
-			
-			
-	
-//			final BindingSet relevantBindings = bindingSetOps.project(computeVars(expr), bindings);
-//			logger.info("relevantBindings::");
-//			logger.info(relevantBindings.toString());
-	
-	
-//			String sparqlQuery = SPARQLQueryStringUtil.buildSPARQLQuery(expr, freeVars);
-//			//logger.info(expr.toString());
-//			//logger.info(freeVars.toString());
-//			logger.info("sparqlQuery::");
-//			logger.info(sparqlQuery);
-//			result = sendTupleQuery(endpoint.getURL(), sparqlQuery, relevantBindings, expr)
-//			        .map(b -> bindingSetOps.merge(bindings, b));
-//			logger.info("result::");
-//			logger.info(result.toString());
-//			logger.info("done");
+//			BindingSet results = bindingSetOps.transform(rs);
+//			result = Flux.just(results);
+			return Flux.from(new SQLQueryResultPublisher(rs));
 		}
-	
-	
-		return result;
+		
+		return result;		
 	}
 	
 	public Flux<BindingSet>
@@ -196,8 +157,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		
 		String sqlQuery = null;
 		if (from.equals(" FROM ")) {
-			//sqlQuery = select + " FROM lucas t1 UNION " + select + " FROM invekos t1;";
-			sqlQuery = select + from + "lucas t1;";
+			sqlQuery = select + " FROM lucas t1 UNION " + select + " FROM invekos t1;";
 		}
 		else {
 			sqlQuery = select + from + where + ";";
@@ -214,7 +174,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			@Override
 			public void meet(Var node)
 			throws RuntimeException {
-				logger.info(node.toString());
+//				logger.info(node.toString());
 				// take only real vars, i.e. ignore blank nodes
 				if (!node.hasValue() && !node.isAnonymous())
 					res.add(node.getName());
@@ -233,7 +193,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			@Override
 			public void meet(Var node)
 			throws RuntimeException {
-				logger.info(node.toString());
+//				logger.info(node.toString());
 				// take only real vars, i.e. ignore blank nodes
 				if (!node.hasValue() && !node.isAnonymous())
 					res.add(node.getName());
