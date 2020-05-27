@@ -41,7 +41,7 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
         private Subscriber<? super BindingSet> subscriber;
 		private ResultSet rs;
 		private long requested = 0;
-        private Boolean shutdownFlag = false;
+//        private Boolean shutdownFlag = false;
         private CountDownLatch latch = new CountDownLatch(0);
 		private static final ValueFactory vf = SimpleValueFactory.getInstance();
         final private Object syncRequest = new Object();
@@ -51,41 +51,40 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
             this.subscriber = subscriber;
         }
 		
-		public void shutdown() {
-            shutdownFlag = true;
-        }
+//		public void shutdown() {
+//            shutdownFlag = true;
+//        }
 		
-		public void requestMore(long n) {
-            latch.countDown();
-            synchronized (syncRequest) {
-                requested += n;
-            }
-        }
+//		public void requestMore(long n) {
+//            latch.countDown();
+//            synchronized (syncRequest) {
+//                requested += n;
+//            }
+//        }
 		
-		public void fullfillOne() {
-            synchronized (syncRequest) {
-                assert requested > 0;
-                requested--;
-            }
-        }
+//		public void fullfillOne() {
+//            synchronized (syncRequest) {
+//                assert requested > 0;
+//                requested--;
+//            }
+//        }
 		
-		public void awaitForRequests() throws InterruptedException {
-            synchronized (syncRequest) {
-                if (requested == 0)
-                    latch.await();
-            }
-        }
+//		public void awaitForRequests() throws InterruptedException {
+//            synchronized (syncRequest) {
+//                if (requested == 0)
+//                    latch.await();
+//            }
+//        }
 		
 		@Override
 		public void run() {
-			
 			try {
-				awaitForRequests();
+//				awaitForRequests();
 				ResultSetMetaData rsmd = rs.getMetaData();
 				int columnsNumber = rsmd.getColumnCount();
 				while (rs.next()) {
 					QueryBindingSet result = new QueryBindingSet();
-					awaitForRequests();
+//					awaitForRequests();
 					for (int i = 1; i <= columnsNumber; i++) {
 						String columnValue = rs.getString(i);
 						logger.info("columnName:: {} ", rsmd.getColumnName(i));
@@ -93,7 +92,7 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
 						result.addBinding(rsmd.getColumnName(i), vf.createLiteral(columnValue));
 						logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
 					}
-					fullfillOne();
+//					fullfillOne();
 					subscriber.onNext(result);
 				}
 			} catch (SQLException e) {
@@ -102,11 +101,11 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
 			} catch (QueryEvaluationException e) {
                 logger.warn("Error while evaluating subquery", e);
                 subscriber.onError(e);
-			} catch (InterruptedException i) {
-                if (shutdownFlag)
-                    logger.info("Subscription shutdown by subscriber. Interrupted.");
-                else
-                    logger.warn("SubQuery thread interrupted.");
+//			} catch (InterruptedException i) {
+//                if (shutdownFlag)
+//                    logger.info("Subscription shutdown by subscriber. Interrupted.");
+//                else
+//                    logger.warn("SubQuery thread interrupted.");
             }
 			subscriber.onComplete();
 		}
@@ -131,17 +130,17 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
 				producer = new SQLQueryProducer(subscriber, rs);
                 //executorService.execute(producer);
                 Future<?> f = executorService.submit(producer);
-                producer.requestMore(l);
+//                producer.requestMore(l);
 			}
-			else {
-				producer.requestMore(l);
-			}
+//			else {
+//				producer.requestMore(l);
+//			}
 		}
 
 		@Override
 		public void cancel() {
 			if (producer != null) {
-                producer.shutdown();
+//                producer.shutdown();
                 assert f != null;
                 if (!f.isDone() && !f.isCancelled())
                     f.cancel(true);

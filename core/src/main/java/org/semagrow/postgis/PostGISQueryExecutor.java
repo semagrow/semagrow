@@ -156,11 +156,36 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		
 		
 		String sqlQuery = null;
-		if (from.equals(" FROM ")) {
-			sqlQuery = select + " FROM lucas t1 UNION " + select + " FROM invekos t1;";
+		if (vars.size() - 1 > triples.size() / 3)  {	//throw exception ????
+			logger.error("More than one triples with two free variables.");
+			throw new QueryEvaluationException();
+		}
+		
+		
+		if (from.equals(" FROM ")) {	
+			sqlQuery = select + from + "lucas t1 UNION " 
+					+ select + from + "invekos t1;";
 		}
 		else {
-			sqlQuery = select + from + where + ";";
+			
+			logger.info("vars size: {}", vars.size());
+			logger.info("triples size: {}", triples.size());
+			
+			if (vars.size() == triples.size() / 3)
+				sqlQuery = select + from + where + ";";
+			else {
+				String lucas = null, invekos = null;
+				place = 1;
+				while (place < triples.size()) {
+					if (!vars.contains("t" + place)) {
+						lucas = ", lucas t" + place;
+						invekos = ", invekos t" + place;
+					}
+					place += 3;
+				}
+				sqlQuery = select + from + lucas + where + " UNION " 
+						+ select + from + invekos + where + ";";
+			}
 		}
 		
 		logger.info("sqlQuery:: {}", sqlQuery);
@@ -259,9 +284,10 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		logger.info(predicate.substring(columnStart));
 		if (predicate.substring(columnStart).equals("asWKT"))
 			return "ST_AsText(t" + place + ".geom)";
-		else 
+		else {
 			logger.error("No \"asWKT\" predicate.");
-		return null;		//throw exception ????
+			throw new QueryEvaluationException();
+		}
 	}
 
 }
