@@ -3,6 +3,7 @@ package org.semagrow.postgis;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Set;
 import org.postgresql.Driver;
 
@@ -83,7 +84,9 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		logger.info(endpoint.toString());
 		
 		Set<String> freeVars = computeVars(expr);
+		List<String> triples = computeTriples(expr);
 		logger.info("freeVars: {}", freeVars.toString());
+		
 		
 		freeVars.removeAll(bindings.getBindingNames());
 		
@@ -91,7 +94,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.error("No variables in query.");
 		} 
 		else {
-			String sqlQuery = buildSqlQuery(expr, freeVars);
+			String sqlQuery = buildSqlQuery(expr, freeVars, triples);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint.toString());
 			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost:5432/semdb", "postgres", "postgres");
 			ResultSet rs = client.execute(sqlQuery);
@@ -156,40 +159,48 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		return null;
 //	}
 	
-	protected String buildSqlQuery(TupleExpr expr, Set<String> vars) {
-		Set<String> subAndPred = computeSubAndPred(expr);
-		logger.info("subAndPred:: {}", subAndPred.toString());
-		String column = null;
+	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> triples) {
 		Pair<String, String> tableAndGid = null;
-		for (String temp : subAndPred) {
-			if (temp.contains("#")) {
-				logger.info("predicate:: {}", temp);
-				column = predDecompose(temp);
+		String select = "SELECT ", where = " WHERE ", from = " FROM ";
+		int place = 0;
+		for (String part : triples) {
+			place++;
+			if (part.contains("#")) {
+				if (!select.equals("SELECT ")) select += ", ";
+				select += predDecompose(part, place - 1);
 			}
-			else {
-				logger.info("subject:: {}", temp);
-				tableAndGid = subDecompose(temp);
-				logger.info("table and gid:: {} - {}", tableAndGid.getLeft(), tableAndGid.getRight());
+			else {						//subject
+				if (place % 3 != 0) {	
+					if (vars.contains(part)) {
+						if (!select.equals("SELECT ")) select += ", ";
+						select += "t"+ place + ".gid AS " + part;
+					}
+					else {				
+						tableAndGid = subDecompose(part);
+						if (!from.equals(" FROM ")) from += ", ";
+						from += tableAndGid.getLeft() + " t" + place;
+						if (!where.equals(" WHERE ")) where += " AND ";
+						where += "t" + place + ".gid = " + tableAndGid.getRight();
+					}
+				}
+				else {					//object
+					select += " AS " + part;
+				}
 			}
 		}
 		
-		if (column == null) logger.error("No \"asWKT\" predicate.");
+		logger.info("select:: {}", select);
+		logger.info("from:: {}", from);
+		logger.info("where:: {}", where);
+		
 		
 		String sqlQuery = null;
-		if (vars.size() == 1 && tableAndGid != null) {
-			logger.info("table and gid:: {} - {}", tableAndGid.getLeft(), tableAndGid.getRight());
-			sqlQuery = "SELECT " + column + 
-					" AS " + vars.iterator().next() + 
-					" FROM " + tableAndGid.getLeft() + 
-					" WHERE gid = " + tableAndGid.getRight() + ";";
+		if (from.equals(" FROM ")) {
+			//sqlQuery = select + " FROM lucas t1 UNION " + select + " FROM invekos t1;";
+			sqlQuery = select + from + "lucas t1;";
 		}
 		else {
-			logger.info("vars.size(): {} ", vars.size() );
-			Iterator<String> var = vars.iterator();
-			logger.info("vars: {}, {}", var.next(), vars.iterator().next());
-			sqlQuery = "SELECT gid AS " + var.next() + ", " + 
-					column + " AS " + vars.iterator().next() + 
-					" FROM lucas;";
+			sqlQuery = select + from + where + ";";
 		}
 		
 		logger.info("sqlQuery:: {}", sqlQuery);
@@ -203,6 +214,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			@Override
 			public void meet(Var node)
 			throws RuntimeException {
+				logger.info(node.toString());
 				// take only real vars, i.e. ignore blank nodes
 				if (!node.hasValue() && !node.isAnonymous())
 					res.add(node.getName());
@@ -213,27 +225,49 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		return res;
 	}
 	
-	protected Set<String> computeSubAndPred(TupleExpr serviceExpression) {
-		final Set<String> res = new HashSet<String>();
+	protected List<String> computeTriples(TupleExpr serviceExpression) {
+		final List<String> res = new ArrayList<String>();
+//		final int nodes = 0;
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 		
 			@Override
 			public void meet(Var node)
 			throws RuntimeException {
-//				logger.info("computeSubAndPred!!!");
-//				logger.info(node.toString());
-				if (node.hasValue() && node.isAnonymous()) {
-//					logger.info("inside if");
-//					logger.info("name:");
-//					logger.info(node.getName());
-//					logger.info("value:");
-//					logger.info(node.getValue().toString());
+				logger.info(node.toString());
+				// take only real vars, i.e. ignore blank nodes
+				if (!node.hasValue() && !node.isAnonymous())
+					res.add(node.getName());
+				else 
 					res.add(node.getValue().toString());
-				} 
 			}
+			// TODO maybe stop tree traversal in nested SERVICE?
+			// TODO special case handling for BIND
 		});
+		logger.info(res.toString());
 		return res;
 	}
+	
+//	protected Set<String> computeSubAndPred(TupleExpr serviceExpression) {
+//		final Set<String> res = new HashSet<String>();
+//		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
+//		
+//			@Override
+//			public void meet(Var node)
+//			throws RuntimeException {
+////				logger.info("computeSubAndPred!!!");
+////				logger.info(node.toString());
+//				if (node.hasValue() && node.isAnonymous()) {
+////					logger.info("inside if");
+////					logger.info("name:");
+////					logger.info(node.getName());
+////					logger.info("value:");
+////					logger.info(node.getValue().toString());
+//					res.add(node.getValue().toString());
+//				} 
+//			}
+//		});
+//		return res;
+//	}
 	
 	protected Pair<String, String> subDecompose(String subject) {
 		int gidStart = subject.lastIndexOf("/") + 1;
@@ -259,14 +293,15 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		return Pair.of(table, gid);
 	}
 	
-	protected String predDecompose(String predicate) {
+	protected String predDecompose(String predicate, int place) {
 		int columnStart = predicate.lastIndexOf("#") + 1;
 //		logger.info("columnStart:: ");
 //		logger.info(predicate.substring(columnStart));
 		if (predicate.substring(columnStart).equals("asWKT"))
-			return "ST_AsText(geom)";
+			return "ST_AsText(t" + place + ".geom)";
 		else 
-			return null;
+			logger.error("No \"asWKT\" predicate.");
+		return null;		//throw exception ????
 	}
 
 }

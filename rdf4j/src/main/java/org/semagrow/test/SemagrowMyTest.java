@@ -46,16 +46,31 @@ public class SemagrowMyTest extends TestCase {
 		
 		String q4 = "" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
+				"  ?id <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
 				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				"}";
 		
 		String q5 = "" +
 				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
+				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"}";
+		
+		String q6 = "" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/165506> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt_inv .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
+				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"}";
+		
+		String q7 = "" +
+				"SELECT * WHERE {\n" +
 				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				"}";
+		
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
@@ -65,7 +80,7 @@ public class SemagrowMyTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q1);
+		TupleQuery query = conn.prepareTupleQuery(q7);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
