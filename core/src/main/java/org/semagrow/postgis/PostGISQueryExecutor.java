@@ -1,21 +1,27 @@
 package org.semagrow.postgis;
 
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
-import org.postgresql.Driver;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.Compare;
+import org.eclipse.rdf4j.query.algebra.Filter;
+import org.eclipse.rdf4j.query.algebra.FunctionCall;
+import org.eclipse.rdf4j.query.algebra.QueryModelNode;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
+import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.Var;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.reactivestreams.Publisher;
-import org.reactivestreams.Subscriber;
-import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
 import org.semagrow.selector.Site;
@@ -23,12 +29,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import reactor.core.publisher.Flux;
-
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
 
 public class PostGISQueryExecutor implements QueryExecutor {
 	
@@ -81,11 +81,16 @@ public class PostGISQueryExecutor implements QueryExecutor {
 				throws QueryEvaluationException {
 		Flux<BindingSet> result = null;
 		logger.info("evaluateReactorImpl!!!");
-		logger.info(endpoint.toString());
+		logger.info("endpoint: {}", endpoint.toString());
+		logger.info("bindings: {}", bindings.toString());
+		logger.info("!!!!!!!!!!!!expr:: {}", expr.toString());
 		
 		Set<String> freeVars = computeVars(expr);
-		List<String> triples = computeTriples(expr);
 		logger.info("freeVars: {}", freeVars.toString());
+//		Map<String,String> filterVars = computeFilterVars(expr);
+//		List<String> triples = computeTriples(expr);
+//		logger.info("triples: {}", filterVars.toString());
+//		logger.info("filterVars: {}", filterVars.toString());
 		
 		
 		freeVars.removeAll(bindings.getBindingNames());
@@ -95,7 +100,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		} 
 		else {
 			List<String> tables = new ArrayList<String>();
-			String sqlQuery = buildSqlQuery(expr, freeVars, triples, tables);
+			String sqlQuery = buildSqlQuery(expr, freeVars, tables);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint.toString());
 			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost:5432/semdb", "postgres", "postgres");
 			ResultSet rs = client.execute(sqlQuery);
@@ -111,7 +116,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		evaluateReactorImpl(final Site endpoint, final TupleExpr expr, List<BindingSet> bindings)
 				throws QueryEvaluationException {
 		Flux<BindingSet> result = null;
-		logger.info("evaluateReactorImpl 2!!!");
+		logger.info("!!!!evaluateReactorImpl 2!!!!!!");
 		return result;
 	}
 	
@@ -121,23 +126,39 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		return null;
 //	}
 	
-	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> triples, List<String> tables) {
+	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> tables) {
+		
 		Pair<String, String> tableAndGid = null;
+		
+		Map<String,String> filterVars = computeFilterVars(expr);
+		List<String> triples = computeTriples(expr);
+		Map<String,String> asToVar = new HashMap<String, String>();
+		logger.info("triples: {}", filterVars.toString());
+		logger.info("filterVars: {}", filterVars.toString());
+		
 		String select = "SELECT ", where = " WHERE ", from = " FROM ", geom = "";
 		int place = 0;
 		
 		for (String part : triples) {
 			place++;
 			if (part.contains("#")) {	//predicate
-//				if (!select.equals("SELECT ")) select += ", ";
-//				select += predDecompose(part, place - 1);
-				geom = predDecompose(part, place - 1);
+////				if (!select.equals("SELECT ")) select += ", ";
+////				select += predDecompose(part, place - 1);
+//				geom = predDecompose(part, place - 1);
+				if (part.substring(part.lastIndexOf("#") + 1).equals("asWKT")) {
+					geom = "t" + (place-1) + ".geom";
+				}
+				else {
+					logger.error("No \"asWKT\" predicate.");
+					throw new QueryEvaluationException();
+				}
 			}
 			else {						
 				if (place % 3 != 0) {	//subject
 					if (vars.contains(part)) {
 						if (!select.equals("SELECT ")) select += ", ";
 						select += "t"+ place + ".gid AS " + part;
+						asToVar.put(part, "t"+ place + ".gid");
 						tables.add("?");
 					}
 					else {				
@@ -152,7 +173,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
 				else {					//object
 					if (vars.contains(part)) {
 						if (!select.equals("SELECT ")) select += ", ";
-						select += geom + " AS " + part;
+						select += "ST_AsText(" + geom + ") AS " + part;
+						asToVar.put(part, geom);
 						tables.add("-");
 					}
 					else {
@@ -213,6 +235,27 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			}
 		}
 		
+
+		String filter = "";
+		if (!filterVars.isEmpty()) {
+			if (!where.equals(" WHERE ")) filter += " AND ";
+			if (filterVars.get("function").equals("distance"))
+				filter += "ST_Distance(";
+			if (filterVars.get("type").equals("metre")) {
+				filter += "ST_GeographyFromText(ST_AsText("
+						+ filterVars.get("var") 
+						+ ")), ST_GeographyFromText(ST_AsText("
+						+ filterVars.get("var2") 
+						+ "))";
+			}
+			else if (filterVars.get("type").equals("degree")) {
+				filter += filterVars.get("var") + ", " + filterVars.get("var2");
+			}
+			filter += ")" + filterVars.get("operator") + " " + filterVars.get("value");
+		}
+		
+		logger.info("asToVar:: {}", asToVar.toString());
+		logger.info("filter:: {}", filter);
 		logger.info("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
 	}
@@ -224,10 +267,15 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			@Override
 			public void meet(Var node)
 			throws RuntimeException {
-//				logger.info(node.toString());
+				logger.info("node: {}", node.toString());
 				// take only real vars, i.e. ignore blank nodes
+//				if (!filter && node.getParentNode().getClass().toString().contains("StatementPattern")) {
+//					logger.info("AAAAAAAAAAAAAAAA: {}", node.getParentNode().getClass());
 				if (!node.hasValue() && !node.isAnonymous())
 					res.add(node.getName());
+//				}
+//				logger.info("AAAAAAAAAAAAAAAA: {}", node.getParentNode().getClass());
+//				if (filter && node.getParentNode().getClass().toString().contains("StatementPattern"))
 			}
 			// TODO maybe stop tree traversal in nested SERVICE?
 			// TODO special case handling for BIND
@@ -235,20 +283,76 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		return res;
 	}
 	
+	protected Map<String,String> computeFilterVars(TupleExpr serviceExpression) {
+		logger.info("computeFilterVars!!!!");
+		final Map<String,String> res = new HashMap<String,String>();
+		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
+			
+			@Override
+			public void meet(FunctionCall node) throws RuntimeException {
+//				logger.info("!!! filter FunctionCall nodesignature: {}", node.getSignature());
+//				logger.info("!!! filter FunctionCall nodeparentsignature: {}", node.getParentNode().getSignature());
+				String function = node.getSignature();
+				String operator = node.getParentNode().getSignature();
+				logger.info("!!! function and operator: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")), operator.substring(operator.lastIndexOf("(") + 1, operator.lastIndexOf(")")));
+				res.put("function", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
+				res.put("operator", operator.substring(operator.lastIndexOf("(") + 1, operator.lastIndexOf(")")));
+//				res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
+//				res.add(operator.substring(operator.lastIndexOf("(") + 1, operator.lastIndexOf(")")));
+				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
+					
+					@Override
+					public void meet(Var node) throws RuntimeException {
+						logger.info("!!! var: {}", node.getName());
+						if (res.containsKey("var"))
+							res.put("var2", node.getName());
+						else
+							res.put("var", node.getName());
+//						res.add(node.getName());
+					}
+					
+					@Override
+					public void meet(ValueConstant node) throws RuntimeException {
+//						logger.info("!!! filter FunctionCall ValueConstant nodevalue: {}", node.getValue());
+						String type = node.getValue().toString();
+//						res.add(type.substring(type.lastIndexOf("/") + 1));
+						res.put("type", type.substring(type.lastIndexOf("/") + 1));
+						logger.info("!!! type: {}", type.substring(type.lastIndexOf("/") + 1));
+					}
+				});
+			
+			}
+			
+			@Override
+			public void meet(ValueConstant node) throws RuntimeException {
+//				logger.info("!!! filter ValueConstant nodevalue: {}", node.getValue());
+				String value = node.getValue().toString();
+//				res.add(value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
+				res.put("value", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
+				logger.info("!!! value: {}", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
+			}
+			
+		});
+		return res;
+	}
+	
 	protected List<String> computeTriples(TupleExpr serviceExpression) {
 		final List<String> res = new ArrayList<String>();
 //		final int nodes = 0;
+//		logger.info("serviceExpression: {} ", serviceExpression.toString());
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 		
 			@Override
 			public void meet(Var node)
 			throws RuntimeException {
-//				logger.info(node.toString());
+//				logger.info("triples: node: {} ", node.toString());
 				// take only real vars, i.e. ignore blank nodes
-				if (!node.hasValue() && !node.isAnonymous())
-					res.add(node.getName());
-				else 
-					res.add(node.getValue().toString());
+				if (node.getParentNode().getClass().toString().contains("StatementPattern")) {
+					if (!node.hasValue() && !node.isAnonymous())
+						res.add(node.getName());
+					else 
+						res.add(node.getValue().toString());
+				}
 			}
 			// TODO maybe stop tree traversal in nested SERVICE?
 			// TODO special case handling for BIND

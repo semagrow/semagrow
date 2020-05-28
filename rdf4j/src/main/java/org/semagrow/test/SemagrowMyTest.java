@@ -97,11 +97,22 @@ public class SemagrowMyTest extends TestCase {
 //				"}";
 		
 		String q11 = "" +
-		"SELECT * WHERE {\n" +
-		"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-		"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
-		//"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
-		"}";
+			"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+			"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+			"SELECT * WHERE {\n" +
+			"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
+			"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
+			"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
+			"}";
+		
+		String q12 = "" +
+			"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+			"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+			"SELECT * WHERE {\n" +
+			"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom1 .\n" +
+			"  <http://deg.iit.demokritos.gr/lucas/resource/1> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom2 .\n" +
+			"  FILTER(geof:distance(?geom1,?geom2,opengis:metre) < 10) .\n" +
+			"}";
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
@@ -111,7 +122,7 @@ public class SemagrowMyTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q9);
+		TupleQuery query = conn.prepareTupleQuery(q11);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
