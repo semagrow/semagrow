@@ -85,6 +85,12 @@ public class SemagrowMyTest extends TestCase {
 				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				"}";
 		
+//		String q10 = "" +
+//				"SELECT * WHERE {\n" +
+//				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
+//				"  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+//				"}";
+		
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
@@ -94,7 +100,7 @@ public class SemagrowMyTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q8);
+		TupleQuery query = conn.prepareTupleQuery(q7);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);

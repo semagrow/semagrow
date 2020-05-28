@@ -3,11 +3,11 @@ package org.semagrow.postgis;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.BindingSet;
@@ -40,72 +40,67 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
 
         private Subscriber<? super BindingSet> subscriber;
 		private ResultSet rs;
-		private long requested = 0;
-//        private Boolean shutdownFlag = false;
-        private CountDownLatch latch = new CountDownLatch(0);
 		private static final ValueFactory vf = SimpleValueFactory.getInstance();
-        final private Object syncRequest = new Object();
 		
 		public SQLQueryProducer(Subscriber<? super BindingSet> subscriber, ResultSet rs) {
             this.rs = rs;
             this.subscriber = subscriber;
         }
 		
-//		public void shutdown() {
-//            shutdownFlag = true;
-//        }
-		
-//		public void requestMore(long n) {
-//            latch.countDown();
-//            synchronized (syncRequest) {
-//                requested += n;
-//            }
-//        }
-		
-//		public void fullfillOne() {
-//            synchronized (syncRequest) {
-//                assert requested > 0;
-//                requested--;
-//            }
-//        }
-		
-//		public void awaitForRequests() throws InterruptedException {
-//            synchronized (syncRequest) {
-//                if (requested == 0)
-//                    latch.await();
-//            }
-//        }
-		
 		@Override
 		public void run() {
 			try {
-//				awaitForRequests();
 				ResultSetMetaData rsmd = rs.getMetaData();
 				int columnsNumber = rsmd.getColumnCount();
+				if (columnsNumber > 2)
+					logger.error("Select clause requests more than two variables (id and geom)");
+				
 				while (rs.next()) {
 					QueryBindingSet result = new QueryBindingSet();
-//					awaitForRequests();
-					for (int i = 1; i <= columnsNumber; i++) {
-						String columnValue = rs.getString(i);
-						logger.info("columnName:: {} ", rsmd.getColumnName(i));
-						logger.info("columnValue:: {} ", columnValue);
-						result.addBinding(rsmd.getColumnName(i), vf.createLiteral(columnValue));
-						logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
+					if (columnsNumber == 1) {
+						result.addBinding(rsmd.getColumnName(1), vf.createLiteral(rs.getString(1)));
 					}
-//					fullfillOne();
+					else {
+						String idValue = null, idName = null, geomValue = null, geomName = null;
+						if (StringUtils.isNumeric(rs.getString(1))) {
+							idValue = rs.getString(1);
+							idName = rsmd.getColumnName(1);
+							geomValue = rs.getString(2);
+							geomName = rsmd.getColumnName(2);
+						}
+						else if (StringUtils.isNumeric(rs.getString(2))){
+							idValue = rs.getString(2);
+							idName = rsmd.getColumnName(2);
+							geomValue = rs.getString(1);
+							geomName = rsmd.getColumnName(1);
+						}
+						if (geomValue.contains("POINT")) {
+							result.addBinding(idName, vf.createLiteral("<http://deg.iit.demokritos.gr/lucas/resource/Geometry/" + idValue + ">"));
+						}
+						else if (geomValue.contains("MULTIPOLYGON")) {
+							result.addBinding(idName, vf.createLiteral("<http://deg.iit.demokritos.gr/invekos/resource/Geometry/" + idValue + ">"));
+						}
+						result.addBinding(geomName, vf.createLiteral(geomValue));
+					}
+//					for (int i = 1; i <= columnsNumber; i++) {
+//						String columnValue = rs.getString(i);
+//						if (StringUtils.isNumeric(columnValue)) {
+////							if (columnValue)
+//							logger.info("string is numeric!!!: {} ", rsmd.getColumnName(i));
+//						}
+//						logger.info("columnName:: {} ", rsmd.getColumnName(i));
+//						logger.info("columnValue:: {} ", columnValue);
+//						result.addBinding(rsmd.getColumnName(i), vf.createLiteral(columnValue));
+//						logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
+//					}
 					subscriber.onNext(result);
 				}
 			} catch (SQLException e) {
-				// TODO Auto-generated catch block
+				logger.warn("Error while reading resultSet data", e);
 				e.printStackTrace();
 			} catch (QueryEvaluationException e) {
                 logger.warn("Error while evaluating subquery", e);
                 subscriber.onError(e);
-//			} catch (InterruptedException i) {
-//                if (shutdownFlag)
-//                    logger.info("Subscription shutdown by subscriber. Interrupted.");
-//                else
-//                    logger.warn("SubQuery thread interrupted.");
             }
 			subscriber.onComplete();
 		}
@@ -128,19 +123,13 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
 		public void request(long l) {
 			if (producer == null) {
 				producer = new SQLQueryProducer(subscriber, rs);
-                //executorService.execute(producer);
-                Future<?> f = executorService.submit(producer);
-//                producer.requestMore(l);
+                f = executorService.submit(producer);
 			}
-//			else {
-//				producer.requestMore(l);
-//			}
 		}
 
 		@Override
 		public void cancel() {
 			if (producer != null) {
-//                producer.shutdown();
                 assert f != null;
                 if (!f.isDone() && !f.isCancelled())
                     f.cancel(true);
