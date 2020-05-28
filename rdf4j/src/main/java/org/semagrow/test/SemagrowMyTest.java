@@ -87,10 +87,21 @@ public class SemagrowMyTest extends TestCase {
 		
 //		String q10 = "" +
 //				"SELECT * WHERE {\n" +
+//				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> POINT(16.25613715 47.5043295) .\n" +
+//				"}";
+		
+//		String q12 = "" +
+//				"SELECT * WHERE {\n" +
 //				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
 //				"  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 //				"}";
 		
+		String q11 = "" +
+		"SELECT * WHERE {\n" +
+		"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
+		"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
+		//"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
+		"}";
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
@@ -100,7 +111,7 @@ public class SemagrowMyTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q7);
+		TupleQuery query = conn.prepareTupleQuery(q9);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);

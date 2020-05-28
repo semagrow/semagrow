@@ -94,13 +94,14 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.error("No variables in query.");
 		} 
 		else {
-			String sqlQuery = buildSqlQuery(expr, freeVars, triples);
+			List<String> tables = new ArrayList<String>();
+			String sqlQuery = buildSqlQuery(expr, freeVars, triples, tables);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint.toString());
 			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost:5432/semdb", "postgres", "postgres");
 			ResultSet rs = client.execute(sqlQuery);
 //			BindingSet results = bindingSetOps.transform(rs);
 //			result = Flux.just(results);
-			return Flux.from(new SQLQueryResultPublisher(rs));
+			return Flux.from(new SQLQueryResultPublisher(rs, tables));
 		}
 		
 		return result;		
@@ -120,21 +121,24 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		return null;
 //	}
 	
-	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> triples) {
+	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> triples, List<String> tables) {
 		Pair<String, String> tableAndGid = null;
-		String select = "SELECT ", where = " WHERE ", from = " FROM ";
+		String select = "SELECT ", where = " WHERE ", from = " FROM ", geom = "";
 		int place = 0;
+		
 		for (String part : triples) {
 			place++;
-			if (part.contains("#")) {
-				if (!select.equals("SELECT ")) select += ", ";
-				select += predDecompose(part, place - 1);
+			if (part.contains("#")) {	//predicate
+//				if (!select.equals("SELECT ")) select += ", ";
+//				select += predDecompose(part, place - 1);
+				geom = predDecompose(part, place - 1);
 			}
-			else {						//subject
-				if (place % 3 != 0) {	
+			else {						
+				if (place % 3 != 0) {	//subject
 					if (vars.contains(part)) {
 						if (!select.equals("SELECT ")) select += ", ";
 						select += "t"+ place + ".gid AS " + part;
+						tables.add("?");
 					}
 					else {				
 						tableAndGid = subDecompose(part);
@@ -142,10 +146,30 @@ public class PostGISQueryExecutor implements QueryExecutor {
 						from += tableAndGid.getLeft() + " t" + place;
 						if (!where.equals(" WHERE ")) where += " AND ";
 						where += "t" + place + ".gid = " + tableAndGid.getRight();
+//						tables.add(tableAndGid.getLeft());
 					}
 				}
 				else {					//object
-					select += " AS " + part;
+					if (vars.contains(part)) {
+						if (!select.equals("SELECT ")) select += ", ";
+						select += geom + " AS " + part;
+						tables.add("-");
+					}
+					else {
+						if (!where.equals(" WHERE ")) where += " AND ";
+						where += "ST_Equals(t" + place 
+								+ ".geom, ST_ST_GeomFromText('" + part + "',4326))" ;
+						if (tables.get(place/3 - 1).equals("?"))
+							tables.remove(place/3 - 1);
+						if (part.contains("POINT")) {
+							tables.add("lucas");
+						}
+						else if (part.contains("MULTIPOLYGON")) {
+							tables.add("invekos");
+						}
+					}
+					
+//					ST_Equals(geom,ST_GeomFromText('POINT(16.25613715 47.5043295)',4326));
 				}
 			}
 		}
@@ -153,6 +177,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		logger.info("select:: {}", select);
 		logger.info("from:: {}", from);
 		logger.info("where:: {}", where);
+		logger.info("tables:: {}", tables.toString());
 		
 		
 		String sqlQuery = null;
@@ -174,12 +199,12 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			if (vars.size() == triples.size() / 3)
 				sqlQuery = select + from + where + ";";
 			else {
-				String lucas = null, invekos = null;
+				String lucas = "", invekos = "";
 				place = 1;
 				while (place < triples.size()) {
-					if (!vars.contains("t" + place)) {
-						lucas = ", lucas t" + place;
-						invekos = ", invekos t" + place;
+					if (!from.contains("t" + place)) {
+						lucas += ", lucas t" + place;
+						invekos += ", invekos t" + place;
 					}
 					place += 3;
 				}
