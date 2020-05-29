@@ -14,6 +14,8 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.Compare;
+import org.eclipse.rdf4j.query.algebra.Extension;
+import org.eclipse.rdf4j.query.algebra.ExtensionElem;
 import org.eclipse.rdf4j.query.algebra.Filter;
 import org.eclipse.rdf4j.query.algebra.FunctionCall;
 import org.eclipse.rdf4j.query.algebra.QueryModelNode;
@@ -208,10 +210,36 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			throw new QueryEvaluationException();
 		}
 		
+		String dist = "", filter = "", bind = "";
+		if (!filterVars.isEmpty()) {
+			if (filterVars.get("function").equals("distance"))
+				dist += "ST_Distance(";
+			if (filterVars.get("type").equals("metre")) {
+				dist += "ST_GeographyFromText(ST_AsText("
+						+ asToVar.get(filterVars.get("var"))
+						+ ")), ST_GeographyFromText(ST_AsText("
+						+ asToVar.get(filterVars.get("var2"))
+						+ "))";
+			}
+			else if (filterVars.get("type").equals("degree")) {
+				dist += asToVar.get(filterVars.get("var")) 
+						+ ", " + asToVar.get(filterVars.get("var2"));
+			}
+			dist += ") ";
+			if (filterVars.containsKey("signature")) {
+				if (!select.equals("SELECT ")) select += ", ";
+				bind += dist + "AS " + filterVars.get("signature");
+			}
+			if (filterVars.containsKey("compare")) {
+				if (!where.equals(" WHERE ")) where += " AND ";
+				filter += dist + filterVars.get("compare") + " " + filterVars.get("value");
+			}
+		}
+		
 		
 		if (from.equals(" FROM ")) {	
-			sqlQuery = select + from + "lucas t1 UNION " 
-					+ select + from + "invekos t1;";
+			sqlQuery = select + bind + from + "lucas t1 UNION " 
+					+ select + bind + from + "invekos t1;";
 		}
 		else {
 			
@@ -219,7 +247,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.info("triples size: {}", triples.size());
 			
 			if (vars.size() == triples.size() / 3)
-				sqlQuery = select + from + where + ";";
+				sqlQuery = select + bind + from + where + filter + ";";
 			else {
 				String lucas = "", invekos = "";
 				place = 1;
@@ -230,31 +258,13 @@ public class PostGISQueryExecutor implements QueryExecutor {
 					}
 					place += 3;
 				}
-				sqlQuery = select + from + lucas + where + " UNION " 
-						+ select + from + invekos + where + ";";
+				sqlQuery = select + bind + from + lucas + where + filter + " UNION " 
+						+ select + bind + from + invekos + where + filter + ";";
 			}
-		}
-		
-
-		String filter = "";
-		if (!filterVars.isEmpty()) {
-			if (!where.equals(" WHERE ")) filter += " AND ";
-			if (filterVars.get("function").equals("distance"))
-				filter += "ST_Distance(";
-			if (filterVars.get("type").equals("metre")) {
-				filter += "ST_GeographyFromText(ST_AsText("
-						+ filterVars.get("var") 
-						+ ")), ST_GeographyFromText(ST_AsText("
-						+ filterVars.get("var2") 
-						+ "))";
-			}
-			else if (filterVars.get("type").equals("degree")) {
-				filter += filterVars.get("var") + ", " + filterVars.get("var2");
-			}
-			filter += ")" + filterVars.get("operator") + " " + filterVars.get("value");
 		}
 		
 		logger.info("asToVar:: {}", asToVar.toString());
+		logger.info("bind:: {}", bind);
 		logger.info("filter:: {}", filter);
 		logger.info("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
@@ -291,12 +301,17 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			@Override
 			public void meet(FunctionCall node) throws RuntimeException {
 //				logger.info("!!! filter FunctionCall nodesignature: {}", node.getSignature());
-//				logger.info("!!! filter FunctionCall nodeparentsignature: {}", node.getParentNode().getSignature());
+//				logger.info("!!! filter FunctionCall nodeparentclass: {}", node.getParentNode().getClass());
 				String function = node.getSignature();
-				String operator = node.getParentNode().getSignature();
-				logger.info("!!! function and operator: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")), operator.substring(operator.lastIndexOf("(") + 1, operator.lastIndexOf(")")));
+				String signature = node.getParentNode().getSignature();
+				String parClass = node.getParentNode().getClass().toString();
+				logger.info("!!! function and operator: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")), signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
 				res.put("function", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
-				res.put("operator", operator.substring(operator.lastIndexOf("(") + 1, operator.lastIndexOf(")")));
+//				res.put("parClass", parClass.substring(parClass.lastIndexOf(".") + 1));
+				if (parClass.contains("Compare"))
+					res.put("compare", signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
+				else if (parClass.contains("Extension"))
+					res.put("signature", signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
 //				res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
 //				res.add(operator.substring(operator.lastIndexOf("(") + 1, operator.lastIndexOf(")")));
 				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
