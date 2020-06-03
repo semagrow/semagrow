@@ -11,6 +11,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.Compare;
@@ -24,8 +25,10 @@ import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.Var;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.reactivestreams.Publisher;
+import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
+import org.semagrow.evaluation.util.SimpleBindingSetOps;
 import org.semagrow.selector.Site;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +37,7 @@ import reactor.core.publisher.Flux;
 
 public class PostGISQueryExecutor implements QueryExecutor {
 	
+    protected BindingSetOps bindingSetOps = SimpleBindingSetOps.getInstance();
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	private static final String username = "postgres";
 	private static final String password = "postgres";
@@ -105,12 +109,19 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		
 		freeVars.removeAll(bindings.getBindingNames());
 		
+		logger.info("freeVars again: {}", freeVars.toString());
+		logger.info("bindings: {}", bindings.toString());
+		
 		if (freeVars.isEmpty()) {
 			logger.error("No variables in query.");
 		} 
 		else {
+			final BindingSet relevantBindings = bindingSetOps.project(computeVars(expr), bindings);
+            logger.info("relevantBindings:: {}", relevantBindings.toString());
+			
+			
 			List<String> tables = new ArrayList<String>();
-			String sqlQuery = buildSqlQuery(expr, freeVars, tables);
+			String sqlQuery = buildSqlQuery(expr, freeVars, tables, relevantBindings);
 			String endpoint = "jdbc:" + site.toString().substring(site.toString().indexOf("/") + 2);
 			logger.info("endpoint: {}", endpoint);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
@@ -125,10 +136,17 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	}
 	
 	public Flux<BindingSet>
-		evaluateReactorImpl(final Site site, final TupleExpr expr, List<BindingSet> bindings)
+		evaluateReactorImpl(final PostGISSite site, final TupleExpr expr, List<BindingSet> bindings)
 				throws QueryEvaluationException {
 		Flux<BindingSet> result = null;
 		logger.info("!!!!evaluateReactorImpl 2!!!!!!");
+		logger.info("bindings: {}", bindings.toString());
+		if (bindings.size() == 1)
+            return evaluateReactorImpl(site, expr, bindings.get(0));
+		
+//		Set<String> exprVars = computeVars(expr);
+		
+		
 		return result;
 	}
 	
@@ -138,15 +156,25 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		return null;
 //	}
 	
-	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> tables) {
+	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> tables, BindingSet bindings) {
 		
 		Pair<String, String> tableAndGid = null;
 		
 		Map<String,String> filterVars = computeFilterVars(expr);
 		List<String> triples = computeTriples(expr);
 		Map<String,String> asToVar = new HashMap<String, String>();
-		logger.info("triples: {}", filterVars.toString());
+		logger.info("triples: {}", triples.toString());
 		logger.info("filterVars: {}", filterVars.toString());
+		
+		Set<String> bindingNames = bindings.getBindingNames();
+		for (Object binding: bindingNames) {
+			logger.info("bindings: {} - {}", binding, bindings.getValue((String)binding));
+			if (triples.contains(binding.toString())) {
+				int index = triples.indexOf(binding);
+				triples.remove(index);
+				triples.add(index, bindings.getValue((String)binding).toString());
+			}
+		}
 		
 		String select = "SELECT ", where = " WHERE ", from = " FROM ", geom = "";
 		int place = 0;
@@ -162,7 +190,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
 				}
 				else {
 					logger.error("No \"asWKT\" predicate.");
-					throw new QueryEvaluationException();
+//					return null;
+//					throw new QueryEvaluationException();
 				}
 			}
 			else {						
