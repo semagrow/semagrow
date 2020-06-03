@@ -35,6 +35,8 @@ import reactor.core.publisher.Flux;
 public class PostGISQueryExecutor implements QueryExecutor {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
+	private static final String username = "postgres";
+	private static final String password = "postgres";
 	
 //	protected BindingSetOpsImpl bindingSetOps = new BindingSetOpsImpl();
 	
@@ -42,29 +44,35 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		logger.info("PostGISQueryExecutor!!!");
 	}
 	
-	public Publisher<BindingSet> evaluate(final Site endpoint, final TupleExpr expr, final BindingSet bindings)
+	public Publisher<BindingSet> evaluate(final Site site, final TupleExpr expr, final BindingSet bindings)
 	throws QueryEvaluationException {
 		logger.info("evaluate!!!");
+//		logger.info("endpoint: {}", endpoint);
+//		
+//		String url = "jdbc:" + endpoint.toString().substring(endpoint.toString().indexOf("/") + 2);
+//		logger.info("endpoint: {}", url);
+		
 //		//PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost:5432/semdb", "postgres", "postgres");
 //		if (bindings.size() == 0) {
 //			return sendSqlQuery(endpoint, expr, Collections.emptyList());
 //		}
 //		
 //		return evaluate(endpoint, expr, Collections.singletonList(bindings));
-		URL myURL = null;
-		try {
-//			myURL = new URL("jdbc:postgresql://localhost/semdb");
-			myURL = new URL("http://localhost:30400");
-		} catch (MalformedURLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		PostGISSite site = new PostGISSite(myURL);
-		return evaluateReactorImpl(site, expr, bindings);
-//		return evaluateReactorImpl((PostGISSite)endpoint, expr, bindings);
+//		URL myURL = null;
+//		try {
+////			myURL = new URL("jdbc:postgresql://localhost/semdb");
+////			myURL = new URL(endpoint);
+//			myURL = new URL("http://localhost:30400");
+//		} catch (MalformedURLException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
+//		PostGISSite site = new PostGISSite(myURL);
+//		return evaluateReactorImpl(site, expr, bindings);
+		return evaluateReactorImpl((PostGISSite)site, expr, bindings);
 	}
 	
-	public Publisher<BindingSet> evaluate(final Site endpoint, final TupleExpr expr, final List<BindingSet> bindingList)
+	public Publisher<BindingSet> evaluate(final Site site, final TupleExpr expr, final List<BindingSet> bindingList)
 	throws QueryEvaluationException {
 		logger.info("evaluate 2!!!");
 //		if (bindingList.isEmpty()) {
@@ -73,17 +81,17 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		
 //		logger.info("bindingList not empty: not yet created");
 		
-		return evaluateReactorImpl(endpoint, expr, bindingList);
-//		return evaluateReactorImpl((PostGISSite)endpoint, expr, bindingList);
+//		return evaluateReactorImpl(endpoint, expr, bindingList);
+		return evaluateReactorImpl((PostGISSite)site, expr, bindingList);
 //		return null;
 	}
 	
 	public Flux<BindingSet>
-		evaluateReactorImpl(final PostGISSite endpoint, final TupleExpr expr, final BindingSet bindings)
+		evaluateReactorImpl(final PostGISSite site, final TupleExpr expr, final BindingSet bindings)
 				throws QueryEvaluationException {
 		Flux<BindingSet> result = null;
 		logger.info("evaluateReactorImpl!!!");
-		logger.info("endpoint: {}", endpoint.toString());
+		logger.info("endpoint: {}", site.toString());
 		logger.info("bindings: {}", bindings.toString());
 		logger.info("!!!!!!!!!!!!expr:: {}", expr.toString());
 		
@@ -103,8 +111,10 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		else {
 			List<String> tables = new ArrayList<String>();
 			String sqlQuery = buildSqlQuery(expr, freeVars, tables);
-			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint.toString());
-			PostGISClient client = PostGISClient.getInstance("jdbc:postgresql://localhost:5432/semdb", "postgres", "postgres");
+			String endpoint = "jdbc:" + site.toString().substring(site.toString().indexOf("/") + 2);
+			logger.info("endpoint: {}", endpoint);
+			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
+			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
 			ResultSet rs = client.execute(sqlQuery);
 //			BindingSet results = bindingSetOps.transform(rs);
 //			result = Flux.just(results);
@@ -115,7 +125,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	}
 	
 	public Flux<BindingSet>
-		evaluateReactorImpl(final Site endpoint, final TupleExpr expr, List<BindingSet> bindings)
+		evaluateReactorImpl(final Site site, final TupleExpr expr, List<BindingSet> bindings)
 				throws QueryEvaluationException {
 		Flux<BindingSet> result = null;
 		logger.info("!!!!evaluateReactorImpl 2!!!!!!");

@@ -178,9 +178,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
         BindingSet relevant = bindingSetOps.project(free, bindings);
         
         logger.info("evaluateSourceReactive source {}", source.toString());
-        QueryExecutor executor = new PostGISQueryExecutor();
-//        QueryExecutor executor = queryExecutorResolver.resolve(source)
-//                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
+//        QueryExecutor executor = new PostGISQueryExecutor();
+        QueryExecutor executor = queryExecutorResolver.resolve(source)
+                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
 
         if (BindingSetUtil.hasBNode(relevant))
             return Flux.empty();
@@ -195,9 +195,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
             throws QueryEvaluationException
     {
         Set<String> free = TupleExprs.getFreeVariables(expr);
-        QueryExecutor executor = new PostGISQueryExecutor();
-//        QueryExecutor executor = queryExecutorResolver.resolve(source)
-//                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
+//        QueryExecutor executor = new PostGISQueryExecutor();
+        QueryExecutor executor = queryExecutorResolver.resolve(source)
+                .orElseThrow( () -> new QueryEvaluationException("Cannot find executor for source " + source));
 
         return Flux.fromIterable(bindings)
                 .filter((b) -> !BindingSetUtil.hasBNode(bindingSetOps.project(free, b)))

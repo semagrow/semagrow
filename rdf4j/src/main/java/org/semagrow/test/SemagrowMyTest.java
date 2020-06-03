@@ -59,7 +59,7 @@ public class SemagrowMyTest extends TestCase {
 		
 		String q6 = "" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/165506> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt_inv .\n" +
+				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/7> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt_inv .\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
 				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
@@ -144,6 +144,14 @@ public class SemagrowMyTest extends TestCase {
 //				"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
 				"  BIND(geof:distance(?wkt1,?wkt2,opengis:metre) as ?dist) . \n" +
 				"  FILTER(?dist < 10) .\n" +
+				"}";
+		
+		String q16 = "" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
+				"  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				"}";
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
