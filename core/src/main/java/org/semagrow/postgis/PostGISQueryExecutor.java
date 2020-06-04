@@ -122,6 +122,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			List<String> tables = new ArrayList<String>();
 			String sqlQuery = buildSqlQuery(expr, freeVars, tables, relevantBindings);
+			if (sqlQuery == null) return Flux.empty();
 			String endpoint = "jdbc:" + site.toString().substring(site.toString().indexOf("/") + 2);
 			logger.info("endpoint: {}", endpoint);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
@@ -162,6 +163,22 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		
 		Map<String,String> filterVars = computeFilterVars(expr);
 		List<String> triples = computeTriples(expr);
+		
+		int n = 1;
+		while (n < triples.size()) {
+			if (!triples.get(n).contains("#asWKT")) {
+				triples.remove(n+1);
+				triples.remove(n);
+				triples.remove(n-1);
+			}
+			else {
+				n += 3;
+			}
+		}
+		
+		if (triples.isEmpty())
+			return null;
+		
 		Map<String,String> asToVar = new HashMap<String, String>();
 		logger.info("triples: {}", triples.toString());
 		logger.info("filterVars: {}", filterVars.toString());
@@ -194,7 +211,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //					throw new QueryEvaluationException();
 				}
 			}
-			else {						
+			else {			
 				if (place % 3 != 0) {	//subject
 					if (vars.contains(part)) {
 						if (!select.equals("SELECT ")) select += ", ";

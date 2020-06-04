@@ -154,6 +154,45 @@ public class SemagrowMyTest extends TestCase {
 				"  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
 				"}";
 		
+		String q17 = "" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?l_geom_id .\n" + 
+				"  <http://deg.iit.demokritos.gr/invekos/resource/701155> <http://www.opengis.net/ont/geosparql#hasGeometry> ?i_geom_id .\n" + 
+				"  ?l_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?l_geom .\n" + 
+				"  ?i_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?i_geom .\n" + 
+				"}";
+		
+		String q18 = "" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?l_geom_id .\n" + 
+				"  <http://deg.iit.demokritos.gr/invekos/resource/701155> <http://www.opengis.net/ont/geosparql#hasGeometry> ?i_geom_id .\n" + 
+				"  ?l_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?l_geom .\n" + 
+				"  ?i_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?i_geom .\n" + 
+				"  FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10) .\n" +
+				"}";
+		
+		String q19 = "" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT * WHERE {\n" +
+//				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1> ?l_lc1 .\n" +
+//				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1_SPEC> ?l_lc1_sp .\n" +
+//				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1> ?l_lc1 .\n" +
+//				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1_spec> ?l_lc1_sp .\n" + 
+//				"  ?conversion <http://deg.iit.demokritos.gr/invekosCropTypeNumber> ?cropNu .\n" +
+//				"  ?i <http://deg.iit.demokritos.gr/invekos/hasCropTypeNumber> ?cropNu2 .\n" +
+//				"  FILTER(?cropNu = ?cropNu2) .\n" +
+//				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?l_geom_id .\n" + 
+//				"  ?i <http://www.opengis.net/ont/geosparql#hasGeometry> ?i_geom_id .\n" + 
+//				"  ?l_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?l_geom .\n" + 
+//				"  ?i_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?i_geom .\n" + 
+//				"  FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10) .\n" +
+				"}";
+		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
 		Repository repo = new SemagrowSailRepository((SemagrowSail) factory.getSail(config));
@@ -162,7 +201,7 @@ public class SemagrowMyTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q16);
+		TupleQuery query = conn.prepareTupleQuery(q18);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
