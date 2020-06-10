@@ -1,9 +1,9 @@
 package org.semagrow.postgis;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -11,15 +11,10 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.rdf4j.model.Value;
+import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
-import org.eclipse.rdf4j.query.algebra.Compare;
-import org.eclipse.rdf4j.query.algebra.Extension;
-import org.eclipse.rdf4j.query.algebra.ExtensionElem;
-import org.eclipse.rdf4j.query.algebra.Filter;
 import org.eclipse.rdf4j.query.algebra.FunctionCall;
-import org.eclipse.rdf4j.query.algebra.QueryModelNode;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.Var;
@@ -28,6 +23,7 @@ import org.reactivestreams.Publisher;
 import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
+import org.semagrow.evaluation.util.BindingSetUtil;
 import org.semagrow.evaluation.util.SimpleBindingSetOps;
 import org.semagrow.selector.Site;
 import org.slf4j.Logger;
@@ -121,7 +117,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			
 			List<String> tables = new ArrayList<String>();
-			String sqlQuery = buildSqlQuery(expr, freeVars, tables, relevantBindings);
+			String sqlQuery = buildSQLQuery(expr, freeVars, tables, relevantBindings);
 			if (sqlQuery == null) return Flux.empty();
 			String endpoint = "jdbc:" + site.toString().substring(site.toString().indexOf("/") + 2);
 			logger.info("endpoint: {}", endpoint);
@@ -144,11 +140,38 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		logger.info("bindings: {}", bindings.toString());
 		if (bindings.size() == 1)
             return evaluateReactorImpl(site, expr, bindings.get(0));
-		
-//		Set<String> exprVars = computeVars(expr);
-		
-		
-		return result;
+	
+		Set<String> exprVars = computeVars(expr);
+
+        Collection<String> relevantBindingNames = Collections.emptySet();
+
+        if (!bindings.isEmpty())
+        	relevantBindingNames = BindingSetUtil.projectNames(exprVars, bindings.get(0));
+        
+        logger.info("bindings.get(0): {}", bindings.get(0));
+        logger.info("relevantBindingNames: {}", relevantBindingNames);
+        
+        Set<String> freeVars = computeVars(expr);
+        freeVars.removeAll(relevantBindingNames);
+        
+        if (freeVars.isEmpty()) {
+			logger.error("No variables in query.");
+		} 
+		else {
+        
+	        List<String> tables = new ArrayList<String>();
+	        String sqlQuery = buildSQLQueryUnion(expr, freeVars, tables, bindings, relevantBindingNames);
+			
+	        if (sqlQuery == "") return Flux.empty();
+			String endpoint = "jdbc:" + site.toString().substring(site.toString().indexOf("/") + 2);
+			logger.info("endpoint: {}", endpoint);
+			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
+			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
+			ResultSet rs = client.execute(sqlQuery);
+			return Flux.from(new SQLQueryResultPublisher(rs, tables));
+		}
+        
+        return result;
 	}
 	
 //	private Publisher<BindingSet> sendSqlQuery(Site site, TupleExpr expr, List<BindingSet> bindingsList) {
@@ -157,7 +180,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //		return null;
 //	}
 	
-	protected String buildSqlQuery(TupleExpr expr, Set<String> vars, List<String> tables, BindingSet bindings) {
+	protected String buildSQLQuery(TupleExpr expr, Set<String> vars, List<String> tables, BindingSet bindings) {
 		
 		Pair<String, String> tableAndGid = null;
 		
@@ -325,6 +348,198 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		logger.info("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
 	}
+	
+	
+	protected String buildSQLQueryUnion(TupleExpr expr, Set<String> freeVars, List<String> tables, List<BindingSet> bindings, Collection<String> relevantBindingNames) {
+		Pair<String, String> tableAndGid = null;
+		
+		Map<String,String> filterVars = computeFilterVars(expr);
+		List<String> triples = computeTriples(expr);
+		
+		if (freeVars.size() - 1 > triples.size() / 3)  {	//throw exception ????
+			logger.error("More than one triples with two free variables.");
+			throw new QueryEvaluationException();
+		}
+		
+		int n = 1;
+		while (n < triples.size()) {
+			if (!triples.get(n).contains("#asWKT")) {
+				triples.remove(n+1);
+				triples.remove(n);
+				triples.remove(n-1);
+			}
+			else {
+				n += 3;
+			}
+		}
+		
+		if (triples.isEmpty())
+			return null;
+		
+		Map<String,String> asToVar = new HashMap<String, String>();
+		logger.info("triples: {}", triples.toString());
+		logger.info("filterVars: {}", filterVars.toString());
+		
+//		Set<String> bindingNames = bindings.getBindingNames();
+//		for (Object binding: bindingNames) {
+//			logger.info("bindings: {} - {}", binding, bindings.getValue((String)binding));
+//			if (triples.contains(binding.toString())) {
+//				int index = triples.indexOf(binding);
+//				triples.remove(index);
+//				triples.add(index, bindings.getValue((String)binding).toString());
+//			}
+//		}
+		
+		String select = "SELECT ", where = " WHERE ", from = " FROM ", geom = "", binding_var = "";
+		int binding_place = -1;
+		int place = 0;
+		
+		for (String part : triples) {
+			place++;
+			if (part.contains("#")) {	//predicate
+				if (part.substring(part.lastIndexOf("#") + 1).equals("asWKT")) {
+					geom = "t" + (place-1) + ".geom";
+				}
+				else {
+					logger.error("No \"asWKT\" predicate.");
+				}
+			}
+			else {			
+				if (place % 3 != 0) {	//subject
+					if (freeVars.contains(part)) {
+						if (!select.equals("SELECT ")) select += ", ";
+						select += "t"+ place + ".gid AS " + part;
+						asToVar.put(part, "t"+ place + ".gid");
+						tables.add("?");
+					}
+					else if (bindings.get(0).hasBinding(part)) {
+						tableAndGid = subDecompose(bindings.get(0).getBinding(part).getValue().toString());
+						if (!from.equals(" FROM ")) from += ", ";
+						from += tableAndGid.getLeft() + " t" + place;
+//						if (!where.equals(" WHERE ")) where += " AND ";
+//						where_bind += "t" + place + ".gid = " + tableAndGid.getRight();
+						binding_var = part;
+						binding_place = place;
+//						bindings.remove(0);
+					}
+					else {				
+						tableAndGid = subDecompose(part);
+						if (!from.equals(" FROM ")) from += ", ";
+						from += tableAndGid.getLeft() + " t" + place;
+						if (!where.equals(" WHERE ")) where += " AND ";
+						where += "t" + place + ".gid = " + tableAndGid.getRight();
+					}
+				}
+				else {					//object
+					if (freeVars.contains(part)) {
+						if (!select.equals("SELECT ")) select += ", ";
+						select += "ST_AsText(" + geom + ") AS " + part;
+						asToVar.put(part, geom);
+						tables.add("-");
+					}
+					else {
+						if (!where.equals(" WHERE ")) where += " AND ";
+						where += "ST_Equals(t" + place 
+								+ ".geom, ST_ST_GeomFromText('" + part + "',4326))" ;
+						if (tables.get(place/3 - 1).equals("?"))
+							tables.remove(place/3 - 1);
+						if (part.contains("POINT")) {
+							tables.add("lucas");
+						}
+						else if (part.contains("MULTIPOLYGON")) {
+							tables.add("invekos");
+						}
+					}
+					
+				}
+			}
+		}
+		
+		logger.info("select:: {}", select);
+		logger.info("from:: {}", from);
+		logger.info("where:: {}", where);
+		logger.info("tables:: {}", tables.toString());
+		
+		
+		String sqlQuery = "";
+//		if (freeVars.size() - 1 > triples.size() / 3)  {	//throw exception ????
+//			logger.error("More than one triples with two free variables.");
+//			throw new QueryEvaluationException();
+//		}
+		
+		String dist = "", filter = "", bind = "";
+		if (!filterVars.isEmpty()) {
+			if (filterVars.get("function").equals("distance"))
+				dist += "ST_Distance(";
+			if (filterVars.get("type").equals("metre")) {
+				dist += "ST_GeographyFromText(ST_AsText("
+						+ asToVar.get(filterVars.get("var"))
+						+ ")), ST_GeographyFromText(ST_AsText("
+						+ asToVar.get(filterVars.get("var2"))
+						+ "))";
+			}
+			else if (filterVars.get("type").equals("degree")) {
+				dist += asToVar.get(filterVars.get("var")) 
+						+ ", " + asToVar.get(filterVars.get("var2"));
+			}
+			dist += ") ";
+			if (filterVars.containsKey("signature")) {
+				if (!select.equals("SELECT ")) select += ", ";
+				bind += dist + "AS " + filterVars.get("signature");
+			}
+			if (filterVars.containsKey("compare")) {
+				if (!where.equals(" WHERE ")) where += " AND ";
+				filter += dist + filterVars.get("compare") + " " + filterVars.get("value");
+			}
+		}
+		
+		
+		if (from.equals(" FROM ")) {	
+			sqlQuery = select + bind + from + "lucas t1 UNION " 
+					+ select + bind + from + "invekos t1;";
+		}
+		else {
+			
+			logger.info("vars size: {}", freeVars.size());
+			logger.info("triples size: {}", triples.size());
+			
+			String where_bind = "";
+			if (!where.equals(" WHERE ")) where += " AND ";
+			for (BindingSet b : bindings) {
+				if (!sqlQuery.equals(""))
+					sqlQuery += " UNION ";
+				
+				tableAndGid = subDecompose(b.getBinding(binding_var).getValue().toString());
+				where_bind = "t" + binding_place + ".gid = " + tableAndGid.getRight();	
+				
+				if (freeVars.size() == triples.size() / 3)
+					sqlQuery += select + bind + from + where + where_bind + filter;
+				else {
+					String lucas = "", invekos = "";
+					place = 1;
+					while (place < triples.size()) {
+						if (!from.contains("t" + place)) {
+							lucas += ", lucas t" + place;
+							invekos += ", invekos t" + place;
+						}
+						place += 3;
+					}
+					sqlQuery += select + bind + from + lucas + where + where_bind + filter + " UNION " 
+							+ select + bind + from + invekos + where + where_bind + filter;
+				}
+			}
+			
+			sqlQuery += ";";
+			
+		}
+		
+		logger.info("asToVar:: {}", asToVar.toString());
+		logger.info("bind:: {}", bind);
+		logger.info("filter:: {}", filter);
+		logger.info("sqlQuery:: {}", sqlQuery);
+		return sqlQuery;
+	}
+	
 	
 	protected Set<String> computeVars(TupleExpr serviceExpression) {
 		final Set<String> res = new HashSet<String>();
