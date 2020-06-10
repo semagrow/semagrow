@@ -104,17 +104,17 @@ public class SQLQueryResultPublisher implements Publisher<BindingSet> {
 								tempColumnValue = rs.getString(i);
 							} 
 							else {
-								result.addBinding(rsmd.getColumnName(i), vf.createLiteral("<http://deg.iit.demokritos.gr/" + tables.get(i-1) + "/resource/Geometry/" + rs.getString(i) + ">"));
+								result.addBinding(rsmd.getColumnName(i), vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i-1) + "/resource/Geometry/" + rs.getString(i) + ""));
 							}
 							continue;
 						}
 						if (tempColumnName != null && tempColumnValue != null) {
 							logger.info("tables[{}]: {} ", i-1, tables.get(i-1));
 							if (rs.getString(i).contains("POINT")) {
-								result.addBinding(tempColumnName, vf.createLiteral("<http://deg.iit.demokritos.gr/lucas/resource/Geometry/" + tempColumnValue + ">"));
+								result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/resource/Geometry/" + tempColumnValue + ""));
 							}
 							else if (rs.getString(i).contains("MULTIPOLYGON")) {
-								result.addBinding(tempColumnName, vf.createLiteral("<http://deg.iit.demokritos.gr/invekos/resource/Geometry/" + tempColumnValue + ">"));
+								result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/resource/Geometry/" + tempColumnValue + ""));
 							}
 							tempColumnName = tempColumnValue = null;
 						}
