@@ -24,7 +24,7 @@ import junit.framework.TestCase;
 public class SemagrowMyTest extends TestCase {
 
 	public void testSemagrowQuery() throws IOException {
-	    
+		
 		String q1 = "" +
 				"SELECT * WHERE {\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
@@ -104,7 +104,7 @@ public class SemagrowMyTest extends TestCase {
 			"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
 			"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
 			"}";
-
+		
 		String q12 = "" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
@@ -268,13 +268,13 @@ public class SemagrowMyTest extends TestCase {
 				"      BIND(geof:distance(?l2_geom,?i2_geom,opengis:metre) as ?dist2) .\n" +
 				"      FILTER(?dist2 < 10) .\n" +
 				"    }\n" +
-				"    ORDER BY ASC(?dist2) .\n" +
-				"    LIMIT 1 .\n" +
+				"    ORDER BY ASC(?dist2)\n" +
+				"    LIMIT 1\n" +
 				"  }\n" +
 				"  FILTER(?dist <= ?dist2) .\n" +
 				"}";
 		
-		String q26 = "" +		//query 9 ?
+		String q25 = "" +		//query 9 ?
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
@@ -310,7 +310,7 @@ public class SemagrowMyTest extends TestCase {
 				"  FILTER(?dist < ?dist2) .\n" +
 				"}";
 
-		String q27 = "" +		//query 10 ?
+		String q26 = "" +		//query 10 ?
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
@@ -344,28 +344,7 @@ public class SemagrowMyTest extends TestCase {
                 "ORDER BY ASC(?dist)\n" +
                 "LIMIT 1";
 		
-		String q25 = "" +		//query 2, without ordering and limit
-				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
-				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
-				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
-				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1> ?l_lc1 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1_SPEC> ?l_lc1_sp .\n" +
-				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1> ?l_lc1 .\n" +
-				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1_spec> ?l_lc1_sp .\n" + 
-				"  ?conversion <http://deg.iit.demokritos.gr/invekosCropTypeNumber> ?cropNu .\n" +
-				"  ?i <http://deg.iit.demokritos.gr/invekos/hasCropTypeNumber> ?cropNu2 .\n" +
-				"  FILTER(?cropNu = ?cropNu2) .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
-				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
-				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
-				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
-				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
-				"}\n" +
-				"ORDER BY ASC(?dist)\n" +
-                "LIMIT 1";
-		
-		String q30 = "" +
+		String q27 = "" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
@@ -378,6 +357,48 @@ public class SemagrowMyTest extends TestCase {
 				"  <http://deg.iit.demokritos.gr/invekos/resource/701155> <http://deg.iit.demokritos.gr/invekos/hasCropTypeNumber> ?cropNu2 .\n" +
 				"  FILTER(?cropNu = ?cropNu2) .\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
+				"  <http://deg.iit.demokritos.gr/invekos/resource/701155> geo:hasGeometry ?i_geom_id .\n" + 
+				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
+				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
+				"}\n" +
+				"ORDER BY ASC(?dist)\n" +
+                "LIMIT 1";
+		
+		String q28 = "" +			//query 2, without ordering and limit
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1> ?l_lc1 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1_SPEC> ?l_lc1_sp .\n" +
+				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1> ?l_lc1 .\n" +
+				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1_spec> ?l_lc1_sp .\n" + 
+				"  ?conversion <http://deg.iit.demokritos.gr/invekosCropTypeNumber> ?cropNu .\n" +
+				"  ?i <http://deg.iit.demokritos.gr/invekos/hasCropTypeNumber> ?cropNu2 .\n" +
+				"  FILTER(?cropNu = ?cropNu2) .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
+//				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
+				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+//				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
+//				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
+//				"}\n" +
+//				"ORDER BY ASC(?dist)\n" +
+//                "LIMIT 1";
+				"}";
+		
+		String q29 = "" +			//query 2, without ordering and limit, and no invekos only lucases
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1> ?l_lc1 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1_SPEC> ?l_lc1_sp .\n" +
+				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1> ?l_lc1 .\n" +
+				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1_spec> ?l_lc1_sp .\n" + 
+				"  ?i <http://deg.iit.demokritos.gr/lucas/hasLC1> ?l_lc1 .\n" +
+				"  ?i <http://deg.iit.demokritos.gr/lucas/hasLC1_SPEC> ?l_lc1_sp .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
 				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
 				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
 				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
@@ -385,6 +406,17 @@ public class SemagrowMyTest extends TestCase {
 //				"}\n" +
 //				"ORDER BY ASC(?dist)\n" +
 //                "LIMIT 1";
+				"}";
+		
+		String q30 = "" +		//a2
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT * WHERE {\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
+				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
+//				"  FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10) .\n" + 
 				"}";
 		
 		
@@ -396,7 +428,9 @@ public class SemagrowMyTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q30);
+		// q1: 1, q2: 1, q3: 1, q4: 1052901, q5: 1, q6: 1, q7: 8, q8: error, q9: 8, q11: 0, q12: 0, q13: 1, q14: 1
+		// q15: 2, q16: 1, q17: 1, q18: 1, q19: 1, q20: 2, q21: 1, q22: 2, q23: 1
+		TupleQuery query = conn.prepareTupleQuery(q29);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
