@@ -6,7 +6,10 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.stream.Stream;
 
+import org.jooq.Record;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,17 +74,9 @@ public class PostGISClient {
 		}
     }
 
-    public ResultSet execute(String query) {
+    public Stream<Record> execute(String query) {
     	logger.info("execute!!!");
         logger.info("Sending query: {}", query);
-        ResultSet results = null;
-		try {
-			results = statement.executeQuery(query);
-		} catch (SQLException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		logger.info("results: {}", results);
-        return results;
+        return DSL.using(database).fetch(query).stream();
     }
 }

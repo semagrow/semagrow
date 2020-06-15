@@ -1,5 +1,6 @@
 package org.semagrow.postgis;
 
+import org.jooq.Record;
 import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
 import org.slf4j.Logger;
@@ -14,39 +15,60 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Collection;
+import java.util.List;
 
-public class BindingSetOpsImpl implements BindingSetOps {
+public final class BindingSetOpsImpl implements BindingSetOps {
 
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	private static final ValueFactory vf = SimpleValueFactory.getInstance();
-	
-	/**
-     * Transform a bindingSet from a resultSet.
-     * @param rs
-     * @return A binding set that contains the results from the result set.
-     */
-//	public BindingSet transform(ResultSet rs) {
-//        QueryBindingSet result = new QueryBindingSet();
-//        logger.info("BindingSetOpsImpl transform!!!!! ");
-//        try {
-//			ResultSetMetaData rsmd = rs.getMetaData();
-//			int columnsNumber = rsmd.getColumnCount();
-//			while (rs.next()) {
-//				for (int i = 1; i <= columnsNumber; i++) {
-//					String columnValue = rs.getString(i);
-//					logger.info("columnName:: {} ", rsmd.getColumnName(i));
-//					logger.info("columnValue:: {} ", columnValue);
-////					vf.createLiteral(columnValue);
-//					result.addBinding(rsmd.getColumnName(i), vf.createLiteral(columnValue));
-//					logger.info(" {} as {} ", columnValue, rsmd.getColumnName(i));
-//				}
-//			}
-//		} catch (SQLException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//        return result;
-//    }
+
+    public static final BindingSet transform(Record r, List<String> tables) throws SQLException {
+
+        ResultSet rs = r.intoResultSet();
+        ResultSetMetaData rsmd = rs.getMetaData();
+        int columnsNumber = rsmd.getColumnCount();
+
+        QueryBindingSet result = new QueryBindingSet();
+        String tempColumnName = null, tempColumnValue = null;
+        logger.info("columnsNumber::::::::::::::::::::::: {} ", columnsNumber);
+        logger.info("tables::::::::::::::::::::::: {} ", tables.toString());
+        for (int i = 1; i <= columnsNumber; i++) {
+            if (rsmd.getColumnClassName(i).equals("java.lang.Integer")) {
+                logger.info("string is numeric!!!: {} ", rsmd.getColumnName(i));
+                logger.info("tables[{}]: {} ", i - 1, tables.get(i-1));
+                if (tables.get(i - 1).equals("?")) {
+                    tempColumnName = rsmd.getColumnName(i);
+                    tempColumnValue = r.getValue(i-1) instanceof String ? (String) r.getValue(i-1) : r.getValue(i-1).toString();
+                } else {
+                    result.addBinding(
+                            rsmd.getColumnName(i),
+                            vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i-1) + "/resource/Geometry/" + r.getValue(i-1) + "")
+                    );
+                }
+                continue;
+            }
+            if (tempColumnName != null && tempColumnValue != null) {
+                logger.info("tables[{}]: {} ", i - 1, tables.get(i - 1));
+                if (((String) r.getValue(i-1)).contains("POINT")) {
+                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/resource/Geometry/" + tempColumnValue + ""));
+                } else if (((String) r.getValue(i-1)).contains("MULTIPOLYGON")) {
+                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/resource/Geometry/" + tempColumnValue + ""));
+                }
+                tempColumnName = tempColumnValue = null;
+            }
+//						logger.info("columnClassName:: {} ", rsmd.getColumnClassName(i));
+//						logger.info("columnLabel:: {} ", rsmd.getColumnLabel(i));
+//						logger.info("SchemaName:: {} ", rsmd.getSchemaName(i));
+//						logger.info("TableName:: {} ", rsmd.getTableName(i));
+//						logger.info("CatalogName:: {} ", rsmd.getCatalogName(i));
+            logger.info("columnName:: {} ", rsmd.getColumnName(i));
+            logger.info("columnValue:: {} ", r.getValue(i-1));
+            result.addBinding(rsmd.getColumnName(i), vf.createLiteral((String) r.getValue(i-1)));
+            logger.info(" {} as {} ", r.getValue(i-1), rsmd.getColumnName(i));
+
+        }
+        return result;
+    }
 	
     /**
      * Merge two bindingSet into one. If some bindings of the second set refer to

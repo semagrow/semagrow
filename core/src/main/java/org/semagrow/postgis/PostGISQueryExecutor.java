@@ -1,6 +1,7 @@
 package org.semagrow.postgis;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -9,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.query.Binding;
@@ -19,6 +21,7 @@ import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
 import org.eclipse.rdf4j.query.algebra.Var;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.jooq.Record;
 import org.reactivestreams.Publisher;
 import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
@@ -123,10 +126,15 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.info("endpoint: {}", endpoint);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
 			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
-			ResultSet rs = client.execute(sqlQuery);
-//			BindingSet results = bindingSetOps.transform(rs);
-//			result = Flux.just(results);
-			return Flux.from(new SQLQueryResultPublisher(rs, tables));
+			Stream<Record> rs = client.execute(sqlQuery);
+			return Flux.fromStream(rs.map(r -> {
+				try {
+					return BindingSetOpsImpl.transform(r, tables);
+				} catch (SQLException e) {
+					e.printStackTrace();
+					throw new QueryEvaluationException();
+				}
+			}));
 		}
 		
 		return result;		
@@ -156,7 +164,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
         
         if (freeVars.isEmpty()) {
 			logger.error("No variables in query.");
-		} 
+		}
 		else {
         
 	        List<String> tables = new ArrayList<String>();
@@ -167,8 +175,15 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.info("endpoint: {}", endpoint);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
 			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
-			ResultSet rs = client.execute(sqlQuery);
-			return Flux.from(new SQLQueryResultPublisher(rs, tables));
+			Stream<Record> rs = client.execute(sqlQuery);
+			return Flux.fromStream(rs.map(r -> {
+				try {
+					return BindingSetOpsImpl.transform(r, tables);
+				} catch (SQLException e) {
+					e.printStackTrace();
+					throw new QueryEvaluationException();
+				}
+			}));
 		}
         
         return result;
