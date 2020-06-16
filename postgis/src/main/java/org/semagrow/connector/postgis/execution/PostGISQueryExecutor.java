@@ -170,7 +170,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	        List<String> tables = new ArrayList<String>();
 	        String sqlQuery = buildSQLQueryUnion(expr, freeVars, tables, bindings, relevantBindingNames);
 			
-	        if (sqlQuery == "") return Flux.empty();
+//	        if (sqlQuery == "") return Flux.empty();
+	        if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
 			String username = site.getUsername();
 			String password = site.getPassword();
