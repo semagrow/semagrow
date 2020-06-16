@@ -1,8 +1,6 @@
 package org.semagrow.connector.postgis.config;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
+import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.semagrow.connector.postgis.PostGISSite;
 import org.semagrow.selector.Site;
 import org.semagrow.selector.SiteConfig;
@@ -22,19 +20,7 @@ public class PostGISSiteFactory implements SiteFactory {
 
     @Override
     public Site getSite(SiteConfig config) {
-//    	if (config instanceof PostGISSiteConfig) {
-//    		PostGISSiteConfig postgisSiteConfig = (PostGISSiteConfig)config;
-    		URL u;
-			try {
-				u = new URL(config.getSiteId());
-				return new PostGISSite(u);
-			} catch (MalformedURLException e) {
-	            throw new IllegalArgumentException("Configuration is not a valid URL");
-			}
-//            return new PostGISSite(postgisSiteConfig.getEndpoint());
-//    	}
-//        else
-//        	throw new IllegalArgumentException("config is not of type PostGISSiteConfig");
+			return new PostGISSite(SimpleValueFactory.getInstance().createIRI(config.getSiteId()));
     }
 
 }

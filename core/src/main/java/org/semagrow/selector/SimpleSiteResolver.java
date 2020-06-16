@@ -21,7 +21,7 @@ public class SimpleSiteResolver implements SiteResolver {
         if (id.contains("cassandra")) {
             maybeSiteFactory = siteRegistry.get("CASSANDRA");
         }
-        else if (id.contains("postgresql")) {
+        else if (id.startsWith("postgis://")) {
         	maybeSiteFactory = siteRegistry.get("POSTGIS");
         }
         else {

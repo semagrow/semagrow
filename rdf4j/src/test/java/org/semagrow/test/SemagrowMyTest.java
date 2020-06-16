@@ -416,7 +416,7 @@ public class SemagrowMyTest extends TestCase {
 				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
 				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
 				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
-//				"  FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10) .\n" + 
+//				"  FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10) .\n" +
 				"}";
 		
 		

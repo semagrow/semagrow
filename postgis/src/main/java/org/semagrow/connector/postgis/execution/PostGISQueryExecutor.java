@@ -38,8 +38,6 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	
     protected BindingSetOps bindingSetOps = SimpleBindingSetOps.getInstance();
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
-	private static final String username = "postgres";
-	private static final String password = "postgres";
 	
 //	protected BindingSetOpsImpl bindingSetOps = new BindingSetOpsImpl();
 	
@@ -122,7 +120,9 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			List<String> tables = new ArrayList<String>();
 			String sqlQuery = buildSQLQuery(expr, freeVars, tables, relevantBindings);
 			if (sqlQuery == null) return Flux.empty();
-			String endpoint = "jdbc:" + site.toString().substring(site.toString().indexOf("/") + 2);
+			String endpoint = site.getEndpoint();
+			String username = site.getUsername();
+			String password = site.getPassword();
 			logger.info("endpoint: {}", endpoint);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
 			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
@@ -171,7 +171,9 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	        String sqlQuery = buildSQLQueryUnion(expr, freeVars, tables, bindings, relevantBindingNames);
 			
 	        if (sqlQuery == "") return Flux.empty();
-			String endpoint = "jdbc:" + site.toString().substring(site.toString().indexOf("/") + 2);
+			String endpoint = site.getEndpoint();
+			String username = site.getUsername();
+			String password = site.getPassword();
 			logger.info("endpoint: {}", endpoint);
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
 			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
