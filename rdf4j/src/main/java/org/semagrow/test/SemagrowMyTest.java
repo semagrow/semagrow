@@ -59,7 +59,7 @@ public class SemagrowMyTest extends TestCase {
 		
 		String q6 = "" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/7> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt_inv .\n" +
+				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/165506> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt_inv .\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
 				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
@@ -378,10 +378,10 @@ public class SemagrowMyTest extends TestCase {
 				"  ?i <http://deg.iit.demokritos.gr/invekos/hasCropTypeNumber> ?cropNu2 .\n" +
 				"  FILTER(?cropNu = ?cropNu2) .\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
-//				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
+				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
 				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
-//				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
-//				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
+				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
+				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
 //				"}\n" +
 //				"ORDER BY ASC(?dist)\n" +
 //                "LIMIT 1";
@@ -428,9 +428,11 @@ public class SemagrowMyTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		// q1: 1, q2: 1, q3: 1, q4: 1052901, q5: 1, q6: 1, q7: 8, q8: error, q9: 8, q11: 0, q12: 0, q13: 1, q14: 1
-		// q15: 2, q16: 1, q17: 1, q18: 1, q19: 1, q20: 2, q21: 1, q22: 2, q23: 1
-		TupleQuery query = conn.prepareTupleQuery(q29);
+		// q1: 1, q2: 1, q3: 1, q4: 1052901, q5: 1, q6: 1, q7: *, q8: error, q9: *, q11: 0, q12: 0, q13: 1 (+dist)
+		// q14: 1, q15: 2, q16: 1, q17: 1, q18: 1, q19: 1, q20: 2, q21: 1, q22: 2, q23: 1
+		// q29: 2 ??? , q30: *
+		// * = lucas_geom.count + invekos_geom.count
+		TupleQuery query = conn.prepareTupleQuery(q28);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);

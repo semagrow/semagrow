@@ -32,39 +32,49 @@ public final class BindingSetOpsImpl implements BindingSetOps {
         String tempColumnName = null, tempColumnValue = null;
         logger.info("columnsNumber::::::::::::::::::::::: {} ", columnsNumber);
         logger.info("tables::::::::::::::::::::::: {} ", tables.toString());
-        for (int i = 1; i <= columnsNumber; i++) {
-            if (rsmd.getColumnClassName(i).equals("java.lang.Integer")) {
-                logger.info("string is numeric!!!: {} ", rsmd.getColumnName(i));
-                logger.info("tables[{}]: {} ", i - 1, tables.get(i-1));
-                if (tables.get(i - 1).equals("?")) {
-                    tempColumnName = rsmd.getColumnName(i);
-                    tempColumnValue = r.getValue(i-1) instanceof String ? (String) r.getValue(i-1) : r.getValue(i-1).toString();
+        for (int i = 0; i < columnsNumber; i++) {
+            if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer")) {
+                logger.info("string is numeric!!!: {} ", rsmd.getColumnName(i+1));
+                logger.info("tables[{}]: {} ", i, tables.get(i));
+                if (tables.get(i).equals("?")) {
+                    tempColumnName = rsmd.getColumnName(i+1);
+                    tempColumnValue = r.getValue(i) instanceof String ? (String) r.getValue(i) : r.getValue(i).toString();
                 } else {
                     result.addBinding(
-                            rsmd.getColumnName(i),
-                            vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i-1) + "/resource/Geometry/" + r.getValue(i-1) + "")
+                            rsmd.getColumnName(i+1),
+                            vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i) + "/resource/Geometry/" + r.getValue(i) + "")
                     );
                 }
                 continue;
             }
             if (tempColumnName != null && tempColumnValue != null) {
-                logger.info("tables[{}]: {} ", i - 1, tables.get(i - 1));
-                if (((String) r.getValue(i-1)).contains("POINT")) {
+                logger.info("tables[{}]: {} ", i, tables.get(i));
+                if (((String) r.getValue(i)).contains("POINT")) {
                     result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/resource/Geometry/" + tempColumnValue + ""));
-                } else if (((String) r.getValue(i-1)).contains("MULTIPOLYGON")) {
+                } else if (((String) r.getValue(i)).contains("MULTIPOLYGON")) {
                     result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/resource/Geometry/" + tempColumnValue + ""));
                 }
                 tempColumnName = tempColumnValue = null;
             }
-//						logger.info("columnClassName:: {} ", rsmd.getColumnClassName(i));
-//						logger.info("columnLabel:: {} ", rsmd.getColumnLabel(i));
-//						logger.info("SchemaName:: {} ", rsmd.getSchemaName(i));
-//						logger.info("TableName:: {} ", rsmd.getTableName(i));
-//						logger.info("CatalogName:: {} ", rsmd.getCatalogName(i));
-            logger.info("columnName:: {} ", rsmd.getColumnName(i));
-            logger.info("columnValue:: {} ", r.getValue(i-1));
-            result.addBinding(rsmd.getColumnName(i), vf.createLiteral((String) r.getValue(i-1)));
-            logger.info(" {} as {} ", r.getValue(i-1), rsmd.getColumnName(i));
+//						logger.info("columnClassName:: {} ", rsmd.getColumnClassName(i+1));
+//						logger.info("columnLabel:: {} ", rsmd.getColumnLabel(i+1));
+//						logger.info("SchemaName:: {} ", rsmd.getSchemaName(i+1));
+//						logger.info("TableName:: {} ", rsmd.getTableName(i+1));
+//						logger.info("CatalogName:: {} ", rsmd.getCatalogName(i+1));
+            logger.info("columnName:: {} ", rsmd.getColumnName(i+1));
+            logger.info("columnValue:: {} ", r.getValue(i));
+            
+            if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((String) r.getValue(i)));
+            }
+            else if (rsmd.getColumnClassName(i+1).equals("java.lang.Double")) {
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((Double) r.getValue(i)));
+            }
+            else {
+            	logger.error("java.lang.ClassCastException: {} is {}", rsmd.getColumnName(i+1), rsmd.getColumnClassName(i+1));
+            	throw new SQLException();
+            }
+            logger.info(" {} as {} ", r.getValue(i), rsmd.getColumnName(i+1));
 
         }
         return result;
