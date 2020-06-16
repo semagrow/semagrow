@@ -432,7 +432,7 @@ public class SemagrowMyTest extends TestCase {
 		// q14: 1, q15: 2, q16: 1, q17: 1, q18: 1, q19: 1, q20: 2, q21: 1, q22: 2, q23: 1
 		// q29: 2 ??? , q30: *
 		// * = lucas_geom.count + invekos_geom.count
-		TupleQuery query = conn.prepareTupleQuery(q28);
+		TupleQuery query = conn.prepareTupleQuery(q30);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);

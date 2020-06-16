@@ -1,4 +1,4 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis;
 
 import java.net.URL;
 
@@ -38,7 +38,7 @@ public class PostGISSite implements Site {
 //    }
     
     public Resource getID() { 
-    	return SimpleValueFactory.getInstance().createURI(getURL().toString()); 
+    	return SimpleValueFactory.getInstance().createIRI(getURL().toString());
     }
     
     public String getType() { 

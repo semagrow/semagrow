@@ -1,6 +1,6 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis.config;
 
-import org.semagrow.postgis.PostGISQueryExecutor;
+import org.semagrow.connector.postgis.execution.PostGISQueryExecutor;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.evaluation.QueryExecutorFactory;
 import org.semagrow.evaluation.QueryExecutorImplConfig;

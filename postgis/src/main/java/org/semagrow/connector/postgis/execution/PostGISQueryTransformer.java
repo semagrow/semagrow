@@ -1,4 +1,4 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis.execution;
 
 import java.util.Collections;
 import java.util.List;

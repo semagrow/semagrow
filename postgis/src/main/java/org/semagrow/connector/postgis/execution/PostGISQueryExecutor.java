@@ -1,6 +1,5 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis.execution;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -13,7 +12,6 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.FunctionCall;
@@ -23,6 +21,8 @@ import org.eclipse.rdf4j.query.algebra.Var;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.jooq.Record;
 import org.reactivestreams.Publisher;
+import org.semagrow.connector.postgis.util.BindingSetOpsImpl;
+import org.semagrow.connector.postgis.PostGISSite;
 import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;

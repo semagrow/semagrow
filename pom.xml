@@ -32,6 +32,7 @@
         <module>webgui</module>
         <module>assembly</module>
         <module>geospatial</module>
+        <module>postgis</module>
     </modules>
 
     <properties>

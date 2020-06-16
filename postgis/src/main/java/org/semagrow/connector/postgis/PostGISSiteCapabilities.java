@@ -1,4 +1,4 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis;
 
 import org.semagrow.selector.AbstractSiteCapabilities;
 

@@ -1,4 +1,4 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis.config;
 
 import org.semagrow.selector.SiteConfig;
 import org.eclipse.rdf4j.model.IRI;

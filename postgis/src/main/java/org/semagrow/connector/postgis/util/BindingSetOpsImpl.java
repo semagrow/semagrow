@@ -1,4 +1,4 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis.util;
 
 import org.jooq.Record;
 import org.semagrow.evaluation.BindingSetOps;

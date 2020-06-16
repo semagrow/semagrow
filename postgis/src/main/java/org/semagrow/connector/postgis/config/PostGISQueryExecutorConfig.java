@@ -1,4 +1,4 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis.config;
 
 import org.semagrow.evaluation.QueryExecutorConfigException;
 import org.semagrow.evaluation.QueryExecutorImplConfig;

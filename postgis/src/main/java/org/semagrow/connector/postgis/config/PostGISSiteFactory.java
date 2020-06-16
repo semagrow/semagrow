@@ -1,9 +1,9 @@
-package org.semagrow.postgis;
+package org.semagrow.connector.postgis.config;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.semagrow.postgis.PostGISSite;
+import org.semagrow.connector.postgis.PostGISSite;
 import org.semagrow.selector.Site;
 import org.semagrow.selector.SiteConfig;
 import org.semagrow.selector.SiteFactory;
