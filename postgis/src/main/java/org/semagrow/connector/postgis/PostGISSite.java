@@ -5,20 +5,36 @@ import org.eclipse.rdf4j.model.Resource;
 import org.semagrow.selector.Site;
 import org.semagrow.selector.SiteCapabilities;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class PostGISSite implements Site {
 	
 	static final String TYPE = "POSTGIS";
 
     private IRI endpointURI;
     private String endpoint;
-
-    private final String username = "postgres";
-    private final String password = "postgres";
+    private String username;
+    private String password;
 
     public PostGISSite(IRI uri) {
         assert uri != null;
         this.endpointURI = uri;
-        this.endpoint = uri.toString().replace("postgis://","jdbc:postgresql://");
+
+        String regex = "^postgis://([^:]+):([^@]+)@([^ ]+)";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(uri.toString());
+
+        if (matcher.find()) {
+            this.username = matcher.group(1);
+            this.password = matcher.group(2);
+            this.endpoint = "jdbc:postgresql://" + matcher.group(3);
+        }
+        else {
+            this.username = "postgres";
+            this.password = "postgres";
+            this.endpoint = uri.toString().replace("postgis://", "jdbc:postgresql://");
+        }
     }
     
     @Override
