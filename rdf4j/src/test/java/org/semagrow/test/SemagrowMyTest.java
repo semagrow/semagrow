@@ -489,6 +489,7 @@ public class SemagrowMyTest extends TestCase {
 		// q29: More than one triples with two free variables, wrong
 		// q30: 0 wrong
 		// q31: 5 ??? wrong
+//		TupleQuery query = conn.prepareTupleQuery(q13);
 		TupleQuery query = conn.prepareTupleQuery(q34);
 		
 		final int[] count = {0};

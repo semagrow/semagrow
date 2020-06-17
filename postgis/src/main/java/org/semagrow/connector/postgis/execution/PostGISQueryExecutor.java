@@ -324,54 +324,174 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		logger.info("1 asToVar:: {}", asToVar.toString());
 		String dist = "", filter = "", bind = "";
 //		if (!filterVars.isEmpty()) {
-		while (!filterVars.isEmpty()) {
-			Map<String, String> filt = filterVars.remove(0);
-			if (filt.get("function").equals("distance"))
-				dist += "ST_Distance(";
-			if (filt.get("type").equals("metre")) {
-//				dist += "ST_GeographyFromText(ST_AsText("
-//						+ asToVar.get(filterVars.get("var"))
-//						+ ")), ST_GeographyFromText(ST_AsText("
-//						+ asToVar.get(filterVars.get("var2"))
-//						+ "))";
-				dist += "ST_GeographyFromText(ST_AsText(";
-				if (asToVar.containsKey(filt.get("var"))) dist += asToVar.get(filt.get("var"));
-				else {
-					asToVar.put(filt.get("var"), "t"+(triples.size()+1)+".geom");
-					dist += asToVar.get(filt.get("var"));
-					triples.add(null); triples.add(null); triples.add(null);
-				}
-				dist += ")), ST_GeographyFromText(ST_AsText(";
-				if (asToVar.containsKey(filt.get("var2"))) dist += asToVar.get(filt.get("var2"));
-				else {
-					asToVar.put(filt.get("var2"), "t"+(triples.size()+1)+".geom");
-					dist += asToVar.get(filt.get("var2"));
-					triples.add(null); triples.add(null); triples.add(null);
-				}
-				dist += "))";
-			}
-			else if (filt.get("type").equals("degree")) {
-				dist += asToVar.get(filt.get("var")) 
-						+ ", " + asToVar.get(filt.get("var2"));
-			}
-			dist += ") ";
-			logger.info("dist:: {}", dist);
-			
-			if (filt.containsKey("signature")) {
-				if (!select.equals("SELECT ")) select += ", ";
-				bind += dist + "AS " + filt.get("signature");
-			}
-			if (filt.containsKey("compare")) {
-				if (!where.equals(" WHERE ")) where += " AND ";
-				if (filt.containsKey("value")) {
-					if (filt.get("value_place").equals("after"))
-						filter += dist + filt.get("compare") + " " + filt.get("value");
-					else
-						filter += filt.get("value") + " " + filt.get("compare") + " " + dist;
-				}
-			}
-		}
+//		while (!filterVars.isEmpty()) {
+//			Map<String, String> filt = filterVars.remove(0);
+//			if (filt.get("function").equals("distance"))
+//				dist += "ST_Distance(";
+//			if (filt.get("type").equals("metre")) {
+////				dist += "ST_GeographyFromText(ST_AsText("
+////						+ asToVar.get(filterVars.get("var"))
+////						+ ")), ST_GeographyFromText(ST_AsText("
+////						+ asToVar.get(filterVars.get("var2"))
+////						+ "))";
+//				dist += "ST_GeographyFromText(ST_AsText(";
+//				if (asToVar.containsKey(filt.get("var"))) dist += asToVar.get(filt.get("var"));
+//				else {
+//					asToVar.put(filt.get("var"), "t"+(triples.size()+1)+".geom");
+//					dist += asToVar.get(filt.get("var"));
+//					triples.add(null); triples.add(null); triples.add(null);
+//				}
+//				dist += ")), ST_GeographyFromText(ST_AsText(";
+//				if (asToVar.containsKey(filt.get("var2"))) dist += asToVar.get(filt.get("var2"));
+//				else {
+//					asToVar.put(filt.get("var2"), "t"+(triples.size()+1)+".geom");
+//					dist += asToVar.get(filt.get("var2"));
+//					triples.add(null); triples.add(null); triples.add(null);
+//				}
+//				dist += "))";
+//			}
+//			else if (filt.get("type").equals("degree")) {
+//				dist += asToVar.get(filt.get("var")) 
+//						+ ", " + asToVar.get(filt.get("var2"));
+//			}
+//			dist += ") ";
+//			logger.info("dist:: {}", dist);
+//			
+//			if (filt.containsKey("signature")) {
+//				if (!select.equals("SELECT ")) select += ", ";
+//				bind += dist + "AS " + filt.get("signature");
+//			}
+//			if (filt.containsKey("compare")) {
+//				if (!where.equals(" WHERE ")) where += " AND ";
+//				if (filt.containsKey("value")) {
+//					if (filt.get("value_place").equals("after"))
+//						filter += dist + filt.get("compare") + " " + filt.get("value");
+//					else
+//						filter += filt.get("value") + " " + filt.get("compare") + " " + dist;
+//				}
+//			}
+//		}
 		
+		
+		String compare = "", function = "", type = "";
+		Set<String> binds = new HashSet<String>();
+		List<String> filters = new ArrayList<String>();
+		int i = 0;
+		while (i < fv.size()) {
+			if (fv.get(i).matches("[0-9]+")) {
+				logger.info(fv.get(i));
+				dist += fv.get(i);
+				i++;
+				if (!dist.contains(compare)) {
+					binds.add(dist);
+					dist += compare + " ";
+				}
+				else {
+					filters.add(dist);
+					dist = "";
+				}
+			}
+			else if (fv.get(i).matches("[!<=>]+")) {
+				logger.info(fv.get(i));
+				compare = fv.get(i);
+				i++;
+			}
+			else {
+				logger.info(fv.get(i));
+				for (int b = 0; b < bv.size(); b++) {
+					logger.info("1 " + bv.get(b) + bv.get(b+1) + bv.get(b+2) + bv.get(b+3));
+					logger.info("2 " + fv.get(i) + fv.get(i+1) + fv.get(i+2) + fv.get(i+3));
+					if (fv.get(i).equals(bv.get(b)) && fv.get(i+1).equals(bv.get(b+1)) && fv.get(i+2).equals(bv.get(b+2)) && fv.get(i+3).equals(bv.get(b+3))) {
+						logger.info("inside if");
+						function = fv.get(i);
+						if (function.equals("distance")) dist += "ST_Distance(";
+						type = fv.get(i+3);
+						if (type.equals("metre")) dist += "ST_GeographyFromText(ST_AsText(";
+						if (asToVar.containsKey(fv.get(i+1))) dist += asToVar.get(fv.get(i+1));
+						else {
+							asToVar.put(fv.get(i+1), "t"+(triples.size()+1)+".geom");
+							dist += asToVar.get(fv.get(i+1));
+							triples.add(null); triples.add(null); triples.add(null);
+						}
+						if (type.equals("metre")) dist += ")), ST_GeographyFromText(ST_AsText(";
+						else if (type.equals("degree")) dist += ", ";
+						if (asToVar.containsKey(fv.get(i+2))) dist += asToVar.get(fv.get(i+2));
+						else {
+							asToVar.put(fv.get(i+2), "t"+(triples.size()+1)+".geom");
+							dist += asToVar.get(fv.get(i+2));
+							triples.add(null); triples.add(null); triples.add(null);
+						}
+						if (type.equals("metre")) dist += "))";
+						dist += ") ";
+						if (!dist.contains(compare)) {
+							binds.add(dist);
+							dist += compare + " ";
+						}
+						else {
+							binds.add(dist.substring(dist.lastIndexOf(compare) + 2));
+							filters.add(dist);
+							dist = "";
+						}
+//						compare = "";
+						break;
+					}
+				}
+				i += 4;
+			}
+			
+//			if (var.contains("!#%&'()*+,-./:;<=>?@[]^_`{|}~")) {
+//				compare = var;
+//			}
+//			Map<String, String> filt = filterVars.remove(0);
+//			if (filt.get("function").equals("distance"))
+//				dist += "ST_Distance(";
+//			if (filt.get("type").equals("metre")) {
+////				dist += "ST_GeographyFromText(ST_AsText("
+////						+ asToVar.get(filterVars.get("var"))
+////						+ ")), ST_GeographyFromText(ST_AsText("
+////						+ asToVar.get(filterVars.get("var2"))
+////						+ "))";
+//				dist += "ST_GeographyFromText(ST_AsText(";
+//				if (asToVar.containsKey(filt.get("var"))) dist += asToVar.get(filt.get("var"));
+//				else {
+//					asToVar.put(filt.get("var"), "t"+(triples.size()+1)+".geom");
+//					dist += asToVar.get(filt.get("var"));
+//					triples.add(null); triples.add(null); triples.add(null);
+//				}
+//				dist += ")), ST_GeographyFromText(ST_AsText(";
+//				if (asToVar.containsKey(filt.get("var2"))) dist += asToVar.get(filt.get("var2"));
+//				else {
+//					asToVar.put(filt.get("var2"), "t"+(triples.size()+1)+".geom");
+//					dist += asToVar.get(filt.get("var2"));
+//					triples.add(null); triples.add(null); triples.add(null);
+//				}
+//				dist += "))";
+//			}
+//			else if (filt.get("type").equals("degree")) {
+//				dist += asToVar.get(filt.get("var")) 
+//						+ ", " + asToVar.get(filt.get("var2"));
+//			}
+//			dist += ") ";
+//			logger.info("dist:: {}", dist);
+//			
+//			if (filt.containsKey("signature")) {
+//				if (!select.equals("SELECT ")) select += ", ";
+//				bind += dist + "AS " + filt.get("signature");
+//			}
+//			if (filt.containsKey("compare")) {
+//				if (!where.equals(" WHERE ")) where += " AND ";
+//				if (filt.containsKey("value")) {
+//					if (filt.get("value_place").equals("after"))
+//						filter += dist + filt.get("compare") + " " + filt.get("value");
+//					else
+//						filter += filt.get("value") + " " + filt.get("compare") + " " + dist;
+//				}
+//			}
+		}
+//		logger.info("dist:: {}", dist);
+		
+		logger.info("binds:: {}", binds);
+		logger.info("filters:: {}", filters);
 		
 		if (from.equals(" FROM ")) {	
 			sqlQuery = select + bind + from + "lucas t1 UNION " 
