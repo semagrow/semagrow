@@ -21,8 +21,8 @@ import org.eclipse.rdf4j.query.algebra.Var;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.jooq.Record;
 import org.reactivestreams.Publisher;
-import org.semagrow.connector.postgis.util.BindingSetOpsImpl;
 import org.semagrow.connector.postgis.PostGISSite;
+import org.semagrow.connector.postgis.util.BindingSetOpsImpl;
 import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
@@ -202,7 +202,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		
 		Pair<String, String> tableAndGid = null;
 		
-		Map<String,String> filterVars = computeFilterVars(expr);
+		List<Map<String,String>> filterVars = new ArrayList<Map<String,String>>();
+		filterVars.add(computeFilterVars(expr));
 		List<String> triples = computeTriples(expr);
 		
 		int n = 1;
@@ -307,29 +308,54 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			throw new QueryEvaluationException();
 		}
 		
+		logger.info("1 asToVar:: {}", asToVar.toString());
 		String dist = "", filter = "", bind = "";
-		if (!filterVars.isEmpty()) {
-			if (filterVars.get("function").equals("distance"))
+//		if (!filterVars.isEmpty()) {
+		while (!filterVars.isEmpty()) {
+			Map<String, String> filt = filterVars.remove(0);
+			if (filt.get("function").equals("distance"))
 				dist += "ST_Distance(";
-			if (filterVars.get("type").equals("metre")) {
-				dist += "ST_GeographyFromText(ST_AsText("
-						+ asToVar.get(filterVars.get("var"))
-						+ ")), ST_GeographyFromText(ST_AsText("
-						+ asToVar.get(filterVars.get("var2"))
-						+ "))";
+			if (filt.get("type").equals("metre")) {
+//				dist += "ST_GeographyFromText(ST_AsText("
+//						+ asToVar.get(filterVars.get("var"))
+//						+ ")), ST_GeographyFromText(ST_AsText("
+//						+ asToVar.get(filterVars.get("var2"))
+//						+ "))";
+				dist += "ST_GeographyFromText(ST_AsText(";
+				if (asToVar.containsKey(filt.get("var"))) dist += asToVar.get(filt.get("var"));
+				else {
+					asToVar.put(filt.get("var"), "t"+(triples.size()+1)+".geom");
+					dist += asToVar.get(filt.get("var"));
+					triples.add(null); triples.add(null); triples.add(null);
+				}
+				dist += ")), ST_GeographyFromText(ST_AsText(";
+				if (asToVar.containsKey(filt.get("var2"))) dist += asToVar.get(filt.get("var2"));
+				else {
+					asToVar.put(filt.get("var2"), "t"+(triples.size()+1)+".geom");
+					dist += asToVar.get(filt.get("var2"));
+					triples.add(null); triples.add(null); triples.add(null);
+				}
+				dist += "))";
 			}
-			else if (filterVars.get("type").equals("degree")) {
-				dist += asToVar.get(filterVars.get("var")) 
-						+ ", " + asToVar.get(filterVars.get("var2"));
+			else if (filt.get("type").equals("degree")) {
+				dist += asToVar.get(filt.get("var")) 
+						+ ", " + asToVar.get(filt.get("var2"));
 			}
 			dist += ") ";
-			if (filterVars.containsKey("signature")) {
+			logger.info("dist:: {}", dist);
+			
+			if (filt.containsKey("signature")) {
 				if (!select.equals("SELECT ")) select += ", ";
-				bind += dist + "AS " + filterVars.get("signature");
+				bind += dist + "AS " + filt.get("signature");
 			}
-			if (filterVars.containsKey("compare")) {
+			if (filt.containsKey("compare")) {
 				if (!where.equals(" WHERE ")) where += " AND ";
-				filter += dist + filterVars.get("compare") + " " + filterVars.get("value");
+				if (filt.containsKey("value")) {
+					if (filt.get("value_place").equals("after"))
+						filter += dist + filt.get("compare") + " " + filt.get("value");
+					else
+						filter += filt.get("value") + " " + filt.get("compare") + " " + dist;
+				}
 			}
 		}
 		
@@ -343,7 +369,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			logger.info("vars size: {}", vars.size());
 			logger.info("triples size: {}", triples.size());
 			
-			if (vars.size() == triples.size() / 3)
+			if (vars.size() == triples.size() / 3 && !triples.contains(null))
 				sqlQuery = select + bind + from + where + filter + ";";
 			else {
 				String lucas = "", invekos = "";
@@ -594,7 +620,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 				String function = node.getSignature();
 				String signature = node.getParentNode().getSignature();
 				String parClass = node.getParentNode().getClass().toString();
-				logger.info("!!! function and operator: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")), signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
+				logger.info("!!! function and compare: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")), signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
 				res.put("function", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
 //				res.put("parClass", parClass.substring(parClass.lastIndexOf(".") + 1));
 				if (parClass.contains("Compare"))
@@ -634,6 +660,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
 //				res.add(value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
 				res.put("value", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
 				logger.info("!!! value: {}", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
+				if (res.containsKey("compare")) res.put("value_place", "after");
+				else res.put("value_place", "before");
 			}
 			
 		});
