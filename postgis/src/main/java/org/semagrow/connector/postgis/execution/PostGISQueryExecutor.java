@@ -6,6 +6,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -14,6 +15,9 @@ import java.util.stream.Stream;
 import org.apache.commons.lang3.tuple.Pair;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.query.algebra.Compare;
+import org.eclipse.rdf4j.query.algebra.ExtensionElem;
+import org.eclipse.rdf4j.query.algebra.Filter;
 import org.eclipse.rdf4j.query.algebra.FunctionCall;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.ValueConstant;
@@ -98,7 +102,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		
 		Set<String> freeVars = computeVars(expr);
 		logger.info("freeVars: {}", freeVars.toString());
-//		Map<String,String> filterVars = computeFilterVars(expr);
+//		Map<String,String> filterVars = computeFunctionCallVars(expr);
 //		List<String> triples = computeTriples(expr);
 //		logger.info("triples: {}", filterVars.toString());
 //		logger.info("filterVars: {}", filterVars.toString());
@@ -203,7 +207,16 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		Pair<String, String> tableAndGid = null;
 		
 		List<Map<String,String>> filterVars = new ArrayList<Map<String,String>>();
-		filterVars.add(computeFilterVars(expr));
+		filterVars.add(computeFunctionCallVars(expr));
+		
+		List<String> fv = computeFilterVars(expr);
+		logger.info("filter variables: {} " ,fv);
+		logger.info("computeFilterVars!!!! DONE");
+		
+		List<String> bv = computeBindVars(expr);
+		logger.info("bind variables: {} " ,bv);
+		logger.info("computeBindVars!!!! DONE");
+		
 		List<String> triples = computeTriples(expr);
 		
 		int n = 1;
@@ -397,7 +410,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	protected String buildSQLQueryUnion(TupleExpr expr, Set<String> freeVars, List<String> tables, List<BindingSet> bindings, Collection<String> relevantBindingNames) {
 		Pair<String, String> tableAndGid = null;
 		
-		Map<String,String> filterVars = computeFilterVars(expr);
+		Map<String,String> filterVars = computeFunctionCallVars(expr);
 		List<String> triples = computeTriples(expr);
 		
 		if (freeVars.size() - 1 > triples.size() / 3)  {	//throw exception ????
@@ -608,8 +621,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		return res;
 	}
 	
-	protected Map<String,String> computeFilterVars(TupleExpr serviceExpression) {
-		logger.info("computeFilterVars!!!!");
+	protected Map<String,String> computeFunctionCallVars(TupleExpr serviceExpression) {
+		logger.info("computeFunctionCallVars!!!!");
 		final Map<String,String> res = new HashMap<String,String>();
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 			
@@ -667,6 +680,97 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		});
 		return res;
 	}
+	
+	
+	protected List<String> computeBindVars(TupleExpr serviceExpression) {
+		logger.info("computeBindVars!!!!");
+		final List<String> res = new ArrayList<String>();
+		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
+			
+			@Override
+			public void meet(ExtensionElem node) throws RuntimeException {
+				String signature = node.getSignature();
+//				logger.info("!!! signature: {}", signature);
+				res.add(signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
+
+				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
+					
+					@Override
+					public void meet(FunctionCall node) throws RuntimeException {
+						String function = node.getSignature();
+//						logger.info("!!! function: {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
+						res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
+						
+						node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
+							@Override
+							public void meet(Var node) throws RuntimeException {
+//								logger.info("!!! var: {}", node.getName());
+								res.add(node.getName());
+							}
+							
+							@Override
+							public void meet(ValueConstant node) throws RuntimeException {
+								String type = node.getValue().toString();
+//								logger.info("!!! type: {}", type.substring(type.lastIndexOf("/") + 1));
+								res.add(type.substring(type.lastIndexOf("/") + 1));
+							}
+						});
+					}
+				});
+			}
+		});
+		return res;
+	}
+	
+	
+	
+	protected List<String> computeFilterVars(TupleExpr serviceExpression) {
+		logger.info("computeFilterVars!!!!");
+		final List<String> res = new ArrayList<String>();
+		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
+			
+			@Override
+			public void meet(Compare node) throws RuntimeException {
+				String signature = node.getSignature();
+				res.add(signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
+//				logger.info("!!! signature: {}", signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
+				
+				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
+					
+					@Override
+					public void meet(FunctionCall node) throws RuntimeException {
+						String function = node.getSignature();
+						res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
+//						logger.info("!!! function and compare: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
+						
+						node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
+							@Override
+							public void meet(Var node) throws RuntimeException {
+//								logger.info("!!! var: {}", node.getName());
+								res.add(node.getName());
+							}
+							
+							@Override
+							public void meet(ValueConstant node) throws RuntimeException {
+								String type = node.getValue().toString();
+//								logger.info("!!!2  type: {}", type.substring(type.lastIndexOf("/") + 1));
+								res.add(type.substring(type.lastIndexOf("/") + 1));
+							}
+						});
+					}
+					
+					@Override
+					public void meet(ValueConstant node) throws RuntimeException {
+						String value = node.getValue().toString();
+//						logger.info("!!! value: {}", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
+						res.add(value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
+					}
+				});
+			}
+		});
+		return res;
+	}
+	
 	
 	protected List<String> computeTriples(TupleExpr serviceExpression) {
 		final List<String> res = new ArrayList<String>();
