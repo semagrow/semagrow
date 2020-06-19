@@ -460,7 +460,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			where += f;
 		}
 		
-//		if (from.equals(" FROM ")) {	
+//		if (from.equals(" FROM ")) {
 //			sqlQuery = select + bind + from + "lucas t1 UNION " 
 //					+ select + bind + from + "invekos t1;";
 //		}
@@ -758,9 +758,36 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		
 		
 		
-		if (from.equals(" FROM ")) {	
-			sqlQuery = select + bind + from + "lucas t1 UNION " 
-					+ select + bind + from + "invekos t1;";
+//		if (from.equals(" FROM ")) {
+//			sqlQuery = select + bind + from + "lucas t1 UNION " 
+//					+ select + bind + from + "invekos t1;";
+//		}
+		if (from.equals(" FROM ")) {
+			String from1 = from, from2 = from, from3 = from, from4 = from;
+			logger.info("vars size: {}", freeVars.size());
+			logger.info("triples size: {}", triples.size());
+			logger.info("asToVar size: {}", asToVar.size());
+			if (triples.size() == 3) {
+				from1 = from + "lucas t1";
+				from2 = from + "invekos t1";
+				if (where.equals(" WHERE ")) where = "";
+				sqlQuery = select + bind + from1 + where + " UNION " 
+						+ select + bind + from2 + where + ";";
+			}
+			else if (triples.size() == 6) {
+				from1 = from + "lucas t1, lucas t4";
+				from2 = from + "lucas t1, invekos t4";
+				from3 = from + "invekos t1, lucas t4";
+				from4 = from + "invekos t1, invekos t4";
+				if (where.equals(" WHERE ")) where = "";
+				sqlQuery = select + bind + from1 + where + " UNION " 
+						+ select + bind + from2 + where + " UNION " 
+						+ select + bind + from3 + where + " UNION " 
+						+ select + bind + from4 + where + ";";
+			}
+			
+//			sqlQuery = select + bind + from + "lucas t1 UNION " 
+//					+ select + bind + from + "invekos t1;";
 		}
 		else {
 			
@@ -769,6 +796,9 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			String where_bind = "";
 			if (!where.equals(" WHERE ")) where += " AND ";
+			
+			logger.info("now sqlQuery: {}", sqlQuery);
+			
 			for (BindingSet b : bindings) {
 				if (!sqlQuery.equals(""))
 					sqlQuery += " UNION ";

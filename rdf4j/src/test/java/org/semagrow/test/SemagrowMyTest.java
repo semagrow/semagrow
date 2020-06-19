@@ -542,6 +542,32 @@ public class SemagrowMyTest extends TestCase {
 				"  FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10) .\n" +
 				"}";
 		
+		String q36 = "" +
+				"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
+				"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
+				"PREFIX invekos: <http://deg.iit.demokritos.gr/invekos/>" +
+				"PREFIX invekos_r: <http://deg.iit.demokritos.gr/invekos/resource/>" +
+				"PREFIX lictm: <http://deg.iit.demokritos.gr/>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"SELECT ?i ?l_lc1 ?l_lc1_spec ?i_crop_no ?l_wkt ?i_wkt WHERE {\n" +
+				"  lucas_r:9 lucas:hasLC1 ?l_lc1 .\n" +
+				"  lucas_r:9 lucas:hasLC1_SPEC ?l_lc1_spec .\n" +
+				"  lucas_r:9 geo:hasGeometry ?l_geometry .\n" +
+				"  ?m lictm:lucasLC1 ?l_lc1 .\n" +
+				"  ?m lictm:lucasLC1_spec ?l_lc1_spec .\n" +
+				"  ?m lictm:invekosCropTypeNumber ?l_crop_no .\n" + 
+				"  ?i invekos:hasCropTypeNumber ?i_crop_no .\n" +
+				"  ?i geo:hasGeometry ?i_geometry .\n" +  
+				"  ?l_geometry geo:asWKT ?l_wkt .\n" +
+				"  ?i_geometry geo:asWKT ?i_wkt .\n" +
+			  	"  BIND (geof:distance(?l_wkt, ?i_wkt, opengis:metre) as ?dist) .\n" +
+			  	"  FILTER (?l_crop_no = ?i_crop_no).\n" +
+			  	"  FILTER (?dist < 10).\n" +
+			  	"  ORDER BY ASC(?dist)\n" +
+			  	"  LIMIT 1\n" +
+				"}";
 		
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
@@ -562,9 +588,11 @@ public class SemagrowMyTest extends TestCase {
 		// q28: Plan[null tuples]
 		// q29: Found first result
 		// q30: 0 wrong
-		// q31: 5 ??? wrong, q32: 1, q33: 14, q34: 1, q35: ????? (multiple bindings)
+		// q31: 5 ??? wrong, q32: 1, q33: 14, q34: 1
+		// q35: 24-30 (multiple bindings) does not check all invekos OR all lucas instances
+		// q36: ?????
 //		TupleQuery query = conn.prepareTupleQuery(q13);
-		TupleQuery query = conn.prepareTupleQuery(q29);
+		TupleQuery query = conn.prepareTupleQuery(q35);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
