@@ -25,44 +25,31 @@ import org.slf4j.LoggerFactory;
 public class PostGISQueryStringUtil {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
-	private static String INDEX_BINDING_NAME = "__id";
+//	private static String INDEX_BINDING_NAME = "__id";
+	private static String INDEX_BINDING_NAME = "gid";
+	private static String SELECT = "SELECT ";
+	private static String FROM = " FROM ";
+	private static String WHERE = " WHERE ";
+	private static String UNION = " UNION ";
+	private static String COMMA_SEP = ", ";
+	private static String AND_SEP = " AND ";
 	
 	
-	public static String buildSQLQuery(TupleExpr expr, Set<String> vars, List<String> tables, BindingSet bindings) {
-		
-		Pair<String, String> tableAndGid = null;
-		
-		List<Map<String,String>> filterVars = new ArrayList<Map<String,String>>();
-		filterVars.add(computeFunctionCallVars(expr));
-		
-		List<String> fv = computeFilterVars(expr);
-		logger.info("filter variables: {} " ,fv);
-		logger.info("computeFilterVars!!!! DONE");
-		
-		List<String> bv = computeBindVars(expr);
-		logger.info("bind variables: {} " ,bv);
-		logger.info("computeBindVars!!!! DONE");
+	public static String buildSQLQuery(TupleExpr expr, Set<String> freeVars, List<String> tables, BindingSet bindings) {
 		
 		List<String> triples = computeTriples(expr);
+		List<String> filterInfo = computeFilterVars(expr);
+		List<String> bindInfo = computeBindVars(expr);
 		
-		int n = 1;
-		while (n < triples.size()) {
-			if (!triples.get(n).contains("#asWKT")) {
-				triples.remove(n+1);
-				triples.remove(n);
-				triples.remove(n-1);
-			}
-			else {
-				n += 3;
-			}
-		}
+		// remove all triples with predicate different than #asWKT
+		keepOnlyAsWKTPredicates(triples);
+		if (triples.isEmpty()) return null;
 		
-		if (triples.isEmpty())
-			return null;
+		logger.info("triples: {}", triples);
+		logger.info("filter variables: {} ", filterInfo);
+		logger.info("bind variables: {} ", bindInfo);
 		
-		Map<String,String> asToVar = new HashMap<String, String>();
-		logger.info("BEFORE triples: {}", triples.toString());
-		logger.info("filterVars: {}", filterVars.toString());
+		Map<String,String> bindingVars = new HashMap<String, String>();
 		
 		Set<String> bindingNames = bindings.getBindingNames();
 		for (Object binding: bindingNames) {
@@ -72,59 +59,45 @@ public class PostGISQueryStringUtil {
 				triples.remove(index);
 				triples.add(index, bindings.getValue((String)binding).toString());
 			}
-			asToVar.put((String) binding, bindings.getValue((String)binding).toString().replace("\"", "\'"));
+			bindingVars.put((String) binding, bindings.getValue((String)binding).toString().replace("\"", "\'"));
 		}
 		
-		logger.info("AFTER triples: {}", triples.toString());
-		logger.info("AFTER bv: {}", bv.toString());
-		logger.info("AFTER fv: {}", fv.toString());
+		logger.info("triples 2: {}", triples.toString());
 		
-		String select = "SELECT ", where = " WHERE ", from = " FROM ", geom = "";
+		List<String> select = new ArrayList<String>();
+		List<String> from = new ArrayList<String>();
+		List<String> where = new ArrayList<String>();
+		
+		Pair<String, String> tableAndGid = null;
+		String geom = "";
 		int place = 0;
 		
 		for (String part : triples) {
 			place++;
-			if (part.contains("#")) {	//predicate
-////				if (!select.equals("SELECT ")) select += ", ";
-////				select += predDecompose(part, place - 1);
-//				geom = predDecompose(part, place - 1);
-				if (part.substring(part.lastIndexOf("#") + 1).equals("asWKT")) {
-					geom = "t" + (place-1) + ".geom";
-				}
-				else {
-					logger.error("No \"asWKT\" predicate.");
-//					return null;
-//					throw new QueryEvaluationException();
-				}
+			if (part.contains("#")) {	// predicate
+				geom = "t" + (place-1) + ".geom";
 			}
 			else {			
-				if (place % 3 != 0) {	//subject
-					if (vars.contains(part)) {
-						if (!select.equals("SELECT ")) select += ", ";
-						select += "t"+ place + ".gid AS " + part;
-						asToVar.put(part, "t"+ place + ".gid");
+				if (place % 3 != 0) {	// subject
+					if (freeVars.contains(part)) {	// free var as subject (from ?)
+						select.add("t" + place + ".gid AS " + part);
+						bindingVars.put(part, "t"+ place + ".gid");
 						tables.add("?");
 					}
-					else {				
-						tableAndGid = subDecompose(part);
-						if (!from.equals(" FROM ")) from += ", ";
-						from += tableAndGid.getLeft() + " t" + place;
-						if (!where.equals(" WHERE ")) where += " AND ";
-						where += "t" + place + ".gid = " + tableAndGid.getRight();
-//						tables.add(tableAndGid.getLeft());
+					else { 							// binding var as subject
+						tableAndGid = subjectDecompose(part);
+						from.add(tableAndGid.getLeft() + " t" + place);
+						where.add("t" + place + ".gid = " + tableAndGid.getRight());
 					}
 				}
-				else {					//object
-					if (vars.contains(part)) {
-						if (!select.equals("SELECT ")) select += ", ";
-						select += "ST_AsText(" + geom + ") AS " + part;
-						asToVar.put(part, geom);
+				else {					// object
+					if (freeVars.contains(part)) {	// free var as object
+						select.add("ST_AsText(" + geom + ") AS " + part);
+						bindingVars.put(part, geom);
 						tables.add("-");
 					}
-					else {
-						if (!where.equals(" WHERE ")) where += " AND ";
-						where += "ST_Equals(t" + place 
-								+ ".geom, ST_ST_GeomFromText('" + part + "',4326))" ;
+					else {							// binding var as object
+						where.add("ST_Equals(t" + place + ".geom, ST_GeomFromText('" + part + "',4326))");
 						if (tables.get(place/3 - 1).equals("?"))
 							tables.remove(place/3 - 1);
 						if (part.contains("POINT")) {
@@ -135,7 +108,6 @@ public class PostGISQueryStringUtil {
 						}
 					}
 					
-//					ST_Equals(geom,ST_GeomFromText('POINT(16.25613715 47.5043295)',4326));
 				}
 			}
 		}
@@ -143,7 +115,7 @@ public class PostGISQueryStringUtil {
 		logger.info("select:: {}", select);
 		logger.info("from:: {}", from);
 		logger.info("where:: {}", where);
-		logger.info("tables:: {}", tables.toString());
+		logger.info("tables:: {}", tables);
 		
 		
 		String sqlQuery = null;
@@ -152,66 +124,17 @@ public class PostGISQueryStringUtil {
 //			throw new QueryEvaluationException();
 //		}
 		
-		logger.info("1 asToVar:: {}", asToVar.toString());
-		String dist = "", filter = "", bind = "";
-//		if (!filterVars.isEmpty()) {
-//		while (!filterVars.isEmpty()) {
-//			Map<String, String> filt = filterVars.remove(0);
-//			if (filt.get("function").equals("distance"))
-//				dist += "ST_Distance(";
-//			if (filt.get("type").equals("metre")) {
-////				dist += "ST_GeographyFromText(ST_AsText("
-////						+ asToVar.get(filterVars.get("var"))
-////						+ ")), ST_GeographyFromText(ST_AsText("
-////						+ asToVar.get(filterVars.get("var2"))
-////						+ "))";
-//				dist += "ST_GeographyFromText(ST_AsText(";
-//				if (asToVar.containsKey(filt.get("var"))) dist += asToVar.get(filt.get("var"));
-//				else {
-//					asToVar.put(filt.get("var"), "t"+(triples.size()+1)+".geom");
-//					dist += asToVar.get(filt.get("var"));
-//					triples.add(null); triples.add(null); triples.add(null);
-//				}
-//				dist += ")), ST_GeographyFromText(ST_AsText(";
-//				if (asToVar.containsKey(filt.get("var2"))) dist += asToVar.get(filt.get("var2"));
-//				else {
-//					asToVar.put(filt.get("var2"), "t"+(triples.size()+1)+".geom");
-//					dist += asToVar.get(filt.get("var2"));
-//					triples.add(null); triples.add(null); triples.add(null);
-//				}
-//				dist += "))";
-//			}
-//			else if (filt.get("type").equals("degree")) {
-//				dist += asToVar.get(filt.get("var")) 
-//						+ ", " + asToVar.get(filt.get("var2"));
-//			}
-//			dist += ") ";
-//			logger.info("dist:: {}", dist);
-//			
-//			if (filt.containsKey("signature")) {
-//				if (!select.equals("SELECT ")) select += ", ";
-//				bind += dist + "AS " + filt.get("signature");
-//			}
-//			if (filt.containsKey("compare")) {
-//				if (!where.equals(" WHERE ")) where += " AND ";
-//				if (filt.containsKey("value")) {
-//					if (filt.get("value_place").equals("after"))
-//						filter += dist + filt.get("compare") + " " + filt.get("value");
-//					else
-//						filter += filt.get("value") + " " + filt.get("compare") + " " + dist;
-//				}
-//			}
-//		}
-		
-		
+		logger.info("1 bindingVars:: {}", bindingVars.toString());
+		String dist = "";
+//		String filter = "", bind = "";	
 		String compare = "", function = "", type = "";
 		Set<String> binds = new HashSet<String>();
 		List<String> filters = new ArrayList<String>();
 		int i = 0;
-		while (i < fv.size()) {
-			if (fv.get(i).matches("[0-9]+")) {
-				logger.info(fv.get(i));
-				dist += fv.get(i);
+		while (i < filterInfo.size()) {
+			if (filterInfo.get(i).matches("[0-9]+")) {
+				logger.info(filterInfo.get(i));
+				dist += filterInfo.get(i);
 				i++;
 				if (!dist.contains(compare)) {
 //					binds.add(dist + "AS " + bv.get(b-1));
@@ -222,44 +145,44 @@ public class PostGISQueryStringUtil {
 					dist = "";
 				}
 			}
-			else if (fv.get(i).matches("[!<=>]+")) {
-				logger.info(fv.get(i));
-				compare = fv.get(i);
+			else if (filterInfo.get(i).matches("[!<=>]+")) {
+				logger.info(filterInfo.get(i));
+				compare = filterInfo.get(i);
 				i++;
 			}
 			else {
-				logger.info(fv.get(i));
-				function = fv.get(i);
+				logger.info(filterInfo.get(i));
+				function = filterInfo.get(i);
 				if (function.equals("distance")) dist += "ST_Distance(";
-				type = fv.get(i+3);
+				type = filterInfo.get(i+3);
 				if (type.equals("metre")) dist += "ST_GeographyFromText(ST_AsText(";
-				if (asToVar.containsKey(fv.get(i+1))) dist += asToVar.get(fv.get(i+1));
+				if (bindingVars.containsKey(filterInfo.get(i+1))) dist += bindingVars.get(filterInfo.get(i+1));
 				else {
-					asToVar.put(fv.get(i+1), "t"+(triples.size()+1)+".geom");
-					dist += asToVar.get(fv.get(i+1));
+					bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+".geom");
+					dist += bindingVars.get(filterInfo.get(i+1));
 					triples.add(null); triples.add(null); triples.add(null);
 				}
 				if (type.equals("metre")) dist += ")), ST_GeographyFromText(ST_AsText(";
 				else if (type.equals("degree")) dist += ", ";
-				if (asToVar.containsKey(fv.get(i+2))) dist += asToVar.get(fv.get(i+2));
+				if (bindingVars.containsKey(filterInfo.get(i+2))) dist += bindingVars.get(filterInfo.get(i+2));
 				else {
-					asToVar.put(fv.get(i+2), "t"+(triples.size()+1)+".geom");
-					dist += asToVar.get(fv.get(i+2));
+					bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+".geom");
+					dist += bindingVars.get(filterInfo.get(i+2));
 					triples.add(null); triples.add(null); triples.add(null);
 				}
 				if (type.equals("metre")) dist += "))";
 				dist += ") ";
 				
-				/* Gathering binds */
-				for (int b = 0; b < bv.size(); b += 5) {
-					if (fv.get(i).equals(bv.get(b+1)) && fv.get(i+1).equals(bv.get(b+2)) && fv.get(i+2).equals(bv.get(b+3)) && fv.get(i+3).equals(bv.get(b+4))) {
-						if (!dist.contains(compare)) binds.add(dist + "AS " + bv.get(b));
-						else binds.add(dist.substring(dist.lastIndexOf(compare) + 2) + "AS " + bv.get(b));
+				// Gathering binds
+				for (int b = 0; b < bindInfo.size(); b += 5) {
+					if (filterInfo.get(i).equals(bindInfo.get(b+1)) && filterInfo.get(i+1).equals(bindInfo.get(b+2)) && filterInfo.get(i+2).equals(bindInfo.get(b+3)) && filterInfo.get(i+3).equals(bindInfo.get(b+4))) {
+						if (!dist.contains(compare)) binds.add(dist + "AS " + bindInfo.get(b));
+						else binds.add(dist.substring(dist.lastIndexOf(compare) + 2) + "AS " + bindInfo.get(b));
 						break;
 					}
 				}
 				
-				/* Gathering filters */
+				// Gathering filters
 				if (!dist.contains(compare)) {
 					dist += compare + " ";
 				}
@@ -275,114 +198,104 @@ public class PostGISQueryStringUtil {
 		logger.info("binds:: {}", binds);
 		logger.info("filters:: {}", filters);
 		
-		for (String b : binds) {
-			if (!select.equals("SELECT ")) select += ", ";
-			select += b;
-		}
+		for (String b : binds)
+			select.add(b);
 		
-		for (String f : filters) {
-			if (!where.equals(" WHERE ")) where += " AND ";
-			where += f;
-		}
+		for (String f : filters)
+			where.add(f);
 		
-//		if (from.equals(" FROM ")) {
-//			sqlQuery = select + bind + from + "lucas t1 UNION " 
-//					+ select + bind + from + "invekos t1;";
-//		}
-		if (from.equals(" FROM ")) {
-			String from1 = from, from2 = from, from3 = from, from4 = from;
-			logger.info("vars size: {}", vars.size());
+		if (from.isEmpty()) {
+			String from1 = "", from2 = "", from3 = "", from4 = "";
+			logger.info("vars size: {}", freeVars.size());
 			logger.info("triples size: {}", triples.size());
-			logger.info("asToVar size: {}", asToVar.size());
+			logger.info("asToVar size: {}", bindingVars.size());
 			if (triples.size() == 3 && triples.size() == 6) {
-				from1 = from + "lucas t1";
-				from2 = from + "invekos t1";
-				if (where.equals(" WHERE ")) where = "";
-				sqlQuery = select + bind + from1 + where + " UNION " 
-						+ select + bind + from2 + where + ";";
+				from1 = "lucas t1";
+				from2 = "invekos t1";
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from2
+						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
 			else if (triples.size() == 6) {
-				from1 = from + "lucas t1, lucas t4";
-				from2 = from + "lucas t1, invekos t4";
-				from3 = from + "invekos t1, lucas t4";
-				from4 = from + "invekos t1, invekos t4";
-				if (where.equals(" WHERE ")) where = "";
-				sqlQuery = select + bind + from1 + where + " UNION " 
-						+ select + bind + from2 + where + " UNION " 
-						+ select + bind + from3 + where + " UNION " 
-						+ select + bind + from4 + where + ";";
+				from1 = "lucas t1, lucas t4";
+				from2 = "lucas t1, invekos t4";
+				from3 = "invekos t1, lucas t4";
+				from4 = "invekos t1, invekos t4";
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from2
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from3
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from4
+						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
-			
-//			sqlQuery = select + bind + from + "lucas t1 UNION " 
-//					+ select + bind + from + "invekos t1;";
 		}
 		else {
 			
-			logger.info("vars size: {}", vars.size());
-			logger.info("triples size: {}", triples.size());
-			
-			if (vars.size() == triples.size() / 3 && !triples.contains(null))
-				sqlQuery = select + bind + from + where + filter + ";";
+			if (freeVars.size() == triples.size() / 3 && !triples.contains(null)) {
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
+						+ serializeList(from, COMMA_SEP, FROM)
+						+ serializeList(where, AND_SEP, WHERE) + ";";
+			}
 			else {
 				String lucas = "", invekos = "";
 				place = 1;
 				while (place < triples.size()) {
-					if (!from.contains("t" + place)) {
+					if (!from.contains("lucas t" + place) && !from.contains("invekos t" + place)) {
 						lucas += ", lucas t" + place;
 						invekos += ", invekos t" + place;
 					}
 					place += 3;
 				}
-				sqlQuery = select + bind + from + lucas + where + filter + " UNION " 
-						+ select + bind + from + invekos + where + filter + ";";
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
+						+ serializeList(from, COMMA_SEP, FROM) + lucas
+						+ serializeList(where, AND_SEP, WHERE) + UNION
+						+ serializeList(select, COMMA_SEP, SELECT) 
+						+ serializeList(from, COMMA_SEP, FROM) + invekos
+						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
 		}
 		
-		logger.info("asToVar:: {}", asToVar.toString());
-		logger.info("bind:: {}", bind);
-		logger.info("filter:: {}", filter);
+		logger.info("2 bindingVars:: {}", bindingVars.toString());
 		logger.info("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
 	}
 	
 	
+	protected static String serializeList(List<String> list, String separator, String start) {
+		String string = "";
+		for (String l : list) {
+			if (!string.equals("")) string += separator;
+			else string += start;
+			string += l;
+		}
+		return string;
+	}
+	
+	
 	public static String buildSQLQueryUnion(TupleExpr expr, Set<String> freeVars, List<String> tables, List<BindingSet> bindings, Collection<String> relevantBindingNames) {
-		Pair<String, String> tableAndGid = null;
 		
-		Map<String,String> filterVars = computeFunctionCallVars(expr);
 		List<String> triples = computeTriples(expr);
-		
-		List<String> fv = computeFilterVars(expr);
-		logger.info("filter variables: {} " ,fv);
-		logger.info("computeFilterVars!!!! DONE");
-		
-		List<String> bv = computeBindVars(expr);
-		logger.info("bind variables: {} " ,bv);
-		logger.info("computeBindVars!!!! DONE");
+		List<String> filterInfo = computeFilterVars(expr);
+		List<String> bindInfo = computeBindVars(expr);
 		
 		if (freeVars.size() - 1 > triples.size() / 3)  {	//throw exception ????
 			logger.error("More than one triples with two free variables.");
 			throw new QueryEvaluationException();
 		}
 		
-		int n = 1;
-		while (n < triples.size()) {
-			if (!triples.get(n).contains("#asWKT")) {
-				triples.remove(n+1);
-				triples.remove(n);
-				triples.remove(n-1);
-			}
-			else {
-				n += 3;
-			}
-		}
+		keepOnlyAsWKTPredicates(triples);
+		if (triples.isEmpty()) return null;
 		
-		if (triples.isEmpty())
-			return null;
+		logger.info("triples: {}", triples);
+		logger.info("filter variables: {} " ,filterInfo);
+		logger.info("bind variables: {} " ,bindInfo);
 		
-		Map<String,String> asToVar = new HashMap<String, String>();
-		logger.info("triples: {}", triples.toString());
-		logger.info("filterVars: {}", filterVars.toString());
+		Map<String,String> bindingVars = new HashMap<String, String>();
+		
+//		logger.info("filterVars: {}", filterVars.toString());
 		
 //		Set<String> bindingNames = bindings.getBindingNames();
 //		for (Object binding: bindingNames) {
@@ -395,57 +308,47 @@ public class PostGISQueryStringUtil {
 ////			asToVar.put((String) binding, bindings.getValue((String)binding).toString().replace("\"", "\'"));
 //		}
 		
-		String select = "SELECT ", where = " WHERE ", from = " FROM ", geom = "", binding_var = "";
+		Pair<String, String> tableAndGid = null;
+		List<String> select = new ArrayList<String>();
+		List<String> from = new ArrayList<String>();
+		List<String> where = new ArrayList<String>();
+//		String select = "SELECT ", where = " WHERE ", from = " FROM ";
+		String geom = "", binding_var = "";
 		int binding_place = -1;
 		int place = 0;
 		
 		for (String part : triples) {
 			place++;
-			if (part.contains("#")) {	//predicate
-				if (part.substring(part.lastIndexOf("#") + 1).equals("asWKT")) {
-					geom = "t" + (place-1) + ".geom";
-				}
-				else {
-					logger.error("No \"asWKT\" predicate.");
-				}
+			if (part.contains("#")) {	// predicate
+				geom = "t" + (place-1) + ".geom";
 			}
 			else {			
-				if (place % 3 != 0) {	//subject
-					if (freeVars.contains(part)) {
-						if (!select.equals("SELECT ")) select += ", ";
-						select += "t"+ place + ".gid AS " + part;
-						asToVar.put(part, "t"+ place + ".gid");
+				if (place % 3 != 0) {	// subject
+					if (freeVars.contains(part)) {	// free var as subject (from ?)
+						select.add("t"+ place + ".gid AS " + part);
+						bindingVars.put(part, "t"+ place + ".gid");
 						tables.add("?");
 					}
 					else if (bindings.get(0).hasBinding(part)) {
-						tableAndGid = subDecompose(bindings.get(0).getBinding(part).getValue().toString());
-						if (!from.equals(" FROM ")) from += ", ";
-						from += tableAndGid.getLeft() + " t" + place;
-//						if (!where.equals(" WHERE ")) where += " AND ";
-//						where_bind += "t" + place + ".gid = " + tableAndGid.getRight();
+						tableAndGid = subjectDecompose(bindings.get(0).getBinding(part).getValue().toString());
+						from.add(tableAndGid.getLeft() + " t" + place);
 						binding_var = part;
 						binding_place = place;
-//						bindings.remove(0);
 					}
-					else {				
-						tableAndGid = subDecompose(part);
-						if (!from.equals(" FROM ")) from += ", ";
-						from += tableAndGid.getLeft() + " t" + place;
-						if (!where.equals(" WHERE ")) where += " AND ";
-						where += "t" + place + ".gid = " + tableAndGid.getRight();
+					else {
+						tableAndGid = subjectDecompose(part);
+						from.add(tableAndGid.getLeft() + " t" + place);
+						where.add("t" + place + ".gid = " + tableAndGid.getRight());
 					}
 				}
-				else {					//object
+				else {					// object
 					if (freeVars.contains(part)) {
-						if (!select.equals("SELECT ")) select += ", ";
-						select += "ST_AsText(" + geom + ") AS " + part;
-						asToVar.put(part, geom);
+						select.add("ST_AsText(" + geom + ") AS " + part);
+						bindingVars.put(part, geom);
 						tables.add("-");
 					}
 					else {
-						if (!where.equals(" WHERE ")) where += " AND ";
-						where += "ST_Equals(t" + place 
-								+ ".geom, ST_ST_GeomFromText('" + part + "',4326))" ;
+						where.add("ST_Equals(t" + place + ".geom, ST_GeomFromText('" + part + "',4326))");
 						if (tables.get(place/3 - 1).equals("?"))
 							tables.remove(place/3 - 1);
 						if (part.contains("POINT")) {
@@ -471,42 +374,16 @@ public class PostGISQueryStringUtil {
 //			logger.error("More than one triples with two free variables.");
 //			throw new QueryEvaluationException();
 //		}
-		
-//		String dist = "", filter = "", bind = "";
-//		if (!filterVars.isEmpty()) {
-//			if (filterVars.get("function").equals("distance"))
-//				dist += "ST_Distance(";
-//			if (filterVars.get("type").equals("metre")) {
-//				dist += "ST_GeographyFromText(ST_AsText("
-//						+ asToVar.get(filterVars.get("var"))
-//						+ ")), ST_GeographyFromText(ST_AsText("
-//						+ asToVar.get(filterVars.get("var2"))
-//						+ "))";
-//			}
-//			else if (filterVars.get("type").equals("degree")) {
-//				dist += asToVar.get(filterVars.get("var")) 
-//						+ ", " + asToVar.get(filterVars.get("var2"));
-//			}
-//			dist += ") ";
-//			if (filterVars.containsKey("signature")) {
-//				if (!select.equals("SELECT ")) select += ", ";
-//				bind += dist + "AS " + filterVars.get("signature");
-//			}
-//			if (filterVars.containsKey("compare")) {
-//				if (!where.equals(" WHERE ")) where += " AND ";
-//				filter += dist + filterVars.get("compare") + " " + filterVars.get("value");
-//			}
-//		}
-		
-		String dist = "", filter = "", bind = "";
+
+		String dist = "";
 		String compare = "", function = "", type = "";
 		Set<String> binds = new HashSet<String>();
 		List<String> filters = new ArrayList<String>();
 		int i = 0;
-		while (i < fv.size()) {
-			if (fv.get(i).matches("[0-9]+")) {
-				logger.info(fv.get(i));
-				dist += fv.get(i);
+		while (i < filterInfo.size()) {
+			if (filterInfo.get(i).matches("[0-9]+")) {
+				logger.info(filterInfo.get(i));
+				dist += filterInfo.get(i);
 				i++;
 				if (!dist.contains(compare)) {
 //					binds.add(dist + "AS " + bv.get(b-1));
@@ -517,44 +394,44 @@ public class PostGISQueryStringUtil {
 					dist = "";
 				}
 			}
-			else if (fv.get(i).matches("[!<=>]+")) {
-				logger.info(fv.get(i));
-				compare = fv.get(i);
+			else if (filterInfo.get(i).matches("[!<=>]+")) {
+				logger.info(filterInfo.get(i));
+				compare = filterInfo.get(i);
 				i++;
 			}
 			else {
-				logger.info(fv.get(i));
-				function = fv.get(i);
+				logger.info(filterInfo.get(i));
+				function = filterInfo.get(i);
 				if (function.equals("distance")) dist += "ST_Distance(";
-				type = fv.get(i+3);
+				type = filterInfo.get(i+3);
 				if (type.equals("metre")) dist += "ST_GeographyFromText(ST_AsText(";
-				if (asToVar.containsKey(fv.get(i+1))) dist += asToVar.get(fv.get(i+1));
+				if (bindingVars.containsKey(filterInfo.get(i+1))) dist += bindingVars.get(filterInfo.get(i+1));
 				else {
-					asToVar.put(fv.get(i+1), "t"+(triples.size()+1)+".geom");
-					dist += asToVar.get(fv.get(i+1));
+					bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+".geom");
+					dist += bindingVars.get(filterInfo.get(i+1));
 					triples.add(null); triples.add(null); triples.add(null);
 				}
 				if (type.equals("metre")) dist += ")), ST_GeographyFromText(ST_AsText(";
 				else if (type.equals("degree")) dist += ", ";
-				if (asToVar.containsKey(fv.get(i+2))) dist += asToVar.get(fv.get(i+2));
+				if (bindingVars.containsKey(filterInfo.get(i+2))) dist += bindingVars.get(filterInfo.get(i+2));
 				else {
-					asToVar.put(fv.get(i+2), "t"+(triples.size()+1)+".geom");
-					dist += asToVar.get(fv.get(i+2));
+					bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+".geom");
+					dist += bindingVars.get(filterInfo.get(i+2));
 					triples.add(null); triples.add(null); triples.add(null);
 				}
 				if (type.equals("metre")) dist += "))";
 				dist += ") ";
 				
-				/* Gathering binds */
-				for (int b = 0; b < bv.size(); b += 5) {
-					if (fv.get(i).equals(bv.get(b+1)) && fv.get(i+1).equals(bv.get(b+2)) && fv.get(i+2).equals(bv.get(b+3)) && fv.get(i+3).equals(bv.get(b+4))) {
-						if (!dist.contains(compare)) binds.add(dist + "AS " + bv.get(b));
-						else binds.add(dist.substring(dist.lastIndexOf(compare) + 2) + "AS " + bv.get(b));
+				// Gathering binds
+				for (int b = 0; b < bindInfo.size(); b += 5) {
+					if (filterInfo.get(i).equals(bindInfo.get(b+1)) && filterInfo.get(i+1).equals(bindInfo.get(b+2)) && filterInfo.get(i+2).equals(bindInfo.get(b+3)) && filterInfo.get(i+3).equals(bindInfo.get(b+4))) {
+						if (!dist.contains(compare)) binds.add(dist + "AS " + bindInfo.get(b));
+						else binds.add(dist.substring(dist.lastIndexOf(compare) + 2) + "AS " + bindInfo.get(b));
 						break;
 					}
 				}
 				
-				/* Gathering filters */
+				// Gathering filters
 				if (!dist.contains(compare)) {
 					dist += compare + " ";
 				}
@@ -570,49 +447,41 @@ public class PostGISQueryStringUtil {
 		logger.info("binds:: {}", binds);
 		logger.info("filters:: {}", filters);
 		
-		for (String b : binds) {
-			if (!select.equals("SELECT ")) select += ", ";
-			select += b;
-		}
+		for (String b : binds)
+			select.add(b);
 		
-		for (String f : filters) {
-			if (!where.equals(" WHERE ")) where += " AND ";
-			where += f;
-		}
+		for (String f : filters)
+			where.add(f);
 		
 		
-		
-		
-//		if (from.equals(" FROM ")) {
-//			sqlQuery = select + bind + from + "lucas t1 UNION " 
-//					+ select + bind + from + "invekos t1;";
-//		}
-		if (from.equals(" FROM ")) {
-			String from1 = from, from2 = from, from3 = from, from4 = from;
+		if (from.isEmpty()) {
+			String from1 = "", from2 = "", from3 = "", from4 = "";
 			logger.info("vars size: {}", freeVars.size());
 			logger.info("triples size: {}", triples.size());
-			logger.info("asToVar size: {}", asToVar.size());
+			logger.info("asToVar size: {}", bindingVars.size());
 			if (triples.size() == 3) {
-				from1 = from + "lucas t1";
-				from2 = from + "invekos t1";
-				if (where.equals(" WHERE ")) where = "";
-				sqlQuery = select + bind + from1 + where + " UNION " 
-						+ select + bind + from2 + where + ";";
+				from1 = "lucas t1";
+				from2 = "invekos t1";
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from2
+						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
 			else if (triples.size() == 6) {
-				from1 = from + "lucas t1, lucas t4";
-				from2 = from + "lucas t1, invekos t4";
-				from3 = from + "invekos t1, lucas t4";
-				from4 = from + "invekos t1, invekos t4";
-				if (where.equals(" WHERE ")) where = "";
-				sqlQuery = select + bind + from1 + where + " UNION " 
-						+ select + bind + from2 + where + " UNION " 
-						+ select + bind + from3 + where + " UNION " 
-						+ select + bind + from4 + where + ";";
+				from1 = "lucas t1, lucas t4";
+				from2 = "lucas t1, invekos t4";
+				from3 = "invekos t1, lucas t4";
+				from4 = "invekos t1, invekos t4";
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from2
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from3
+						+ serializeList(where, AND_SEP, WHERE) + UNION 
+						+ serializeList(select, COMMA_SEP, SELECT) + from4
+						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
 			
-//			sqlQuery = select + bind + from + "lucas t1 UNION " 
-//					+ select + bind + from + "invekos t1;";
 		}
 		else {
 			
@@ -620,31 +489,46 @@ public class PostGISQueryStringUtil {
 			logger.info("triples size: {}", triples.size());
 			
 			String where_bind = "";
-			if (!where.equals(" WHERE ")) where += " AND ";
 			
 			logger.info("now sqlQuery: {}", sqlQuery);
 			
 			for (BindingSet b : bindings) {
 				if (!sqlQuery.equals(""))
-					sqlQuery += " UNION ";
+					sqlQuery += UNION;
 				
-				tableAndGid = subDecompose(b.getBinding(binding_var).getValue().toString());
+				tableAndGid = subjectDecompose(b.getBinding(binding_var).getValue().toString());
 				where_bind = "t" + binding_place + ".gid = " + tableAndGid.getRight();	
 				
-				if (freeVars.size() == triples.size() / 3)
-					sqlQuery += select + bind + from + where + where_bind + filter;
+				if (freeVars.size() == triples.size() / 3 && !triples.contains(null)) {
+					sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
+							+ serializeList(from, COMMA_SEP, FROM)
+							+ serializeList(where, AND_SEP, WHERE);
+					if (where.isEmpty()) sqlQuery += WHERE;
+					else sqlQuery += AND_SEP;
+					sqlQuery += where_bind;
+				}
 				else {
 					String lucas = "", invekos = "";
 					place = 1;
 					while (place < triples.size()) {
-						if (!from.contains("t" + place)) {
+						if (!from.contains("lucas t" + place) && !from.contains("invekos t" + place)) {
 							lucas += ", lucas t" + place;
 							invekos += ", invekos t" + place;
 						}
 						place += 3;
 					}
-					sqlQuery += select + bind + from + lucas + where + where_bind + filter + " UNION " 
-							+ select + bind + from + invekos + where + where_bind + filter;
+					sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
+							+ serializeList(from, COMMA_SEP, FROM) + lucas
+							+ serializeList(where, AND_SEP, WHERE);
+					if (where.isEmpty()) sqlQuery += WHERE;
+					else sqlQuery += AND_SEP;
+					sqlQuery += where_bind + UNION;
+					sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
+							+ serializeList(from, COMMA_SEP, FROM) + invekos
+							+ serializeList(where, AND_SEP, WHERE);
+					if (where.isEmpty()) sqlQuery += WHERE;
+					else sqlQuery += AND_SEP;
+					sqlQuery += where_bind;
 				}
 			}
 			
@@ -652,83 +536,20 @@ public class PostGISQueryStringUtil {
 			
 		}
 		
-		logger.info("asToVar:: {}", asToVar.toString());
-		logger.info("bind:: {}", bind);
-		logger.info("filter:: {}", filter);
+		logger.info("bindingVars:: {}", bindingVars.toString());
 		logger.info("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
 	}
 	
-	protected static Map<String,String> computeFunctionCallVars(TupleExpr serviceExpression) {
-		logger.info("computeFunctionCallVars!!!!");
-		final Map<String,String> res = new HashMap<String,String>();
-		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
-			
-			@Override
-			public void meet(FunctionCall node) throws RuntimeException {
-//				logger.info("!!! filter FunctionCall nodesignature: {}", node.getSignature());
-//				logger.info("!!! filter FunctionCall nodeparentclass: {}", node.getParentNode().getClass());
-				String function = node.getSignature();
-				String signature = node.getParentNode().getSignature();
-				String parClass = node.getParentNode().getClass().toString();
-				logger.info("!!! function and compare: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")), signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
-				res.put("function", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
-//				res.put("parClass", parClass.substring(parClass.lastIndexOf(".") + 1));
-				if (parClass.contains("Compare"))
-					res.put("compare", signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
-				else if (parClass.contains("Extension"))
-					res.put("signature", signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
-//				res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
-//				res.add(operator.substring(operator.lastIndexOf("(") + 1, operator.lastIndexOf(")")));
-				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
-					
-					@Override
-					public void meet(Var node) throws RuntimeException {
-						logger.info("!!! var: {}", node.getName());
-						if (res.containsKey("var"))
-							res.put("var2", node.getName());
-						else
-							res.put("var", node.getName());
-//						res.add(node.getName());
-					}
-					
-					@Override
-					public void meet(ValueConstant node) throws RuntimeException {
-//						logger.info("!!! filter FunctionCall ValueConstant nodevalue: {}", node.getValue());
-						String type = node.getValue().toString();
-//						res.add(type.substring(type.lastIndexOf("/") + 1));
-						res.put("type", type.substring(type.lastIndexOf("/") + 1));
-						logger.info("!!! type: {}", type.substring(type.lastIndexOf("/") + 1));
-					}
-				});
-			
-			}
-			
-			@Override
-			public void meet(ValueConstant node) throws RuntimeException {
-//				logger.info("!!! filter ValueConstant nodevalue: {}", node.getValue());
-				String value = node.getValue().toString();
-//				res.add(value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
-				res.put("value", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
-				logger.info("!!! value: {}", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
-				if (res.containsKey("compare")) res.put("value_place", "after");
-				else res.put("value_place", "before");
-			}
-			
-		});
-		return res;
-	}
-	
 	
 	protected static List<String> computeBindVars(TupleExpr serviceExpression) {
-		logger.info("computeBindVars!!!!");
 		final List<String> res = new ArrayList<String>();
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 			
 			@Override
 			public void meet(ExtensionElem node) throws RuntimeException {
+				// take all info about bind nodes, i.e. binding name, vars, values etc
 				String signature = node.getSignature();
-//				logger.info("!!! signature: {}", signature);
 				res.add(signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
 
 				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
@@ -736,20 +557,17 @@ public class PostGISQueryStringUtil {
 					@Override
 					public void meet(FunctionCall node) throws RuntimeException {
 						String function = node.getSignature();
-//						logger.info("!!! function: {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
 						res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
 						
 						node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 							@Override
 							public void meet(Var node) throws RuntimeException {
-//								logger.info("!!! var: {}", node.getName());
 								res.add(node.getName());
 							}
 							
 							@Override
 							public void meet(ValueConstant node) throws RuntimeException {
 								String type = node.getValue().toString();
-//								logger.info("!!! type: {}", type.substring(type.lastIndexOf("/") + 1));
 								res.add(type.substring(type.lastIndexOf("/") + 1));
 							}
 						});
@@ -761,17 +579,15 @@ public class PostGISQueryStringUtil {
 	}
 	
 	
-	
 	protected static List<String> computeFilterVars(TupleExpr serviceExpression) {
-		logger.info("computeFilterVars!!!!");
 		final List<String> res = new ArrayList<String>();
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 			
 			@Override
 			public void meet(Compare node) throws RuntimeException {
+				// take all info about compare nodes, i.e. operation, vars, values etc
 				String signature = node.getSignature();
 				res.add(signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
-//				logger.info("!!! signature: {}", signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
 				
 				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 					
@@ -779,19 +595,16 @@ public class PostGISQueryStringUtil {
 					public void meet(FunctionCall node) throws RuntimeException {
 						String function = node.getSignature();
 						res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
-//						logger.info("!!! function and compare: {} {}", function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
 						
 						node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 							@Override
 							public void meet(Var node) throws RuntimeException {
-//								logger.info("!!! var: {}", node.getName());
 								res.add(node.getName());
 							}
 							
 							@Override
 							public void meet(ValueConstant node) throws RuntimeException {
 								String type = node.getValue().toString();
-//								logger.info("!!!2  type: {}", type.substring(type.lastIndexOf("/") + 1));
 								res.add(type.substring(type.lastIndexOf("/") + 1));
 							}
 						});
@@ -800,7 +613,6 @@ public class PostGISQueryStringUtil {
 					@Override
 					public void meet(ValueConstant node) throws RuntimeException {
 						String value = node.getValue().toString();
-//						logger.info("!!! value: {}", value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
 						res.add(value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
 					}
 				});
@@ -812,15 +624,12 @@ public class PostGISQueryStringUtil {
 	
 	protected static List<String> computeTriples(TupleExpr serviceExpression) {
 		final List<String> res = new ArrayList<String>();
-//		final int nodes = 0;
-//		logger.info("serviceExpression: {} ", serviceExpression.toString());
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 		
 			@Override
 			public void meet(Var node)
 			throws RuntimeException {
-//				logger.info("triples: node: {} ", node.toString());
-				// take only real vars, i.e. ignore blank nodes
+				// take all expr vars
 				if (node.getParentNode().getClass().toString().contains("StatementPattern")) {
 					if (!node.hasValue() && !node.isAnonymous())
 						res.add(node.getName());
@@ -828,69 +637,45 @@ public class PostGISQueryStringUtil {
 						res.add(node.getValue().toString());
 				}
 			}
-			// TODO maybe stop tree traversal in nested SERVICE?
-			// TODO special case handling for BIND
 		});
-		logger.info(res.toString());
 		return res;
 	}
 	
-//	protected Set<String> computeSubAndPred(TupleExpr serviceExpression) {
-//		final Set<String> res = new HashSet<String>();
-//		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
-//		
-//			@Override
-//			public void meet(Var node)
-//			throws RuntimeException {
-////				logger.info("computeSubAndPred!!!");
-////				logger.info(node.toString());
-//				if (node.hasValue() && node.isAnonymous()) {
-////					logger.info("inside if");
-////					logger.info("name:");
-////					logger.info(node.getName());
-////					logger.info("value:");
-////					logger.info(node.getValue().toString());
-//					res.add(node.getValue().toString());
-//				} 
-//			}
-//		});
-//		return res;
-//	}
 	
-	protected static Pair<String, String> subDecompose(String subject) {
+	protected static void keepOnlyAsWKTPredicates(List<String> triples) {
+		int n = 1;
+		while (n < triples.size()) {
+			if (!triples.get(n).contains("#asWKT")) {
+				triples.remove(n+1);
+				triples.remove(n);
+				triples.remove(n-1);
+			}
+			else {
+				n += 3;
+			}
+		}
+	}
+	
+	
+	protected static Pair<String, String> subjectDecompose(String subject) {
 		int gidStart = subject.lastIndexOf("/") + 1;
 		String gid = subject.substring(gidStart);
-//		logger.info("gid:");
-//		logger.info(gid);
-//		int tableStart = subject.substring(subject.lastIndexOf(".")).lastIndexOf("/");
 		int lastDot = subject.lastIndexOf(".");
-//		logger.info(subject.substring(lastDot));
 		int tableStart = lastDot + subject.substring(lastDot).indexOf("/") + 1;
-//		logger.info(subject.substring(tableStart));
 		int tableEnd = tableStart + subject.substring(tableStart).indexOf("/");
-//		logger.info(subject.substring(tableEnd));
-//		logger.info("done!!");
-		
-//		Integer tableEnd = subject.substring(0, gidStart - 1).lastIndexOf("/");
-//		logger.info(subject.substring(0, gidStart - 1));
-//		Integer tableStart = subject.substring(0, tableEnd).lastIndexOf("/") + 1;
-//		logger.info(subject.substring(0, tableEnd - 1));
 		String table = subject.substring(tableStart, tableEnd);
-//		logger.info("table:");
-//		logger.info(table);
 		return Pair.of(table, gid);
 	}
 	
-	protected String predDecompose(String predicate, int place) {
-		int columnStart = predicate.lastIndexOf("#") + 1;
-//		logger.info("columnStart:: ");
-//		logger.info(predicate.substring(columnStart));
-		if (predicate.substring(columnStart).equals("asWKT"))
-			return "ST_AsText(t" + place + ".geom)";
-		else {
-			logger.error("No \"asWKT\" predicate.");
-			throw new QueryEvaluationException();
-		}
-	}
+	
+//	protected String predDecompose(String predicate, int place) {
+//		int columnStart = predicate.lastIndexOf("#") + 1;
+//		if (predicate.substring(columnStart).equals("asWKT"))
+//			return "ST_AsText(t" + place + ".geom)";
+//		else {
+//			logger.error("No \"asWKT\" predicate.");
+//			throw new QueryEvaluationException();
+//		}
+//	}
 
 }

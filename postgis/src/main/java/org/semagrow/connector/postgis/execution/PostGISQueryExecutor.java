@@ -162,7 +162,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
         logger.info("bindings.get(0): {}", bindings.get(0));
         logger.info("relevantBindingNames: {}", relevantBindingNames);
         
-        Set<String> freeVars = computeVars(expr);
+        Set<String> freeVars = computeVars(expr);	// freeVars = exprVars
         freeVars.removeAll(relevantBindingNames);
         
         if (freeVars.isEmpty()) {
