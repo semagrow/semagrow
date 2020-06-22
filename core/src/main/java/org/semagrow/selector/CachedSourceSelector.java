@@ -1,6 +1,5 @@
 package org.semagrow.selector;
 
-import org.semagrow.art.Loggable;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
@@ -26,7 +25,6 @@ public class CachedSourceSelector extends SourceSelectorWrapper
     }
 
     @Override
-    @Loggable
     public Collection<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings)
     {
         Collection<SourceMetadata> retv;
