@@ -138,12 +138,13 @@ public class SemagrowSail extends AbstractSail {
         TupleQueryResultWriterRegistry  registry = TupleQueryResultWriterRegistry.getInstance();
         TupleQueryResultWriterFactory writerFactory = registry.get(resultFF).get();
         materializationManager = new FileManager(baseDir, writerFactory);
-
+        /*
         try {
             return factory.getQueryRecordLogger(config);
         } catch (QueryLogException e) {
             logger.warn("Cannot initialize Query Log writer", e);
         }
+        */
         return null;
     }
 

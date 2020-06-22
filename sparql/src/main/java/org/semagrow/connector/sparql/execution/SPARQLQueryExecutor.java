@@ -250,6 +250,7 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
             query.setBinding(b.getName(), b.getValue());
 
         LoggingUtil.logRemote(logger, conn, sparqlQuery, endpoint, expr, query);
+        logger.info("Sending query {} to {} with {}", sparqlQuery, endpoint, bindings);
 
         return Flux.from(new TupleQueryResultPublisher(query, sparqlQuery, qfrHandler, mat, endpoint))
                 .doAfterTerminate(() -> closeQuietly(conn));
@@ -278,6 +279,7 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
             query.setBinding(b.getName(), b.getValue());
 
         LoggingUtil.logRemote(logger, conn, sparqlQuery, endpoint, expr, query);
+        logger.info("Sending query {} to {} with {}", sparqlQuery, endpoint, bindings);
 
         boolean answer = query.evaluate();
         closeQuietly(conn);

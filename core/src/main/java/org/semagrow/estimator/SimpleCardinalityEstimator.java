@@ -1,6 +1,5 @@
 package org.semagrow.estimator;
 
-import org.semagrow.art.Loggable;
 import org.semagrow.plan.Plan;
 import org.semagrow.statistics.Statistics;
 import org.semagrow.plan.operators.SourceQuery;
@@ -32,7 +31,6 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
         this.statistics = statistics;
     }
 
-    @Loggable
     public BigInteger getCardinality(TupleExpr expr)  {
 
         if (expr instanceof StatementPattern)

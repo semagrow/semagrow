@@ -1,6 +1,5 @@
 package org.semagrow.plan;
 
-import org.semagrow.art.Loggable;
 import org.semagrow.plan.util.CombinationIterator;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.Dataset;
@@ -86,7 +85,6 @@ public class DPPlanOptimizer
         return  plan1.getProperties().isComparable(plan2.getProperties());
     }
 
-    @Loggable
     public Optional<Plan> getBestPlan(Collection<TupleExpr> exprs, BindingSet bindings, Dataset dataset) {
 
         Map<Set<Integer>,PlanCollection> optPlans = new HashMap<>();
@@ -124,7 +122,7 @@ public class DPPlanOptimizer
         prunePlans(fullPlans);
 
         if (!fullPlans.isEmpty()) {
-            logger.info("Found {} complete optimal plans", fullPlans.size());
+            logger.debug("Found {} complete optimal plans", fullPlans.size());
         } else {
             logger.warn("Found no complete plans");
         }

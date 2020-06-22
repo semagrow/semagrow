@@ -18,7 +18,7 @@ import java.net.URL;
 public class LoggingUtil {
 
     public static void logSourceQuery(Logger logger, SourceQuery expr) {
-        logger.info("sq {} - Source query [{}] at source {}",
+        logger.debug("sq {} - Source query [{}] at source {}",
                 Math.abs(expr.hashCode()),
                 expr,
                 //SPARQLQueryStringUtil.tupleExpr2Str(expr),
@@ -26,7 +26,7 @@ public class LoggingUtil {
     }
 
     public static void logFirstResult(Logger logger, String query, URL endpoint) {
-        logger.info("rq {} - Found first result.",
+        logger.debug("rq {} - Found first result.",
                 Math.abs((query + endpoint).hashCode()));
     }
 
@@ -37,13 +37,13 @@ public class LoggingUtil {
     }
 
     public static void logEnd(Logger logger, String query, URL endpoint, int results) {
-        logger.info("rq {} - Found {} results.",
+        logger.debug("rq {} - Found {} results.",
                 Math.abs((query + endpoint).hashCode()),
                 results);
     }
 
     public static void logRemote(Logger logger, RepositoryConnection conn, String sparqlQuery, java.net.URL endpoint, TupleExpr expr, Query query) {
-        logger.info("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
+        logger.debug("rc {} - rq {} - sq {} - Sending to [{}] query [{}] with {}",
                 conn.hashCode(),
                 Math.abs((sparqlQuery+endpoint).hashCode()),
                 Math.abs(expr.getParentNode().getParentNode().hashCode()),

@@ -161,7 +161,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Flux<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        logger.info("sq {} - Source query [{}] at source {}",
+        logger.debug("sq {} - Source query [{}] at source {}",
                 Math.abs(expr.hashCode()),
                 expr.getArg(),
                 expr.getSite());

@@ -26,9 +26,12 @@ public class MethodLogger {
             Method method = MethodSignature.class.cast(point.getSignature()).getMethod();
             Logger logger = LoggerFactory.getLogger(method.getDeclaringClass());
             LogExprProcessing event = new LogExprProcessing();
-            logger.info( "Enter {}", method.getName());
+            logger.debug( "Enter {}", method.getName());
+            long start = System.currentTimeMillis();
             result = point.proceed();
-            logger.info( "Exit  {}", method.getName());
+            long duration = System.currentTimeMillis() - start;
+            logger.debug( "Exit  {}", method.getName());
+            logger.debug("{} time: {}", method.getName(), duration);
             event.finalize();
         } catch (Throwable throwable) {
             throwable.printStackTrace();

@@ -1,7 +1,6 @@
 package org.semagrow.plan;
 
 import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
-import org.semagrow.art.Loggable;
 import org.semagrow.plan.optimizer.ExtensionOptimizer;
 import org.semagrow.plan.optimizer.LimitPushDownOptimizer;
 import org.semagrow.plan.util.BPGCollector;
@@ -66,7 +65,6 @@ public class SimpleQueryDecomposer implements QueryDecomposer
      */
 
     @Override
-    @Loggable
     public void decompose(TupleExpr expr, Dataset dataset, BindingSet bindings)
     {
         /*

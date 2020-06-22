@@ -1,6 +1,5 @@
 package org.semagrow.estimator;
 
-import org.semagrow.art.Loggable;
 import org.semagrow.plan.operators.*;
 import org.semagrow.plan.Cost;
 import org.semagrow.plan.Plan;
@@ -31,7 +30,6 @@ public class SimpleCostEstimator implements CostEstimator {
         this.cardinalityEstimator = cardinalityEstimator;
     }
 
-    @Loggable
     public Cost getCost(TupleExpr expr) {
         // just favor remote queries.
         if (expr instanceof SourceQuery)
