@@ -142,20 +142,21 @@ public class PostGISQueryStringUtil {
 			String from1 = "", from2 = "", from3 = "", from4 = "";
 			logger.info("vars size: {}", freeVars.size());
 			logger.info("triples size: {}", triples.size());
-			logger.info("asToVar size: {}", bindingVars.size());
-			if (triples.size() == 3 && triples.size() == 6) {
-				from1 = "lucas t1";
-				from2 = "invekos t1";
+			logger.info("bindingVars size: {}", bindingVars.size());
+			logger.info("bindingVars: {}", bindingVars);
+			if (triples.size() == 3) {
+				from1 = " FROM lucas t1";
+				from2 = " FROM invekos t1";
 				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
 						+ serializeList(where, AND_SEP, WHERE) + UNION 
 						+ serializeList(select, COMMA_SEP, SELECT) + from2
 						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
 			else if (triples.size() == 6) {
-				from1 = "lucas t1, lucas t4";
-				from2 = "lucas t1, invekos t4";
-				from3 = "invekos t1, lucas t4";
-				from4 = "invekos t1, invekos t4";
+				from1 = " FROM lucas t1, lucas t4";
+				from2 = " FROM lucas t1, invekos t4";
+				from3 = " FROM invekos t1, lucas t4";
+				from4 = " FROM invekos t1, invekos t4";
 				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
 						+ serializeList(where, AND_SEP, WHERE) + UNION 
 						+ serializeList(select, COMMA_SEP, SELECT) + from2
@@ -329,18 +330,18 @@ public class PostGISQueryStringUtil {
 			logger.info("triples size: {}", triples.size());
 			logger.info("asToVar size: {}", bindingVars.size());
 			if (triples.size() == 3) {
-				from1 = "lucas t1";
-				from2 = "invekos t1";
+				from1 = " FROM lucas t1";
+				from2 = " FROM invekos t1";
 				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
 						+ serializeList(where, AND_SEP, WHERE) + UNION 
 						+ serializeList(select, COMMA_SEP, SELECT) + from2
 						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
 			else if (triples.size() == 6) {
-				from1 = "lucas t1, lucas t4";
-				from2 = "lucas t1, invekos t4";
-				from3 = "invekos t1, lucas t4";
-				from4 = "invekos t1, invekos t4";
+				from1 = " FROM lucas t1, lucas t4";
+				from2 = " FROM lucas t1, invekos t4";
+				from3 = " FROM invekos t1, lucas t4";
+				from4 = " FROM invekos t1, invekos t4";
 				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
 						+ serializeList(where, AND_SEP, WHERE) + UNION 
 						+ serializeList(select, COMMA_SEP, SELECT) + from2

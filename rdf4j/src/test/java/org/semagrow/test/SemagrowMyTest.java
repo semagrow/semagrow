@@ -329,26 +329,38 @@ public class SemagrowMyTest extends TestCase {
 //				"}";
 		
 		String q28 = "" +		//query 5 ?
+				"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
+				"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
+				"PREFIX invekos: <http://deg.iit.demokritos.gr/invekos/>" +
+				"PREFIX invekos_r: <http://deg.iit.demokritos.gr/invekos/resource/>" +
+				"PREFIX lictm: <http://deg.iit.demokritos.gr/>" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1> ?l_lc1 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1_SPEC> ?l_lc1_sp .\n" +
-				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1> ?l_lc1 .\n" +
-				"  ?conversion <http://deg.iit.demokritos.gr/lucasLC1_spec> ?l_lc1_sp .\n" + 
-				"  ?conversion <http://deg.iit.demokritos.gr/invekosCropTypeNumber> ?cropNu .\n" +
-				"  ?i <http://deg.iit.demokritos.gr/invekos/hasCropTypeNumber> ?cropNu2 .\n" +
+				"  lucas_r:9 lucas:hasLC1 ?l_lc1 .\n" +
+				"  lucas_r:9 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
+				"  ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
+				"  ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
+				"  ?conversion lictm:invekosCropTypeNumber ?cropNu .\n" +
+				"  ?i invekos:hasCropTypeNumber ?cropNu2 .\n" +
 				"  FILTER(?cropNu = ?cropNu2) .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
+				"  lucas_r:9 geo:hasGeometry ?l_geom_id .\n" + 
 				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
 				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
 				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
 				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
 				"  FILTER(?dist < 10) .\n" +
-				"  ORDER BY ASC(?dist2)\n" +
-				"  LIMIT 1\n" +
-				"}";
+				"  ?i2 geo:hasGeometry ?i2_geom_id .\n" + 
+				"  ?i2_geom_id geo:asWKT ?i2_geom .\n" + 
+				"  BIND(geof:distance(?l_geom,?i2_geom,opengis:metre) as ?dist2) .\n" +
+				"  FILTER(?dist < ?dist2) .\n" +
+//				"  ORDER BY ASC(?dist2)\n" +
+//				"  LIMIT 1\n" +
+//				"}";
+				"}\n" +
+				"ORDER BY ASC(?dist2)\n" +
+				"LIMIT 1";
 		
 //		String q29 = "" +		//query 9 ?
 //				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
@@ -592,7 +604,7 @@ public class SemagrowMyTest extends TestCase {
 		// q35: 24-30 (multiple bindings) does not check all invekos OR all lucas instances
 		// q36: ?????
 //		TupleQuery query = conn.prepareTupleQuery(q13);
-		TupleQuery query = conn.prepareTupleQuery(q35);
+		TupleQuery query = conn.prepareTupleQuery(q28);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
