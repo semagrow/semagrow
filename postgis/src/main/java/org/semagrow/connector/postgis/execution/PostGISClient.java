@@ -28,7 +28,7 @@ public class PostGISClient {
     private PostGISClient() {}
 
     public static PostGISClient getInstance(String url, String user, String password) {
-    	logger.info("getInstance!!!");
+    	logger.debug("getInstance!!!");
         if (instance == null) {
             instance = new PostGISClient();
             instance.setCredentials(url, user, password);
@@ -38,14 +38,14 @@ public class PostGISClient {
     }
     
     private void setCredentials(String url, String user, String password) {
-    	logger.info("setCredentials!!!");
+    	logger.debug("setCredentials!!!");
         this.url = url;
         this.user = user;
         this.password = password;
     }
 
     private void connect() {
-    	logger.info("connect!!!");
+    	logger.debug("connect!!!");
     	try {
 			Class.forName("org.postgresql.Driver");
 			database = DriverManager.getConnection(url, user, password);
@@ -60,7 +60,7 @@ public class PostGISClient {
     }
 
     private void close() {
-    	logger.info("close!!!");
+    	logger.debug("close!!!");
 //        session.close();
 //        cluster.close();
         try {
@@ -73,8 +73,8 @@ public class PostGISClient {
     }
 
     public Stream<Record> execute(String query) {
-    	logger.info("execute!!!");
-        logger.info("Sending query: {}", query);
+    	logger.debug("execute!!!");
+        logger.debug("Sending query: {}", query);
         return DSL.using(database).fetch(query).stream();
     }
 }

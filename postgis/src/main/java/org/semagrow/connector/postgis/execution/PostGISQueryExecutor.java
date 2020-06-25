@@ -85,11 +85,11 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		Set<String> freeVars = computeVars(expr);
 		freeVars.removeAll(bindings.getBindingNames());
 		
-		logger.info("evaluateReactorImpl!!!");
-		logger.info("expr: {}" , expr);
-		logger.info("endpoint: {}", site.toString());
-		logger.info("bindings: {}", bindings.toString());
-		logger.info("freeVars: {}", freeVars.toString());
+		logger.debug("evaluateReactorImpl!!!");
+		logger.debug("expr: {}" , expr);
+		logger.debug("endpoint: {}", site.toString());
+		logger.debug("bindings: {}", bindings.toString());
+		logger.debug("freeVars: {}", freeVars.toString());
 		
 		if (freeVars.isEmpty()) {
 			// all variables in expression are bound, switch to simple ASK query or return empty ???
@@ -98,7 +98,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		} 
 		else {
 			final BindingSet relevantBindings = bindingSetOps.project(computeVars(expr), bindings);
-            logger.info("relevantBindings:: {}", relevantBindings.toString());
+            logger.debug("relevantBindings:: {}", relevantBindings.toString());
 			
 			List<String> tables = new ArrayList<String>();
 			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings);
@@ -149,11 +149,11 @@ public class PostGISQueryExecutor implements QueryExecutor {
         if (!bindings.isEmpty())
         	relevantBindingNames = BindingSetUtil.projectNames(exprVars, bindings.get(0));
         
-        logger.info("evaluateReactorImpl 2!!!");
-		logger.info("expr: {}" , expr);
-		logger.info("bindings: {}", bindings.toString());
-        logger.info("bindings.get(0): {}", bindings.get(0));
-        logger.info("relevantBindingNames: {}", relevantBindingNames);
+        logger.debug("evaluateReactorImpl 2!!!");
+		logger.debug("expr: {}" , expr);
+		logger.debug("bindings: {}", bindings.toString());
+        logger.debug("bindings.get(0): {}", bindings.get(0));
+        logger.debug("relevantBindingNames: {}", relevantBindingNames);
         
         Set<String> freeVars = computeVars(expr);	// freeVars = exprVars
         freeVars.removeAll(relevantBindingNames);

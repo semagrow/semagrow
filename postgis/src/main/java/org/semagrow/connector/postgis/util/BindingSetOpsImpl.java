@@ -30,12 +30,12 @@ public final class BindingSetOpsImpl implements BindingSetOps {
 
         QueryBindingSet result = new QueryBindingSet();
         String tempColumnName = null, tempColumnValue = null;
-        logger.info("columnsNumber::::::::::::::::::::::: {} ", columnsNumber);
-        logger.info("tables::::::::::::::::::::::: {} ", tables.toString());
+        logger.debug("columnsNumber::::::::::::::::::::::: {} ", columnsNumber);
+        logger.debug("tables::::::::::::::::::::::: {} ", tables.toString());
         for (int i = 0; i < columnsNumber; i++) {
             if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer")) {
-                logger.info("string is numeric!!!: {} ", rsmd.getColumnName(i+1));
-                logger.info("tables[{}]: {} ", i, tables.get(i));
+                logger.debug("string is numeric!!!: {} ", rsmd.getColumnName(i+1));
+                logger.debug("tables[{}]: {} ", i, tables.get(i));
                 if (tables.get(i).equals("?")) {
                     tempColumnName = rsmd.getColumnName(i+1);
                     tempColumnValue = r.getValue(i) instanceof String ? (String) r.getValue(i) : r.getValue(i).toString();
@@ -48,7 +48,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
                 continue;
             }
             if (tempColumnName != null && tempColumnValue != null) {
-                logger.info("tables[{}]: {} ", i, tables.get(i));
+                logger.debug("tables[{}]: {} ", i, tables.get(i));
                 if (((String) r.getValue(i)).contains("POINT")) {
                     result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/resource/Geometry/" + tempColumnValue + ""));
                 } else if (((String) r.getValue(i)).contains("MULTIPOLYGON")) {
@@ -56,13 +56,13 @@ public final class BindingSetOpsImpl implements BindingSetOps {
                 }
                 tempColumnName = tempColumnValue = null;
             }
-//						logger.info("columnClassName:: {} ", rsmd.getColumnClassName(i+1));
-//						logger.info("columnLabel:: {} ", rsmd.getColumnLabel(i+1));
-//						logger.info("SchemaName:: {} ", rsmd.getSchemaName(i+1));
-//						logger.info("TableName:: {} ", rsmd.getTableName(i+1));
-//						logger.info("CatalogName:: {} ", rsmd.getCatalogName(i+1));
-            logger.info("columnName:: {} ", rsmd.getColumnName(i+1));
-            logger.info("columnValue:: {} ", r.getValue(i));
+//						logger.debug("columnClassName:: {} ", rsmd.getColumnClassName(i+1));
+//						logger.debug("columnLabel:: {} ", rsmd.getColumnLabel(i+1));
+//						logger.debug("SchemaName:: {} ", rsmd.getSchemaName(i+1));
+//						logger.debug("TableName:: {} ", rsmd.getTableName(i+1));
+//						logger.debug("CatalogName:: {} ", rsmd.getCatalogName(i+1));
+            logger.debug("columnName:: {} ", rsmd.getColumnName(i+1));
+            logger.debug("columnValue:: {} ", r.getValue(i));
             
             if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
             	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((String) r.getValue(i)));
@@ -74,7 +74,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
             	logger.error("java.lang.ClassCastException: {} is {}", rsmd.getColumnName(i+1), rsmd.getColumnClassName(i+1));
             	throw new SQLException();
             }
-            logger.info(" {} as {} ", r.getValue(i), rsmd.getColumnName(i+1));
+            logger.debug(" {} as {} ", r.getValue(i), rsmd.getColumnName(i+1));
 
         }
         return result;

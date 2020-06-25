@@ -45,15 +45,15 @@ public class PostGISQueryStringUtil {
 		keepOnlyAsWKTPredicates(triples);
 		if (triples.isEmpty()) return null;
 		
-		logger.info("triples: {}", triples);
-//		logger.info("filter variables: {} ", filterInfo);
-//		logger.info("bind variables: {} ", bindInfo);
+		logger.debug("triples: {}", triples);
+//		logger.debug("filter variables: {} ", filterInfo);
+//		logger.debug("bind variables: {} ", bindInfo);
 		
 		Map<String,String> bindingVars = new HashMap<String, String>();
 		
 		Set<String> bindingNames = bindings.getBindingNames();
 		for (Object binding: bindingNames) {
-			logger.info("bindings: {} - {}", binding, bindings.getValue((String)binding));
+			logger.debug("bindings: {} - {}", binding, bindings.getValue((String)binding));
 			if (triples.contains(binding.toString())) {
 				int index = triples.indexOf(binding);
 				triples.remove(index);
@@ -62,7 +62,7 @@ public class PostGISQueryStringUtil {
 			bindingVars.put((String) binding, bindings.getValue((String)binding).toString().replace("\"", "\'"));
 		}
 		
-		logger.info("triples 2: {}", triples.toString());
+		logger.debug("triples 2: {}", triples.toString());
 		
 		List<String> select = new ArrayList<String>();
 		List<String> from = new ArrayList<String>();
@@ -112,10 +112,10 @@ public class PostGISQueryStringUtil {
 			}
 		}
 		
-		logger.info("select:: {}", select);
-		logger.info("from:: {}", from);
-		logger.info("where:: {}", where);
-		logger.info("tables:: {}", tables);
+		logger.debug("select:: {}", select);
+		logger.debug("from:: {}", from);
+		logger.debug("where:: {}", where);
+		logger.debug("tables:: {}", tables);
 		
 		
 		String sqlQuery = null;
@@ -129,8 +129,8 @@ public class PostGISQueryStringUtil {
 		
 		computeBindsAndFilters(expr, triples, binds, filters, tables, bindingVars);
 		
-		logger.info("binds:: {}", binds);
-		logger.info("filters:: {}", filters);
+		logger.debug("binds:: {}", binds);
+		logger.debug("filters:: {}", filters);
 		
 		for (String b : binds)
 			select.add(b);
@@ -140,10 +140,10 @@ public class PostGISQueryStringUtil {
 		
 		if (from.isEmpty()) {
 			String from1 = "", from2 = "", from3 = "", from4 = "";
-			logger.info("vars size: {}", freeVars.size());
-			logger.info("triples size: {}", triples.size());
-			logger.info("bindingVars size: {}", bindingVars.size());
-			logger.info("bindingVars: {}", bindingVars);
+			logger.debug("vars size: {}", freeVars.size());
+			logger.debug("triples size: {}", triples.size());
+			logger.debug("bindingVars size: {}", bindingVars.size());
+			logger.debug("bindingVars: {}", bindingVars);
 			if (triples.size() == 3) {
 				from1 = " FROM lucas t1";
 				from2 = " FROM invekos t1";
@@ -193,8 +193,8 @@ public class PostGISQueryStringUtil {
 			}
 		}
 		
-		logger.info("2 bindingVars:: {}", bindingVars.toString());
-		logger.info("sqlQuery:: {}", sqlQuery);
+		logger.debug("2 bindingVars:: {}", bindingVars.toString());
+		logger.debug("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
 	}
 	
@@ -224,17 +224,17 @@ public class PostGISQueryStringUtil {
 		keepOnlyAsWKTPredicates(triples);
 		if (triples.isEmpty()) return null;
 		
-		logger.info("triples: {}", triples);
-		logger.info("filter variables: {} " ,filterInfo);
-		logger.info("bind variables: {} " ,bindInfo);
+		logger.debug("triples: {}", triples);
+		logger.debug("filter variables: {} " ,filterInfo);
+		logger.debug("bind variables: {} " ,bindInfo);
 		
 		Map<String,String> bindingVars = new HashMap<String, String>();
 		
-//		logger.info("filterVars: {}", filterVars.toString());
+//		logger.debug("filterVars: {}", filterVars.toString());
 		
 //		Set<String> bindingNames = bindings.getBindingNames();
 //		for (Object binding: bindingNames) {
-//			logger.info("bindings: {} - {}", binding, bindings.getValue((String)binding));
+//			logger.debug("bindings: {} - {}", binding, bindings.getValue((String)binding));
 //			if (triples.contains(binding.toString())) {
 //				int index = triples.indexOf(binding);
 //				triples.remove(index);
@@ -297,10 +297,10 @@ public class PostGISQueryStringUtil {
 			}
 		}
 		
-		logger.info("select:: {}", select);
-		logger.info("from:: {}", from);
-		logger.info("where:: {}", where);
-		logger.info("tables:: {}", tables.toString());
+		logger.debug("select:: {}", select);
+		logger.debug("from:: {}", from);
+		logger.debug("where:: {}", where);
+		logger.debug("tables:: {}", tables.toString());
 		
 		
 		String sqlQuery = "";
@@ -314,8 +314,8 @@ public class PostGISQueryStringUtil {
 		
 		computeBindsAndFilters(expr, triples, binds, filters, tables, bindingVars);
 		
-		logger.info("binds:: {}", binds);
-		logger.info("filters:: {}", filters);
+		logger.debug("binds:: {}", binds);
+		logger.debug("filters:: {}", filters);
 		
 		for (String b : binds)
 			select.add(b);
@@ -326,9 +326,9 @@ public class PostGISQueryStringUtil {
 		
 		if (from.isEmpty()) {
 			String from1 = "", from2 = "", from3 = "", from4 = "";
-			logger.info("vars size: {}", freeVars.size());
-			logger.info("triples size: {}", triples.size());
-			logger.info("asToVar size: {}", bindingVars.size());
+			logger.debug("vars size: {}", freeVars.size());
+			logger.debug("triples size: {}", triples.size());
+			logger.debug("asToVar size: {}", bindingVars.size());
 			if (triples.size() == 3) {
 				from1 = " FROM lucas t1";
 				from2 = " FROM invekos t1";
@@ -355,12 +355,12 @@ public class PostGISQueryStringUtil {
 		}
 		else {
 			
-			logger.info("vars size: {}", freeVars.size());
-			logger.info("triples size: {}", triples.size());
+			logger.debug("vars size: {}", freeVars.size());
+			logger.debug("triples size: {}", triples.size());
 			
 			String where_bind = "";
 			
-			logger.info("now sqlQuery: {}", sqlQuery);
+			logger.debug("now sqlQuery: {}", sqlQuery);
 			
 			for (BindingSet b : bindings) {
 				if (!sqlQuery.equals(""))
@@ -406,8 +406,8 @@ public class PostGISQueryStringUtil {
 			
 		}
 		
-		logger.info("bindingVars:: {}", bindingVars.toString());
-		logger.info("sqlQuery:: {}", sqlQuery);
+		logger.debug("bindingVars:: {}", bindingVars.toString());
+		logger.debug("sqlQuery:: {}", sqlQuery);
 		return sqlQuery;
 	}
 	
@@ -416,15 +416,15 @@ public class PostGISQueryStringUtil {
 		List<String> filterInfo = computeFilterVars(expr);
 		List<String> bindInfo = computeBindVars(expr);
 		
-		logger.info("filter variables: {} ", filterInfo);
-		logger.info("bind variables: {} ", bindInfo);
+		logger.debug("filter variables: {} ", filterInfo);
+		logger.debug("bind variables: {} ", bindInfo);
 		
 		String dist = "";
 		String compare = "", function = "", type = "";
 		int i = 0;
 		while (i < filterInfo.size()) {
 			if (filterInfo.get(i).matches("[0-9]+")) {
-				logger.info(filterInfo.get(i));
+				logger.debug(filterInfo.get(i));
 				dist += filterInfo.get(i);
 				i++;
 				if (!dist.contains(compare)) {
@@ -437,12 +437,12 @@ public class PostGISQueryStringUtil {
 				}
 			}
 			else if (filterInfo.get(i).matches("[!<=>]+")) {
-				logger.info(filterInfo.get(i));
+				logger.debug(filterInfo.get(i));
 				compare = filterInfo.get(i);
 				i++;
 			}
 			else {
-				logger.info(filterInfo.get(i));
+				logger.debug(filterInfo.get(i));
 				function = filterInfo.get(i);
 				if (function.equals("distance")) dist += "ST_Distance(";
 				type = filterInfo.get(i+3);
