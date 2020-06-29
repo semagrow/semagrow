@@ -292,6 +292,51 @@ public class SemagrowMyTest extends TestCase {
                 "LIMIT 1";
 //				"}";
 		
+		
+//		String q28 = "" +		//query 5 ?
+//		"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
+//		"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
+//		"PREFIX invekos: <http://deg.iit.demokritos.gr/invekos/>" +
+//		"PREFIX invekos_r: <http://deg.iit.demokritos.gr/invekos/resource/>" +
+//		"PREFIX lictm: <http://deg.iit.demokritos.gr/>" +
+//		"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+//		"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+//		"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+//		"SELECT * WHERE {\n" +
+//		"  lucas_r:9 lucas:hasLC1 ?l_lc1 .\n" +
+//		"  lucas_r:9 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
+//		"  ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
+//		"  ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
+//		"  ?conversion lictm:invekosCropTypeNumber ?cropNu .\n" +
+//		//"  ?i invekos:hasCropTypeNumber ?cropNu2 .\n" +
+//		//"  FILTER(?cropNu = ?cropNu2) .\n" +
+//		//"  lucas_r:9 geo:hasGeometry ?l_geom_id .\n" + 
+//		//"  ?i geo:hasGeometry ?i_geom_id .\n" + 
+//		//"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+//		//"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
+//		//"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
+//		//"  FILTER(?dist < 10) .\n" +
+//		"    lucas_r:9 geo:hasGeometry ?l2_geom_id .\n" +
+//		"    ?l2_geom_id geo:asWKT ?l2_geom .\n" +
+//		"  {\n" +
+//		"    SELECT * WHERE {\n" +
+////		"      lucas_r:9 lucas:hasLC1 ?l2_lc1 .\n" +
+////		"      lucas_r:9 lucas:hasLC1_SPEC ?l2_lc1_sp .\n" +
+////		"      ?conversion2 lictm:lucasLC1 ?l2_lc1 .\n" +
+////		"      ?conversion2 lictm:lucasLC1_spec ?l2_lc1_sp .\n" +
+//		"      ?i2 invekos:hasCropTypeNumber ?nu .\n" +
+//		"      ?i2 geo:hasGeometry ?i2_geom_id .\n" +
+//		"      ?i2_geom_id geo:asWKT ?i2_geom .\n" +
+//		"      BIND(geof:distance(?l2_geom,?i2_geom,opengis:metre) as ?dist2) .\n" +
+//		"      FILTER(?dist2 < 10) .\n" +
+//		"    }\n" +
+//		"    ORDER BY ASC(?dist2)\n" +
+//		"    LIMIT 1\n" +
+//		"  }\n"
+//		+ "FILTER (?nu = ?cropNu) . \n" +
+//		//"  FILTER(?dist <= ?dist2) .\n" +
+//		"}";
+		
 		String q28 = "" +		//query 5 ?
 				"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
 				"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
@@ -335,6 +380,50 @@ public class SemagrowMyTest extends TestCase {
 				"  FILTER(?dist <= ?dist2) .\n" +
 				"}";
 		
+//		String q29 = "" +		//query 9 ?
+//				"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
+//				"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
+//				"PREFIX invekos: <http://deg.iit.demokritos.gr/invekos/>" +
+//				"PREFIX invekos_r: <http://deg.iit.demokritos.gr/invekos/resource/>" +
+//				"PREFIX lictm: <http://deg.iit.demokritos.gr/>" +
+//				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+//				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+//				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+//				"SELECT * WHERE {\n" +
+//				"  lucas_r:1 lucas:hasLC1 ?l_lc1 .\n" +
+//				"  lucas_r:1 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
+//				"  ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
+//				"  ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
+//				"  ?conversion lictm:invekosCropTypeNumber ?cropNu .\n" +
+//				"  ?i invekos:hasCropTypeNumber ?cropNu2 .\n" +
+//				"  FILTER(?cropNu != ?cropNu2) .\n" +
+//				"  lucas_r:1 geo:hasGeometry ?l_geom_id .\n" + 
+//				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
+//				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+//				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
+//				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
+//				"  FILTER(?dist < 10) .\n" +
+//				"  {\n" +
+//				"    SELECT DISTINCT ?dist2 WHERE {\n" +
+////				"      lucas_r:9 lucas:hasLC1 ?l2_lc1 .\n" +
+////				"      lucas_r:9 lucas:hasLC1_SPEC ?l2_lc1_sp .\n" +
+////				"      ?conversion2 lictm:lucasLC1 ?l2_lc1 .\n" +
+////				"      ?conversion2 lictm:lucasLC1_spec ?l2_lc1_sp .\n" +
+////				"      lucas_r:9 geo:hasGeometry ?l2_geom_id .\n" +
+////				"      ?l2_geom_id geo:asWKT ?l2_geom .\n" +
+//				"      ?i2 invekos:hasCropTypeNumber ?nu .\n" +
+//				"      ?i2 geo:hasGeometry ?i2_geom_id .\n" +
+//				"      ?i2_geom_id geo:asWKT ?i2_geom .\n" +
+//				"      BIND(geof:distance(?l_geom,?i2_geom,opengis:metre) as ?dist2) .\n" +
+////				"      FILTER(?dist2 < 10) .\n" +
+//				"    }\n" +
+//				"    ORDER BY ASC(?dist2)\n" +
+//				"    LIMIT 1\n" +
+//				"  }\n" +
+//				"  FILTER(?dist <= ?dist2) .\n" +
+//				"}";
+		
+		
 		String q29 = "" +		//query 9 ?
 				"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
 				"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
@@ -345,43 +434,40 @@ public class SemagrowMyTest extends TestCase {
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  lucas_r:1 lucas:hasLC1 ?l_lc1 .\n" +
-				"  lucas_r:1 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
-				"  ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
-				"  ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
-				"  ?conversion lictm:invekosCropTypeNumber ?cropNu .\n" + 
-				"  ?i invekos:hasCropTypeNumber ?cropNu2 .\n" +
-				"  FILTER(?cropNu != ?cropNu2) .\n" +
-				"  lucas_r:1 geo:hasGeometry ?l_geom_id .\n" + 
-				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+//				"  lucas_r:1 lucas:hasLC1 ?l_lc1 .\n" +
+//				"  lucas_r:1 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
+//				"  ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
+//				"  ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
+//				"  ?conversion lictm:invekosCropTypeNumber ?cropNu .\n" +
+				"  ?i invekos:hasCropTypeNumber ?cropNu .\n" +
+//				"  FILTER(?cropNu != ?cropNu2) .\n" +
+				"  lucas_r:9 geo:hasGeometry ?l_geom_id .\n" + 
 				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
+				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
 				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
 				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
-                "  FILTER(?dist < 10) .\n" +
+				"  FILTER(?dist < 10) .\n" +
 				"  {\n" +
 				"    SELECT DISTINCT ?dist2 WHERE {\n" +
-//				"      lucas_r:1 lucas:hasLC1 ?l2_lc1 .\n" +
-//				"      lucas_r:1 lucas:hasLC1_SPEC ?l2_lc1_sp .\n" +
-//				"      ?conversion2 lictm:lucasLC1 ?l2_lc1 .\n" +
-//				"      ?conversion2 lictm:lucasLC1_spec ?l2_lc1_sp .\n" +
-//                "      ?conversion lictm:invekosCropTypeNumber ?cropNu .\n" +
-				"      ?i2 invekos:hasCropTypeNumber ?nu .\n" +
-//				"      FILTER(?cropNu = ?cropNu2) .\n" +
-//				"      lucas_r:1 geo:hasGeometry ?l2_geom_id .\n" +
-//				"      ?l2_geom_id geo:asWKT ?l2_geom .\n" +
+				"      lucas_r:9 lucas:hasLC1 ?l_lc1 .\n" +
+				"      lucas_r:9 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
+				"      ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
+				"      ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
+				"      ?conversion lictm:invekosCropTypeNumber ?nu .\n" +
+				"      ?i2 invekos:hasCropTypeNumber ?nu2 .\n" +
+				"      FILTER(?nu = ?nu2) .\n" +
 				"      ?i2 geo:hasGeometry ?i2_geom_id .\n" +
 				"      ?i2_geom_id geo:asWKT ?i2_geom .\n" +
 				"      BIND(geof:distance(?l_geom,?i2_geom,opengis:metre) as ?dist2) .\n" +
+//				"      FILTER(?dist2 < 10) .\n" +
 				"    }\n" +
 				"    ORDER BY ASC(?dist2)\n" +
 				"    LIMIT 1\n" +
 				"  }\n" +
-				"  FILTER(?dist <= ?dist2) .\n" +
-				"}" +
-				"ORDER BY ASC(?dist)\n" +
-				"LIMIT 1";
+				"  FILTER(?dist < ?dist2) .\n" +
+				"}";
 
-		String q30 = "" +		//query 10 ?		//not exists sparql	//centroid
+		String q30 = "" +		//query 10 ?
 				"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
 				"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
 				"PREFIX invekos: <http://deg.iit.demokritos.gr/invekos/>" +
@@ -395,31 +481,69 @@ public class SemagrowMyTest extends TestCase {
 				"  lucas_r:5 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
 				"  ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
 				"  ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
-				"  lucas_r:5 geo:hasGeometry ?l_geom_id .\n" +
-				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
-				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
-				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
-				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
 				"  {\n" +
-				"    SELECT DISTINCT ?dist2 WHERE {\n" +
-//				"      lucas_r:5 lucas:hasLC1 ?l2_lc1 .\n" +
-//				"      lucas_r:5 lucas:hasLC1_SPEC ?l2_lc1_sp .\n" +
-//				"      ?conversion2 lictm:lucasLC1 ?l2_lc1 .\n" +
-//				"      ?conversion2 lictm:lucasLC1_spec ?l2_lc1_sp .\n" +
-//				"      lucas_r:5 geo:hasGeometry ?l2_geom_id .\n" +
-//				"      ?l2_geom_id geo:asWKT ?l2_geom .\n" +
-				"      ?i2 invekos:hasCropTypeNumber ?nu .\n" +
-				"      ?i2 geo:hasGeometry ?i2_geom_id .\n" +
-				"      ?i2_geom_id geo:asWKT ?i2_geom .\n" +
-				"      BIND(geof:distance(?l_geom,?i2_geom,opengis:metre) as ?dist2) .\n" +
+				"    SELECT DISTINCT ?dist WHERE {\n" +
+				"      lucas_r:5 geo:hasGeometry ?l_geom_id .\n" +
+				"      ?l_geom_id geo:asWKT ?l_geom .\n" + 
+				"      ?i invekos:hasCropTypeNumber ?nu .\n" +
+				"      ?i geo:hasGeometry ?i_geom_id .\n" +
+				"      ?i_geom_id geo:asWKT ?i_geom .\n" +
+				"      BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
 				"    }\n" +
-				"    ORDER BY ASC(?dist2)\n" +
+				"    ORDER BY ASC(?dist)\n" +
 				"    LIMIT 1\n" +
 				"  }\n" +
-				"  FILTER(10 <= ?dist2) .\n" +
-				"}\n" +
-                "ORDER BY ASC(?dist)\n" +
-                "LIMIT 1";
+				"  FILTER(10 <= ?dist) .\n" +
+				"}\n";
+		
+//		String q30 = "" +		//query 10 ?		//not exists sparql	//centroid
+//				"PREFIX lucas: <http://deg.iit.demokritos.gr/lucas/>" +
+//				"PREFIX lucas_r: <http://deg.iit.demokritos.gr/lucas/resource/>" +
+//				"PREFIX invekos: <http://deg.iit.demokritos.gr/invekos/>" +
+//				"PREFIX invekos_r: <http://deg.iit.demokritos.gr/invekos/resource/>" +
+//				"PREFIX lictm: <http://deg.iit.demokritos.gr/>" +
+//				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+//				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+//				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+//				"SELECT * WHERE {\n" +
+//				"  lucas_r:5 lucas:hasLC1 ?l_lc1 .\n" +
+//				"  lucas_r:5 lucas:hasLC1_SPEC ?l_lc1_sp .\n" +
+//				"  ?conversion lictm:lucasLC1 ?l_lc1 .\n" +
+//				"  ?conversion lictm:lucasLC1_spec ?l_lc1_sp .\n" + 
+//				"  lucas_r:5 geo:hasGeometry ?l_geom_id .\n" +
+//				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+//				
+////				"  NOT EXISTS {\n" +
+////				"    FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10)\n" +
+////				"  }\n" +
+//				"  FILTER NOT EXISTS {\n" +
+//				"    ?i invekos:hasCropTypeNumber ?nu .\n" +
+//				"    ?i geo:hasGeometry ?i_geom_id .\n" + 
+//				"    ?i_geom_id geo:asWKT ?i_geom .\n" + 
+//				"    BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
+//				"    FILTER(?dist < 10) .\n" + 
+//				"  }\n" +
+////				"  BIND(geof:distance(?l_geom,?i_geom,opengis:metre) as ?dist) .\n" +
+////				"  {\n" +
+////				"    SELECT DISTINCT ?dist2 WHERE {\n" +
+//////				"      lucas_r:5 lucas:hasLC1 ?l2_lc1 .\n" +
+//////				"      lucas_r:5 lucas:hasLC1_SPEC ?l2_lc1_sp .\n" +
+//////				"      ?conversion2 lictm:lucasLC1 ?l2_lc1 .\n" +
+//////				"      ?conversion2 lictm:lucasLC1_spec ?l2_lc1_sp .\n" +
+//////				"      lucas_r:5 geo:hasGeometry ?l2_geom_id .\n" +
+//////				"      ?l2_geom_id geo:asWKT ?l2_geom .\n" +
+////				"      ?i2 invekos:hasCropTypeNumber ?nu .\n" +
+////				"      ?i2 geo:hasGeometry ?i2_geom_id .\n" +
+////				"      ?i2_geom_id geo:asWKT ?i2_geom .\n" +
+////				"      BIND(geof:distance(?l_geom,?i2_geom,opengis:metre) as ?dist2) .\n" +
+////				"    }\n" +
+////				"    ORDER BY ASC(?dist2)\n" +
+////				"    LIMIT 1\n" +
+////				"  }\n" +
+////				"  FILTER(10 <= ?dist2) .\n" +
+//				"}\n";
+////                "ORDER BY ASC(?dist)\n" +
+////                "LIMIT 1";
 		
 		String q31 = "" +			//query 2, without ordering and limit, and no invekos only lucases
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
@@ -579,7 +703,7 @@ public class SemagrowMyTest extends TestCase {
 		//writer.write("\n");
 //		System.out.println(EndpointCollector.process(plan));
 
-		if (true) {
+		if (false) {
 			query.evaluate(new TupleQueryResultHandler() {
 				@Override
 				public void handleBoolean(boolean b) throws QueryResultHandlerException {
