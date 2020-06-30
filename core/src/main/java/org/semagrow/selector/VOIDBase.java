@@ -34,7 +34,7 @@ public abstract class VOIDBase {
     }
 
     protected Set<Resource> getAllDatasets() {
-        String q = "SELECT ?dataset { ?dataset <" + RDF.TYPE + "> <" + VOID.DATASET + "> }";
+        String q = "SELECT ?dataset { ?dataset <" + VOID.SPARQLENDPOINT + "> ?endpoint. }";
         QueryBindingSet bindings = new QueryBindingSet();
         return evalQuerySet(q, bindings, "dataset");
     }
