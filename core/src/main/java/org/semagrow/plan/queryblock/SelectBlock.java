@@ -77,6 +77,8 @@ public class SelectBlock extends AbstractQueryBlock {
 
     public void setOffset(Long l) { offset = Optional.of(l); }
 
+    public Optional<Long> getLimit() { return limit; }
+
     @Override
     public <X extends Exception> void visitChildren(QueryBlockVisitor<X> visitor) throws X {
         for (Quantifier q : quantifiers)

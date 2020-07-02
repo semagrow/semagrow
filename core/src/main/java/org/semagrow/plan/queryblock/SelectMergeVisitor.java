@@ -39,7 +39,9 @@ public class SelectMergeVisitor extends AbstractQueryBlockVisitor<RuntimeExcepti
             boolean ordering = lower.getOutputDataProperties().hasOrdering() &&
                                !upper.getOutputDataProperties().hasOrdering();
 
-            return duplicateConstraint && !ordering;
+            boolean limit = !lower.getLimit().isPresent() && !upper.getLimit().isPresent();
+
+            return duplicateConstraint && !ordering && limit;
         }
 
         return false;
