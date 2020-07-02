@@ -1,5 +1,6 @@
 package org.semagrow.util;
 
+import org.eclipse.rdf4j.query.algebra.Exists;
 import org.eclipse.rdf4j.query.algebra.StatementPattern;
 import org.eclipse.rdf4j.query.algebra.TupleExpr;
 import org.eclipse.rdf4j.query.algebra.Union;
@@ -13,6 +14,7 @@ import java.util.List;
 public class GroupedPatternCollector extends AbstractQueryModelVisitor<RuntimeException> {
 
     private Collection<List<StatementPattern>> groups = new ArrayList<>();
+    private Collection<List<StatementPattern>> additionalGroups = new ArrayList<>();
 
     private GroupedPatternCollector() { }
 
@@ -22,6 +24,7 @@ public class GroupedPatternCollector extends AbstractQueryModelVisitor<RuntimeEx
         if (collector.groups.isEmpty()) {
             collector.addGroup(StatementPatternCollector.process(expr));
         }
+        collector.groups.addAll(collector.additionalGroups);
         return collector.groups;
     }
 
@@ -44,6 +47,11 @@ public class GroupedPatternCollector extends AbstractQueryModelVisitor<RuntimeEx
         else  {
             groups.add(StatementPatternCollector.process(r));
         }
+    }
+
+    @Override
+    public void meet(Exists node) throws RuntimeException {
+        additionalGroups.add(StatementPatternCollector.process(node.getSubQuery()));
     }
 
     public void addGroup(List<StatementPattern> group) {
