@@ -129,6 +129,16 @@ public class BindJoinExtensionOptimizer implements QueryOptimizer {
             }
         }
 
+        @Override
+        public void meet(Projection node) throws RuntimeException {
+            node.getArg().visit(this);
+        }
+
+        @Override
+        public void meet(Slice node) throws RuntimeException {
+            node.getArg().visit(this);
+        }
+
         public void meet(Filter filter) {
             filter.getArg().visit(this);
         }

@@ -13,7 +13,6 @@ import org.semagrow.estimator.CardinalityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
 import org.semagrow.local.LocalSite;
 import org.semagrow.plan.optimizer.BindJoinExtensionOptimizer;
-import org.semagrow.plan.optimizer.ExtensionOptimizer;
 import org.semagrow.plan.optimizer.FilterPlanOptimizer;
 import org.semagrow.plan.queryblock.*;
 import org.semagrow.plan.util.EndpointCollector;
