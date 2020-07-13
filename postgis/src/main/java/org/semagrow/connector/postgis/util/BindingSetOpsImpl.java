@@ -42,7 +42,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
                 } else {
                     result.addBinding(
                             rsmd.getColumnName(i+1),
-                            vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i) + "/resource/Geometry/" + r.getValue(i) + "")
+                            vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i) + "/geometry/" + r.getValue(i) + "")
                     );
                 }
                 continue;
@@ -50,9 +50,9 @@ public final class BindingSetOpsImpl implements BindingSetOps {
             if (tempColumnName != null && tempColumnValue != null) {
                 logger.debug("tables[{}]: {} ", i, tables.get(i));
                 if (((String) r.getValue(i)).contains("POINT")) {
-                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/resource/Geometry/" + tempColumnValue + ""));
+                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/geometry/" + tempColumnValue + ""));
                 } else if (((String) r.getValue(i)).contains("MULTIPOLYGON")) {
-                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/resource/Geometry/" + tempColumnValue + ""));
+                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/geometry/" + tempColumnValue + ""));
                 }
                 tempColumnName = tempColumnValue = null;
             }

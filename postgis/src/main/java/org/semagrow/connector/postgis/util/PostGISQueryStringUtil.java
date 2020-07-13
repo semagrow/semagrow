@@ -424,7 +424,7 @@ public class PostGISQueryStringUtil {
 		int i = 0;
 		while (i < filterInfo.size()) {
 			if (filterInfo.get(i).matches("[0-9]+")) {
-				logger.debug(filterInfo.get(i));
+				logger.debug("filterInfo.get(i): {}", filterInfo.get(i));
 				dist += filterInfo.get(i);
 				i++;
 				if (!dist.contains(compare)) {
@@ -437,25 +437,34 @@ public class PostGISQueryStringUtil {
 				}
 			}
 			else if (filterInfo.get(i).matches("[!<=>]+")) {
-				logger.debug(filterInfo.get(i));
 				compare = filterInfo.get(i);
 				i++;
 			}
 			else {
-				logger.debug(filterInfo.get(i));
 				function = filterInfo.get(i);
 				if (function.equals("distance")) dist += "ST_Distance(";
 				type = filterInfo.get(i+3);
 				if (type.equals("metre")) dist += "ST_GeographyFromText(ST_AsText(";
-				if (bindingVars.containsKey(filterInfo.get(i+1))) dist += bindingVars.get(filterInfo.get(i+1));
+				if (bindingVars.containsKey(filterInfo.get(i+1))) {
+					String var = bindingVars.get(filterInfo.get(i+1));
+					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
+					logger.debug("--- bindingVars: {}", var);
+					dist += var;
+				}
 				else {
 					bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+".geom");
 					dist += bindingVars.get(filterInfo.get(i+1));
 					triples.add(null); triples.add(null); triples.add(null);
 				}
+				logger.debug("--- dist: {}", dist);
 				if (type.equals("metre")) dist += ")), ST_GeographyFromText(ST_AsText(";
 				else if (type.equals("degree")) dist += ", ";
-				if (bindingVars.containsKey(filterInfo.get(i+2))) dist += bindingVars.get(filterInfo.get(i+2));
+				if (bindingVars.containsKey(filterInfo.get(i+2))) {
+					String var = bindingVars.get(filterInfo.get(i+2));
+					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
+					logger.debug("--- bindingVars: {}", var);
+					dist += var;
+				}
 				else {
 					bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+".geom");
 					dist += bindingVars.get(filterInfo.get(i+2));
