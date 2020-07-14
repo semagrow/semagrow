@@ -65,10 +65,12 @@ public final class BindingSetOpsImpl implements BindingSetOps {
             logger.debug("columnValue:: {} ", r.getValue(i));
             
             if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
-            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((String) r.getValue(i)));
+            	String geom = "\"" + (String) r.getValue(i) + "\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>";
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(geom));
             }
             else if (rsmd.getColumnClassName(i+1).equals("java.lang.Double")) {
-            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((Double) r.getValue(i)));
+            	String dist = "\"" + (Double) r.getValue(i) + "\"^^<http://www.w3.org/2001/XMLSchema#double>";
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(dist));
             }
             else {
             	logger.error("java.lang.ClassCastException: {} is {}", rsmd.getColumnName(i+1), rsmd.getColumnClassName(i+1));
