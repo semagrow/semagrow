@@ -445,6 +445,7 @@ public class PostGISQueryStringUtil {
 				if (function.equals("distance")) dist += "ST_Distance(";
 				type = filterInfo.get(i+3);
 				if (type.equals("metre")) dist += "ST_GeographyFromText(ST_AsText(";
+				else if (type.equals("degree")) dist += "ST_GeomFromText(ST_AsText(";
 				if (bindingVars.containsKey(filterInfo.get(i+1))) {
 					String var = bindingVars.get(filterInfo.get(i+1));
 					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
@@ -458,7 +459,7 @@ public class PostGISQueryStringUtil {
 				}
 				logger.debug("--- dist: {}", dist);
 				if (type.equals("metre")) dist += ")), ST_GeographyFromText(ST_AsText(";
-				else if (type.equals("degree")) dist += ", ";
+				else if (type.equals("degree")) dist += "), 4326), ST_GeomFromText(ST_AsText(";
 				if (bindingVars.containsKey(filterInfo.get(i+2))) {
 					String var = bindingVars.get(filterInfo.get(i+2));
 					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
@@ -471,6 +472,7 @@ public class PostGISQueryStringUtil {
 					triples.add(null); triples.add(null); triples.add(null);
 				}
 				if (type.equals("metre")) dist += "))";
+				else if (type.equals("degree")) dist += "), 4326)";
 				dist += ") ";
 				
 				// Gathering binds
