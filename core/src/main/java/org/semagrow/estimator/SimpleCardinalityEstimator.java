@@ -107,7 +107,8 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
 
         BigInteger card2 = getCardinality(join.getRightArg());
 
-        BigDecimal sel = BigDecimal.valueOf(selectivityEstimator.getJoinSelectivity(join));
+        Double js = selectivityEstimator.getJoinSelectivity(join);
+        BigDecimal sel = (js.isInfinite()) ? BigDecimal.valueOf(Double.MAX_VALUE) : BigDecimal.valueOf(js);
 
         BigInteger tt = new BigDecimal(card1.multiply(card2)).multiply(sel).setScale(0, RoundingMode.CEILING).toBigInteger();
 
