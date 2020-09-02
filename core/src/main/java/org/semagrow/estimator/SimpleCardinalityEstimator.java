@@ -83,6 +83,10 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
                 .add(getCardinality(union.getRightArg()));
     }
 
+    public BigInteger getCardinality(Group group) {
+        return getCardinality(group.getArg());
+    }
+
     public BigInteger getCardinality(Filter filter) {
         BigDecimal sel = BigDecimal.valueOf(selectivityEstimator.getConditionSelectivity(filter.getCondition(), filter.getArg()));
         return new BigDecimal(getCardinality(filter.getArg())).multiply(sel).toBigInteger();
