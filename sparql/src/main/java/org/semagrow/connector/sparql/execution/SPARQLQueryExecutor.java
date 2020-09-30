@@ -1,7 +1,5 @@
 package org.semagrow.connector.sparql.execution;
 
-import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
-import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
 import org.semagrow.connector.sparql.SPARQLSite;
 import org.semagrow.evaluation.file.MaterializationManager;
 import org.semagrow.evaluation.BindingSetOps;
@@ -10,7 +8,6 @@ import org.semagrow.evaluation.util.LoggingUtil;
 import org.semagrow.evaluation.util.SimpleBindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
 import org.semagrow.connector.sparql.query.render.SPARQLQueryStringUtil;
-import org.semagrow.geospatial.execution.BBoxDistanceOptimizer;
 import org.semagrow.selector.Site;
 import org.semagrow.querylog.api.QueryLogHandler;
 import org.eclipse.rdf4j.query.*;
@@ -60,7 +57,6 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
     public Publisher<BindingSet> evaluate(final Site endpoint, final TupleExpr expr, final BindingSet bindings)
             throws QueryEvaluationException
     {
-        optimize(expr, bindings); // FIXME
         return evaluateReactorImpl((SPARQLSite)endpoint, expr, bindings);
     }
 
@@ -76,7 +72,6 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
     public Publisher<BindingSet> evaluate(final Site endpoint, final TupleExpr expr, final List<BindingSet> bindingList)
             throws QueryEvaluationException
     {
-        optimize(expr, bindingList); // FIXME
         try {
             return evaluateReactorImpl((SPARQLSite)endpoint, expr, bindingList);
         }catch(QueryEvaluationException e)
@@ -313,24 +308,5 @@ public class SPARQLQueryExecutor extends ConnectionManager implements QueryExecu
             // TODO special case handling for BIND
         });
         return res;
-    }
-    // FIXME
-
-    protected void optimize(TupleExpr expr, BindingSet bindings) {
-        QueryOptimizer queryOptimizer =  new QueryOptimizerList(
-                new BBoxDistanceOptimizer()
-        );
-        queryOptimizer.optimize(expr, null, bindings);
-    }
-
-    protected void optimize(TupleExpr expr, List<BindingSet> bindingSetList) {
-        if (bindingSetList.isEmpty()) {
-            optimize(expr, new EmptyBindingSet());
-        }
-        else {
-            if (bindingSetList.size() == 1) {
-                optimize(expr, bindingSetList.get(0));
-            }
-        }
     }
 }
