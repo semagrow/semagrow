@@ -65,8 +65,7 @@ public class BBoxDistanceOptimizer implements QueryOptimizer {
                             Value unit = ((ValueConstant) arg3).getValue();
 
                             if (unit.equals(UOM.metre)) {
-                                distance = distance * 0.00001 / 1.1132;
-                                /* 0.00001 degrees equal 1.1132 meters at equator */
+                                distance = approxMetersToDegrees(distance);
                             }
 
                             if (getArgValue(arg1, bindingSet) == null && getArgValue(arg2, bindingSet) != null) {
@@ -123,6 +122,13 @@ public class BBoxDistanceOptimizer implements QueryOptimizer {
 
             return value;
         }
+    }
+
+    private static double approxMetersToDegrees(double distance) {
+        /* this calculation is an over-estimation, because at this stage we simply want to filter non relevant geometries */
+        distance = 1.3 * distance;
+        return distance * 0.00001 / 1.1132;
+        /* 0.00001 degrees equal 1.1132 meters at equator */
     }
 
 }
