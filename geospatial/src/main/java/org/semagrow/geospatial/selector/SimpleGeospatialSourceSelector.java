@@ -25,7 +25,7 @@ import org.semagrow.selector.SourceSelectorWrapper;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class GeospatialSourceSelector extends SourceSelectorWrapper implements QueryAwareSourceSelector  {
+public class SimpleGeospatialSourceSelector extends SourceSelectorWrapper implements QueryAwareSourceSelector  {
 
     private ValueFactory vf = SimpleValueFactory.getInstance();
     private IRI HAS_GEOMETRY = vf.createIRI(GEO.NAMESPACE, "hasGeometry");
@@ -34,7 +34,7 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
     private Map<StatementPattern,Collection<SourceMetadata>> selectorMap = new HashMap<>();
     private boolean processed = false;
 
-    public GeospatialSourceSelector(SourceSelector selector) {
+    public SimpleGeospatialSourceSelector(SourceSelector selector) {
         super(selector);
     }
 
