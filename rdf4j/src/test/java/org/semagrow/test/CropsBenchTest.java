@@ -17,7 +17,10 @@ import org.semagrow.sail.SemagrowSail;
 import org.semagrow.sail.config.SemagrowSailConfig;
 import org.semagrow.sail.config.SemagrowSailFactory;
 
+import com.google.common.base.Stopwatch;
+
 import java.util.Arrays;
+import java.util.concurrent.TimeUnit;
 
 public class CropsBenchTest extends TestCase {
 
@@ -109,11 +112,21 @@ public class CropsBenchTest extends TestCase {
 
 
     public static void main(String[] args) throws InterruptedException {
-        for (int i: diff1) {
-            execute(query1(i), i, "q1");
+    	// Creates and starts a new stopwatch
+        Stopwatch stopwatch = Stopwatch.createStarted();
+    	
+        for (int i: template4) {
+            execute(query3(i), i, "q3");
             /* the result set of each query is placed in /tmp/result-q1-i.json */
             Thread.sleep(1000);
         }
+        
+        stopwatch.stop();    // optional
+        
+        // get elapsed time, expressed in milliseconds
+        long timeElapsed = stopwatch.elapsed(TimeUnit.MILLISECONDS);
+ 
+        System.out.println("Execution time in milliseconds: " + timeElapsed);
     }
 
     public static void decompose(String queryString) {
