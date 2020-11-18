@@ -12,10 +12,12 @@ import org.eclipse.rdf4j.query.algebra.evaluation.impl.StrictEvaluationStrategy;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.semagrow.geospatial.helpers.WktHelpers;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
-public final class BoundingBoxPruner {
+public final class BBoxSourcePruner {
 
     private static final Set<String> nonDisjointStRelations;
     private static final Set<Compare.CompareOp> leqOperators;
@@ -80,29 +82,41 @@ public final class BoundingBoxPruner {
         }, s -> null);
     }
 
-    public static boolean prune(ValueExpr filter, String varName, Literal boundingBox) {
-        ValueExpr expr = rewriteFilter(filter, varName, boundingBox);
+    public static boolean emptyResultSet(ValueExpr filter, String varName, Literal boundingBox) {
+        Map<String, Literal> var_bbox = new HashMap<>();
+        var_bbox.put(varName, boundingBox);
+        ValueExpr expr = rewriteFilter(filter, var_bbox);
         Value value = strategy.evaluate(expr, new EmptyBindingSet());
         return value.equals(TRUE);
     }
 
-    private static ValueExpr rewriteFilter(ValueExpr valueExpr, String varName, Value boundingBox) {
+    public static boolean emptyResultSet(ValueExpr filter, String varName1, Literal boundingBox1, String varName2, Literal boundingBox2) {
+        Map<String, Literal> var_bbox = new HashMap<>();
+        var_bbox.put(varName1, boundingBox1);
+        var_bbox.put(varName2, boundingBox2);
+        ValueExpr expr = rewriteFilter(filter, var_bbox);
+        Value value = strategy.evaluate(expr, new EmptyBindingSet());
+        return value.equals(TRUE);
+    }
 
-        Value bboxWKT = WktHelpers.removeCRSfromWKT((Literal) boundingBox);
+    private static ValueExpr rewriteFilter(ValueExpr valueExpr, Map<String, Literal> var_bbox) {
 
         if (valueExpr instanceof FunctionCall) {
             FunctionCall func = (FunctionCall) valueExpr;
 
-            if (checkArgs(func, varName)) {
-                if (nonDisjointStRelations.contains(func.getURI())) {
-
+            if (nonDisjointStRelations.contains(func.getURI())) {
+                try {
                     FunctionCall new_func = new FunctionCall();
                     new_func.setURI(GEOF.SF_DISJOINT.stringValue());
-                    new_func.addArgs(new ValueConstant(bboxWKT), func.getArgs().get(1));
-
+                    ValueConstant arg0 = getValue(func.getArgs().get(0), var_bbox);
+                    ValueConstant arg1 = getValue(func.getArgs().get(1), var_bbox);
+                    new_func.addArgs(arg0, arg1);
                     return new_func;
+                } catch (UnboundVariableException e) {
+                    return new ValueConstant(FALSE);
                 }
             }
+
         }
         if (valueExpr instanceof Compare) {
             Compare compare = (Compare) valueExpr;
@@ -110,26 +124,43 @@ public final class BoundingBoxPruner {
             if (leqOperators.contains(compare.getOperator())) {
                 FunctionCall func = (FunctionCall) compare.getLeftArg();
 
-                if (func.getURI().equals(GEOF.DISTANCE.stringValue()) && checkArgs(func, varName)) {
+                if (func.getURI().equals(GEOF.DISTANCE.stringValue()) ) {
+                    try {
+                        FunctionCall buffer = new FunctionCall();
+                        buffer.setURI(GEOF.BUFFER.stringValue());
+                        ValueConstant buffarg = getValue(func.getArgs().get(1), var_bbox);
+                        buffer.addArgs(buffarg, compare.getRightArg(), func.getArgs().get(2));
 
-                    FunctionCall buffer = new FunctionCall();
-                    buffer.setURI(GEOF.BUFFER.stringValue());
-                    buffer.addArgs(func.getArgs().get(1), compare.getRightArg(), func.getArgs().get(2));
-                    new ValueConstant(bboxWKT);
+                        FunctionCall new_func = new FunctionCall();
+                        new_func.setURI(GEOF.SF_DISJOINT.stringValue());
+                        ValueConstant disjarg = getValue(func.getArgs().get(0), var_bbox);
+                        new_func.addArgs(disjarg, buffer);
 
-                    FunctionCall new_func = new FunctionCall();
-                    new_func.setURI(GEOF.SF_DISJOINT.stringValue());
-                    new_func.addArgs(new ValueConstant(bboxWKT), buffer);
-
-                    return new_func;
+                        return new_func;
+                    } catch (UnboundVariableException e) {
+                        return new ValueConstant(FALSE);
+                    }
                 }
             }
         }
         return new ValueConstant(FALSE);
     }
 
-    private static boolean checkArgs(FunctionCall functionCall, String varName) {
-        ValueExpr arg0 = functionCall.getArgs().get(0);
-        return (arg0 instanceof Var && ((Var) arg0).getName().equals(varName));
+    private static ValueConstant getValue(ValueExpr arg, Map<String, Literal> var_bbox) throws UnboundVariableException {
+        if (arg instanceof ValueConstant) {
+            return (ValueConstant) arg;
+        }
+        if (arg instanceof Var && var_bbox.containsKey(((Var) arg).getName())) {
+            Literal bbox = var_bbox.get(((Var) arg).getName());
+            bbox = WktHelpers.removeCRSfromWKT(bbox);
+            return new ValueConstant(bbox);
+        }
+        throw new UnboundVariableException();
+    }
+
+    private static class UnboundVariableException extends Exception {
+        public UnboundVariableException() {
+            super();
+        }
     }
 }

@@ -7,10 +7,10 @@ import org.semagrow.model.vocabulary.SEVOD;
 
 public final class SEVOD_GEO {
 
-    public static final IRI DATASET_BOUNDING_POLYGON;
+    public static final IRI BOUNDING_POLYGON;
 
     static {
         ValueFactory vf = SimpleValueFactory.getInstance();
-        DATASET_BOUNDING_POLYGON = vf.createIRI(SEVOD.NAMESPACE + "datasetBoundingPolygon");
+        BOUNDING_POLYGON = vf.createIRI(SEVOD.NAMESPACE + "boundingPolygon");
     }
 }

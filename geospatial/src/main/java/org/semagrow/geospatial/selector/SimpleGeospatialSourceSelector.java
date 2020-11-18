@@ -30,7 +30,7 @@ public class SimpleGeospatialSourceSelector extends SourceSelectorWrapper implem
     private ValueFactory vf = SimpleValueFactory.getInstance();
     private IRI HAS_GEOMETRY = vf.createIRI(GEO.NAMESPACE, "hasGeometry");
 
-    private BoundingBoxBase boundingBoxBase = new BoundingBoxBase();
+    private BBoxBase bBoxBase = new BBoxBase();
     private Map<StatementPattern,Collection<SourceMetadata>> selectorMap = new HashMap<>();
     private boolean processed = false;
 
@@ -39,7 +39,7 @@ public class SimpleGeospatialSourceSelector extends SourceSelectorWrapper implem
     }
 
     public void setMetadataRepository(Repository metadata) {
-        boundingBoxBase.setMetadata(metadata);
+        bBoxBase.setMetadata(metadata);
     }
 
     @Override
@@ -75,9 +75,9 @@ public class SimpleGeospatialSourceSelector extends SourceSelectorWrapper implem
 
                     if (filterVars.contains(varName) && filterVars.size() == 1) {
                         for (SourceMetadata source: candidateSources) {
-                            Literal boundingBox = boundingBoxBase.getDatasetBoundingBox(endpointOfSource(source));
+                            Literal boundingBox = bBoxBase.getDatasetBoundingBox(endpointOfSource(source));
                             if (boundingBox != null) {
-                               if (BoundingBoxPruner.prune(filter, varName, boundingBox)) {
+                               if (BBoxSourcePruner.emptyResultSet(filter, varName, boundingBox)) {
                                    prunedSources.add(source);
                                    endpoints.remove(endpointOfSource(source));
                                }
