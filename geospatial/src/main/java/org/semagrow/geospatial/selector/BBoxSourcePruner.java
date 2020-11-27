@@ -99,6 +99,25 @@ public final class BBoxSourcePruner {
         return value.equals(TRUE);
     }
 
+    public static boolean isGeospatialFilter(ValueExpr valueExpr) {
+
+        if (valueExpr instanceof FunctionCall) {
+            FunctionCall func = (FunctionCall) valueExpr;
+            return nonDisjointStRelations.contains(func.getURI());
+        }
+
+        if (valueExpr instanceof Compare) {
+            Compare compare = (Compare) valueExpr;
+            if (leqOperators.contains(compare.getOperator()) && compare.getLeftArg() instanceof FunctionCall) {
+                FunctionCall func = (FunctionCall) compare.getLeftArg();
+                return func.getURI().equals(GEOF.DISTANCE.stringValue());
+            }
+            return false;
+        }
+
+        return false;
+    }
+
     private static ValueExpr rewriteFilter(ValueExpr valueExpr, Map<String, Literal> var_bbox) {
 
         if (valueExpr instanceof FunctionCall) {

@@ -88,6 +88,9 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
         do {
             c = false;
             for (ValueExpr f : filters) {
+                if (!BBoxSourcePruner.isGeospatialFilter(f)) {
+                    continue;
+                }
                 Collection<String> vars = VarNameCollector.process(f);
                 Iterator<String> iter = vars.iterator();
 
@@ -116,15 +119,15 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
 
                     toRemove = new HashSet<>();
                     for (SourceMetadata s1: pattern_sources.get(wktPattern1)) {
+                        boolean empty = true;
                         for (SourceMetadata s2: pattern_sources.get(wktPattern2)) {
-                            boolean empty = true;
                             if (!BBoxSourcePruner.emptyResultSet(f, v1, source_bbox.get(s1), v2, source_bbox.get(s2))) {
                                 empty = false;
                             }
-                            if (empty) {
-                                c = true;
-                                toRemove.add(s1);
-                            }
+                        }
+                        if (empty) {
+                            c = true;
+                            toRemove.add(s1);
                         }
                     }
                     for (SourceMetadata s: toRemove) {
@@ -133,15 +136,15 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
 
                    toRemove = new HashSet<>();
                     for (SourceMetadata s2: pattern_sources.get(wktPattern2)) {
+                        boolean empty = true;
                         for (SourceMetadata s1: pattern_sources.get(wktPattern1)) {
-                            boolean empty = true;
                             if (!BBoxSourcePruner.emptyResultSet(f, v1, source_bbox.get(s1), v2, source_bbox.get(s2))) {
                                 empty = false;
                             }
-                            if (empty) {
-                                c = true;
-                                toRemove.add(s2);
-                            }
+                        }
+                        if (empty) {
+                            c = true;
+                            toRemove.add(s2);
                         }
                     }
                     for (SourceMetadata s: toRemove) {
@@ -150,23 +153,6 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
                 }
             }
         } while (c);
-
-        /* prune remaining patterns according to non-joinable BBoxes
-
-        do {
-            c = false;
-
-            for (String var: var_patterns.keySet()) {
-                Set<StatementPattern> patternsOfVar = var_patterns.get(var);
-
-                Set<SourceMetadata> commonSourcesOfVar = pattern_sources.get(patternsOfVar.iterator().next());
-                for (StatementPattern p: patternsOfVar) {
-                    commonSourcesOfVar.retainAll(pattern_sources.get(p));
-                }
-
-
-            }
-        } while(c);*/
 
         /* update selector map */
         selectorMap.putAll(pattern_sources);
