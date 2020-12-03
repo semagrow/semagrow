@@ -14,9 +14,7 @@ import org.eclipse.rdf4j.sail.memory.config.MemoryStoreConfig;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 /**
  * Created by angel on 5/29/14.
@@ -31,6 +29,10 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
     private String queryTransformationUser;
     private String queryTransformationPassword;
     private String queryTransformationDBString;
+
+    private boolean askSourceSelFlag = true;
+    private boolean prefixSourceSelFlag = true;
+    private boolean geospatialSourceSelFlag = false;
 
     private SourceSelectorImplConfig sourceSelectorConfig = null;
 
@@ -86,6 +88,18 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
         return executorBatchSize;
     }
 
+    public boolean useAskSourceSelector() {
+        return askSourceSelFlag;
+    }
+
+    public boolean usePrefixSourceSelector() {
+        return prefixSourceSelFlag;
+    }
+
+    public boolean useGeospatialSourceSelector() {
+        return geospatialSourceSelFlag;
+    }
+
     @Override
     public Resource export(Model graph) {
         Resource implNode = super.export(graph);
@@ -113,6 +127,19 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
 
         for (Value o : graph.filter(node, SemagrowSchema.EXECUTORBATCHSIZE, null).objects()) {
             executorBatchSize = Integer.parseInt(o.stringValue());
+        }
+
+        for (Value o : graph.filter(node, SemagrowSchema.SOURCESELECTORS, null).objects()) {
+            List<String> sources = Arrays.asList(o.stringValue().split(","));
+            if (sources.contains("ASK")) {
+                askSourceSelFlag = true;
+            }
+            if (sources.contains("PREFIX")) {
+                prefixSourceSelFlag = true;
+            }
+            if (sources.contains("GEO")) {
+                geospatialSourceSelFlag = true;
+            }
         }
 
         /*
