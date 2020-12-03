@@ -40,6 +40,11 @@
             <version>${semagrow.version}</version>
             <scope>compile</scope>
         </dependency>
+        <dependency>
+            <groupId>com.esri.geometry</groupId>
+            <artifactId>esri-geometry-api</artifactId>
+            <version>2.2.4</version>
+        </dependency>
     </dependencies>
 
 </project>

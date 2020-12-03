@@ -14,7 +14,6 @@ import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
 import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.eclipse.rdf4j.repository.Repository;
-import org.semagrow.plan.util.BPGCollector;
 import org.semagrow.plan.util.FilterCollector;
 import org.semagrow.selector.QueryAwareSourceSelector;
 import org.semagrow.selector.SourceMetadata;
@@ -43,17 +42,14 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
         if (getWrappedSelector() instanceof QueryAwareSourceSelector) {
             ((QueryAwareSourceSelector) getWrappedSelector()).processTupleExpr(expr);
         }
-        Collection<TupleExpr> bpgs = BPGCollector.process(expr);
-        for (TupleExpr bpg: bpgs) {
-            processBPG(bpg);
-        }
+        processBPG(expr);
         processed = true;
     }
 
-    private void processBPG(TupleExpr bpg) {
+    private void processBPG(TupleExpr expr) {
 
-        Collection<StatementPattern> patterns = StatementPatternCollector.process(bpg);
-        Collection<ValueExpr> filters = FilterCollector.process(bpg);
+        Collection<StatementPattern> patterns = StatementPatternCollector.process(expr);
+        Collection<ValueExpr> filters = FilterCollector.process(expr);
 
         SetMultimap<String, StatementPattern> var_patterns = HashMultimap.create();
         SetMultimap<StatementPattern, SourceMetadata> pattern_sources = HashMultimap.create();

@@ -1,15 +1,10 @@
 package org.semagrow.geospatial.selector;
 
-import org.eclipse.rdf4j.common.iteration.CloseableIteration;
+import com.esri.core.geometry.*;
 import org.eclipse.rdf4j.model.*;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
-import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.*;
-import org.eclipse.rdf4j.query.algebra.evaluation.EvaluationStrategy;
-import org.eclipse.rdf4j.query.algebra.evaluation.TripleSource;
-import org.eclipse.rdf4j.query.algebra.evaluation.impl.StrictEvaluationStrategy;
-import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.semagrow.geospatial.helpers.WktHelpers;
 
 import java.util.HashMap;
@@ -17,21 +12,16 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import static com.esri.core.geometry.WktImportFlags.wktImportDefaults;
+
 public final class BBoxSourcePruner {
 
     private static final Set<String> nonDisjointStRelations;
+    private static final Set<String> nonTouchingStRelations;
     private static final Set<Compare.CompareOp> leqOperators;
-
-    private static final Literal TRUE;
-    private static final Literal FALSE;
-
-    private static final EvaluationStrategy strategy;
 
     static {
         final ValueFactory vf = SimpleValueFactory.getInstance();
-
-        TRUE = vf.createLiteral(true);
-        FALSE = vf.createLiteral(false);
 
         nonDisjointStRelations = new HashSet<>();
 
@@ -59,44 +49,23 @@ public final class BBoxSourcePruner {
         nonDisjointStRelations.add(GEOF.RCC8_NTPP.stringValue());
         nonDisjointStRelations.add(GEOF.RCC8_TPPI.stringValue());
 
+        nonTouchingStRelations = new HashSet<>();
+
+        nonTouchingStRelations.add(GEOF.SF_EQUALS.stringValue());
+        nonTouchingStRelations.add(GEOF.SF_WITHIN.stringValue());
+        nonTouchingStRelations.add(GEOF.SF_CONTAINS.stringValue());
+
+        nonDisjointStRelations.add(GEOF.EH_EQUALS.stringValue());
+        nonDisjointStRelations.add(GEOF.EH_INSIDE.stringValue());
+        nonDisjointStRelations.add(GEOF.EH_CONTAINS.stringValue());
+
+        nonDisjointStRelations.add(GEOF.RCC8_EQ.stringValue());
+
         leqOperators = new HashSet<>();
 
         leqOperators.add(Compare.CompareOp.LE);
         leqOperators.add(Compare.CompareOp.LT);
         leqOperators.add(Compare.CompareOp.EQ);
-
-        strategy = new StrictEvaluationStrategy(new TripleSource() {
-            @Override
-            public CloseableIteration<? extends Statement, QueryEvaluationException>
-                        getStatements( Resource resource,
-                                       IRI iri,
-                                       Value value,
-                                       Resource... resources) throws QueryEvaluationException {
-                return null;
-            }
-
-            @Override
-            public ValueFactory getValueFactory() {
-                return vf;
-            }
-        }, s -> null);
-    }
-
-    public static boolean emptyResultSet(ValueExpr filter, String varName, Literal boundingBox) {
-        Map<String, Literal> var_bbox = new HashMap<>();
-        var_bbox.put(varName, boundingBox);
-        ValueExpr expr = rewriteFilter(filter, var_bbox);
-        Value value = strategy.evaluate(expr, new EmptyBindingSet());
-        return value.equals(TRUE);
-    }
-
-    public static boolean emptyResultSet(ValueExpr filter, String varName1, Literal boundingBox1, String varName2, Literal boundingBox2) {
-        Map<String, Literal> var_bbox = new HashMap<>();
-        var_bbox.put(varName1, boundingBox1);
-        var_bbox.put(varName2, boundingBox2);
-        ValueExpr expr = rewriteFilter(filter, var_bbox);
-        Value value = strategy.evaluate(expr, new EmptyBindingSet());
-        return value.equals(TRUE);
     }
 
     public static boolean isGeospatialFilter(ValueExpr valueExpr) {
@@ -118,63 +87,100 @@ public final class BBoxSourcePruner {
         return false;
     }
 
-    private static ValueExpr rewriteFilter(ValueExpr valueExpr, Map<String, Literal> var_bbox) {
+    public static boolean emptyResultSet(ValueExpr filter, String varName, Literal boundingBox) {
+        Map<String, Literal> var_bbox = new HashMap<>();
+        var_bbox.put(varName, boundingBox);
+        return emptyResultSetInternal(filter, var_bbox);
+    }
 
-        if (valueExpr instanceof FunctionCall) {
-            FunctionCall func = (FunctionCall) valueExpr;
+    public static boolean emptyResultSet(ValueExpr filter, String varName1, Literal boundingBox1, String varName2, Literal boundingBox2) {
+        Map<String, Literal> var_bbox = new HashMap<>();
+        var_bbox.put(varName1, boundingBox1);
+        var_bbox.put(varName2, boundingBox2);
+        return emptyResultSetInternal(filter, var_bbox);
+    }
 
-            if (nonDisjointStRelations.contains(func.getURI())) {
-                try {
-                    FunctionCall new_func = new FunctionCall();
-                    new_func.setURI(GEOF.SF_DISJOINT.stringValue());
-                    ValueConstant arg0 = getValue(func.getArgs().get(0), var_bbox);
-                    ValueConstant arg1 = getValue(func.getArgs().get(1), var_bbox);
-                    new_func.addArgs(arg0, arg1);
-                    return new_func;
-                } catch (UnboundVariableException e) {
-                    return new ValueConstant(FALSE);
+    private static boolean emptyResultSetInternal(ValueExpr valueExpr, Map<String, Literal> var_bbox) {
+
+        SpatialReference sr = SpatialReference.create(4326);
+
+        try {
+            if (valueExpr instanceof FunctionCall) {
+                FunctionCall func = (FunctionCall) valueExpr;
+
+                if (nonDisjointStRelations.contains(func.getURI())) {
+                    Geometry arg1 = getGeometry(func.getArgs().get(0), var_bbox);
+                    Geometry arg2 = getGeometry(func.getArgs().get(1), var_bbox);
+
+                    if (OperatorDisjoint.local().execute(arg1, arg2, sr, null)) {
+                        return true;
+                    }
                 }
-            }
 
-        }
-        if (valueExpr instanceof Compare) {
-            Compare compare = (Compare) valueExpr;
+                if (nonTouchingStRelations.contains(func.getURI())) {
+                    Geometry arg1 = getGeometry(func.getArgs().get(0), var_bbox);
+                    Geometry arg2 = getGeometry(func.getArgs().get(1), var_bbox);
 
-            if (leqOperators.contains(compare.getOperator())) {
-                FunctionCall func = (FunctionCall) compare.getLeftArg();
-
-                if (func.getURI().equals(GEOF.DISTANCE.stringValue()) ) {
-                    try {
-                        FunctionCall buffer = new FunctionCall();
-                        buffer.setURI(GEOF.BUFFER.stringValue());
-                        ValueConstant buffarg = getValue(func.getArgs().get(1), var_bbox);
-                        buffer.addArgs(buffarg, compare.getRightArg(), func.getArgs().get(2));
-
-                        FunctionCall new_func = new FunctionCall();
-                        new_func.setURI(GEOF.SF_DISJOINT.stringValue());
-                        ValueConstant disjarg = getValue(func.getArgs().get(0), var_bbox);
-                        new_func.addArgs(disjarg, buffer);
-
-                        return new_func;
-                    } catch (UnboundVariableException e) {
-                        return new ValueConstant(FALSE);
+                    if (OperatorTouches.local().execute(arg1, arg2, sr, null)) {
+                        return true;
                     }
                 }
             }
+            if (valueExpr instanceof Compare) {
+                Compare compare = (Compare) valueExpr;
+
+                if (leqOperators.contains(compare.getOperator())) {
+                    FunctionCall func = (FunctionCall) compare.getLeftArg();
+                    String distanceString = ((ValueConstant) compare.getRightArg()).getValue().stringValue();
+                    double distance = Double.parseDouble(distanceString);
+
+                    if (func.getURI().equals(GEOF.DISTANCE.stringValue()) ) {
+                        Geometry arg = getGeometry(func.getArgs().get(0), var_bbox);
+                        Geometry buf = getGeometry(func.getArgs().get(1), var_bbox);
+                        ValueExpr arg3 = func.getArgs().get(2);
+
+                        if (arg3 instanceof ValueConstant) {
+                            Value unit = ((ValueConstant) arg3).getValue();
+
+                            if (unit.stringValue().equals("http://www.opengis.net/def/uom/OGC/1.0/metre")) { //FIXME
+                                distance = approxMetersToDegrees(distance);
+                            }
+
+                            Geometry buffer = OperatorBuffer.local().execute(buf, sr, distance, null);
+
+                            if (OperatorDisjoint.local().execute(arg, buffer, sr, null)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (UnboundVariableException e) {
+            return false;
         }
-        return new ValueConstant(FALSE);
+        return false;
     }
 
-    private static ValueConstant getValue(ValueExpr arg, Map<String, Literal> var_bbox) throws UnboundVariableException {
+    private static Geometry getGeometry(ValueExpr arg, Map<String, Literal> var_bbox) throws UnboundVariableException {
         if (arg instanceof ValueConstant) {
-            return (ValueConstant) arg;
+            String wkt = ((ValueConstant) arg).getValue().stringValue();
+            Geometry g = OperatorImportFromWkt.local().execute(wktImportDefaults, Geometry.Type.Unknown, wkt, null);
+            return g;
         }
         if (arg instanceof Var && var_bbox.containsKey(((Var) arg).getName())) {
             Literal bbox = var_bbox.get(((Var) arg).getName());
             bbox = WktHelpers.removeCRSfromWKT(bbox);
-            return new ValueConstant(bbox);
+            String wkt = bbox.stringValue();
+            Geometry g = OperatorImportFromWkt.local().execute(wktImportDefaults, Geometry.Type.Unknown, wkt, null);
+            return g;
         }
         throw new UnboundVariableException();
+    }
+
+    private static double approxMetersToDegrees(double distance) {
+        /* this calculation is an over-estimation */
+        return distance * 0.00001 / 1.1132;
+        /* 0.00001 degrees equal 1.1132 meters at equator */
     }
 
     private static class UnboundVariableException extends Exception {
