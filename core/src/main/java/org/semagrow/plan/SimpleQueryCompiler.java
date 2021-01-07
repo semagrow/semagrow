@@ -7,6 +7,7 @@ import org.eclipse.rdf4j.query.algebra.QueryRoot;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.*;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
 import org.semagrow.art.LogUtils;
 import org.semagrow.art.Loggable;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
@@ -21,7 +22,9 @@ import org.semagrow.selector.SourceSelector;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The default implementation of a {@link QueryCompiler}
@@ -76,6 +79,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
 
         Plan plan = (plans.isEmpty()) ? new Plan(new EmptySet()) : plans.iterator().next();
 
+        addMissingProjectionElems(plan, query);
         optimize(plan, dataset, bindings);
 
         long t3 = System.currentTimeMillis();
@@ -147,5 +151,31 @@ public class SimpleQueryCompiler implements QueryCompiler {
         context.setCostEstimatorResolver(costEstimatorResolver);
         context.setSourceSelector(sourceSelector);
         return context;
+    }
+
+    private void addMissingProjectionElems(Plan plan, QueryRoot query) {
+        try {
+            final List<ProjectionElem> elems = new ArrayList<>();
+            query.visit(new AbstractQueryModelVisitor<Exception>() {
+                @Override
+                public void meet(ProjectionElem node) throws Exception {
+                    elems.add(node);
+                }
+            });
+            plan.visit(new AbstractPlanVisitor<Exception>() {
+                @Override
+                public void meet(ProjectionElem node) throws Exception {
+                    elems.remove(node);
+                }
+            });
+            plan.visit(new AbstractPlanVisitor<Exception>() {
+                @Override
+                public void meet(ProjectionElemList node) throws Exception {
+                    node.addElements(elems);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -98,6 +98,9 @@ public abstract class AbstractQueryController extends WebContentGenerator implem
                 LogUtils.initKobeReport();
                 LogUtils.appendKobeReport(kobeQueryDesc);
             }
+            else {
+                LogUtils.initKobeReport();
+            }
 
             Repository repository = getRepository(request);
             RepositoryConnection repositoryCon = getRepositoryConnection(request);
