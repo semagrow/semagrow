@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class GeospatialSourceSelector extends SourceSelectorWrapper implements QueryAwareSourceSelector {
 
     private BBoxBase bBoxBase = new BBoxBase();
-    private SetMultimap<StatementPattern,SourceMetadata> selectorMap = HashMultimap.create();
+    private SetMultimap<StatementPattern,SourceMetadata> selectorMap;
     private boolean processed = false;
 
     public GeospatialSourceSelector(SourceSelector selector) {
@@ -42,6 +42,7 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
         if (getWrappedSelector() instanceof QueryAwareSourceSelector) {
             ((QueryAwareSourceSelector) getWrappedSelector()).processTupleExpr(expr);
         }
+        selectorMap = HashMultimap.create();
         processBPG(expr);
         processed = true;
     }
