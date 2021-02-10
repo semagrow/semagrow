@@ -132,7 +132,7 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
                 selector = new AskSourceSelector(selector);
                 selector = new CachedSourceSelector(selector);
             }
-            if (sailConfig.useGeospatialSourceSelector()) {
+            if (sailConfig.usePrefixSourceSelector()) {
                 selector = new PrefixQueryAwareSourceSelector(selector);
                 ((PrefixQueryAwareSourceSelector) selector).setMetadataRepository(metadata);
             }
