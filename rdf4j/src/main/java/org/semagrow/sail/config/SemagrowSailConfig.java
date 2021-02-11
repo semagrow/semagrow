@@ -30,8 +30,8 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
     private String queryTransformationPassword;
     private String queryTransformationDBString;
 
-    private boolean askSourceSelFlag = true;
-    private boolean prefixSourceSelFlag = true;
+    private boolean askSourceSelFlag = false;
+    private boolean prefixSourceSelFlag = false;
     private boolean geospatialSourceSelFlag = false;
 
     private SourceSelectorImplConfig sourceSelectorConfig = null;
