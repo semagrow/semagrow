@@ -17,7 +17,7 @@ import java.util.*;
 public class PrefixQueryAwareSourceSelector extends SourceSelectorWrapper implements QueryAwareSourceSelector {
 
     private PrefixBase prefixBase = new PrefixBase();
-    private Map<StatementPattern,Collection<SourceMetadata>> selectorMap = new HashMap<>();
+    private Map<StatementPattern,Collection<SourceMetadata>> selectorMap;
     private boolean processed = false;
 
     public PrefixQueryAwareSourceSelector(SourceSelector selector) {
@@ -33,6 +33,7 @@ public class PrefixQueryAwareSourceSelector extends SourceSelectorWrapper implem
         if (getWrappedSelector() instanceof QueryAwareSourceSelector) {
             ((QueryAwareSourceSelector) getWrappedSelector()).processTupleExpr(expr);
         }
+        selectorMap = new HashMap<>();
         Collection<List<StatementPattern>> groups = GroupedPatternCollector.process(expr);
         for (List<StatementPattern> group: groups) {
             processBPG(group);
