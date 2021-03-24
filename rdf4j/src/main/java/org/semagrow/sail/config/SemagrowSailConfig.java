@@ -30,9 +30,9 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
     private String queryTransformationPassword;
     private String queryTransformationDBString;
 
-    private boolean askSourceSelFlag = false;
-    private boolean prefixSourceSelFlag = false;
-    private boolean geospatialSourceSelFlag = false;
+    private boolean askSourceSelFlag = true;
+    private boolean prefixSourceSelFlag = true;
+    private boolean geospatialSourceSelFlag = true;
 
     private SourceSelectorImplConfig sourceSelectorConfig = null;
 
@@ -130,7 +130,13 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
         }
 
         for (Value o : graph.filter(node, SemagrowSchema.SOURCESELECTORS, null).objects()) {
+
+            askSourceSelFlag = false;
+            prefixSourceSelFlag = false;
+            geospatialSourceSelFlag = false;
+
             List<String> sources = Arrays.asList(o.stringValue().split(","));
+            
             if (sources.contains("ASK")) {
                 askSourceSelFlag = true;
             }
