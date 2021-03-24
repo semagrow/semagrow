@@ -14,6 +14,7 @@ import org.eclipse.rdf4j.sparqlbuilder.core.query.SelectQuery;
 import org.eclipse.rdf4j.sparqlbuilder.graphpattern.GraphPattern;
 import org.eclipse.rdf4j.sparqlbuilder.graphpattern.GraphPatterns;
 import org.eclipse.rdf4j.sparqlbuilder.graphpattern.TriplePattern;
+import org.semagrow.geospatial.helpers.WktHelpers;
 import org.semagrow.geospatial.vocabulary.SEVOD_GEO;
 import org.semagrow.model.vocabulary.VOID;
 
@@ -42,7 +43,7 @@ public class BBoxBase {
         if (wktLiteral != null) {
             return (Literal) wktLiteral;
         }
-        return null;
+        return WktHelpers.infMBBoxLiteral();
     }
 
     private Value runQuery(String varName, String qStr){
