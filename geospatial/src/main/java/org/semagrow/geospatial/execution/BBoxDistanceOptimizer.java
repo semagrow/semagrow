@@ -1,10 +1,7 @@
 package org.semagrow.geospatial.execution;
 
-import com.esri.core.geometry.*;
+import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
-import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.Dataset;
@@ -62,20 +59,19 @@ public class BBoxDistanceOptimizer implements QueryOptimizer {
                         double distance = Double.parseDouble(distanceString);
 
                         if (arg3 instanceof ValueConstant) {
-                            Value unit = ((ValueConstant) arg3).getValue();
+                            Value uom = ((ValueConstant) arg3).getValue();
 
-                            if (unit.equals(UOM.metre)) {
-                                distance = approxMetersToDegrees(distance);
-                            }
+                            if (uom instanceof IRI) {
 
-                            if (getArgValue(arg1, bindingSet) == null && getArgValue(arg2, bindingSet) != null) {
-                                assert (arg1 instanceof Var);
-                                expand(filter, (Var) arg1, getArgValue(arg2, bindingSet), distance);
-                            }
+                                if (getArgValue(arg1, bindingSet) == null && getArgValue(arg2, bindingSet) != null) {
+                                    assert (arg1 instanceof Var);
+                                    expand(filter, (Var) arg1, getArgValue(arg2, bindingSet), distance, (IRI) uom);
+                                }
 
-                            if (getArgValue(arg2, bindingSet) == null && getArgValue(arg1, bindingSet) != null) {
-                                assert (arg2 instanceof Var);
-                                expand(filter, (Var) arg2, getArgValue(arg1, bindingSet), distance);
+                                if (getArgValue(arg2, bindingSet) == null && getArgValue(arg1, bindingSet) != null) {
+                                    assert (arg2 instanceof Var);
+                                    expand(filter, (Var) arg2, getArgValue(arg1, bindingSet), distance, (IRI) uom);
+                                }
                             }
                         }
                     }
@@ -96,39 +92,18 @@ public class BBoxDistanceOptimizer implements QueryOptimizer {
             return null;
         }
 
-        private void expand(Filter filter, Var arg, String knownWKT, double distance) {
+        private void expand(Filter filter, Var arg, String wkt, double distance, IRI uom) {
+
+            Value bbox = BBoxBuilder.getBufferedBBox(wkt, distance, uom);
 
             FunctionCall func = new FunctionCall();
             func.setURI(GEOF.SF_INTERSECTS.stringValue());
-            func.addArgs(arg, new ValueConstant((BufferedBBox(knownWKT,distance))));
+            func.addArgs(arg, new ValueConstant(bbox));
 
             Filter expansion = new Filter();
             expansion.setCondition(func);
             expansion.setArg(filter.getArg());
             filter.setArg(expansion);
         }
-
-        private Value BufferedBBox(String knownWKT, double distance) {
-            ValueFactory vf = SimpleValueFactory.getInstance();
-
-            /* http://esri.github.io/geometry-api-java/doc/Buffer.html */
-            Geometry g = OperatorImportFromWkt.local().execute(wktImportDefaults, Geometry.Type.Unknown, knownWKT, null);
-            SpatialReference spatialRef = SpatialReference.create(4326);
-            Geometry b = OperatorBuffer.local().execute(g, spatialRef, distance, null);
-            Envelope e = new Envelope();
-            b.queryEnvelope(e);
-            String str = OperatorExportToWkt.local().execute(wktExportDefaults, e, null);
-            Value value = vf.createLiteral(str, GEO.WKT_LITERAL);
-
-            return value;
-        }
     }
-
-    private static double approxMetersToDegrees(double distance) {
-        /* this calculation is an over-estimation, because at this stage we simply want to filter non relevant geometries */
-        distance = 1.3 * distance;
-        return distance * 0.00001 / 1.1132;
-        /* 0.00001 degrees equal 1.1132 meters at equator */
-    }
-
 }
