@@ -50,7 +50,7 @@ public final class BBoxBuilder {
         GeoLocation[] bounding;
         MultiPoint mPoint = new MultiPoint();
 
-        double radius = 6371.01;
+        double radius = 6371010 / 1.5;
 
         /* lower left point */
         point = e.getLowerLeft();
