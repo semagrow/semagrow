@@ -3,17 +3,7 @@ package org.semagrow.connector.sparql.query.render;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.eclipse.rdf4j.query.algebra.Difference;
-import org.eclipse.rdf4j.query.algebra.Filter;
-import org.eclipse.rdf4j.query.algebra.Intersection;
-import org.eclipse.rdf4j.query.algebra.Join;
-import org.eclipse.rdf4j.query.algebra.LeftJoin;
-import org.eclipse.rdf4j.query.algebra.StatementPattern;
-import org.eclipse.rdf4j.query.algebra.TupleExpr;
-import org.eclipse.rdf4j.query.algebra.Union;
-import org.eclipse.rdf4j.query.algebra.ValueConstant;
-import org.eclipse.rdf4j.query.algebra.ValueExpr;
-import org.eclipse.rdf4j.query.algebra.Var;
+import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.queryrender.BaseTupleExprRenderer;
 
 /**
@@ -303,5 +293,20 @@ public class SPARQLTupleExprRenderer extends BaseTupleExprRenderer {
                 + renderValueExpr(thePattern.getPredicateVar()) + " " + ""
                 + renderValueExpr(thePattern.getObjectVar()) + ".\n";
 
+    }
+
+
+    @Override
+    public void meet(Extension theExtension) throws Exception {
+        super.meet(theExtension);
+
+        ctxOpen(theExtension);
+
+        for (ExtensionElem elem : theExtension.getElements()) {
+            String render =  "bind(" + renderValueExpr(elem.getExpr()) + " as ?" + elem.getName() + ").";
+            mJoinBuffer.append(indent()).append(render).append("\n");
+        }
+
+        ctxClose(theExtension);
     }
 }

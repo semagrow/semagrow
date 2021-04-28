@@ -5,6 +5,7 @@ import org.semagrow.evaluation.QueryExecutorResolver;
 import org.semagrow.evaluation.SimpleQueryExecutorResolver;
 import org.semagrow.evaluation.util.BindingSetUtil;
 import org.semagrow.evaluation.util.LoggingUtil;
+import org.semagrow.plan.Pair;
 import org.semagrow.plan.Plan;
 import org.semagrow.evaluation.QueryExecutor;
 
@@ -90,6 +91,9 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
         else if (expr instanceof MergeJoin) {
             return evaluateReactorInternal((MergeJoin) expr, bindings);
         }
+        else if (expr instanceof BindNotExists) {
+            return evaluateReactorInternal((BindNotExists) expr, bindings);
+        }
         else if (expr == null) {
             throw new IllegalArgumentException("expr must not be null");
         }
@@ -161,7 +165,7 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
     public Flux<BindingSet> evaluateReactorInternal(SourceQuery expr, BindingSet bindings)
             throws QueryEvaluationException
     {
-        logger.info("sq {} - Source query [{}] at source {}",
+        logger.debug("sq {} - Source query [{}] at source {}",
                 Math.abs(expr.hashCode()),
                 expr.getArg(),
                 expr.getSite());
@@ -262,6 +266,23 @@ public class FederatedEvaluationStrategyImpl extends EvaluationStrategyImpl {
                     } catch (Exception x) {
                         return Flux.error(x);
                 }});
+    }
+
+    public Flux<BindingSet> evaluateReactorInternal(BindNotExists expr, BindingSet bindings)
+            throws QueryEvaluationException
+    {
+        return this.evaluateReactorInternal(expr.getLeftArg(), bindings)
+                .flatMap(b -> {
+                    try {
+                        return evaluateReactorInternal(expr.getRightArg(), b)
+                                .map(x -> new Pair<>(x,1))
+                                .defaultIfEmpty(new Pair<>(b,0));
+                    } catch (Exception e) {
+                        return Flux.error(e);
+                    }
+                })
+                .filter(y -> y.getSecond().equals(0))
+                .map(z -> z.getFirst());
     }
 
 }

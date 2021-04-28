@@ -7,15 +7,24 @@ import org.eclipse.rdf4j.query.algebra.QueryRoot;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
 import org.eclipse.rdf4j.query.algebra.evaluation.impl.*;
 import org.eclipse.rdf4j.query.algebra.evaluation.util.QueryOptimizerList;
+import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
+import org.semagrow.art.LogUtils;
+import org.semagrow.art.Loggable;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
 import org.semagrow.local.LocalSite;
+import org.semagrow.plan.optimizer.BindJoinExtensionOptimizer;
 import org.semagrow.plan.optimizer.FilterPlanOptimizer;
 import org.semagrow.plan.queryblock.*;
+import org.semagrow.plan.util.EndpointCollector;
 import org.semagrow.selector.QueryAwareSourceSelector;
 import org.semagrow.selector.SourceSelector;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 /**
  * The default implementation of a {@link QueryCompiler}
@@ -23,6 +32,8 @@ import java.util.Collection;
  * @since 2.0
  */
 public class SimpleQueryCompiler implements QueryCompiler {
+
+    protected final Logger logger = LoggerFactory.getLogger(SimpleQueryCompiler.class);
 
     private CostEstimatorResolver costEstimatorResolver;
     private CardinalityEstimatorResolver cardinalityEstimatorResolver;
@@ -38,6 +49,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
     }
 
     @Override
+    @Loggable
     public Plan compile(QueryRoot query, Dataset dataset, BindingSet bindings) {
 
         // transformations on logical query.
@@ -46,9 +58,11 @@ public class SimpleQueryCompiler implements QueryCompiler {
         // split query to queryblocks.
         QueryBlock blockRoot = blockify(query, dataset, bindings);
 
-        if (sourceSelector instanceof QueryAwareSourceSelector) {
-            ((QueryAwareSourceSelector) sourceSelector).processTupleExpr(query);
-        }
+        long t1 = System.currentTimeMillis();
+
+        sourceSelection(query);
+
+        long t2 = System.currentTimeMillis();
 
         // infer interesting properties for each query block.
         blockRoot.visit(new InterestingPropertiesVisitor());     // infer interesting properties for each block
@@ -65,9 +79,27 @@ public class SimpleQueryCompiler implements QueryCompiler {
 
         Plan plan = (plans.isEmpty()) ? new Plan(new EmptySet()) : plans.iterator().next();
 
+        addMissingProjectionElems(plan, query);
         optimize(plan, dataset, bindings);
 
+        long t3 = System.currentTimeMillis();
+
+        String compilationReport = "" +
+                "Source Selection Time: " + (t2-t1) + " - " +
+                "Compile Time: " + (t3-t2) + " - " +
+                "Sources: " + EndpointCollector.process(plan).size();
+        LogUtils.appendKobeReport(compilationReport);
+
+        logger.info("execution plan: {}", plan);
+
         return plan;
+    }
+
+    @Loggable
+    private void sourceSelection(QueryRoot query) {
+        if (sourceSelector instanceof QueryAwareSourceSelector) {
+            ((QueryAwareSourceSelector) sourceSelector).processTupleExpr(query);
+        }
     }
 
     private QueryBlock blockify(QueryRoot query, Dataset dataset, BindingSet bindings) {
@@ -106,7 +138,8 @@ public class SimpleQueryCompiler implements QueryCompiler {
     protected void optimize(TupleExpr expr, Dataset dataset, BindingSet bindings) {
 
         QueryOptimizer queryOptimizer =  new QueryOptimizerList(
-                new FilterPlanOptimizer()
+                new FilterPlanOptimizer(),
+                new BindJoinExtensionOptimizer()
         );
 
         queryOptimizer.optimize(expr, dataset, bindings);
@@ -118,5 +151,31 @@ public class SimpleQueryCompiler implements QueryCompiler {
         context.setCostEstimatorResolver(costEstimatorResolver);
         context.setSourceSelector(sourceSelector);
         return context;
+    }
+
+    private void addMissingProjectionElems(Plan plan, QueryRoot query) {
+        try {
+            final List<ProjectionElem> elems = new ArrayList<>();
+            query.visit(new AbstractQueryModelVisitor<Exception>() {
+                @Override
+                public void meet(ProjectionElem node) throws Exception {
+                    elems.add(node);
+                }
+            });
+            plan.visit(new AbstractPlanVisitor<Exception>() {
+                @Override
+                public void meet(ProjectionElem node) throws Exception {
+                    elems.remove(node);
+                }
+            });
+            plan.visit(new AbstractPlanVisitor<Exception>() {
+                @Override
+                public void meet(ProjectionElemList node) throws Exception {
+                    node.addElements(elems);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -80,24 +80,25 @@ public class PrefixBase {
                 return result;
             }
         }
+        else {
+            Variable prefix = SparqlBuilder.var("prefix");
+            Variable d = SparqlBuilder.var("d");
 
-        Variable prefix = SparqlBuilder.var("prefix");
-        Variable d = SparqlBuilder.var("d");
+            TriplePattern t1 = d.has(RDF.TYPE, VOID.DATASET);
+            TriplePattern t2 = d.has(VOID.SPARQLENDPOINT, endpoint);
+            TriplePattern t3 = d.has(SEVOD.SUBJECTREGEXPATTERN, prefix);
 
-        TriplePattern t1 = d.has(RDF.TYPE, VOID.DATASET);
-        TriplePattern t2 = d.has(VOID.SPARQLENDPOINT, endpoint);
-        TriplePattern t3 = d.has(SEVOD.SUBJECTREGEXPATTERN, prefix);
+            GraphPattern body = GraphPatterns.and(t1,t2,t3);
 
-        GraphPattern body = GraphPatterns.and(t1,t2,t3);
+            SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
 
-        SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
+            Collection<String> result = runQuery(selectQuery.getQueryString());
 
-        Collection<String> result = runQuery(selectQuery.getQueryString());
-
-        if (!result.isEmpty()) {
-            return result;
+            if (!result.isEmpty()) {
+                return result;
+            }
         }
-        return Collections.singletonList("");
+        return Collections.singletonList("ΑΝΥ");
     }
 
     public Collection<String> getObjectRegexPattern(StatementPattern pattern, Resource endpoint) {
@@ -126,29 +127,30 @@ public class PrefixBase {
                 return result;
             }
         }
+        else {
+            Variable prefix = SparqlBuilder.var("prefix");
+            Variable d = SparqlBuilder.var("d");
 
-        Variable prefix = SparqlBuilder.var("prefix");
-        Variable d = SparqlBuilder.var("d");
+            TriplePattern t1 = d.has(RDF.TYPE, VOID.DATASET);
+            TriplePattern t2 = d.has(VOID.SPARQLENDPOINT, endpoint);
+            TriplePattern t3 = d.has(SEVOD.OBJECTREGEXPATTERN, prefix);
 
-        TriplePattern t1 = d.has(RDF.TYPE, VOID.DATASET);
-        TriplePattern t2 = d.has(VOID.SPARQLENDPOINT, endpoint);
-        TriplePattern t3 = d.has(SEVOD.OBJECTREGEXPATTERN, prefix);
+            GraphPattern body = GraphPatterns.and(t1,t2,t3);
 
-        GraphPattern body = GraphPatterns.and(t1,t2,t3);
+            SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
 
-        SelectQuery selectQuery = Queries.SELECT().select(prefix).where(body);
+            Collection<String> result = runQuery(selectQuery.getQueryString());
 
-        Collection<String> result = runQuery(selectQuery.getQueryString());
-
-        if (!result.isEmpty()) {
-            return result;
+            if (!result.isEmpty()) {
+                return result;
+            }
         }
-        return Collections.singletonList("");
+        return Collections.singletonList("ΑΝΥ");
     }
 
     private Collection<String> runQuery(String qStr){
         RepositoryConnection conn = null;
-        List<String> result = new ArrayList<>();
+        Set<String> result = new HashSet<>();
         try {
             conn = metadata.getConnection();
             TupleQuery q = conn.prepareTupleQuery(QueryLanguage.SPARQL, qStr);
@@ -163,6 +165,6 @@ public class PrefixBase {
             if (conn != null)
                 try { conn.close(); } catch (Exception e){ }
         }
-        return Collections.emptyList();
+        return Collections.emptySet();
     }
 }
