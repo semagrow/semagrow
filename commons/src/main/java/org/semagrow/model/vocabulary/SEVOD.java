@@ -11,7 +11,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
  */
 public final class SEVOD {
 
-    public static final String NAMESPACE = "http://rdf.iit.demokritos.gr/2013/sevod#";
+    public static final String NAMESPACE = "http://www.w3.org/2015/03/sevod#";
 
     public static final String PREFIX = "svd";
 
