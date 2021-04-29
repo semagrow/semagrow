@@ -29,6 +29,9 @@ public final class SEVOD {
     public final static IRI FROM;
     public final static IRI TO;
 
+    public final static IRI BOUNDINGWKT;
+    public final static IRI BOUNDINGGML;
+
     static {
         ValueFactory factory = SimpleValueFactory.getInstance();
         SUBJECTREGEXPATTERN = factory.createIRI(SEVOD.NAMESPACE, "subjectRegexPattern");
@@ -41,5 +44,7 @@ public final class SEVOD {
         DATEINTERVAL = factory.createIRI(SEVOD.NAMESPACE, "dateInterval");
         FROM = factory.createIRI(SEVOD.NAMESPACE, "from");
         TO = factory.createIRI(SEVOD.NAMESPACE, "to");
+        BOUNDINGWKT = factory.createIRI(SEVOD.NAMESPACE, "boundingWKT");
+        BOUNDINGGML = factory.createIRI(SEVOD.NAMESPACE, "boundingGML");
     }
 }
