@@ -50,7 +50,7 @@ public class SemagrowSailConfig extends AbstractSailImplConfig {
 
     public RepositoryImplConfig getMetadataConfig() {
 
-        SailImplConfig sailConfig = new org.semagrow.sail.SEVOD.config.SEVODInferencerConfig(
+        SailImplConfig sailConfig = new org.semagrow.sail.sevod.config.SEVODInferencerConfig(
                 new ForwardChainingRDFSInferencerConfig(
                         new MemoryStoreConfig()));
 

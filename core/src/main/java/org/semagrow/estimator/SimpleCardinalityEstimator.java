@@ -1,6 +1,5 @@
 package org.semagrow.estimator;
 
-import org.semagrow.art.Loggable;
 import org.semagrow.plan.Plan;
 import org.semagrow.statistics.Statistics;
 import org.semagrow.plan.operators.SourceQuery;
@@ -32,7 +31,6 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
         this.statistics = statistics;
     }
 
-    @Loggable
     public BigInteger getCardinality(TupleExpr expr)  {
 
         if (expr instanceof StatementPattern)
@@ -85,6 +83,10 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
                 .add(getCardinality(union.getRightArg()));
     }
 
+    public BigInteger getCardinality(Group group) {
+        return getCardinality(group.getArg());
+    }
+
     public BigInteger getCardinality(Filter filter) {
         BigDecimal sel = BigDecimal.valueOf(selectivityEstimator.getConditionSelectivity(filter.getCondition(), filter.getArg()));
         return new BigDecimal(getCardinality(filter.getArg())).multiply(sel).toBigInteger();
@@ -109,7 +111,8 @@ public class SimpleCardinalityEstimator implements CardinalityEstimator {
 
         BigInteger card2 = getCardinality(join.getRightArg());
 
-        BigDecimal sel = BigDecimal.valueOf(selectivityEstimator.getJoinSelectivity(join));
+        Double js = selectivityEstimator.getJoinSelectivity(join);
+        BigDecimal sel = (js.isInfinite()) ? BigDecimal.valueOf(Double.MAX_VALUE) : BigDecimal.valueOf(js);
 
         BigInteger tt = new BigDecimal(card1.multiply(card2)).multiply(sel).setScale(0, RoundingMode.CEILING).toBigInteger();
 

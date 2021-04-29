@@ -7,6 +7,7 @@ import org.semagrow.plan.*;
 import org.semagrow.plan.operators.*;
 import org.semagrow.selector.Site;
 import org.semagrow.util.CombinationIterator;
+import org.semagrow.util.FilterNotExistsCombinator;
 import org.semagrow.util.PartitionedSet;
 
 import java.util.*;
@@ -77,6 +78,8 @@ public class SelectBlock extends AbstractQueryBlock {
 
     public void setOffset(Long l) { offset = Optional.of(l); }
 
+    public Optional<Long> getLimit() { return limit; }
+
     @Override
     public <X extends Exception> void visitChildren(QueryBlockVisitor<X> visitor) throws X {
         for (Quantifier q : quantifiers)
@@ -143,7 +146,7 @@ public class SelectBlock extends AbstractQueryBlock {
 
     public void addProjection(String var, ValueExpr expr) {
         if (var == null)
-            throw new IllegalArgumentException("Quantified variable " + var.toString() + " not a member of the block");
+            throw new IllegalArgumentException("Quantified variable null and not a member of the block");
 
         outputVars.put(var, expr);
     }
@@ -442,6 +445,20 @@ public class SelectBlock extends AbstractQueryBlock {
             Collection<Quantifier> all = new HashSet<>(left.getFirst().size() + right.getFirst().size());
             all.addAll(left.getFirst());
             all.addAll(right.getFirst());
+
+            ///////////
+            // FIXME: Workaround for filter not exists:
+            ///////////
+            if (FilterNotExistsCombinator.match(left, right)) {
+                Collection<Plan> plans = FilterNotExistsCombinator.combine(left, right, context);
+                return new Pair<>(all, plans);
+            }
+            if (FilterNotExistsCombinator.match(right, left)) {
+                Collection<Plan> plans = FilterNotExistsCombinator.combine(right, left, context);
+                return new Pair<>(all, plans);
+            }
+            ///////////
+
             Collection<Plan> plans = crossProduct(left, right);
             return new Pair<>(all, plans);
         }

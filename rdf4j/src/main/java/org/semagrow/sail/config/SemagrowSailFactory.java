@@ -5,6 +5,7 @@ import org.semagrow.config.*;
 import org.semagrow.connector.sparql.selector.AskSourceSelector;
 import org.semagrow.estimator.*;
 import org.semagrow.alignment.QueryTransformationImpl;
+import org.semagrow.geospatial.selector.GeospatialSourceSelector;
 import org.semagrow.sail.SemagrowSail;
 import org.semagrow.selector.*;
 import org.semagrow.alignment.SourceSelectorWithQueryTransform;
@@ -20,7 +21,7 @@ import org.eclipse.rdf4j.repository.config.RepositoryConfigException;
 import org.eclipse.rdf4j.repository.config.RepositoryFactory;
 import org.eclipse.rdf4j.repository.config.RepositoryImplConfig;
 import org.eclipse.rdf4j.repository.config.RepositoryRegistry;
-import org.eclipse.rdf4j.repository.sail.config.RepositoryResolver;
+import org.eclipse.rdf4j.repository.RepositoryResolver;
 import org.eclipse.rdf4j.repository.sail.config.RepositoryResolverClient;
 import org.eclipse.rdf4j.rio.RDFFormat;
 import org.eclipse.rdf4j.rio.RDFParseException;
@@ -129,6 +130,10 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
 
             selector = new AskSourceSelector(selector);
             selector = new CachedSourceSelector(selector);
+            selector = new PrefixQueryAwareSourceSelector(selector);
+            ((PrefixQueryAwareSourceSelector) selector).setMetadataRepository(metadata);
+            selector = new GeospatialSourceSelector(selector);
+            ((GeospatialSourceSelector) selector).setMetadataRepository(metadata);
 
             return selector;
         }
@@ -202,5 +207,4 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
     public void setRepositoryResolver(RepositoryResolver repositoryResolver) {
         this.repositoryResolver = repositoryResolver;
     }
-
 }

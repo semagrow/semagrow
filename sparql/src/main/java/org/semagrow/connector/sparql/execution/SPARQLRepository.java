@@ -1,7 +1,7 @@
 package org.semagrow.connector.sparql.execution;
 
+import org.eclipse.rdf4j.http.client.SPARQLProtocolSession;
 import org.semagrow.model.SemagrowValueFactory;
-import org.eclipse.rdf4j.http.client.SparqlSession;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
@@ -34,8 +34,8 @@ public class SPARQLRepository extends org.eclipse.rdf4j.repository.sparql.SPARQL
     public ValueFactory getValueFactory() { return valueFactory; }
 
     @Override
-    protected SparqlSession createHTTPClient() {
-        SparqlSession session = super.createHTTPClient();
+    protected SPARQLProtocolSession createHTTPClient() {
+        SPARQLProtocolSession session = super.createHTTPClient();
         session.setValueFactory(getValueFactory());
         return session;
     }

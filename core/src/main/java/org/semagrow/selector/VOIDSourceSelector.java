@@ -1,6 +1,5 @@
 package org.semagrow.selector;
 
-import org.semagrow.art.Loggable;
 import org.eclipse.rdf4j.model.Resource;
 import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Value;
@@ -35,7 +34,6 @@ public class VOIDSourceSelector extends VOIDBase
 
     protected SiteResolver getSiteResolver() { return this.siteResolver; }
 
-    @Loggable
     public Collection<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings) {
 
         if (!pattern.getSubjectVar().hasValue() &&
@@ -46,7 +44,6 @@ public class VOIDSourceSelector extends VOIDBase
             return new LinkedList<SourceMetadata>(datasetsToSourceMetadata(pattern, getDatasets(pattern)));
     }
 
-    @Loggable
     public Collection<SourceMetadata> getSources(TupleExpr expr, Dataset dataset, BindingSet bindings) {
 
         if (expr instanceof StatementPattern)

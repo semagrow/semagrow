@@ -69,7 +69,7 @@ var Tab = function(yasgui, id, name, endpoint) {
     var $endpointInput;
     var $queryBtn;
     var $decomposeBtn;
-    var $monitorBtn;
+    //var $monitorBtn;
     var addControlBar = function() {
 
         var $btnGroup = $('<div>', {
@@ -109,6 +109,7 @@ var Tab = function(yasgui, id, name, endpoint) {
             .text("Execute")
             .appendTo($btnGroup);
 
+	/*
         $monitorBtn = $('<button>', {
             type: 'button',
             class: 'menuButton btn btn-default'
@@ -117,6 +118,7 @@ var Tab = function(yasgui, id, name, endpoint) {
             .appendTo($btnGroup);
 
         $monitorBtn.hide();
+	*/
 
         var $paneMenu = menu.initWrapper().appendTo($controlBar);
             menu.updateWrapper();
@@ -134,11 +136,13 @@ var Tab = function(yasgui, id, name, endpoint) {
     var yasqeContainer = $('<div>', {
         id: 'yasqe_' + persistentOptions.id
     }).appendTo($paneContent);
+    /*
     var monitorContainer = $('<iframe/>', {
         id: 'monitor_' + persistentOptions.id,
         src: "./resources/monitor/index.html",
         style: "width:100%; height:350px; border:0; display:none;"
     }).appendTo($paneContent);
+    */
     var treeContainer = $('<iframe/>', {
         id: 'tree_' + persistentOptions.id,
         src: "./resources/semagrow_site/index.html",
@@ -259,7 +263,7 @@ var Tab = function(yasgui, id, name, endpoint) {
                 $('.nav-tabs .active').removeClass('querying');
                 yasgui.emit('queryFinish', yasgui, tab);
                 tab.emit('queryFinish');
-                $monitorBtn.show();
+                //$monitorBtn.show();
             });
             var beforeSend = null;
             tab.yasqe.options.sparql.callbacks.beforeSend = function() {
@@ -301,7 +305,7 @@ var Tab = function(yasgui, id, name, endpoint) {
                 //document.getElementById('yasq_' + persistentOptions.id).style.display="block";
                 treeContainer.css("display","none");
                 yasrContainer.css("display","block");
-                $monitorBtn.hide();
+                //$monitorBtn.hide();
                 yasrDisplayed = true;
                 decomposeDisplayed = false;
                 //$(".yasqe_queryButton").click();
@@ -323,6 +327,7 @@ var Tab = function(yasgui, id, name, endpoint) {
                 //document.getElementById('tree_' + persistentOptions.id).height=document.getElementById('tree_' + persistentOptions.id).contentWindow.document.getElementById("result2").offsetHeight;
             });
 
+	    /*
             $monitorBtn.click(function(){
                 //yasrContainer.css("display","none");//document.getElementById('yasq_' + persistentOptions.id).style.display="none";
                 if(monitorContainer.css("display") == "none"){
@@ -340,6 +345,7 @@ var Tab = function(yasgui, id, name, endpoint) {
                 //console.log(document.getElementById('tree_' + persistentOptions.id).contentWindow.document.getElementById("result2").offsetHeight);
                 //document.getElementById('tree_' + persistentOptions.id).height=document.getElementById('tree_' + persistentOptions.id).contentWindow.document.getElementById("result2").offsetHeight;
             });
+            */
             tab.yasqe.on('query', function() { 
                 $queryBtn.css("background-color","white");
                 $queryBtn.css("color","black");

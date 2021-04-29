@@ -1,4 +1,4 @@
-package org.semagrow.sail.SEVOD.config;
+package org.semagrow.sail.sevod.config;
 
 import org.eclipse.rdf4j.sail.config.AbstractDelegatingSailImplConfig;
 import org.eclipse.rdf4j.sail.config.SailImplConfig;

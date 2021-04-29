@@ -48,20 +48,11 @@ PostgresSQL database needs to be installed and run separately.
 
 #### Building a Docker image from sources
 
-You can also test your build deployed in a docker image. To do so run:
+You can also test your build deployed in a docker image (Docker 18.09 or newer required for building). To do so run at the project root directory:
 ```bash
-$ mvn clean package -P docker
+$ DOCKER_BUILDKIT=1 docker build -t semagrow .
 ```
 The produced image will be tagged as `semagrow:latest` and will contain Tomcat with Semagrow deployed.
-
-If you get the following error
-
-> `INFO: I/O exception (java.io.IOException) caught when processing request to {}->unix://localhost:80: Permission denied`
-
-during the build it probably means that you don't have permission to access the
-docker daemon. To fix this try to run maven as root.
-
-The `Dockerfile` is located at [`assembly/src/docker`](assembly/src/docker).
 
 ### Configuration
 
@@ -95,18 +86,18 @@ and official docker images are available in [Docker Hub](https://hub.docker.com/
 
 To run semagrow using the latest official docker image you should execute
 ```bash
-$ docker run semagrow/semagrow
+$ docker run -d semagrow/semagrow
 ```
 Howeover, you can also build your own docker image using the steps described in Section [Building](#### Building a Docker image from sources)
 The produced image will be tagged as `semagrow` and will contain Tomcat with Semagrow deployed.
 
 To run the newly produced image you should execute
 ```bash
-$ docker run semagrow
+$ docker run -d semagrow
 ```
 or if you want to test Semagrow with your configuration files (`repository.ttl` and `metadata.ttl`) issue
 ```bash
-$ docker run -v /path/to/configuration:/etc/default/semagrow semagrow
+$ docker run -d -v /path/to/configuration:/etc/default/semagrow semagrow
 ```
 
 In either case you can access Semagrow at `http://<CONTAINER_IP>:8080/SemaGrow/`
@@ -116,3 +107,5 @@ be retrieved using [`docker inspect`](https://docs.docker.com/engine/reference/c
 ## Known issues
 
 * SemaGrow uses UNION instead of VALUES to implement the BindJoin operator. This fails in 4store 1.1.5 and previous versions in the  presence of FILTER clauses due to an unsafe optimization by 4store.
+* When deploying in Glassfish 4 by coping the SemaGrow.war file in the autodeploy directory, Semagrow is accessible at `http://DOMAIN/SemaGrow/index.jsp` instead of `http://DOMAIN/SemaGrow/`
+

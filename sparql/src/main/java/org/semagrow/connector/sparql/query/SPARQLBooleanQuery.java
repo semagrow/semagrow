@@ -1,7 +1,7 @@
 package org.semagrow.connector.sparql.query;
 
+import org.eclipse.rdf4j.http.client.SPARQLProtocolSession;
 import org.semagrow.connector.sparql.query.render.SPARQLQueryStringUtil;
-import org.eclipse.rdf4j.http.client.SparqlSession;
 import org.eclipse.rdf4j.http.client.query.AbstractHTTPQuery;
 import org.eclipse.rdf4j.query.BooleanQuery;
 import org.eclipse.rdf4j.query.MalformedQueryException;
@@ -19,14 +19,14 @@ import java.io.IOException;
  */
 public class SPARQLBooleanQuery extends AbstractHTTPQuery implements BooleanQuery {
 
-    public SPARQLBooleanQuery(SparqlSession httpClient, String baseURI,
+    public SPARQLBooleanQuery(SPARQLProtocolSession httpClient, String baseURI,
                               String queryString) {
         super(httpClient, QueryLanguage.SPARQL, queryString, baseURI);
     }
 
     public boolean evaluate() throws QueryEvaluationException {
 
-        SparqlSession client = getHttpClient();
+        SPARQLProtocolSession client = getHttpClient();
 
         try {
             return client.sendBooleanQuery(queryLanguage, getQueryString(), baseURI, dataset, getIncludeInferred(), getMaxExecutionTime(),
