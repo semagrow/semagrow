@@ -6,6 +6,7 @@ import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.GEOF;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.semagrow.geospatial.helpers.WktHelpers;
+import org.semagrow.geospatial.vocabulary.UOM;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -142,7 +143,7 @@ public final class BBoxSourcePruner {
                         if (arg3 instanceof ValueConstant) {
                             Value unit = ((ValueConstant) arg3).getValue();
 
-                            if (unit.stringValue().equals("http://www.opengis.net/def/uom/OGC/1.0/metre")) { //FIXME
+                            if (unit.stringValue().equals(UOM.metre)) {
                                 distance = approxMetersToDegrees(distance);
                             }
 
