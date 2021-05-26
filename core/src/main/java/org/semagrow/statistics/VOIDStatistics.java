@@ -77,6 +77,9 @@ public class VOIDStatistics extends VOIDBase implements Statistics {
         spDatasets.retainAll(sDatasets);
 
         if (!spDatasets.isEmpty()) { // datasets that match both the predicate and subject
+            if (sVal != null && pVal != null & getDistinctSubjects(spDatasets).equals(getTriplesCount(sDatasets))) {
+                return 1;
+            }
             long d = 1;
             if (oVal != null)
                 d = getDistinctObjects(spDatasets);

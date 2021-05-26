@@ -155,7 +155,7 @@ public class SPARQLQueryStringUtil {
         ParsedTupleQuery query = new ParsedTupleQuery(body);
 
         String queryString = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
-        queryString = updateFunctionCallsSELECT(expr, queryString, computeVars(expr));
+        //queryString = updateFunctionCallsSELECT(expr, queryString, computeVars(expr));
 
         return queryString;
     }
@@ -217,7 +217,7 @@ public class SPARQLQueryStringUtil {
         }
 
         String query = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
-        query = updateFunctionCallsSELECT(expr, query, freeVars);
+        //query = updateFunctionCallsSELECT(expr, query, freeVars);
         freeVars.addAll(additionalBindingNames(expr));
         String where = query.substring(query.indexOf('{'));
         StringBuilder sb = new StringBuilder();
@@ -263,7 +263,7 @@ public class SPARQLQueryStringUtil {
             throws Exception
     {
         String query = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
-        query = updateFunctionCallsBIND(expr, query); // not tested
+        //query = updateFunctionCallsBIND(expr, query); // not tested
         relevantBindingNames.addAll(additionalBindingNames(expr)); // not tested
         String where = query.substring(query.indexOf('{'));
         StringBuilder sb = new StringBuilder();

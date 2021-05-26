@@ -25,7 +25,7 @@ public class SimpleSiteResolver implements SiteResolver {
         	maybeSiteFactory = siteRegistry.get("POSTGIS");
         }
         else {
-            maybeSiteFactory = siteRegistry.get("SPARQL");
+            maybeSiteFactory = siteRegistry.get("GeoSPARQL");
         }
 
         if (maybeSiteFactory.isPresent()) {

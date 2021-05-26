@@ -12,6 +12,7 @@ import org.semagrow.art.Loggable;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
 import org.semagrow.local.LocalSite;
+import org.semagrow.plan.optimizer.BindJoinExtensionOptimizer;
 import org.semagrow.plan.optimizer.FilterPlanOptimizer;
 import org.semagrow.plan.queryblock.*;
 import org.semagrow.plan.util.EndpointCollector;
@@ -133,7 +134,8 @@ public class SimpleQueryCompiler implements QueryCompiler {
     protected void optimize(TupleExpr expr, Dataset dataset, BindingSet bindings) {
 
         QueryOptimizer queryOptimizer =  new QueryOptimizerList(
-                new FilterPlanOptimizer()
+                new FilterPlanOptimizer(),
+                new BindJoinExtensionOptimizer()
         );
 
         queryOptimizer.optimize(expr, dataset, bindings);

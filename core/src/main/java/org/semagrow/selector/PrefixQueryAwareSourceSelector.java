@@ -10,6 +10,7 @@ import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.eclipse.rdf4j.repository.Repository;
 import org.semagrow.plan.Pair;
 import org.semagrow.plan.util.BPGCollector;
+import org.semagrow.util.GroupedPatternCollector;
 
 import java.util.*;
 
@@ -32,18 +33,18 @@ public class PrefixQueryAwareSourceSelector extends SourceSelectorWrapper implem
         if (getWrappedSelector() instanceof QueryAwareSourceSelector) {
             ((QueryAwareSourceSelector) getWrappedSelector()).processTupleExpr(expr);
         }
-        Collection<TupleExpr> bpgs = BPGCollector.process(expr);
-        for (TupleExpr bpg: bpgs) {
-            processBPG(bpg);
+        Collection<List<StatementPattern>> groups = GroupedPatternCollector.process(expr);
+        for (List<StatementPattern> group: groups) {
+            processBPG(group);
         }
         processed = true;
     }
 
-    private void processBPG(TupleExpr expr) {
+    private void processBPG(List<StatementPattern> group) {
 
         Map<StatementPattern,Map<SourceMetadata,Map<String,Collection<String>>>> phatMap = new HashMap<>();
 
-        for (StatementPattern pattern:  StatementPatternCollector.process(expr)) {
+        for (StatementPattern pattern: group) {
             Map<SourceMetadata,Map<String,Collection<String>>> sourceMap = new HashMap<>();
 
             for (SourceMetadata source: getWrappedSelector().getSources(pattern, null, EmptyBindingSet.getInstance())) {
