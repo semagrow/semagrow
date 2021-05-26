@@ -53,6 +53,8 @@ public final class BindingSetOpsImpl implements BindingSetOps {
                     result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/geometry/" + tempColumnValue + ""));
                 } else if (((String) r.getValue(i)).contains("MULTIPOLYGON")) {
                     result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/geometry/" + tempColumnValue + ""));
+                } else if (((String) r.getValue(i)).contains("POLYGON")) {
+                    result.addBinding(tempColumnName, vf.createIRI("http://rdf.semagrow.org/pgm/antru/resource/" + tempColumnValue + ""));
                 }
                 tempColumnName = tempColumnValue = null;
             }

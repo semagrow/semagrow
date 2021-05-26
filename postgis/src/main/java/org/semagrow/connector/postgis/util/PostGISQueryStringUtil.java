@@ -26,7 +26,10 @@ public class PostGISQueryStringUtil {
 	
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 //	private static String INDEX_BINDING_NAME = ".__id";
-	private static String INDEX_BINDING_NAME = ".gid";
+	private static String INDEX_BINDING_NAME = ".id";
+	private static String WKT_BINDING_NAME = ".wkt";
+	private static String TABLE = " geometries ";
+	private static boolean ONE_TABLE = true;
 	private static String SELECT = "SELECT ";
 	private static String FROM = " FROM ";
 	private static String WHERE = " WHERE ";
@@ -68,14 +71,14 @@ public class PostGISQueryStringUtil {
 		List<String> from = new ArrayList<String>();
 		List<String> where = new ArrayList<String>();
 		
-		Pair<String, String> tableAndGid = null;
-		String geom = "";
+		Pair<String, String> tableAndΙd = null;
+		String wkt = "";
 		int place = 0;
 		
 		for (String part : triples) {
 			place++;
 			if (part.contains("#")) {	// predicate
-				geom = "t" + (place-1) + ".geom";
+				wkt = "t" + (place-1) + WKT_BINDING_NAME;
 			}
 			else {			
 				if (place % 3 != 0) {	// subject
@@ -85,19 +88,19 @@ public class PostGISQueryStringUtil {
 						tables.add("?");
 					}
 					else { 							// binding var as subject
-						tableAndGid = subjectDecompose(part);
-						from.add(tableAndGid.getLeft() + " t" + place);
-						where.add("t" + place + INDEX_BINDING_NAME + " = " + tableAndGid.getRight());
+						tableAndΙd = subjectDecompose(part);
+						from.add(tableAndΙd.getLeft() + " t" + place);
+						where.add("t" + place + INDEX_BINDING_NAME + " = " + tableAndΙd.getRight());
 					}
 				}
 				else {					// object
 					if (freeVars.contains(part)) {	// free var as object
-						select.add("ST_AsText(" + geom + ") AS " + part);
-						bindingVars.put(part, geom);
+						select.add("ST_AsText(" + wkt + ") AS " + part);
+						bindingVars.put(part, wkt);
 						tables.add("-");
 					}
 					else {							// binding var as object
-						where.add("ST_Equals(t" + place + ".geom, ST_GeomFromText('" + part + "',4326))");
+						where.add("ST_Equals(t" + place + WKT_BINDING_NAME + ", ST_GeomFromText('" + part + "',4326))");
 						if (tables.get(place/3 - 1).equals("?"))
 							tables.remove(place/3 - 1);
 						if (part.contains("POINT")) {
@@ -105,6 +108,9 @@ public class PostGISQueryStringUtil {
 						}
 						else if (part.contains("MULTIPOLYGON")) {
 							tables.add("invekos");
+						}
+						else if (part.contains("POLYGON")) {
+							tables.add(TABLE);
 						}
 					}
 					
@@ -139,57 +145,70 @@ public class PostGISQueryStringUtil {
 			where.add(f);
 		
 		if (from.isEmpty()) {
-			String from1 = "", from2 = "", from3 = "", from4 = "";
-			logger.debug("vars size: {}", freeVars.size());
-			logger.debug("triples size: {}", triples.size());
-			logger.debug("bindingVars size: {}", bindingVars.size());
-			logger.debug("bindingVars: {}", bindingVars);
-			if (triples.size() == 3) {
-				from1 = " FROM lucas t1";
-				from2 = " FROM invekos t1";
-				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from2
+			if (ONE_TABLE) {
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
+						+ " FROM geometries t1" 
 						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
-			else if (triples.size() == 6) {
-				from1 = " FROM lucas t1, lucas t4";
-				from2 = " FROM lucas t1, invekos t4";
-				from3 = " FROM invekos t1, lucas t4";
-				from4 = " FROM invekos t1, invekos t4";
-				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from2
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from3
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from4
-						+ serializeList(where, AND_SEP, WHERE) + ";";
+			else {
+				String from1 = "", from2 = "", from3 = "", from4 = "";
+				logger.debug("vars size: {}", freeVars.size());
+				logger.debug("triples size: {}", triples.size());
+				logger.debug("bindingVars size: {}", bindingVars.size());
+				logger.debug("bindingVars: {}", bindingVars);
+				if (triples.size() == 3) {
+					from1 = " FROM lucas t1";
+					from2 = " FROM invekos t1";
+					sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from2
+							+ serializeList(where, AND_SEP, WHERE) + ";";
+				}
+				else if (triples.size() == 6) {
+					from1 = " FROM lucas t1, lucas t4";
+					from2 = " FROM lucas t1, invekos t4";
+					from3 = " FROM invekos t1, lucas t4";
+					from4 = " FROM invekos t1, invekos t4";
+					sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from2
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from3
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from4
+							+ serializeList(where, AND_SEP, WHERE) + ";";
+				}
 			}
 		}
 		else {
-			
-			if (freeVars.size() == triples.size() / 3 && !triples.contains(null)) {
+			if (ONE_TABLE) {
 				sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
 						+ serializeList(from, COMMA_SEP, FROM)
 						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
 			else {
-				String lucas = "", invekos = "";
-				place = 1;
-				while (place < triples.size()) {
-					if (!from.contains("lucas t" + place) && !from.contains("invekos t" + place)) {
-						lucas += ", lucas t" + place;
-						invekos += ", invekos t" + place;
-					}
-					place += 3;
+				if (freeVars.size() == triples.size() / 3 && !triples.contains(null)) {
+					sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
+							+ serializeList(from, COMMA_SEP, FROM)
+							+ serializeList(where, AND_SEP, WHERE) + ";";
 				}
-				sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
-						+ serializeList(from, COMMA_SEP, FROM) + lucas
-						+ serializeList(where, AND_SEP, WHERE) + UNION
-						+ serializeList(select, COMMA_SEP, SELECT) 
-						+ serializeList(from, COMMA_SEP, FROM) + invekos
-						+ serializeList(where, AND_SEP, WHERE) + ";";
+				else {
+					String lucas = "", invekos = "";
+					place = 1;
+					while (place < triples.size()) {
+						if (!from.contains("lucas t" + place) && !from.contains("invekos t" + place)) {
+							lucas += ", lucas t" + place;
+							invekos += ", invekos t" + place;
+						}
+						place += 3;
+					}
+					sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
+							+ serializeList(from, COMMA_SEP, FROM) + lucas
+							+ serializeList(where, AND_SEP, WHERE) + UNION
+							+ serializeList(select, COMMA_SEP, SELECT) 
+							+ serializeList(from, COMMA_SEP, FROM) + invekos
+							+ serializeList(where, AND_SEP, WHERE) + ";";
+				}
 			}
 		}
 		
@@ -243,18 +262,18 @@ public class PostGISQueryStringUtil {
 ////			asToVar.put((String) binding, bindings.getValue((String)binding).toString().replace("\"", "\'"));
 //		}
 		
-		Pair<String, String> tableAndGid = null;
+		Pair<String, String> tableAndΙd = null;
 		List<String> select = new ArrayList<String>();
 		List<String> from = new ArrayList<String>();
 		List<String> where = new ArrayList<String>();
-		String geom = "", binding_var = "";
+		String wkt = "", binding_var = "";
 		int binding_place = -1;
 		int place = 0;
 		
 		for (String part : triples) {
 			place++;
 			if (part.contains("#")) {	// predicate
-				geom = "t" + (place-1) + ".geom";
+				wkt = "t" + (place-1) + WKT_BINDING_NAME;
 			}
 			else {			
 				if (place % 3 != 0) {	// subject
@@ -264,25 +283,25 @@ public class PostGISQueryStringUtil {
 						tables.add("?");
 					}
 					else if (bindings.get(0).hasBinding(part)) {
-						tableAndGid = subjectDecompose(bindings.get(0).getBinding(part).getValue().toString());
-						from.add(tableAndGid.getLeft() + " t" + place);
+						tableAndΙd = subjectDecompose(bindings.get(0).getBinding(part).getValue().toString());
+						from.add(tableAndΙd.getLeft() + " t" + place);
 						binding_var = part;
 						binding_place = place;
 					}
 					else {
-						tableAndGid = subjectDecompose(part);
-						from.add(tableAndGid.getLeft() + " t" + place);
-						where.add("t" + place + INDEX_BINDING_NAME + " = " + tableAndGid.getRight());
+						tableAndΙd = subjectDecompose(part);
+						from.add(tableAndΙd.getLeft() + " t" + place);
+						where.add("t" + place + INDEX_BINDING_NAME + " = " + tableAndΙd.getRight());
 					}
 				}
 				else {					// object
 					if (freeVars.contains(part)) {
-						select.add("ST_AsText(" + geom + ") AS " + part);
-						bindingVars.put(part, geom);
+						select.add("ST_AsText(" + wkt + ") AS " + part);
+						bindingVars.put(part, wkt);
 						tables.add("-");
 					}
 					else {
-						where.add("ST_Equals(t" + place + ".geom, ST_GeomFromText('" + part + "',4326))");
+						where.add("ST_Equals(t" + place + WKT_BINDING_NAME + ", ST_GeomFromText('" + part + "',4326))");
 						if (tables.get(place/3 - 1).equals("?"))
 							tables.remove(place/3 - 1);
 						if (part.contains("POINT")) {
@@ -290,6 +309,9 @@ public class PostGISQueryStringUtil {
 						}
 						else if (part.contains("MULTIPOLYGON")) {
 							tables.add("invekos");
+						}
+						else if (part.contains("POLYGON")) {
+							tables.add(TABLE);
 						}
 					}
 					
@@ -325,85 +347,94 @@ public class PostGISQueryStringUtil {
 		
 		
 		if (from.isEmpty()) {
-			String from1 = "", from2 = "", from3 = "", from4 = "";
-			logger.debug("vars size: {}", freeVars.size());
-			logger.debug("triples size: {}", triples.size());
-			logger.debug("asToVar size: {}", bindingVars.size());
-			if (triples.size() == 3) {
-				from1 = " FROM lucas t1";
-				from2 = " FROM invekos t1";
-				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from2
+			if (ONE_TABLE) {
+				sqlQuery = serializeList(select, COMMA_SEP, SELECT) 
+						+ " FROM geometries t1" 
 						+ serializeList(where, AND_SEP, WHERE) + ";";
 			}
-			else if (triples.size() == 6) {
-				from1 = " FROM lucas t1, lucas t4";
-				from2 = " FROM lucas t1, invekos t4";
-				from3 = " FROM invekos t1, lucas t4";
-				from4 = " FROM invekos t1, invekos t4";
-				sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from2
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from3
-						+ serializeList(where, AND_SEP, WHERE) + UNION 
-						+ serializeList(select, COMMA_SEP, SELECT) + from4
-						+ serializeList(where, AND_SEP, WHERE) + ";";
+			else {
+				String from1 = "", from2 = "", from3 = "", from4 = "";
+				logger.debug("vars size: {}", freeVars.size());
+				logger.debug("triples size: {}", triples.size());
+				logger.debug("asToVar size: {}", bindingVars.size());
+				if (triples.size() == 3) {
+					from1 = " FROM lucas t1";
+					from2 = " FROM invekos t1";
+					sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from2
+							+ serializeList(where, AND_SEP, WHERE) + ";";
+				}
+				else if (triples.size() == 6) {
+					from1 = " FROM lucas t1, lucas t4";
+					from2 = " FROM lucas t1, invekos t4";
+					from3 = " FROM invekos t1, lucas t4";
+					from4 = " FROM invekos t1, invekos t4";
+					sqlQuery = serializeList(select, COMMA_SEP, SELECT) + from1 
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from2
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from3
+							+ serializeList(where, AND_SEP, WHERE) + UNION 
+							+ serializeList(select, COMMA_SEP, SELECT) + from4
+							+ serializeList(where, AND_SEP, WHERE) + ";";
+				}
 			}
-			
 		}
 		else {
-			
-			logger.debug("vars size: {}", freeVars.size());
-			logger.debug("triples size: {}", triples.size());
-			
-			String where_bind = "";
-			
-			logger.debug("now sqlQuery: {}", sqlQuery);
-			
-			for (BindingSet b : bindings) {
-				if (!sqlQuery.equals(""))
-					sqlQuery += UNION;
-				
-				tableAndGid = subjectDecompose(b.getBinding(binding_var).getValue().toString());
-				where_bind = "t" + binding_place + INDEX_BINDING_NAME + " = " + tableAndGid.getRight();	
-				
-				if (freeVars.size() == triples.size() / 3 && !triples.contains(null)) {
-					sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
-							+ serializeList(from, COMMA_SEP, FROM)
-							+ serializeList(where, AND_SEP, WHERE);
-					if (where.isEmpty()) sqlQuery += WHERE;
-					else sqlQuery += AND_SEP;
-					sqlQuery += where_bind;
-				}
-				else {
-					String lucas = "", invekos = "";
-					place = 1;
-					while (place < triples.size()) {
-						if (!from.contains("lucas t" + place) && !from.contains("invekos t" + place)) {
-							lucas += ", lucas t" + place;
-							invekos += ", invekos t" + place;
-						}
-						place += 3;
-					}
-					sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
-							+ serializeList(from, COMMA_SEP, FROM) + lucas
-							+ serializeList(where, AND_SEP, WHERE);
-					if (where.isEmpty()) sqlQuery += WHERE;
-					else sqlQuery += AND_SEP;
-					sqlQuery += where_bind + UNION;
-					sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
-							+ serializeList(from, COMMA_SEP, FROM) + invekos
-							+ serializeList(where, AND_SEP, WHERE);
-					if (where.isEmpty()) sqlQuery += WHERE;
-					else sqlQuery += AND_SEP;
-					sqlQuery += where_bind;
-				}
+			if (ONE_TABLE) {
+				logger.debug("WHAT TO DO HERE ?????");
 			}
-			
-			sqlQuery += ";";
-			
+			else {
+				logger.debug("vars size: {}", freeVars.size());
+				logger.debug("triples size: {}", triples.size());
+				
+				String where_bind = "";
+				
+				logger.debug("now sqlQuery: {}", sqlQuery);
+				
+				for (BindingSet b : bindings) {
+					if (!sqlQuery.equals(""))
+						sqlQuery += UNION;
+					
+					tableAndΙd = subjectDecompose(b.getBinding(binding_var).getValue().toString());
+					where_bind = "t" + binding_place + INDEX_BINDING_NAME + " = " + tableAndΙd.getRight();	
+					
+					if (freeVars.size() == triples.size() / 3 && !triples.contains(null)) {
+						sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
+								+ serializeList(from, COMMA_SEP, FROM)
+								+ serializeList(where, AND_SEP, WHERE);
+						if (where.isEmpty()) sqlQuery += WHERE;
+						else sqlQuery += AND_SEP;
+						sqlQuery += where_bind;
+					}
+					else {
+						String lucas = "", invekos = "";
+						place = 1;
+						while (place < triples.size()) {
+							if (!from.contains("lucas t" + place) && !from.contains("invekos t" + place)) {
+								lucas += ", lucas t" + place;
+								invekos += ", invekos t" + place;
+							}
+							place += 3;
+						}
+						sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
+								+ serializeList(from, COMMA_SEP, FROM) + lucas
+								+ serializeList(where, AND_SEP, WHERE);
+						if (where.isEmpty()) sqlQuery += WHERE;
+						else sqlQuery += AND_SEP;
+						sqlQuery += where_bind + UNION;
+						sqlQuery += serializeList(select, COMMA_SEP, SELECT) 
+								+ serializeList(from, COMMA_SEP, FROM) + invekos
+								+ serializeList(where, AND_SEP, WHERE);
+						if (where.isEmpty()) sqlQuery += WHERE;
+						else sqlQuery += AND_SEP;
+						sqlQuery += where_bind;
+					}
+				}
+				
+				sqlQuery += ";";
+			}
 		}
 		
 		logger.debug("bindingVars:: {}", bindingVars.toString());
@@ -453,7 +484,7 @@ public class PostGISQueryStringUtil {
 					dist += var;
 				}
 				else {
-					bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+".geom");
+					bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+WKT_BINDING_NAME);
 					dist += bindingVars.get(filterInfo.get(i+1));
 					triples.add(null); triples.add(null); triples.add(null);
 				}
@@ -467,7 +498,7 @@ public class PostGISQueryStringUtil {
 					dist += var;
 				}
 				else {
-					bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+".geom");
+					bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+WKT_BINDING_NAME);
 					dist += bindingVars.get(filterInfo.get(i+2));
 					triples.add(null); triples.add(null); triples.add(null);
 				}
@@ -615,13 +646,21 @@ public class PostGISQueryStringUtil {
 	
 	
 	protected static Pair<String, String> subjectDecompose(String subject) {
-		int gidStart = subject.lastIndexOf("/") + 1;
-		String gid = subject.substring(gidStart);
+		int idStart = subject.lastIndexOf("/") + 1;
+		String id = subject.substring(idStart);
 		int lastDot = subject.lastIndexOf(".");
 		int tableStart = lastDot + subject.substring(lastDot).indexOf("/") + 1;
 		int tableEnd = tableStart + subject.substring(tableStart).indexOf("/");
 		String table = subject.substring(tableStart, tableEnd);
-		return Pair.of(table, gid);
+
+//		int tableEnd = subject.substring(0, idStart - 2).lastIndexOf("/");
+//		int tableStart = subject.substring(0, tableEnd).lastIndexOf("/") + 1;
+//		String table = subject.substring(tableStart, tableEnd);
+		
+		if (table.equals("pgm"))
+			table = TABLE;
+		
+		return Pair.of(table, id);
 	}
 	
 }
