@@ -26,8 +26,9 @@ public class SemagrowPostgisTest extends TestCase {
 		
 		String q1 = "" +
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geom: <http://rdf.semagrow.org/pgm/antru/resource/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://rdf.semagrow.org/pgm/antru/resource/9> geo:asWKT ?wkt .\n" +
+				"  geom:9 geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q2 = "" +
@@ -37,10 +38,18 @@ public class SemagrowPostgisTest extends TestCase {
 				"}";
 		
 		String q3 = "" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX tp: <http://rdf.semagrow.org/pgm/antru/>" +
+				"SELECT * WHERE {\n" +
+				"  ?g1 rdf:type tp:geometry .\n" + 
+				"}";
+		
+		String q4 = "" +
 				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX tp: <http://rdf.semagrow.org/pgm/antru/>" +
 				"SELECT * WHERE {\n" +
-				"  ?g1 rdf:type ?pgm1 .\n" + 
+				"  ?g1 rdf:type tp:geometry .\n" + 
 				"  ?g1 geo:asWKT ?w1 .\n" + 
 				"}";
 		
@@ -52,7 +61,7 @@ public class SemagrowPostgisTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q3);
+		TupleQuery query = conn.prepareTupleQuery(q4);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);

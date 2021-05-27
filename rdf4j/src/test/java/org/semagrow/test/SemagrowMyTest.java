@@ -26,142 +26,160 @@ public class SemagrowMyTest extends TestCase {
 	public void testSemagrowQuery() throws IOException {
 		
 		String q1 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/5> geo:asWKT ?wkt .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q2 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?geom .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q3 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom9 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/1> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom1 .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?geom9 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/1> geo:hasGeometry ?geom1 .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q4 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  ?id <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  ?id geo:hasGeometry ?geom .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q5 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> geo:asWKT ?wkt1 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt9 .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q6 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/245412> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt_inv .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt9 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/245412> geo:asWKT ?wkt_inv .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt9 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> geo:asWKT ?wkt1 .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q7 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  ?id geo:asWKT ?wkt .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q8 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
-				"  ?id2 <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  ?id geo:asWKT ?wkt .\n" +
+				"  ?id2 geo:asWKT ?wkt2 .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q9 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
-				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
-				// "  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt .\n" +
+				"  ?id geo:asWKT ?wkt2 .\n" +
+				// "  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 //		String q10 = "" +
+//				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 //				"SELECT * WHERE {\n" +
-//				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> POINT(16.25613715 47.5043295) .\n" +
+//				"  ?id geo:asWKT POINT(16.25613715 47.5043295) .\n" +
 //				"}";
 		
 //		String q12 = "" +
+//				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 //				"SELECT * WHERE {\n" +
-//				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
-//				"  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+//				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?geom .\n" +
+//				"  ?geom geo:asWKT ?wkt .\n" +
 //				"}";
 		
 		String q11 = "" +
+			"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 			"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 			"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 			"SELECT * WHERE {\n" +
-			"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-			"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
+			"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt1 .\n" +
+			"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> geo:asWKT ?wkt2 .\n" +
 			"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
 			"}";
 		
 		String q12 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt1 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> geo:asWKT ?wkt2 .\n" +
 				"  BIND(geof:distance(?wkt1,?wkt2,opengis:metre) as ?dist) . \n" +
 				"  FILTER(?dist < 10) .\n" +
 				"}";
 		
 		String q13 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/701155> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt1 .\n" +
+				"  <http://deg.iit.demokritos.gr/invekos/resource/Geometry/701155> geo:asWKT ?wkt2 .\n" +
 				"  BIND(geof:distance(?wkt1,?wkt2,opengis:metre) as ?dist) . \n" +
 				"  FILTER(?dist < 10) .\n" +
 //				"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
 				"}";
 		
 		String q14 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt1 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/1> geo:asWKT ?wkt2 .\n" +
 				"  BIND(geof:distance(?wkt1,?wkt2,opengis:metre) as ?dist) . \n" +
 				"}";
 		
 		String q15 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> <http://www.opengis.net/ont/geosparql#asWKT> ?wkt1 .\n" +
-				"  ?id <http://www.opengis.net/ont/geosparql#asWKT> ?wkt2 .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/Geometry/9> geo:asWKT ?wkt1 .\n" +
+				"  ?id geo:asWKT ?wkt2 .\n" +
 //				"  FILTER(geof:distance(?wkt1,?wkt2,opengis:metre) < 10) .\n" +
 				"  BIND(geof:distance(?wkt1,?wkt2,opengis:metre) as ?dist) . \n" +
 				"  FILTER(?dist < 10) .\n" +
 				"}";
 		
 		String q16 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?geom .\n" +
-				"  ?geom <http://www.opengis.net/ont/geosparql#asWKT> ?wkt .\n" +
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?geom .\n" +
+				"  ?geom geo:asWKT ?wkt .\n" +
 				"}";
 		
 		String q17 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"SELECT * WHERE {\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?l_geom_id .\n" + 
-				"  <http://deg.iit.demokritos.gr/invekos/resource/701155> <http://www.opengis.net/ont/geosparql#hasGeometry> ?i_geom_id .\n" + 
-				"  ?l_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?l_geom .\n" + 
-				"  ?i_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?i_geom .\n" + 
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
+				"  <http://deg.iit.demokritos.gr/invekos/resource/701155> geo:hasGeometry ?i_geom_id .\n" + 
+				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
 				"}";
 		
 		String q18 = "" +
@@ -181,6 +199,7 @@ public class SemagrowMyTest extends TestCase {
 		String q19 = "" +		//query 1
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX opengis: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
 				"SELECT * WHERE {\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1> ?l_lc1 .\n" +
 				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://deg.iit.demokritos.gr/lucas/hasLC1_SPEC> ?l_lc1_sp .\n" +
@@ -189,10 +208,10 @@ public class SemagrowMyTest extends TestCase {
 				"  ?conversion <http://deg.iit.demokritos.gr/invekosCropTypeNumber> ?cropNu .\n" +
 				"  ?i <http://deg.iit.demokritos.gr/invekos/hasCropTypeNumber> ?cropNu2 .\n" +
 				"  FILTER(?cropNu = ?cropNu2) .\n" +
-				"  <http://deg.iit.demokritos.gr/lucas/resource/9> <http://www.opengis.net/ont/geosparql#hasGeometry> ?l_geom_id .\n" + 
-				"  ?i <http://www.opengis.net/ont/geosparql#hasGeometry> ?i_geom_id .\n" + 
-				"  ?l_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?l_geom .\n" + 
-				"  ?i_geom_id <http://www.opengis.net/ont/geosparql#asWKT> ?i_geom .\n" + 
+				"  <http://deg.iit.demokritos.gr/lucas/resource/9> geo:hasGeometry ?l_geom_id .\n" + 
+				"  ?i geo:hasGeometry ?i_geom_id .\n" + 
+				"  ?l_geom_id geo:asWKT ?l_geom .\n" + 
+				"  ?i_geom_id geo:asWKT ?i_geom .\n" + 
 				"  FILTER(geof:distance(?l_geom,?i_geom,opengis:metre) < 10) .\n" +
 				"}";
 		
@@ -693,7 +712,7 @@ public class SemagrowMyTest extends TestCase {
 		// q35: 24-30 (multiple bindings) does not check all invekos OR all lucas instances
 		// q36: ?????
 //		TupleQuery query = conn.prepareTupleQuery(q13);
-		TupleQuery query = conn.prepareTupleQuery(q30);
+		TupleQuery query = conn.prepareTupleQuery(q1);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
@@ -703,7 +722,7 @@ public class SemagrowMyTest extends TestCase {
 		//writer.write("\n");
 //		System.out.println(EndpointCollector.process(plan));
 
-		if (false) {
+		if (true) {
 			query.evaluate(new TupleQueryResultHandler() {
 				@Override
 				public void handleBoolean(boolean b) throws QueryResultHandlerException {
