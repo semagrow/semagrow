@@ -4,8 +4,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -101,7 +103,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
             logger.debug("relevantBindings:: {}", relevantBindings.toString());
 			
 			List<String> tables = new ArrayList<String>();
-			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings);
+			Map<String,String> bindingVars = new HashMap<String, String>();
+			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings, bindingVars);
 			
 			if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
@@ -113,7 +116,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			Stream<Record> rs = client.execute(sqlQuery);
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r);
+					return BindingSetOpsImpl.transform(r, bindingVars);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();
@@ -172,11 +175,13 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			String password = site.getPassword();
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
 			
+			Map<String,String> bindingVars = new HashMap<String, String>();
+			
 			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
 			Stream<Record> rs = client.execute(sqlQuery);
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r);
+					return BindingSetOpsImpl.transform(r, bindingVars);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();

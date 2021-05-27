@@ -1,37 +1,37 @@
 package org.semagrow.connector.postgis.util;
 
-import org.jooq.Record;
-import org.semagrow.evaluation.BindingSetOps;
-import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.util.Collection;
+import java.util.Map;
+
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
-
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.util.Collection;
-import java.util.List;
+import org.jooq.Record;
+import org.semagrow.evaluation.BindingSetOps;
+import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class BindingSetOpsImpl implements BindingSetOps {
 
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
-    public static final BindingSet transform(Record r) throws SQLException {
+    public static final BindingSet transform(Record r, Map<String,String> bindingVars) throws SQLException {
 
         ResultSet rs = r.intoResultSet();
         ResultSetMetaData rsmd = rs.getMetaData();
         int columnsNumber = rsmd.getColumnCount();
 
         QueryBindingSet result = new QueryBindingSet();
-        String tempColumnName = null, tempColumnValue = null;
-        logger.debug("columnsNumber::::::::::::::::::::::: {} ", columnsNumber);
+        logger.debug("columnsNumber: {} ", columnsNumber);
         for (int i = 0; i < columnsNumber; i++) {
+        	logger.debug("i: {} ", i);
             if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer")) {
                 logger.debug("string is numeric!!!: {} ", rsmd.getColumnName(i+1));
                 String id = "http://rdf.semagrow.org/pgm/antru/resource/" + r.getValue(i);
@@ -50,7 +50,10 @@ public final class BindingSetOpsImpl implements BindingSetOps {
             	throw new SQLException();
             }
             logger.debug(" {} as {} ", r.getValue(i), rsmd.getColumnName(i+1));
-
+        }
+        
+        for (Map.Entry<String,String> binding : bindingVars.entrySet()) {
+        	result.addBinding(binding.getKey(), vf.createIRI(binding.getValue()));
         }
         return result;
     }

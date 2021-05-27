@@ -65,7 +65,8 @@ public class PostGISQueryStringUtil {
 	}
 	
 	public static String buildSelect(Set<String> freeVars, Map<String,String> bindingVars, 
-			Set<String> selectSet, Set<String> fromSet, Set<String> whereSet) {
+			Map<String,String> extraBindingVars, Set<String> selectSet, 
+			Set<String> fromSet, Set<String> whereSet) {
 //		Set<String> selectList = new HashSet<String>();
 //		Set<String> fromList = new HashSet<String>();
 //		Set<String> whereList = new HashSet<String>();
@@ -106,7 +107,7 @@ public class PostGISQueryStringUtil {
 			}
 			
 			if (freeVars.contains(types.getValue())) {
-				bindingVars.put(types.getValue(), TYPE_URI);
+				extraBindingVars.put(types.getValue(), TYPE_URI);
 			}
 			else {
 				if (types.getValue().equals(TYPE_URI))
@@ -127,7 +128,8 @@ public class PostGISQueryStringUtil {
 	}
 	
 	
-	public static String buildSQLQuery(TupleExpr expr, Set<String> freeVars, List<String> tables, BindingSet bindings) {
+	public static String buildSQLQuery(TupleExpr expr, Set<String> freeVars, List<String> tables, 
+			BindingSet bindings, Map<String,String> extraBindingVars) {
 		
 		List<String> triples = computeTriples(expr);
 //		List<String> filterInfo = computeFilterVars(expr);
@@ -161,14 +163,7 @@ public class PostGISQueryStringUtil {
 		Set<String> select = new HashSet<String>();
 		Set<String> from = new HashSet<String>();
 		Set<String> where = new HashSet<String>();
-		String query = buildSelect(freeVars, bindingVars, select, from, where);
-		
-		
-		
-		
-		
-		
-		
+		String query = buildSelect(freeVars, bindingVars, extraBindingVars, select, from, where);
 		
 		
 //		List<String> select = new ArrayList<String>();
