@@ -113,7 +113,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			Stream<Record> rs = client.execute(sqlQuery);
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, tables);
+					return BindingSetOpsImpl.transform(r);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();
@@ -176,7 +176,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			Stream<Record> rs = client.execute(sqlQuery);
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, tables);
+					return BindingSetOpsImpl.transform(r);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();

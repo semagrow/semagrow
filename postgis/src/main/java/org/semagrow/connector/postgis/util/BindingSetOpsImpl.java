@@ -22,7 +22,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
-    public static final BindingSet transform(Record r, List<String> tables) throws SQLException {
+    public static final BindingSet transform(Record r) throws SQLException {
 
         ResultSet rs = r.intoResultSet();
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -31,48 +31,19 @@ public final class BindingSetOpsImpl implements BindingSetOps {
         QueryBindingSet result = new QueryBindingSet();
         String tempColumnName = null, tempColumnValue = null;
         logger.debug("columnsNumber::::::::::::::::::::::: {} ", columnsNumber);
-        logger.debug("tables::::::::::::::::::::::: {} ", tables.toString());
         for (int i = 0; i < columnsNumber; i++) {
             if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer")) {
                 logger.debug("string is numeric!!!: {} ", rsmd.getColumnName(i+1));
-                logger.debug("tables[{}]: {} ", i, tables.get(i));
-                if (tables.get(i).equals("?")) {
-                    tempColumnName = rsmd.getColumnName(i+1);
-                    tempColumnValue = r.getValue(i) instanceof String ? (String) r.getValue(i) : r.getValue(i).toString();
-                } else {
-                    result.addBinding(
-                            rsmd.getColumnName(i+1),
-                            vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i) + "/geometry/" + r.getValue(i) + "")
-                    );
-                }
-                continue;
+                String id = "http://rdf.semagrow.org/pgm/antru/resource/" + r.getValue(i);
+                result.addBinding(rsmd.getColumnName(i+1), vf.createIRI(id));
             }
-            if (tempColumnName != null && tempColumnValue != null) {
-                logger.debug("tables[{}]: {} ", i, tables.get(i));
-                if (((String) r.getValue(i)).contains("POINT")) {
-                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/geometry/" + tempColumnValue + ""));
-                } else if (((String) r.getValue(i)).contains("MULTIPOLYGON")) {
-                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/geometry/" + tempColumnValue + ""));
-                } else if (((String) r.getValue(i)).contains("POLYGON")) {
-                    result.addBinding(tempColumnName, vf.createIRI("http://rdf.semagrow.org/pgm/antru/resource/" + tempColumnValue + ""));
-                }
-                tempColumnName = tempColumnValue = null;
-            }
-//						logger.debug("columnClassName:: {} ", rsmd.getColumnClassName(i+1));
-//						logger.debug("columnLabel:: {} ", rsmd.getColumnLabel(i+1));
-//						logger.debug("SchemaName:: {} ", rsmd.getSchemaName(i+1));
-//						logger.debug("TableName:: {} ", rsmd.getTableName(i+1));
-//						logger.debug("CatalogName:: {} ", rsmd.getCatalogName(i+1));
-            logger.debug("columnName:: {} ", rsmd.getColumnName(i+1));
-            logger.debug("columnValue:: {} ", r.getValue(i));
-            
-            if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
-            	String geom = "\"" + (String) r.getValue(i) + "\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>";
-            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(geom));
+            else if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
+            	String wkt = "\"" + (String) r.getValue(i) + "\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>";
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(wkt));
             }
             else if (rsmd.getColumnClassName(i+1).equals("java.lang.Double")) {
-            	String dist = "\"" + (Double) r.getValue(i) + "\"^^<http://www.w3.org/2001/XMLSchema#double>";
-            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(dist));
+            	String distance = "\"" + (Double) r.getValue(i) + "\"^^<http://www.w3.org/2001/XMLSchema#double>";
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(distance));
             }
             else {
             	logger.error("java.lang.ClassCastException: {} is {}", rsmd.getColumnName(i+1), rsmd.getColumnClassName(i+1));
@@ -83,6 +54,68 @@ public final class BindingSetOpsImpl implements BindingSetOps {
         }
         return result;
     }
+    
+//    public static final BindingSet transform(Record r, List<String> tables) throws SQLException {
+//
+//        ResultSet rs = r.intoResultSet();
+//        ResultSetMetaData rsmd = rs.getMetaData();
+//        int columnsNumber = rsmd.getColumnCount();
+//
+//        QueryBindingSet result = new QueryBindingSet();
+//        String tempColumnName = null, tempColumnValue = null;
+//        logger.debug("columnsNumber::::::::::::::::::::::: {} ", columnsNumber);
+//        logger.debug("tables::::::::::::::::::::::: {} ", tables.toString());
+//        for (int i = 0; i < columnsNumber; i++) {
+//            if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer")) {
+//                logger.debug("string is numeric!!!: {} ", rsmd.getColumnName(i+1));
+//                logger.debug("tables[{}]: {} ", i, tables.get(i));
+//                if (tables.get(i).equals("?")) {
+//                    tempColumnName = rsmd.getColumnName(i+1);
+//                    tempColumnValue = r.getValue(i) instanceof String ? (String) r.getValue(i) : r.getValue(i).toString();
+//                } else {
+//                    result.addBinding(
+//                            rsmd.getColumnName(i+1),
+//                            vf.createIRI("http://deg.iit.demokritos.gr/" + tables.get(i) + "/geometry/" + r.getValue(i) + "")
+//                    );
+//                }
+//                continue;
+//            }
+//            if (tempColumnName != null && tempColumnValue != null) {
+//                logger.debug("tables[{}]: {} ", i, tables.get(i));
+//                if (((String) r.getValue(i)).contains("POINT")) {
+//                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/lucas/geometry/" + tempColumnValue + ""));
+//                } else if (((String) r.getValue(i)).contains("MULTIPOLYGON")) {
+//                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/geometry/" + tempColumnValue + ""));
+//                } else if (((String) r.getValue(i)).contains("POLYGON")) {
+//                    result.addBinding(tempColumnName, vf.createIRI("http://rdf.semagrow.org/pgm/antru/resource/" + tempColumnValue + ""));
+//                }
+//                tempColumnName = tempColumnValue = null;
+//            }
+////						logger.debug("columnClassName:: {} ", rsmd.getColumnClassName(i+1));
+////						logger.debug("columnLabel:: {} ", rsmd.getColumnLabel(i+1));
+////						logger.debug("SchemaName:: {} ", rsmd.getSchemaName(i+1));
+////						logger.debug("TableName:: {} ", rsmd.getTableName(i+1));
+////						logger.debug("CatalogName:: {} ", rsmd.getCatalogName(i+1));
+//            logger.debug("columnName:: {} ", rsmd.getColumnName(i+1));
+//            logger.debug("columnValue:: {} ", r.getValue(i));
+//            
+//            if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
+//            	String geom = "\"" + (String) r.getValue(i) + "\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>";
+//            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(geom));
+//            }
+//            else if (rsmd.getColumnClassName(i+1).equals("java.lang.Double")) {
+//            	String dist = "\"" + (Double) r.getValue(i) + "\"^^<http://www.w3.org/2001/XMLSchema#double>";
+//            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(dist));
+//            }
+//            else {
+//            	logger.error("java.lang.ClassCastException: {} is {}", rsmd.getColumnName(i+1), rsmd.getColumnClassName(i+1));
+//            	throw new SQLException();
+//            }
+//            logger.debug(" {} as {} ", r.getValue(i), rsmd.getColumnName(i+1));
+//
+//        }
+//        return result;
+//    }
 	
     /**
      * Merge two bindingSet into one. If some bindings of the second set refer to
