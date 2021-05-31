@@ -25,21 +25,20 @@ import org.slf4j.LoggerFactory;
 
 public class PostGISQueryStringUtil {
 	
-	private static Map<String, String> wktMap = new HashMap<String, String>();
-	private static Map<String, String> typeMap = new HashMap<String, String>();
+//	private static Map<String, String> wktMap = new HashMap<String, String>();
+//	private static Map<String, String> typeMap = new HashMap<String, String>();
 	
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
-	private static String DBNAME;
-	private static String TYPE_URI = "http://rdf.semagrow.org/pgm/" + DBNAME + "/geometry";
+	private static String TYPE_URI;
 	private static String INDEX_BINDING_NAME = ".id";
 	private static String WKT_BINDING_NAME = ".wkt";
-	private static String DEFAULT_TABLE_NAME = " geometries ";
+	private static String DEFAULT_TABLE_NAME = "geometries ";
 	private static boolean ONE_TABLE = true;
-	private static String SRID = ", 4326))";
+	private static String SRID = ", 4326)";
 	private static String ST_ASTEXT = "ST_AsText(";
 	private static String ST_EQUALS = "ST_Equals(";
 	private static String ST_DISTANCE = "ST_Distance(";
-	private static String ST_GEOM_FROM_TEXT = ", ST_GeomFromText(";
+	private static String ST_GEOM_FROM_TEXT = "ST_GeomFromText(";
 	private static String ST_GEOGR_FROM_TEXT = "ST_GeographyFromText(";	
 	private static String SELECT = "SELECT ";
 	private static String FROM = " FROM ";
@@ -50,8 +49,15 @@ public class PostGISQueryStringUtil {
 	private static String AS = " AS ";
 	private static String G = "table";
 	
+	private static void typeURI(String dbname) {
+		TYPE_URI = "http://rdf.semagrow.org/pgm/" + dbname + "/geometry";
+	}
 	
-	public static void createTripleMaps(List<String> triples) {
+	private static String geomFromText(String a, String b) {
+		return "ST_GeomFromText(" + a + ", " + SRID + ")";
+	}
+	
+	public static void createTripleMaps(List<String> triples, Map<String, String> wktMap, Map<String, String> typeMap) {
 		int i = 0;
 		while (i < triples.size()) {
 			if (triples.get(i+1).contains("#asWKT")) {
@@ -67,13 +73,15 @@ public class PostGISQueryStringUtil {
 		logger.debug("typeMap: {}", typeMap);
 	}
 	
-	public static String buildSelect(Set<String> freeVars, Map<String,String> bindingVars, 
-			Map<String,String> extraBindingVars, Set<String> selectSet, 
-			Set<String> fromSet, Set<String> whereSet) {
+	public static String buildSimpleSQLQuery(Set<String> freeVars, Map<String,String> bindingVars, 
+			Map<String,String> extraBindingVars, 
+			Map<String, String> wktMap, Map<String, String> typeMap, 
+			Set<String> selectSet, Set<String> fromSet, Set<String> whereSet) {
 //		Set<String> selectList = new HashSet<String>();
 //		Set<String> fromList = new HashSet<String>();
 //		Set<String> whereList = new HashSet<String>();
 		int i = 0;
+		
 		for (Entry<String, String> wkts : wktMap.entrySet()) {
 			if (freeVars.contains(wkts.getKey())) {
 				selectSet.add(G + i + INDEX_BINDING_NAME + AS + wkts.getKey());
@@ -88,7 +96,7 @@ public class PostGISQueryStringUtil {
 			}
 			else {
 				if (!freeVars.contains(wkts.getKey())) selectSet.add(G + i + INDEX_BINDING_NAME);
-				whereSet.add(ST_EQUALS + G + i + WKT_BINDING_NAME + ST_GEOM_FROM_TEXT + wkts.getValue().replace("\"", "\'") + SRID);
+				whereSet.add(ST_EQUALS + G + i + WKT_BINDING_NAME + COMMA_SEP + ST_GEOM_FROM_TEXT + wkts.getValue().replace("\"", "\'") + SRID + ")");
 			}
 			fromSet.add(DEFAULT_TABLE_NAME + G + i);
 			i++;
@@ -100,7 +108,7 @@ public class PostGISQueryStringUtil {
 			else {
 				if (freeVars.contains(types.getKey())) {
 					selectSet.add(G + i + INDEX_BINDING_NAME + AS + types.getKey());
-					bindingVars.put(types.getKey(), G+ i + INDEX_BINDING_NAME);
+					bindingVars.put(types.getKey(), G + i + INDEX_BINDING_NAME);
 				}
 				else {
 					selectSet.add(G + i + INDEX_BINDING_NAME);
@@ -134,7 +142,9 @@ public class PostGISQueryStringUtil {
 	public static String buildSQLQuery(TupleExpr expr, Set<String> freeVars, List<String> tables, 
 			BindingSet bindings, Map<String,String> extraBindingVars, String dbname) {
 		
-		DBNAME = dbname;
+		logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! buildSQLQuery");
+		
+		typeURI(dbname);
 		List<String> triples = computeTriples(expr);
 //		List<String> filterInfo = computeFilterVars(expr);
 //		List<String> bindInfo = computeBindVars(expr);
@@ -162,12 +172,15 @@ public class PostGISQueryStringUtil {
 		
 		logger.debug("triples 2: {}", triples.toString());
 		
-		createTripleMaps(triples);
+		Map<String, String> wktMap = new HashMap<String, String>();
+		Map<String, String> typeMap = new HashMap<String, String>();
+		createTripleMaps(triples, wktMap, typeMap);
 		
 		Set<String> select = new HashSet<String>();
 		Set<String> from = new HashSet<String>();
 		Set<String> where = new HashSet<String>();
-		String query = buildSelect(freeVars, bindingVars, extraBindingVars, select, from, where);
+		String query = buildSimpleSQLQuery(freeVars, bindingVars, extraBindingVars, 
+				wktMap, typeMap, select, from, where);
 		
 		
 //		List<String> select = new ArrayList<String>();
@@ -199,12 +212,12 @@ public class PostGISQueryStringUtil {
 //				}
 //				else {					// object
 //					if (freeVars.contains(part)) {	// free var as object
-//						select.add("ST_AsText(" + wkt + ") AS " + part);
+//						select.add(ST_ASTEXT + wkt + ") AS " + part);
 //						bindingVars.put(part, wkt);
 //						tables.add("-");
 //					}
 //					else {							// binding var as object
-//						where.add("ST_Equals(t" + place + WKT_BINDING_NAME + ", ST_GeomFromText('" + part + "',4326))");
+//						where.add("ST_Equals(t" + place + WKT_BINDING_NAME + COMMA_SEP + ST_GEOM_FROM_TEXT + "'" + part + "'" + SRID + ")");
 //						if (tables.get(place/3 - 1).equals("?"))
 //							tables.remove(place/3 - 1);
 //						if (part.contains("POINT")) {
@@ -328,6 +341,8 @@ public class PostGISQueryStringUtil {
 	
 	public static String buildSQLQueryUnion(TupleExpr expr, Set<String> freeVars, List<String> tables, List<BindingSet> bindings, Collection<String> relevantBindingNames) {
 		
+		logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! buildSQLQueryUNION !!!!!!!!!!!!!!!!!!");
+		
 		List<String> triples = computeTriples(expr);
 		List<String> filterInfo = computeFilterVars(expr);
 		List<String> bindInfo = computeBindVars(expr);
@@ -393,12 +408,12 @@ public class PostGISQueryStringUtil {
 				}
 				else {					// object
 					if (freeVars.contains(part)) {
-						select.add("ST_AsText(" + wkt + ") AS " + part);
+						select.add(ST_ASTEXT + wkt + ") AS " + part);
 						bindingVars.put(part, wkt);
 						tables.add("-");
 					}
 					else {
-						where.add("ST_Equals(t" + place + WKT_BINDING_NAME + ", ST_GeomFromText('" + part + "',4326))");
+						where.add("ST_Equals(t" + place + WKT_BINDING_NAME + COMMA_SEP + ST_GEOM_FROM_TEXT + "'" + part + "'" + SRID + ")");
 						if (tables.get(place/3 - 1).equals("?"))
 							tables.remove(place/3 - 1);
 						if (part.contains("POINT")) {
@@ -570,10 +585,10 @@ public class PostGISQueryStringUtil {
 			}
 			else {
 				function = filterInfo.get(i);
-				if (function.equals("distance")) dist += "ST_Distance(";
+				if (function.equals("distance")) dist += ST_DISTANCE;
 				type = filterInfo.get(i+3);
-				if (type.equals("metre")) dist += "ST_GeographyFromText(ST_AsText(";
-				else if (type.equals("degree")) dist += "ST_GeomFromText(ST_AsText(";
+				if (type.equals("metre")) dist += ST_GEOGR_FROM_TEXT + ST_ASTEXT;
+				else if (type.equals("degree")) dist += ST_GEOM_FROM_TEXT + ST_ASTEXT;
 				if (bindingVars.containsKey(filterInfo.get(i+1))) {
 					String var = bindingVars.get(filterInfo.get(i+1));
 					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
@@ -586,8 +601,8 @@ public class PostGISQueryStringUtil {
 					triples.add(null); triples.add(null); triples.add(null);
 				}
 				logger.debug("--- dist: {}", dist);
-				if (type.equals("metre")) dist += ")), ST_GeographyFromText(ST_AsText(";
-				else if (type.equals("degree")) dist += "), 4326), ST_GeomFromText(ST_AsText(";
+				if (type.equals("metre")) dist += ")), " + ST_GEOGR_FROM_TEXT + ST_ASTEXT;
+				else if (type.equals("degree")) dist += ")" + SRID + COMMA_SEP + ST_GEOM_FROM_TEXT + ST_ASTEXT;
 				if (bindingVars.containsKey(filterInfo.get(i+2))) {
 					String var = bindingVars.get(filterInfo.get(i+2));
 					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
@@ -600,7 +615,7 @@ public class PostGISQueryStringUtil {
 					triples.add(null); triples.add(null); triples.add(null);
 				}
 				if (type.equals("metre")) dist += "))";
-				else if (type.equals("degree")) dist += "), 4326)";
+				else if (type.equals("degree")) dist += ")" + SRID;
 				dist += ") ";
 				
 				// Gathering binds
