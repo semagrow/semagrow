@@ -1,5 +1,6 @@
 package org.semagrow.selector;
 
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.semagrow.model.vocabulary.SEVOD;
 import org.semagrow.model.vocabulary.VOID;
 import org.eclipse.rdf4j.model.Resource;
@@ -30,6 +31,12 @@ public abstract class VOIDBase {
 
     protected void setRepository(Repository voidRepository) {
         this.voidRepository = voidRepository;
+    }
+
+    protected Set<Resource> getAllDatasets() {
+        String q = "SELECT ?dataset { ?dataset <" + VOID.SPARQLENDPOINT + "> ?endpoint. }";
+        QueryBindingSet bindings = new QueryBindingSet();
+        return evalQuerySet(q, bindings, "dataset");
     }
 
     protected Set<Resource> getMatchingDatasetsOfPredicate(IRI pred) {

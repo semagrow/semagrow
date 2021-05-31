@@ -71,16 +71,16 @@ public class VOIDSourceSelector extends VOIDBase
         Value oVal = pattern.getObjectVar().getValue();
         Value pVal = pattern.getPredicateVar().getValue();
 
-        Set<Resource> datasets = new HashSet<Resource>();
+        Set<Resource> datasets = getAllDatasets();
 
         if (pVal != null && pVal instanceof IRI)
-            datasets.addAll(getMatchingDatasetsOfPredicate((IRI)pVal));
+            datasets.retainAll(getMatchingDatasetsOfPredicate((IRI)pVal));
 
         if (sVal != null && sVal instanceof IRI)
-            datasets.addAll(getMatchingDatasetsOfSubject((IRI)sVal));
+            datasets.retainAll(getMatchingDatasetsOfSubject((IRI)sVal));
 
         if (oVal != null && oVal instanceof IRI)
-            datasets.addAll(getMatchingDatasetsOfObject((IRI)oVal));
+            datasets.retainAll(getMatchingDatasetsOfObject((IRI)oVal));
 
         return datasets;
     }
