@@ -85,12 +85,31 @@ public class SemagrowPostgisTest extends TestCase {
 				"PREFIX pgm1: <http://rdf.semagrow.org/pgm/conn1/>" +
 				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/conn2/>" +
 				"SELECT * WHERE {\n" +
+				"  <http://rdf.semagrow.org/pgm/conn1/resource/9> geo:asWKT ?w1 .\n" + 
+				"  <http://rdf.semagrow.org/pgm/conn2/resource/101> geo:asWKT ?w2 .\n" + 
+//				"  FILTER(geof:distance(?w1,?w2,uom:metre) < 1) .\n" +
+				"}";
+		
+		String q8 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX pgm1: <http://rdf.semagrow.org/pgm/conn1/>" +
+				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/conn2/>" +
+				"SELECT * WHERE {\n" +
 				"  ?g1 rdf:type pgm1:geometry .\n" + 
 				"  ?g2 rdf:type pgm2:geometry .\n" + 
 				"  ?g1 geo:asWKT ?w1 .\n" + 
 				"  ?g2 geo:asWKT ?w2 .\n" + 
+//				"  FILTER regex(?g1, \"<http://rdf.semagrow.org/pgm/conn1/resource/9>\") .\n" +
+//				"  FILTER regex(?g2, \"<http://rdf.semagrow.org/pgm/conn2/resource/101\") .\n" +
+				"  FILTER(str(?g2) = \"http://rdf.semagrow.org/pgm/conn2/resource/101\") .\n" +
+				"  FILTER(str(?g1) = \"http://rdf.semagrow.org/pgm/conn1/resource/9\") .\n" +
 //				"  FILTER(geof:distance(?w1,?w2,uom:metre) < 1) .\n" +
+//				"  FILTER(geof:distance(?w1,?w2,uom:metre) = 10) .\n" +
 				"}";
+		
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
@@ -100,7 +119,7 @@ public class SemagrowPostgisTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q7);
+		TupleQuery query = conn.prepareTupleQuery(q8);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);

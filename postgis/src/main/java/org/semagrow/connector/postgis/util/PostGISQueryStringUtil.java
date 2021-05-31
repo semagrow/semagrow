@@ -85,7 +85,7 @@ public class PostGISQueryStringUtil {
 		for (Entry<String, String> wkts : wktMap.entrySet()) {
 			if (freeVars.contains(wkts.getKey())) {
 				selectSet.add(G + i + INDEX_BINDING_NAME + AS + wkts.getKey());
-				bindingVars.put(wkts.getKey(), G+ i + INDEX_BINDING_NAME);
+				bindingVars.put(wkts.getKey(), G + i + INDEX_BINDING_NAME);
 			}
 			else {
 				whereSet.add(G + i + INDEX_BINDING_NAME + " = " + decomposeToId(wkts.getKey()));
@@ -148,7 +148,7 @@ public class PostGISQueryStringUtil {
 		List<String> triples = computeTriples(expr);
 //		List<String> filterInfo = computeFilterVars(expr);
 //		List<String> bindInfo = computeBindVars(expr);
-		
+			
 		// remove all triples with predicate different than #asWKT
 		keepWKTAndTypePredicates(triples);
 		if (triples.isEmpty()) return null;
@@ -162,7 +162,7 @@ public class PostGISQueryStringUtil {
 		Set<String> bindingNames = bindings.getBindingNames();
 		for (Object binding: bindingNames) {
 			logger.debug("bindings: {} - {}", binding, bindings.getValue((String)binding));
-			if (triples.contains(binding.toString())) {
+			while (triples.contains(binding.toString())) {
 				int index = triples.indexOf(binding);
 				triples.remove(index);
 				triples.add(index, bindings.getValue((String)binding).toString());
@@ -171,6 +171,44 @@ public class PostGISQueryStringUtil {
 		}
 		
 		logger.debug("triples 2: {}", triples.toString());
+		logger.debug("bindingVars 2: {}", bindingVars);
+		
+		
+		String var1, var2, compare;
+		Set<List<String>> allFilters = computeFilterVars(expr);
+		for (List<String> filterInfo : allFilters) {
+			if (filterInfo.size() == 3) {
+				var1 = filterInfo.get(1);
+				var2 = filterInfo.get(2);
+				if ((freeVars.contains(var1) && freeVars.contains(var2)) || freeVars.contains(var2)) {
+					while (triples.contains(var2)) {
+						int index = triples.indexOf(var2);
+						triples.remove(index);
+						triples.add(index, var1);
+					}
+					if (!bindingVars.get(var1).isEmpty() && !bindingVars.get(var2).isEmpty()) 
+						logger.debug("what happens if bindingVars contains both variables?");
+				}
+				else if (freeVars.contains(var1)) {
+					while (triples.contains(var1)) {
+						int index = triples.indexOf(var1);
+						triples.remove(index);
+						triples.add(index, var2);
+					}
+					bindingVars.remove(bindingVars.remove(var1));
+				}
+				else {
+					logger.debug("what happens if both are constant values");
+				}
+			}
+		}
+		
+		logger.debug("triples 3: {}", triples.toString());
+		logger.debug("bindingVars 3: {}", bindingVars);
+		
+		
+		
+		
 		
 		Map<String, String> wktMap = new HashMap<String, String>();
 		Map<String, String> typeMap = new HashMap<String, String>();
@@ -344,7 +382,7 @@ public class PostGISQueryStringUtil {
 		logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! buildSQLQueryUNION !!!!!!!!!!!!!!!!!!");
 		
 		List<String> triples = computeTriples(expr);
-		List<String> filterInfo = computeFilterVars(expr);
+		Set<List<String>> filterInfo = computeFilterVars(expr);
 		List<String> bindInfo = computeBindVars(expr);
 		
 		if (freeVars.size() - 1 > triples.size() / 3)  {	//throw exception ????
@@ -556,87 +594,95 @@ public class PostGISQueryStringUtil {
 	
 	
 	protected static void computeBindsAndFilters(TupleExpr expr, List<String> triples, Set<String> binds, List<String> filters, List<String> tables, Map<String,String> bindingVars) {
-		List<String> filterInfo = computeFilterVars(expr);
+		Set<List<String>> allFilters = computeFilterVars(expr);
 		List<String> bindInfo = computeBindVars(expr);
 		
-		logger.debug("filter variables: {} ", filterInfo);
+		logger.debug("filter variables: {} ", allFilters);
 		logger.debug("bind variables: {} ", bindInfo);
 		
 		String dist = "";
 		String compare = "", function = "", type = "";
 		int i = 0;
-		while (i < filterInfo.size()) {
-			if (filterInfo.get(i).matches("[0-9]+")) {
-				logger.debug("filterInfo.get(i): {}", filterInfo.get(i));
-				dist += filterInfo.get(i);
-				i++;
-				if (!dist.contains(compare)) {
-//					binds.add(dist + "AS " + bv.get(b-1));
-					dist += " " + compare + " ";
-				}
-				else {
-					filters.add(dist);
-					dist = "";
-				}
+		for (List<String> filterInfo : allFilters) {
+			if (filterInfo.size() == 3) {
+				logger.debug("before bindingVars: {}", bindingVars);
+				bindingVars.replace(filterInfo.get(1), filterInfo.get(2));
+				logger.debug("after bindingVars: {}", bindingVars);
+				continue;
 			}
-			else if (filterInfo.get(i).matches("[!<=>]+")) {
-				compare = filterInfo.get(i);
-				i++;
-			}
-			else {
-				function = filterInfo.get(i);
-				if (function.equals("distance")) dist += ST_DISTANCE;
-				type = filterInfo.get(i+3);
-				if (type.equals("metre")) dist += ST_GEOGR_FROM_TEXT + ST_ASTEXT;
-				else if (type.equals("degree")) dist += ST_GEOM_FROM_TEXT + ST_ASTEXT;
-				if (bindingVars.containsKey(filterInfo.get(i+1))) {
-					String var = bindingVars.get(filterInfo.get(i+1));
-					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
-					logger.debug("--- bindingVars: {}", var);
-					dist += var;
-				}
-				else {
-					bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+WKT_BINDING_NAME);
-					dist += bindingVars.get(filterInfo.get(i+1));
-					triples.add(null); triples.add(null); triples.add(null);
-				}
-				logger.debug("--- dist: {}", dist);
-				if (type.equals("metre")) dist += ")), " + ST_GEOGR_FROM_TEXT + ST_ASTEXT;
-				else if (type.equals("degree")) dist += ")" + SRID + COMMA_SEP + ST_GEOM_FROM_TEXT + ST_ASTEXT;
-				if (bindingVars.containsKey(filterInfo.get(i+2))) {
-					String var = bindingVars.get(filterInfo.get(i+2));
-					if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
-					logger.debug("--- bindingVars: {}", var);
-					dist += var;
-				}
-				else {
-					bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+WKT_BINDING_NAME);
-					dist += bindingVars.get(filterInfo.get(i+2));
-					triples.add(null); triples.add(null); triples.add(null);
-				}
-				if (type.equals("metre")) dist += "))";
-				else if (type.equals("degree")) dist += ")" + SRID;
-				dist += ") ";
-				
-				// Gathering binds
-				for (int b = 0; b < bindInfo.size(); b += 5) {
-					if (filterInfo.get(i).equals(bindInfo.get(b+1)) && filterInfo.get(i+1).equals(bindInfo.get(b+2)) && filterInfo.get(i+2).equals(bindInfo.get(b+3)) && filterInfo.get(i+3).equals(bindInfo.get(b+4))) {
-						if (!dist.contains(compare)) binds.add(dist + "AS " + bindInfo.get(b));
-						else binds.add(dist.substring(dist.lastIndexOf(compare) + 2) + "AS " + bindInfo.get(b));
-						break;
+			while (i < filterInfo.size()) {
+				if (filterInfo.get(i).matches("[0-9]+")) {
+					logger.debug("filterInfo.get(i): {}", filterInfo.get(i));
+					dist += filterInfo.get(i);
+					i++;
+					if (!dist.contains(compare)) {
+	//					binds.add(dist + "AS " + bv.get(b-1));
+						dist += " " + compare + " ";
+					}
+					else {
+						filters.add(dist);
+						dist = "";
 					}
 				}
-				
-				// Gathering filters
-				if (!dist.contains(compare)) {
-					dist += compare + " ";
+				else if (filterInfo.get(i).matches("[!<=>]+")) {
+					compare = filterInfo.get(i);
+					i++;
 				}
 				else {
-					filters.add(dist);
-					dist = "";
+					function = filterInfo.get(i);
+					if (function.equals("distance")) dist += ST_DISTANCE;
+					type = filterInfo.get(i+3);
+					if (type.equals("metre")) dist += ST_GEOGR_FROM_TEXT + ST_ASTEXT;
+					else if (type.equals("degree")) dist += ST_GEOM_FROM_TEXT + ST_ASTEXT;
+					if (bindingVars.containsKey(filterInfo.get(i+1))) {
+						String var = bindingVars.get(filterInfo.get(i+1));
+						if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
+						logger.debug("--- bindingVars: {}", var);
+						dist += var;
+					}
+					else {
+						bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+WKT_BINDING_NAME);
+						dist += bindingVars.get(filterInfo.get(i+1));
+						triples.add(null); triples.add(null); triples.add(null);
+					}
+					logger.debug("--- dist: {}", dist);
+					if (type.equals("metre")) dist += ")), " + ST_GEOGR_FROM_TEXT + ST_ASTEXT;
+					else if (type.equals("degree")) dist += ")" + SRID + COMMA_SEP + ST_GEOM_FROM_TEXT + ST_ASTEXT;
+					if (bindingVars.containsKey(filterInfo.get(i+2))) {
+						String var = bindingVars.get(filterInfo.get(i+2));
+						if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
+						logger.debug("--- bindingVars: {}", var);
+						dist += var;
+					}
+					else {
+						bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+WKT_BINDING_NAME);
+						dist += bindingVars.get(filterInfo.get(i+2));
+						triples.add(null); triples.add(null); triples.add(null);
+					}
+					if (type.equals("metre")) dist += "))";
+					else if (type.equals("degree")) dist += ")" + SRID;
+					dist += ") ";
+					
+					// Gathering binds
+					for (int b = 0; b < bindInfo.size(); b += 5) {
+						if (filterInfo.get(i).equals(bindInfo.get(b+1)) && filterInfo.get(i+1).equals(bindInfo.get(b+2)) && filterInfo.get(i+2).equals(bindInfo.get(b+3)) && filterInfo.get(i+3).equals(bindInfo.get(b+4))) {
+							if (!dist.contains(compare)) binds.add(dist + "AS " + bindInfo.get(b));
+							else binds.add(dist.substring(dist.lastIndexOf(compare) + 2) + "AS " + bindInfo.get(b));
+							break;
+						}
+					}
+					
+					// Gathering filters
+					if (!dist.contains(compare)) {
+						dist += compare + " ";
+					}
+					else {
+						filters.add(dist);
+						dist = "";
+					}
+					
+					i += 4;
 				}
-				
-				i += 4;
 			}
 		}
 	}
@@ -680,15 +726,17 @@ public class PostGISQueryStringUtil {
 	}
 	
 	
-	protected static List<String> computeFilterVars(TupleExpr serviceExpression) {
-		final List<String> res = new ArrayList<String>();
+	protected static Set<List<String>> computeFilterVars(TupleExpr serviceExpression) {
+		final Set<List<String>> allRes = new HashSet<List<String>>();
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 			
 			@Override
 			public void meet(Compare node) throws RuntimeException {
+				final List<String> res = new ArrayList<String>();
 				// take all info about compare nodes, i.e. operation, vars, values etc
 				String signature = node.getSignature();
 				res.add(signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
+				logger.debug("--- signature: {}", signature);
 				
 				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 					
@@ -696,30 +744,42 @@ public class PostGISQueryStringUtil {
 					public void meet(FunctionCall node) throws RuntimeException {
 						String function = node.getSignature();
 						res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
+						logger.debug("--- function: {}", function);
 						
 						node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 							@Override
 							public void meet(Var node) throws RuntimeException {
 								res.add(node.getName());
+								logger.debug("--- CHILD node.getName(): {}", node.getName());
 							}
 							
 							@Override
 							public void meet(ValueConstant node) throws RuntimeException {
 								String type = node.getValue().toString();
 								res.add(type.substring(type.lastIndexOf("/") + 1));
+								logger.debug("--- type: {}", type);
 							}
 						});
+					}
+					
+					@Override
+					public void meet(Var node) throws RuntimeException {
+						res.add(node.getName());
+						logger.debug("--- OUTSIDE node.getName(): {}", node.getName());
 					}
 					
 					@Override
 					public void meet(ValueConstant node) throws RuntimeException {
 						String value = node.getValue().toString();
 						res.add(value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
+						logger.debug("--- value: {}", value);
 					}
 				});
+				
+				allRes.add(res);
 			}
 		});
-		return res;
+		return allRes;
 	}
 	
 	
