@@ -29,7 +29,8 @@ public class PostGISQueryStringUtil {
 	private static Map<String, String> typeMap = new HashMap<String, String>();
 	
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
-	private static String TYPE_URI = "http://rdf.semagrow.org/pgm/antru/geometry";
+	private static String DBNAME;
+	private static String TYPE_URI = "http://rdf.semagrow.org/pgm/" + DBNAME + "/geometry";
 	private static String INDEX_BINDING_NAME = ".id";
 	private static String WKT_BINDING_NAME = ".wkt";
 	private static String DEFAULT_TABLE_NAME = " geometries ";
@@ -37,7 +38,9 @@ public class PostGISQueryStringUtil {
 	private static String SRID = ", 4326))";
 	private static String ST_ASTEXT = "ST_AsText(";
 	private static String ST_EQUALS = "ST_Equals(";
-	private static String ST_GEOM_FROM_TEXT = ", ST_GeomFromText('";
+	private static String ST_DISTANCE = "ST_Distance(";
+	private static String ST_GEOM_FROM_TEXT = ", ST_GeomFromText(";
+	private static String ST_GEOGR_FROM_TEXT = "ST_GeographyFromText(";	
 	private static String SELECT = "SELECT ";
 	private static String FROM = " FROM ";
 	private static String WHERE = " WHERE ";
@@ -85,7 +88,7 @@ public class PostGISQueryStringUtil {
 			}
 			else {
 				if (!freeVars.contains(wkts.getKey())) selectSet.add(G + i + INDEX_BINDING_NAME);
-				whereSet.add(ST_EQUALS + G + i + WKT_BINDING_NAME + ST_GEOM_FROM_TEXT + wkts.getValue() + SRID);
+				whereSet.add(ST_EQUALS + G + i + WKT_BINDING_NAME + ST_GEOM_FROM_TEXT + wkts.getValue().replace("\"", "\'") + SRID);
 			}
 			fromSet.add(DEFAULT_TABLE_NAME + G + i);
 			i++;
@@ -129,8 +132,9 @@ public class PostGISQueryStringUtil {
 	
 	
 	public static String buildSQLQuery(TupleExpr expr, Set<String> freeVars, List<String> tables, 
-			BindingSet bindings, Map<String,String> extraBindingVars) {
+			BindingSet bindings, Map<String,String> extraBindingVars, String dbname) {
 		
+		DBNAME = dbname;
 		List<String> triples = computeTriples(expr);
 //		List<String> filterInfo = computeFilterVars(expr);
 //		List<String> bindInfo = computeBindVars(expr);

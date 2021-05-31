@@ -16,6 +16,7 @@ public class PostGISSite implements Site {
     private String endpoint;
     private String username;
     private String password;
+    private String dbname;
 
     public PostGISSite(IRI uri) {
         assert uri != null;
@@ -29,11 +30,13 @@ public class PostGISSite implements Site {
             this.username = matcher.group(1);
             this.password = matcher.group(2);
             this.endpoint = "jdbc:postgresql://" + matcher.group(3);
+//            this.dbname = matcher.group(4);	// is this correct ???
         }
         else {
             this.username = "postgres";
             this.password = "postgres";
             this.endpoint = uri.toString().replace("postgis://", "jdbc:postgresql://");
+            this.dbname = uri.toString().substring(uri.toString().lastIndexOf("/") + 1);
         }
     }
     
@@ -60,6 +63,10 @@ public class PostGISSite implements Site {
 
     public String getEndpoint() {
         return endpoint;
+    }
+    
+    public String getDatabaseName() {
+        return dbname;
     }
 
     @Override

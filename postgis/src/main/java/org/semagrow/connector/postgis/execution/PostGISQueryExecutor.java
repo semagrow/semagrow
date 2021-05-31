@@ -104,7 +104,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			List<String> tables = new ArrayList<String>();
 			Map<String,String> bindingVars = new HashMap<String, String>();
-			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings, bindingVars);
+			String dbname = site.getDatabaseName();
+			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings, bindingVars, dbname);
 			
 			if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
@@ -116,7 +117,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			Stream<Record> rs = client.execute(sqlQuery);
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, bindingVars);
+					return BindingSetOpsImpl.transform(r, dbname, bindingVars);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();
@@ -173,6 +174,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			String endpoint = site.getEndpoint();
 			String username = site.getUsername();
 			String password = site.getPassword();
+			String dbname = site.getDatabaseName();
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
 			
 			Map<String,String> bindingVars = new HashMap<String, String>();
@@ -181,7 +183,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			Stream<Record> rs = client.execute(sqlQuery);
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, bindingVars);
+					return BindingSetOpsImpl.transform(r, dbname, bindingVars);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();

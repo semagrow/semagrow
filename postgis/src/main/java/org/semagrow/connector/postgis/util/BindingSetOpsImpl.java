@@ -22,7 +22,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
-    public static final BindingSet transform(Record r, Map<String,String> bindingVars) throws SQLException {
+    public static final BindingSet transform(Record r, String dbname, Map<String,String> bindingVars) throws SQLException {
 
         ResultSet rs = r.intoResultSet();
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -34,7 +34,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
         	logger.debug("i: {} ", i);
             if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer")) {
                 logger.debug("string is numeric!!!: {} ", rsmd.getColumnName(i+1));
-                String id = "http://rdf.semagrow.org/pgm/antru/resource/" + r.getValue(i);
+                String id = "http://rdf.semagrow.org/pgm/" + dbname + "/resource/" + r.getValue(i);
                 result.addBinding(rsmd.getColumnName(i+1), vf.createIRI(id));
             }
             else if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
@@ -90,7 +90,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
 //                } else if (((String) r.getValue(i)).contains("MULTIPOLYGON")) {
 //                    result.addBinding(tempColumnName, vf.createIRI("http://deg.iit.demokritos.gr/invekos/geometry/" + tempColumnValue + ""));
 //                } else if (((String) r.getValue(i)).contains("POLYGON")) {
-//                    result.addBinding(tempColumnName, vf.createIRI("http://rdf.semagrow.org/pgm/antru/resource/" + tempColumnValue + ""));
+//                    result.addBinding(tempColumnName, vf.createIRI("http://rdf.semagrow.org/pgm/" + dbname + "/resource/" + tempColumnValue + ""));
 //                }
 //                tempColumnName = tempColumnValue = null;
 //            }
