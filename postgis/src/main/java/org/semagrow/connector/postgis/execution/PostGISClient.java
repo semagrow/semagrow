@@ -34,6 +34,12 @@ public class PostGISClient {
             instance.setCredentials(url, user, password);
             instance.connect();
         }
+        else {
+        	instance.close();
+        	instance = new PostGISClient();
+            instance.setCredentials(url, user, password);
+            instance.connect();
+        }
         return instance;
     }
     
@@ -75,6 +81,8 @@ public class PostGISClient {
     public Stream<Record> execute(String query) {
     	logger.debug("execute!!!");
         logger.debug("Sending query: {}", query);
-        return DSL.using(database).fetch(query).stream();
+        Stream<Record> results = DSL.using(database).fetch(query).stream();
+        instance.close();
+        return results;
     }
 }
