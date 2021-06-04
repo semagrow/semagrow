@@ -32,7 +32,7 @@ public class PostGISQueryStringUtil {
 	private static String TYPE_URI;
 	private static String INDEX_BINDING_NAME = ".id";
 	private static String WKT_BINDING_NAME = ".wkt";
-	private static String DEFAULT_TABLE_NAME = "geometries ";
+	private static String DEFAULT_TABLE_NAME = "geometries";
 	private static boolean ONE_TABLE = true;
 	private static String SRID = ", 4326)";
 	private static String ST_ASTEXT = "ST_AsText(";
@@ -98,7 +98,7 @@ public class PostGISQueryStringUtil {
 				if (!freeVars.contains(wkts.getKey())) selectSet.add(G + i + INDEX_BINDING_NAME);
 				whereSet.add(ST_EQUALS + G + i + WKT_BINDING_NAME + COMMA_SEP + ST_GEOM_FROM_TEXT + wkts.getValue().replace("\"", "\'") + SRID + ")");
 			}
-			fromSet.add(DEFAULT_TABLE_NAME + G + i);
+			fromSet.add(DEFAULT_TABLE_NAME + " " + G + i);
 			i++;
 		}
 		
@@ -132,8 +132,8 @@ public class PostGISQueryStringUtil {
 				+ serializeSet(fromSet, COMMA_SEP, FROM)
 				+ serializeSet(whereSet, AND_SEP, WHERE);
 		
-		logger.debug("bindingVars: {}", bindingVars);
-		logger.debug("query: {}", query);
+		logger.debug("bindingVars (simple sql query): {}", bindingVars);
+		logger.debug("query (simple sql query): {}", query);
 		
 		return query;
 	}
@@ -610,6 +610,13 @@ public class PostGISQueryStringUtil {
 				logger.debug("after bindingVars: {}", bindingVars);
 				continue;
 			}
+//			if (filterInfo.size() == 6) {
+//				if (filterInfo.get(1).equals("distance")) dist += ST_DISTANCE;
+//				if (filterInfo.get(4).equals("metre")) dist += ST_GEOGR_FROM_TEXT + ST_ASTEXT;
+//				else if (filterInfo.get(1).equals("degree")) dist += ST_GEOM_FROM_TEXT + ST_ASTEXT;
+//			}
+			
+			
 			while (i < filterInfo.size()) {
 				if (filterInfo.get(i).matches("[0-9]+")) {
 					logger.debug("filterInfo.get(i): {}", filterInfo.get(i));
@@ -629,6 +636,7 @@ public class PostGISQueryStringUtil {
 					i++;
 				}
 				else {
+					logger.debug("filterInfo: {} ", filterInfo);
 					function = filterInfo.get(i);
 					if (function.equals("distance")) dist += ST_DISTANCE;
 					type = filterInfo.get(i+3);
@@ -636,12 +644,12 @@ public class PostGISQueryStringUtil {
 					else if (type.equals("degree")) dist += ST_GEOM_FROM_TEXT + ST_ASTEXT;
 					if (bindingVars.containsKey(filterInfo.get(i+1))) {
 						String var = bindingVars.get(filterInfo.get(i+1));
-						if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
+						if (var.contains("^")) var = var.substring(1, var.indexOf("^"));
 						logger.debug("--- bindingVars: {}", var);
 						dist += var;
 					}
 					else {
-						bindingVars.put(filterInfo.get(i+1), "t"+(triples.size()+1)+WKT_BINDING_NAME);
+						bindingVars.put(filterInfo.get(i+1), "t" + (triples.size()+1) + WKT_BINDING_NAME);
 						dist += bindingVars.get(filterInfo.get(i+1));
 						triples.add(null); triples.add(null); triples.add(null);
 					}
@@ -649,13 +657,14 @@ public class PostGISQueryStringUtil {
 					if (type.equals("metre")) dist += ")), " + ST_GEOGR_FROM_TEXT + ST_ASTEXT;
 					else if (type.equals("degree")) dist += ")" + SRID + COMMA_SEP + ST_GEOM_FROM_TEXT + ST_ASTEXT;
 					if (bindingVars.containsKey(filterInfo.get(i+2))) {
+						logger.debug("filterInfo : {} ", filterInfo);
 						String var = bindingVars.get(filterInfo.get(i+2));
 						if (var.contains("^")) var = var.substring(0, var.indexOf("^"));
 						logger.debug("--- bindingVars: {}", var);
 						dist += var;
 					}
 					else {
-						bindingVars.put(filterInfo.get(i+2), "t"+(triples.size()+1)+WKT_BINDING_NAME);
+						bindingVars.put(filterInfo.get(i+2), "t" + (triples.size()+1) + WKT_BINDING_NAME);
 						dist += bindingVars.get(filterInfo.get(i+2));
 						triples.add(null); triples.add(null); triples.add(null);
 					}

@@ -113,8 +113,12 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			String password = site.getPassword();
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
 			
-			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
+//			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
+//			Stream<Record> rs = client.execute(sqlQuery);
+			
+			PostGISContextProvider client = new PostGISContextProvider(endpoint, username, password);
 			Stream<Record> rs = client.execute(sqlQuery);
+			
 			return Flux.fromStream(rs.map(r -> {
 				try {
 					return BindingSetOpsImpl.transform(r, dbname, bindingVars);
@@ -179,8 +183,12 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			Map<String,String> bindingVars = new HashMap<String, String>();
 			
-			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
+//			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
+//			Stream<Record> rs = client.execute(sqlQuery);
+			
+			PostGISContextProvider client = new PostGISContextProvider(endpoint, username, password);
 			Stream<Record> rs = client.execute(sqlQuery);
+			
 			return Flux.fromStream(rs.map(r -> {
 				try {
 					return BindingSetOpsImpl.transform(r, dbname, bindingVars);

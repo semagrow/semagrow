@@ -106,7 +106,7 @@ public class SemagrowPostgisTest extends TestCase {
 //				"  FILTER regex(?g2, \"<http://rdf.semagrow.org/pgm/conn2/resource/101\") .\n" +
 				"  FILTER(str(?g2) = \"http://rdf.semagrow.org/pgm/conn2/resource/101\") .\n" +
 				"  FILTER(str(?g1) = \"http://rdf.semagrow.org/pgm/conn1/resource/9\") .\n" +
-//				"  FILTER(geof:distance(?w1,?w2,uom:metre) < 1) .\n" +
+				"  FILTER(geof:distance(?w1,?w2,uom:metre) < 1000000) .\n" +
 //				"  FILTER(geof:distance(?w1,?w2,uom:metre) = 10) .\n" +
 				"}";
 		
