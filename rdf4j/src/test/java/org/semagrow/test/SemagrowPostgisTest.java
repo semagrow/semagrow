@@ -67,14 +67,14 @@ public class SemagrowPostgisTest extends TestCase {
 				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
 				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
-				"PREFIX pgm: <http://rdf.semagrow.org/pgm/conn1/>" +
-				"PREFIX geom: <http://rdf.semagrow.org/pgm/conn1/resource/>" +
+				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/conn2/>" +
+				"PREFIX geom1: <http://rdf.semagrow.org/pgm/conn1/resource/>" +
 				"SELECT * WHERE {\n" +
 //				"  ?g1 rdf:type pgm:geometry .\n" + 
-				"  geom:5 geo:asWKT ?w1 .\n" + 
-				"  ?g2 rdf:type ?pgm .\n" + 
+				"  geom1:5 geo:asWKT ?w1 .\n" + 
+				"  ?g2 rdf:type pgm2:geometry .\n" + 
 				"  ?g2 geo:asWKT ?w2 .\n" + 
-				"  FILTER(geof:distance(?w1,?w2,uom:metre) < 1) .\n" +
+				"  FILTER(geof:distance(?w1,?w2,uom:metre) < 1000000) .\n" +
 				"}";
 		
 		String q7 = "" +
@@ -110,6 +110,23 @@ public class SemagrowPostgisTest extends TestCase {
 //				"  FILTER(geof:distance(?w1,?w2,uom:metre) = 10) .\n" +
 				"}";
 		
+		String q9 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX pgm1: <http://rdf.semagrow.org/pgm/conn1/>" +
+				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/conn2/>" +
+				"PREFIX geom1: <http://rdf.semagrow.org/pgm/conn1/resource/>" +
+				"  SELECT * WHERE {\n" +
+				"  ?s2 rdf:type pgm2:geometry .\n" + 
+				"  ?s1 geo:asWKT ?w1 .\n" + 
+				"  ?s2 geo:asWKT ?w2 .\n" + 
+				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 100) .\n" + 
+//				"} VALUES ?s1 { geom1:5, geom1:9 }";
+				"}";
+
+		
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
@@ -119,7 +136,7 @@ public class SemagrowPostgisTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q8);
+		TupleQuery query = conn.prepareTupleQuery(q9);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
