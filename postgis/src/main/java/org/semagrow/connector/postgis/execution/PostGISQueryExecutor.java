@@ -172,17 +172,19 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		else {
         
 	        List<String> tables = new ArrayList<String>();
-	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindings, relevantBindingNames);
-			
+	        Map<String,String> bindingVars = new HashMap<String, String>();
+	        String dbname = site.getDatabaseName();
+	        
+	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindings, relevantBindingNames, bindingVars, dbname);
+	        
+	        
 	        if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
 			String username = site.getUsername();
 			String password = site.getPassword();
-			String dbname = site.getDatabaseName();
+			
 			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
-			
-			Map<String,String> bindingVars = new HashMap<String, String>();
-			
+						
 //			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
 //			Stream<Record> rs = client.execute(sqlQuery);
 			

@@ -122,10 +122,9 @@ public class SemagrowPostgisTest extends TestCase {
 				"  ?s2 rdf:type pgm2:geometry .\n" + 
 				"  ?s1 geo:asWKT ?w1 .\n" + 
 				"  ?s2 geo:asWKT ?w2 .\n" + 
-				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 100) .\n" + 
-//				"} VALUES ?s1 { geom1:5, geom1:9 }";
+//				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 100) .\n" + 
+				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 224400) .\n" + 
 				"}";
-
 		
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
