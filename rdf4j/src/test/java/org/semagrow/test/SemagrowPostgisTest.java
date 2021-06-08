@@ -120,6 +120,7 @@ public class SemagrowPostgisTest extends TestCase {
 				"PREFIX geom1: <http://rdf.semagrow.org/pgm/conn1/resource/>" +
 				"  SELECT * WHERE {\n" +
 				"  ?s2 rdf:type pgm2:geometry .\n" + 
+				"  ?s1 rdf:type pgm1:geometry .\n" + 
 				"  ?s1 geo:asWKT ?w1 .\n" + 
 				"  ?s2 geo:asWKT ?w2 .\n" + 
 //				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 100) .\n" + 
