@@ -125,6 +125,25 @@ public class SemagrowPostgisTest extends TestCase {
 				"  ?s2 geo:asWKT ?w2 .\n" + 
 //				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 100) .\n" + 
 				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 224400) .\n" + 
+//				"  FILTER (geof:sfEquals(?w1,?w2)) .\n" + 
+				"}";
+		
+		String q10 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX pgm1: <http://rdf.semagrow.org/pgm/conn1/>" +
+				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/conn2/>" +
+				"SELECT ?r1 ?r2 WHERE {\n" + 
+				"  ?r1 rdf:type pgm1:geometry . \n" +
+//				"  ?r1 geo:hasGeometry ?g1 . \n" +
+				"  ?r1 geo:asWKT ?w1 .\n" + 
+				"  ?r2 rdf:type pgm2:geometry . \n" +
+//				"  ?r2 geo:hasGeometry ?g2 . \n" +
+				"  ?r2 geo:asWKT ?w2 .\n" + 
+				"  FILTER( str(?r1) = \"http://rdf.semagrow.org/pgm/conn1/resource/9\" ) .\n" + 
+				"  FILTER( geof:distance(?w1, ?w2, uom:metre) < 224400 ) .\n" + 
 				"}";
 		
 		
