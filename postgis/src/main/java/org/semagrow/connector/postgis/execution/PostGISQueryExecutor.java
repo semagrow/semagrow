@@ -107,12 +107,6 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		Set<String> freeVars = computeVars(expr);
 		freeVars.removeAll(bindings.getBindingNames());
 		
-		logger.debug("evaluateReactorImpl!!!");
-		logger.debug("expr: {}" , expr);
-		logger.debug("endpoint: {}", site.toString());
-		logger.debug("bindings: {}", bindings.toString());
-		logger.debug("freeVars: {}", freeVars.toString());
-		
 		if (freeVars.isEmpty()) {
 			// all variables in expression are bound, switch to simple ASK query or return empty ???
 			logger.error("No variables in query.");
@@ -120,28 +114,17 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		} 
 		else {
 			final BindingSet relevantBindings = bindingSetOps.project(computeVars(expr), bindings);
-            logger.debug("relevantBindings:: {}", relevantBindings.toString());
-            
-//            BindingSet bindingsExt;
-//            if (relevantBindings.size() != 0) {	
-//	            distanceOptimizer.optimize(expr, null, relevantBindings);
-//	            bindingsExt = distanceOptimizer.expandBindings(relevantBindings);
-//            }
-//            else {
-//            	bindingsExt = relevantBindings;
-//            }
             
 			List<String> tables = new ArrayList<String>();
 			Map<String,String> extraBindingVars = new HashMap<String, String>();
 			String dbname = site.getDatabaseName();
 			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings, extraBindingVars, dbname);
-//			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, bindingsExt, extraBindingVars, dbname);
 
 			if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
 			String username = site.getUsername();
 			String password = site.getPassword();
-			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
+			logger.info("Sending SQL query [{}] to {} \n\t\t with {}", sqlQuery, endpoint, relevantBindings);
 			
 //			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
 //			Stream<Record> rs = client.execute(sqlQuery);
@@ -185,12 +168,6 @@ public class PostGISQueryExecutor implements QueryExecutor {
         if (!bindingsList.isEmpty())
         	relevantBindingNames = BindingSetUtil.projectNames(exprVars, bindingsList.get(0));
         
-        logger.debug("evaluateReactorImpl 2!!!");
-		logger.debug("expr: {}" , expr);
-		logger.debug("bindings: {}", bindingsList.toString());
-        logger.debug("bindings.get(0): {}", bindingsList.get(0));
-        logger.debug("relevantBindingNames: {}", relevantBindingNames);
-        
         Set<String> freeVars = computeVars(expr);	// freeVars = exprVars
         freeVars.removeAll(relevantBindingNames);
         
@@ -203,27 +180,14 @@ public class PostGISQueryExecutor implements QueryExecutor {
 	        Map<String,String> extraBindingVars = new HashMap<String, String>();
 	        String dbname = site.getDatabaseName();
 	        
-//	        List<BindingSet> bindingsListExt;
-//	        if (!bindingsList.isEmpty()) {
-//				BindingSet template =  bindingsList.get(0);
-//				distanceOptimizer.optimize(expr, null, template);
-//				bindingsListExt = distanceOptimizer.expandBindings(bindingsList);
-//	        }
-//	        else {
-//	        	bindingsListExt = bindingsList;
-//	        }
-	        
-	        
 	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindingsList, relevantBindingNames, extraBindingVars, dbname);
-//	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindingsListExt, relevantBindingNames, extraBindingVars, dbname);
-
 	        
 	        if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
 			String username = site.getUsername();
 			String password = site.getPassword();
 			
-			logger.info("Sending SQL query [{}] to [{}]", sqlQuery, endpoint);
+			logger.info("Sending SQL query [{}] to {} \n\t\t with {}", sqlQuery, endpoint, bindingsList);
 						
 //			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
 //			Stream<Record> rs = client.execute(sqlQuery);

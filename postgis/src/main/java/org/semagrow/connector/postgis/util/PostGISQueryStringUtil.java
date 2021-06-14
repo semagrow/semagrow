@@ -108,9 +108,6 @@ public class PostGISQueryStringUtil {
 			}
 			i += 3;
 		}
-		
-		logger.debug("wktMap: {}", wktMap);
-		logger.debug("typeMap: {}", typeMap);
 	}
 	
 	/**
@@ -155,10 +152,7 @@ public class PostGISQueryStringUtil {
 	public static String keepBinding(Map<String,String> bindingVars, String var) {
 		if (bindingVars.containsKey(var)) {
 			var = bindingVars.get(var);
-			if (var.contains("^"))  {
-				var = var.substring(1, var.indexOf("^"));
-//				var = var.
-			}
+			if (var.contains("^")) var = var.substring(1, var.indexOf("^"));
 		}
 		return var;
 	}
@@ -178,17 +172,12 @@ public class PostGISQueryStringUtil {
 				continue;
 			}
 			else if (filterInfo.size() == 3 && filterInfo.get(0).contains("sf")) {
-//				if (!queryUnion)
-//					logger.debug("###1 sf fuction: {}", filterInfo.get(0));
-//				else {
-//					logger.debug("###2 sf fuction: {}", filterInfo.get(0));
-					call = filterInfo.get(0);
-					var1 = keepBinding(bindingVars, filterInfo.get(1));
-					var2 = keepBinding(bindingVars, filterInfo.get(2));
-					
-					condition = function(simpleFeatureFunction(call), 
-							geomFromText(asText(var1)), geomFromText(asText(var2)));
-//				}
+				call = filterInfo.get(0);
+				var1 = keepBinding(bindingVars, filterInfo.get(1));
+				var2 = keepBinding(bindingVars, filterInfo.get(2));
+				
+				condition = function(simpleFeatureFunction(call), 
+						geomFromText(asText(var1)), geomFromText(asText(var2)));
 			}
 			else if (filterInfo.size() == 6) {
 				operator = filterInfo.get(0);
@@ -209,7 +198,6 @@ public class PostGISQueryStringUtil {
 				condition += operator + " " + value;
 			}
 			
-			logger.debug("condition : {}", condition); 
 			allConditions.add(condition);
 		}
 		
@@ -227,20 +215,14 @@ public class PostGISQueryStringUtil {
 	 * Replace variables in each triple with their bindings. 
 	 * @return a map from variables to their binding.
 	 */
-	private static Map<String, String> replaceVarsWithBindings(BindingSet bindings, List<String> triples) {
+	private static Map<String, String> replaceVarsWithBindings(BindingSet bindings, 
+			List<String> triples) {
+		
 		Map<String,String> bindingVars = new HashMap<String, String>();
 		
 		Set<String> bindingNames = bindings.getBindingNames();
 		for (String bindingName: bindingNames) {
-			logger.debug("bindings: {} - {}", bindingName, bindings.getValue((String)bindingName));
-//			String value = bindings.getValue(bindingName).stringValue();
-//			if (!value.contains("http"))
-//				value = "'" + value + "'";
 			String value = getValueFromLiteralOrIRI(bindings, bindingName);
-			
-//			String label = ((Literal) bindings.getValue(bindingName)).getLabel();
-//			replacement (triples, bindingName, bindings.getValue(bindingName).toString());
-//			bindingVars.put(bindingName, bindings.getValue(bindingName).toString().replace("\"", "\'"));
 			replacement(triples, bindingName, value);
 			bindingVars.put(bindingName, value);
 		}
@@ -250,17 +232,8 @@ public class PostGISQueryStringUtil {
 	
 	public static String buildUnion(List<BindingSet> bindingsList, Collection<String> relevantBindingNames, 
 			String sqlQuery) {
-		String sqlQueryUnion = "", bindingValue = "";
-//		for (String relevantBindingName: relevantBindingNames) {
-//			logger.debug("relevantBindingName : {} ", relevantBindingName);
-//			if (sqlQuery.contains(relevantBindingName)) {
-//				for (BindingSet bindings: bindingsList) {
-//					logger.debug("binding : {} ", bindings);
-//					String value = getValueFromLiteralOrIRI(bindings, relevantBindingName);
-//					sqlQueryUnion += sqlQuery.replace(relevantBindingName, value) + UNION;
-//				}
-//			}
-//		}	
+		
+		String sqlQueryUnion = "";
 		
 		String transformingSqlQuery;
 		for (BindingSet bindings: bindingsList) {
@@ -276,9 +249,6 @@ public class PostGISQueryStringUtil {
 		
 		// remove the last "UNION" operator
 		sqlQueryUnion = sqlQueryUnion.substring(0, sqlQueryUnion.length() - 6) + ";";
-		
-		logger.debug("sqlQueryUnion : {} ", sqlQueryUnion);
-		
 		return sqlQueryUnion;
 	}
 	
@@ -344,40 +314,26 @@ public class PostGISQueryStringUtil {
 		String query = serializeSet(selectSet, COMMA_SEP, SELECT) 
 				+ serializeSet(fromSet, COMMA_SEP, FROM)
 				+ serializeSet(whereSet, AND_SEP, WHERE);
-		
-		logger.debug("bindingVars (simple sql query): {}", bindingVars);
-		logger.debug("query (simple sql query): {}", query);
-		
+				
 		return query;
 	}
 	
 	
 	public static String buildSQLQuery(TupleExpr expr, Set<String> freeVars, List<String> tables, 
 			BindingSet bindings, Map<String,String> extraBindingVars, String dbname) {
-		
-		logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! buildSQLQuery");
-		
+				
 		typeURI(dbname);
 		List<String> triples = computeTriples(expr);
 		
 		triplePruning(triples);
 		if (triples.isEmpty()) return null;
-		
-		logger.debug("1 triples: {}", triples);
-		
+				
 		Map<String,String> bindingVars = replaceVarsWithBindings(bindings, triples);
 		
-		logger.debug("2 triples: {}", triples.toString());
-		logger.debug("2 bindingVars: {}", bindingVars);
-		
 		Set<List<String>> allFilters = computeFilterVars(expr);
-		logger.debug("2 allFilters: {} ", allFilters);
 		replaceVarsWithFilterBindings(allFilters, freeVars, triples, bindingVars);
 		
 //		List<String> bindInfo = computeBindVars(expr);
-		
-		logger.debug("3 triples: {}", triples.toString());
-		logger.debug("3 bindingVars: {}", bindingVars);
 		
 		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingVars, extraBindingVars, triples);
 		
@@ -386,9 +342,6 @@ public class PostGISQueryStringUtil {
 		else 
 			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingVars, false), AND_SEP, WHERE);
 		
-		logger.debug("4 bindingVars: {}", bindingVars);
-		logger.debug("sqlQuery : {} ", sqlQuery);
-		
 		return sqlQuery;
 	}
 	
@@ -396,9 +349,7 @@ public class PostGISQueryStringUtil {
 	public static String buildSQLQueryUnion(TupleExpr expr, Set<String> freeVars, 
 		List<String> tables, List<BindingSet> bindings, Collection<String> relevantBindingNames, 
 		Map<String,String> extraBindingVars, String dbname) {
-		
-		logger.debug("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! buildSQLQueryUNION !!!!!!!!!!!!!!!!!!");
-		
+				
 		typeURI(dbname);
 		List<String> triples = computeTriples(expr);
 		
@@ -410,18 +361,11 @@ public class PostGISQueryStringUtil {
 		triplePruning(triples);
 		if (triples.isEmpty()) return null;
 		
-		logger.debug("triples 1: {}", triples);
-		logger.debug("relevantBindingNames 1: {}", relevantBindingNames);
-		
 		Set<List<String>> allFilters = computeFilterVars(expr);
-		logger.debug("allFilters 1: {} ", allFilters);
 		Map<String,String> bindingVars = new HashMap<String, String>();
 		replaceVarsWithFilterBindings(allFilters, freeVars, triples, bindingVars);
 		
 //		List<String> bindInfo = computeBindVars(expr);
-		
-		logger.debug("triples 2: {}", triples.toString());
-		logger.debug("bindingVars 2: {}", bindingVars);
 		
 		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingVars, extraBindingVars, triples);
 				
@@ -430,9 +374,6 @@ public class PostGISQueryStringUtil {
 		else
 			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingVars, true), AND_SEP, WHERE);
 
-		logger.debug("bindingVars 3: {}", bindingVars);
-		logger.debug("sqlQuery : {} ", sqlQuery);
-				
 		return buildUnion(bindings, relevantBindingNames, sqlQuery);
 	}
 	
@@ -482,7 +423,6 @@ public class PostGISQueryStringUtil {
 	 */
 	protected static Set<List<String>> computeFilterVars(TupleExpr serviceExpression) {
 		final Set<List<String>> allRes = new HashSet<List<String>>();
-		logger.debug("--- computeFilterVars");
 		serviceExpression.visit(new AbstractQueryModelVisitor<RuntimeException>() {
 			
 			@Override
@@ -491,7 +431,6 @@ public class PostGISQueryStringUtil {
 				// take all info about compare nodes, i.e. operation, vars, values etc
 				String signature = node.getSignature();
 				res.add(signature.substring(signature.lastIndexOf("(") + 1, signature.lastIndexOf(")")));
-				logger.debug("--- signature: {}", signature);
 				
 				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 					
@@ -499,20 +438,17 @@ public class PostGISQueryStringUtil {
 					public void meet(FunctionCall node) throws RuntimeException {
 						String function = node.getSignature();
 						res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
-						logger.debug("--- function: {}", function);
 						
 						node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 							@Override
 							public void meet(Var node) throws RuntimeException {
 								res.add(node.getName());
-								logger.debug("--- CHILD node.getName(): {}", node.getName());
 							}
 							
 							@Override
 							public void meet(ValueConstant node) throws RuntimeException {
 								String type = node.getValue().toString();
-								res.add(type.substring(type.lastIndexOf("/") + 1));
-								logger.debug("--- type: {}", type);
+								res.add(type.substring(type.lastIndexOf("/") + 1).replace("\"", "'"));
 							}
 						});
 					}
@@ -520,14 +456,12 @@ public class PostGISQueryStringUtil {
 					@Override
 					public void meet(Var node) throws RuntimeException {
 						res.add(node.getName());
-						logger.debug("--- OUTSIDE node.getName(): {}", node.getName());
 					}
 					
 					@Override
 					public void meet(ValueConstant node) throws RuntimeException {
 						String value = node.getValue().toString();
 						res.add(value.substring(value.indexOf("\"") + 1, value.lastIndexOf("\"")));
-						logger.debug("--- value: {}", value);
 					}
 				});
 				
@@ -539,20 +473,17 @@ public class PostGISQueryStringUtil {
 				final List<String> res = new ArrayList<String>();
 				String function = node.getSignature();
 				res.add(function.substring(function.lastIndexOf("/") + 1, function.lastIndexOf(")")));
-				logger.debug("### function: {}", function);
 				
 				node.visitChildren(new AbstractQueryModelVisitor<RuntimeException>() {
 					@Override
 					public void meet(Var node) throws RuntimeException {
 						res.add(node.getName());
-						logger.debug("### CHILD node.getName(): {}", node.getName());
 					}
 					
 					@Override
 					public void meet(ValueConstant node) throws RuntimeException {
 						String type = node.getValue().toString();
-						res.add(type.substring(type.lastIndexOf("/") + 1));
-						logger.debug("### type: {}", type);
+						res.add(type.substring(type.lastIndexOf("/") + 1).replace("\"", "'"));
 					}
 				});
 				
@@ -589,10 +520,8 @@ public class PostGISQueryStringUtil {
 	 * @return empty string or a serialized set.
 	 */
 	protected static String serializeSet(Set<String> set, String separator, String start) {
-		logger.debug("set: {}", set);
 		String string = "";
 		for (String s : set) {
-			logger.debug("s: {}", s);
 			if (!string.equals("")) string += separator;
 			else string += start;
 			string += s;

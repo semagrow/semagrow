@@ -159,10 +159,8 @@ public class SemagrowPostgisTest extends TestCase {
 				"  ?s1 rdf:type pgm1:geometry .\n" + 
 				"  ?s1 geo:asWKT ?w1 .\n" + 
 				"  ?s2 geo:asWKT ?w2 .\n" + 
-				"  FILTER (geof:sfWithin(?w1,polygon)) .\n" + 
-//				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 100) .\n" + 
+				"  FILTER (geof:sfWithin(?w1,'POLYGON ((12.738969253262903 44.32005770336234, 18.794807468364077 44.32005770336234, 18.794807468364077 50.61230614046566, 12.738969253262903 50.61230614046566, 12.738969253262903 44.32005770336234))')) .\n" + 
 				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 224400) .\n" + 
-//				"  FILTER (geof:sfEquals(?w1,?w2)) .\n" + 
 				"}";
 		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
@@ -173,7 +171,7 @@ public class SemagrowPostgisTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q9);
+		TupleQuery query = conn.prepareTupleQuery(q8);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);

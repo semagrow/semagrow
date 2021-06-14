@@ -1,10 +1,8 @@
 package org.semagrow.connector.postgis.config;
 
-import org.semagrow.selector.SiteConfig;
-import org.eclipse.rdf4j.model.IRI;
 import org.eclipse.rdf4j.model.Model;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.semagrow.selector.SiteConfig;
 
 public class PostGISSiteConfig implements SiteConfig {
 
