@@ -6,8 +6,10 @@ import java.sql.SQLException;
 import java.util.Collection;
 import java.util.Map;
 
+import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.ValueFactory;
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
+import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.query.Binding;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryBindingSet;
@@ -22,7 +24,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
 	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
 	private static final ValueFactory vf = SimpleValueFactory.getInstance();
 
-    public static final BindingSet transform(Record r, String dbname, Map<String,String> bindingVars) throws SQLException {
+    public static final BindingSet transform(Record r, String dbname, Map<String,String> extraBindingVars) throws SQLException {
 
         ResultSet rs = r.intoResultSet();
         ResultSetMetaData rsmd = rs.getMetaData();
@@ -38,12 +40,12 @@ public final class BindingSetOpsImpl implements BindingSetOps {
                 result.addBinding(rsmd.getColumnName(i+1), vf.createIRI(id));
             }
             else if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
-            	String wkt = "\"" + (String) r.getValue(i) + "\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>";
-            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(wkt));
+//            	String wkt = "\"" + (String) r.getValue(i) + "\"^^<http://www.opengis.net/ont/geosparql#wktLiteral>";
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((String) r.getValue(i), GEO.WKT_LITERAL));
             }
             else if (rsmd.getColumnClassName(i+1).equals("java.lang.Double")) {
-            	String distance = "\"" + (Double) r.getValue(i) + "\"^^<http://www.w3.org/2001/XMLSchema#double>";
-            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral(distance));
+//            	String distance = "\"" + (Double) r.getValue(i) + "\"^^<http://www.w3.org/2001/XMLSchema#double>";
+            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((Double) r.getValue(i)));
             }
             else {
             	logger.error("java.lang.ClassCastException: {} is {}", rsmd.getColumnName(i+1), rsmd.getColumnClassName(i+1));
@@ -52,7 +54,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
             logger.debug(" {} as {} ", r.getValue(i), rsmd.getColumnName(i+1));
         }
         
-        for (Map.Entry<String,String> binding : bindingVars.entrySet()) {
+        for (Map.Entry<String,String> binding : extraBindingVars.entrySet()) {
         	result.addBinding(binding.getKey(), vf.createIRI(binding.getValue()));
         }
         return result;

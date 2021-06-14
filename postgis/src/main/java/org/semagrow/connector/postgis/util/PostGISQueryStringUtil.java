@@ -10,6 +10,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.eclipse.rdf4j.model.Literal;
+import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.Compare;
@@ -113,7 +115,7 @@ public class PostGISQueryStringUtil {
 		logger.debug("typeMap: {}", typeMap);
 	}
 	
-	/*
+	/**
 	 * Replace variables in each triple with their bindings derived from filter clauses. 
 	 * Remove these variables from the bindingVars map.
 	 */
@@ -155,13 +157,16 @@ public class PostGISQueryStringUtil {
 	public static String keepBinding(Map<String,String> bindingVars, String var) {
 		if (bindingVars.containsKey(var)) {
 			var = bindingVars.get(var);
-			if (var.contains("^")) var = var.substring(1, var.indexOf("^"));
+			if (var.contains("^"))  {
+				var = var.substring(1, var.indexOf("^"));
+//				var = var.
+			}
 		}
 		return var;
 	}
 	
-	/*
-	 * Return all conditions derived from the filter clauses.
+	/**
+	 * @return all conditions derived from the filter clauses.
 	 * ((( Probably boolean queryUnion is not needed )))
 	 */
 	public static Set<String> computingFilterClauses(Set<List<String>> allFilters, 
@@ -213,9 +218,9 @@ public class PostGISQueryStringUtil {
 		return allConditions;
 	}
 	
-	/*
+	/**
 	 * Replace variables in each triple with their bindings. 
-	 * Return a map from variables to their binding.
+	 * @return a map from variables to their binding.
 	 */
 	private static Map<String, String> replaceVarsWithBindings(BindingSet bindings, List<String> triples) {
 		Map<String,String> bindingVars = new HashMap<String, String>();
@@ -223,8 +228,14 @@ public class PostGISQueryStringUtil {
 		Set<String> bindingNames = bindings.getBindingNames();
 		for (String bindingName: bindingNames) {
 			logger.debug("bindings: {} - {}", bindingName, bindings.getValue((String)bindingName));
-			replacement (triples, bindingName, bindings.getValue(bindingName).toString());
-			bindingVars.put(bindingName, bindings.getValue(bindingName).toString().replace("\"", "\'"));
+			String value = bindings.getValue(bindingName).stringValue();
+			if (!value.contains("http"))
+				value = "'" + value + "'";
+//			String label = ((Literal) bindings.getValue(bindingName)).getLabel();
+//			replacement (triples, bindingName, bindings.getValue(bindingName).toString());
+//			bindingVars.put(bindingName, bindings.getValue(bindingName).toString().replace("\"", "\'"));
+			replacement(triples, bindingName, value);
+			bindingVars.put(bindingName, value);
 		}
 		
 		return bindingVars;
@@ -238,13 +249,20 @@ public class PostGISQueryStringUtil {
 			if (sqlQuery.contains(relevantBindingName)) {
 				for (BindingSet binding: bindings) {
 					logger.debug("binding : {} ", binding);
-					bindingValue += binding.getValue(relevantBindingName);
-					if (bindingValue.contains("^")) {
-						bindingValue = bindingValue.substring(1, bindingValue.indexOf("^"));
-						bindingValue = bindingValue.replace("\"", "'");
-						sqlQueryUnion += sqlQuery.replace(relevantBindingName, bindingValue) + UNION;
-						bindingValue = "";
-					}
+					
+					String value = binding.getValue(relevantBindingName).stringValue();
+					if (!value.contains("http"))
+						value = "'" + value + "'";
+//					String mpla = ((Literal) binding.getValue(relevantBindingName)).getLabel();
+					sqlQueryUnion += sqlQuery.replace(relevantBindingName, value) + UNION;
+					
+//					bindingValue += binding.getValue(relevantBindingName);
+//					if (bindingValue.contains("^")) {
+//						bindingValue = bindingValue.substring(1, bindingValue.indexOf("^"));
+//						bindingValue = bindingValue.replace("\"", "'");
+//						sqlQueryUnion += sqlQuery.replace(relevantBindingName, bindingValue) + UNION;
+//						bindingValue = "";
+//					}
 				}
 			}
 		}	
@@ -411,7 +429,7 @@ public class PostGISQueryStringUtil {
 	}
 	
 	
-	/* 
+	/**
 	 * Compute all binds in serviceExpression 
 	 */
 	protected static List<String> computeBindVars(TupleExpr serviceExpression) {
@@ -451,7 +469,7 @@ public class PostGISQueryStringUtil {
 	}
 	
 
-	/* 
+	/**
 	 * Compute all filters in serviceExpression 
 	 */
 	protected static Set<List<String>> computeFilterVars(TupleExpr serviceExpression) {
@@ -537,7 +555,7 @@ public class PostGISQueryStringUtil {
 		return allRes;
 	}
 	
-	/* 
+	/**
 	 * Compute all triples (subject predicate object) in serviceExpression 
 	 */
 	protected static List<String> computeTriples(TupleExpr serviceExpression) {
@@ -559,8 +577,8 @@ public class PostGISQueryStringUtil {
 		return res;
 	}
 	
-	/* 
-	 * Return empty string or a serialized set.
+	/**
+	 * @return empty string or a serialized set.
 	 */
 	protected static String serializeSet(Set<String> set, String separator, String start) {
 		logger.debug("set: {}", set);
@@ -575,7 +593,7 @@ public class PostGISQueryStringUtil {
 	}
 
 	
-	/* 
+	/**
 	 * Removes all triples with predicate different than #asWKT or #type 
 	 */
 	protected static void triplePruning(List<String> triples) {
@@ -592,8 +610,8 @@ public class PostGISQueryStringUtil {
 		}
 	}
 	
-	/* 
-	 * Return table and id names.
+	/**
+	 * @return table and id names.
 	 */
 	protected static Pair<String, String> subjectDecompose(String subject) {
 		int idStart = subject.lastIndexOf("/") + 1;
@@ -609,8 +627,8 @@ public class PostGISQueryStringUtil {
 		return Pair.of(table, id);
 	}
 	
-	/* 
-	 * Return the id.
+	/**
+	 * @return the id.
 	 */
 	protected static String decomposeToId(String string) {
 		int idStart = string.lastIndexOf("/") + 1;
