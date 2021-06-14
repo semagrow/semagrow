@@ -10,8 +10,6 @@ import java.util.Map.Entry;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.eclipse.rdf4j.model.Literal;
-import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.eclipse.rdf4j.query.algebra.Compare;
@@ -180,17 +178,17 @@ public class PostGISQueryStringUtil {
 				continue;
 			}
 			else if (filterInfo.size() == 3 && filterInfo.get(0).contains("sf")) {
-				if (!queryUnion)
-					logger.debug("###1 sf fuction: {}", filterInfo.get(0));
-				else {
-					logger.debug("###2 sf fuction: {}", filterInfo.get(0));
+//				if (!queryUnion)
+//					logger.debug("###1 sf fuction: {}", filterInfo.get(0));
+//				else {
+//					logger.debug("###2 sf fuction: {}", filterInfo.get(0));
 					call = filterInfo.get(0);
 					var1 = keepBinding(bindingVars, filterInfo.get(1));
 					var2 = keepBinding(bindingVars, filterInfo.get(2));
 					
 					condition = function(simpleFeatureFunction(call), 
 							geomFromText(asText(var1)), geomFromText(asText(var2)));
-				}
+//				}
 			}
 			else if (filterInfo.size() == 6) {
 				operator = filterInfo.get(0);
@@ -218,6 +216,13 @@ public class PostGISQueryStringUtil {
 		return allConditions;
 	}
 	
+	private static String getValueFromLiteralOrIRI(BindingSet bindings, String bindingName) {
+		String value = bindings.getValue(bindingName).stringValue();
+		if (!value.contains("http"))
+			value = "'" + value + "'";
+		return value;
+	}
+	
 	/**
 	 * Replace variables in each triple with their bindings. 
 	 * @return a map from variables to their binding.
@@ -228,9 +233,11 @@ public class PostGISQueryStringUtil {
 		Set<String> bindingNames = bindings.getBindingNames();
 		for (String bindingName: bindingNames) {
 			logger.debug("bindings: {} - {}", bindingName, bindings.getValue((String)bindingName));
-			String value = bindings.getValue(bindingName).stringValue();
-			if (!value.contains("http"))
-				value = "'" + value + "'";
+//			String value = bindings.getValue(bindingName).stringValue();
+//			if (!value.contains("http"))
+//				value = "'" + value + "'";
+			String value = getValueFromLiteralOrIRI(bindings, bindingName);
+			
 //			String label = ((Literal) bindings.getValue(bindingName)).getLabel();
 //			replacement (triples, bindingName, bindings.getValue(bindingName).toString());
 //			bindingVars.put(bindingName, bindings.getValue(bindingName).toString().replace("\"", "\'"));
@@ -241,31 +248,32 @@ public class PostGISQueryStringUtil {
 		return bindingVars;
 	}
 	
-	public static String buildUnion(List<BindingSet> bindings, Collection<String> relevantBindingNames, 
+	public static String buildUnion(List<BindingSet> bindingsList, Collection<String> relevantBindingNames, 
 			String sqlQuery) {
 		String sqlQueryUnion = "", bindingValue = "";
-		for (String relevantBindingName: relevantBindingNames) {
-			logger.debug("relevantBindingName : {} ", relevantBindingName);
-			if (sqlQuery.contains(relevantBindingName)) {
-				for (BindingSet binding: bindings) {
-					logger.debug("binding : {} ", binding);
-					
-					String value = binding.getValue(relevantBindingName).stringValue();
-					if (!value.contains("http"))
-						value = "'" + value + "'";
-//					String mpla = ((Literal) binding.getValue(relevantBindingName)).getLabel();
-					sqlQueryUnion += sqlQuery.replace(relevantBindingName, value) + UNION;
-					
-//					bindingValue += binding.getValue(relevantBindingName);
-//					if (bindingValue.contains("^")) {
-//						bindingValue = bindingValue.substring(1, bindingValue.indexOf("^"));
-//						bindingValue = bindingValue.replace("\"", "'");
-//						sqlQueryUnion += sqlQuery.replace(relevantBindingName, bindingValue) + UNION;
-//						bindingValue = "";
-//					}
+//		for (String relevantBindingName: relevantBindingNames) {
+//			logger.debug("relevantBindingName : {} ", relevantBindingName);
+//			if (sqlQuery.contains(relevantBindingName)) {
+//				for (BindingSet bindings: bindingsList) {
+//					logger.debug("binding : {} ", bindings);
+//					String value = getValueFromLiteralOrIRI(bindings, relevantBindingName);
+//					sqlQueryUnion += sqlQuery.replace(relevantBindingName, value) + UNION;
+//				}
+//			}
+//		}	
+		
+		String transformingSqlQuery;
+		for (BindingSet bindings: bindingsList) {
+			transformingSqlQuery = sqlQuery;
+			for (String relevantBindingName: relevantBindingNames) {
+				if (sqlQuery.contains(relevantBindingName)) {
+					String value = getValueFromLiteralOrIRI(bindings, relevantBindingName);
+					transformingSqlQuery = transformingSqlQuery.replace(relevantBindingName, value);
 				}
 			}
-		}	
+			sqlQueryUnion += transformingSqlQuery + UNION;
+		}
+		
 		// remove the last "UNION" operator
 		sqlQueryUnion = sqlQueryUnion.substring(0, sqlQueryUnion.length() - 6) + ";";
 		

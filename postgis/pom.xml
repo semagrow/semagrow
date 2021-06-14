@@ -96,6 +96,11 @@
             <artifactId>semagrow-monitor</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>semagrow-geospatial</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <dependency>
             <groupId>org.eclipse.rdf4j</groupId>

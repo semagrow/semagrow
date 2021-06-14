@@ -23,9 +23,8 @@ import org.semagrow.connector.postgis.util.BindingSetOpsImpl;
 import org.semagrow.connector.postgis.util.PostGISQueryStringUtil;
 import org.semagrow.evaluation.BindingSetOps;
 import org.semagrow.evaluation.QueryExecutor;
-import org.semagrow.evaluation.reactor.FederatedEvaluationStrategyImpl;
 import org.semagrow.evaluation.util.BindingSetUtil;
-import org.semagrow.evaluation.util.SimpleBindingSetOps;
+import org.semagrow.geospatial.execution.BBoxDistanceOptimizer;
 import org.semagrow.selector.Site;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,8 +33,10 @@ import reactor.core.publisher.Flux;
 
 public class PostGISQueryExecutor implements QueryExecutor {
 	
-	private static final Logger logger = LoggerFactory.getLogger(FederatedEvaluationStrategyImpl.class);
-    protected BindingSetOps bindingSetOps = SimpleBindingSetOps.getInstance();
+	private static final Logger logger = LoggerFactory.getLogger(PostGISQueryExecutor.class);
+    protected BindingSetOps bindingSetOps = BindingSetOpsImpl.getInstance();
+    
+    private BBoxDistanceOptimizer distanceOptimizer = new BBoxDistanceOptimizer();
 		
 	public PostGISQueryExecutor() {
 		
@@ -52,7 +53,17 @@ public class PostGISQueryExecutor implements QueryExecutor {
      */
 	public Publisher<BindingSet> evaluate(final Site site, final TupleExpr expr, final BindingSet bindings)
 			throws QueryEvaluationException {
-		return evaluateReactorImpl((PostGISSite)site, expr, bindings);
+		
+		if (bindings.size() == 0) {
+            return evaluateReactorImpl((PostGISSite) site, expr, bindings);
+        }
+        else {
+            distanceOptimizer.optimize(expr, null, bindings);
+            BindingSet bindingsExt = distanceOptimizer.expandBindings(bindings);
+
+            return evaluateReactorImpl((PostGISSite) site, expr, bindingsExt)
+                    .map(b -> bindingSetOps.project(bindings.getBindingNames(), b));
+        }
 	}
 	
 	/**
@@ -66,7 +77,18 @@ public class PostGISQueryExecutor implements QueryExecutor {
      */
 	public Publisher<BindingSet> evaluate(final Site site, final TupleExpr expr, final List<BindingSet> bindingList)
 			throws QueryEvaluationException {
-		return evaluateReactorImpl((PostGISSite)site, expr, bindingList);
+		
+		if (bindingList.isEmpty()) {
+            return evaluateReactorImpl((PostGISSite) site, expr, bindingList);
+        }
+        else {
+            BindingSet template =  bindingList.get(0);
+            distanceOptimizer.optimize(expr, null, template);
+            List<BindingSet> bindingsListExt = distanceOptimizer.expandBindings(bindingList);
+
+            return evaluateReactorImpl((PostGISSite) site, expr, bindingsListExt);
+//                    .map(b -> bindingSetOps.project(template.getBindingNames(), b));
+        }
 	}
 	
 	/**
@@ -82,8 +104,6 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		evaluateReactorImpl(final PostGISSite site, final TupleExpr expr, final BindingSet bindings)
 				throws QueryEvaluationException {
 		
-		Flux<BindingSet> result = null;
-		
 		Set<String> freeVars = computeVars(expr);
 		freeVars.removeAll(bindings.getBindingNames());
 		
@@ -96,17 +116,27 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		if (freeVars.isEmpty()) {
 			// all variables in expression are bound, switch to simple ASK query or return empty ???
 			logger.error("No variables in query.");
-			result = Flux.empty();
+			return Flux.empty();
 		} 
 		else {
 			final BindingSet relevantBindings = bindingSetOps.project(computeVars(expr), bindings);
             logger.debug("relevantBindings:: {}", relevantBindings.toString());
-			
+            
+//            BindingSet bindingsExt;
+//            if (relevantBindings.size() != 0) {	
+//	            distanceOptimizer.optimize(expr, null, relevantBindings);
+//	            bindingsExt = distanceOptimizer.expandBindings(relevantBindings);
+//            }
+//            else {
+//            	bindingsExt = relevantBindings;
+//            }
+            
 			List<String> tables = new ArrayList<String>();
-			Map<String,String> bindingVars = new HashMap<String, String>();
+			Map<String,String> extraBindingVars = new HashMap<String, String>();
 			String dbname = site.getDatabaseName();
-			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings, bindingVars, dbname);
-			
+			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings, extraBindingVars, dbname);
+//			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, bindingsExt, extraBindingVars, dbname);
+
 			if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
 			String username = site.getUsername();
@@ -121,15 +151,13 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, dbname, bindingVars);
+					return BindingSetOpsImpl.transform(r, dbname, extraBindingVars);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();
 				}
 			}));
 		}
-		
-		return result;		
 	}
 	
 	/**
@@ -137,16 +165,16 @@ public class PostGISQueryExecutor implements QueryExecutor {
      *
      * @param endpoint The endpoint in which the source query is to be sent
      * @param expr The tuple expression that corresponds to the source query
-     * @param bindings a list of bindings
+     * @param bindingsList a list of bindings
      * @return Stream with the evaluation results
      * @throws QueryEvaluationException
      */
 	public Flux<BindingSet>
-		evaluateReactorImpl(final PostGISSite site, final TupleExpr expr, List<BindingSet> bindings)
+		evaluateReactorImpl(final PostGISSite site, final TupleExpr expr, List<BindingSet> bindingsList)
 				throws QueryEvaluationException {
 		
-		if (bindings.size() == 1)
-            return evaluateReactorImpl(site, expr, bindings.get(0));
+		if (bindingsList.size() == 1)
+            return evaluateReactorImpl(site, expr, bindingsList.get(0));
 	
 		Flux<BindingSet> result = null;
 		
@@ -154,13 +182,13 @@ public class PostGISQueryExecutor implements QueryExecutor {
 
         Collection<String> relevantBindingNames = Collections.emptySet();
 
-        if (!bindings.isEmpty())
-        	relevantBindingNames = BindingSetUtil.projectNames(exprVars, bindings.get(0));
+        if (!bindingsList.isEmpty())
+        	relevantBindingNames = BindingSetUtil.projectNames(exprVars, bindingsList.get(0));
         
         logger.debug("evaluateReactorImpl 2!!!");
 		logger.debug("expr: {}" , expr);
-		logger.debug("bindings: {}", bindings.toString());
-        logger.debug("bindings.get(0): {}", bindings.get(0));
+		logger.debug("bindings: {}", bindingsList.toString());
+        logger.debug("bindings.get(0): {}", bindingsList.get(0));
         logger.debug("relevantBindingNames: {}", relevantBindingNames);
         
         Set<String> freeVars = computeVars(expr);	// freeVars = exprVars
@@ -172,11 +200,23 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		else {
         
 	        List<String> tables = new ArrayList<String>();
-	        Map<String,String> bindingVars = new HashMap<String, String>();
+	        Map<String,String> extraBindingVars = new HashMap<String, String>();
 	        String dbname = site.getDatabaseName();
 	        
-	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindings, relevantBindingNames, bindingVars, dbname);
+//	        List<BindingSet> bindingsListExt;
+//	        if (!bindingsList.isEmpty()) {
+//				BindingSet template =  bindingsList.get(0);
+//				distanceOptimizer.optimize(expr, null, template);
+//				bindingsListExt = distanceOptimizer.expandBindings(bindingsList);
+//	        }
+//	        else {
+//	        	bindingsListExt = bindingsList;
+//	        }
 	        
+	        
+	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindingsList, relevantBindingNames, extraBindingVars, dbname);
+//	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindingsListExt, relevantBindingNames, extraBindingVars, dbname);
+
 	        
 	        if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
@@ -193,7 +233,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, dbname, bindingVars);
+					return BindingSetOpsImpl.transform(r, dbname, extraBindingVars);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();
