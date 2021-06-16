@@ -163,6 +163,23 @@ public class SemagrowPostgisTest extends TestCase {
 				"  FILTER (geof:distance(?w1,?w2,uom:metre) < 224400) .\n" + 
 				"}";
 		
+		String q12 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX pgm1: <http://rdf.semagrow.org/pgm/conn1/>" +
+				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/multi/>" +
+				"SELECT * WHERE {\n" +
+				"  ?g1 rdf:type pgm1:geometry .\n" + 
+				"  ?g2 rdf:type pgm2:geometry .\n" + 
+				"  ?g1 geo:asWKT ?w1 .\n" + 
+				"  ?g2 geo:asWKT ?w2 .\n" + 
+				"  FILTER(str(?g1) = \"http://rdf.semagrow.org/pgm/conn1/resource/9\") .\n" +
+				"  FILTER(geof:distance(?w1,?w2,uom:metre) < 1000000) .\n" +
+//				"  FILTER(geof:distance(?w1,?w2,uom:metre) = 10) .\n" +
+				"}";
+		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
 		Repository repo = new SemagrowSailRepository((SemagrowSail) factory.getSail(config));
@@ -171,7 +188,7 @@ public class SemagrowPostgisTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q8);
+		TupleQuery query = conn.prepareTupleQuery(q12);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
