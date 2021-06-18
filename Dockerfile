@@ -11,7 +11,7 @@ COPY . /semagrow
 RUN --mount=type=cache,target=/root/.m2 mvn clean package -P tomcat-bundle
 
 
-FROM openjdk:8-jre-alpine
+FROM tomcat:8.5-jre8-slim
 
 ENV SEMAGROW_HOME /opt/semagrow
 ENV CATALINA_HOME $SEMAGROW_HOME
