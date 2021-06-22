@@ -128,12 +128,22 @@ public class SemagrowSailFactory implements SailFactory, RepositoryResolverClien
             if (transformation != null)
                 selector = new SourceSelectorWithQueryTransform(selector, transformation);
 
-            selector = new AskSourceSelector(selector);
-            selector = new CachedSourceSelector(selector);
-            selector = new PrefixQueryAwareSourceSelector(selector);
-            ((PrefixQueryAwareSourceSelector) selector).setMetadataRepository(metadata);
-            selector = new GeospatialSourceSelector(selector);
-            ((GeospatialSourceSelector) selector).setMetadataRepository(metadata);
+            if (sailConfig.useAskSourceSelector()) {
+                selector = new AskSourceSelector(selector);
+                selector = new CachedSourceSelector(selector);
+            }
+            if (sailConfig.usePrefixSourceSelector()) {
+                selector = new PrefixQueryAwareSourceSelector(selector);
+                ((PrefixQueryAwareSourceSelector) selector).setMetadataRepository(metadata);
+            }
+            if (sailConfig.useGeospatialSourceSelector()) {
+                selector = new GeospatialSourceSelector(selector);
+                ((GeospatialSourceSelector) selector).setMetadataRepository(metadata);
+            }
+            if (sailConfig.useGeospatialSourceSelector() && sailConfig.usePrefixSourceSelector()) {
+                selector = new PrefixQueryAwareSourceSelector(selector);
+                ((PrefixQueryAwareSourceSelector) selector).setMetadataRepository(metadata);
+            }
 
             return selector;
         }

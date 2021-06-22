@@ -89,8 +89,8 @@ public class SimpleQueryCompiler implements QueryCompiler {
                 "Compile Time: " + (t3-t2) + " - " +
                 "Sources: " + EndpointCollector.process(plan).size();
         LogUtils.appendKobeReport(compilationReport);
-
-        logger.info("execution plan: {}", plan);
+        
+        logger.info(compilationReport);
 
         return plan;
     }

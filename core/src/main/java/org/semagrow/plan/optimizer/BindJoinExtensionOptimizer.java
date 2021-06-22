@@ -89,12 +89,10 @@ public class BindJoinExtensionOptimizer implements QueryOptimizer {
         }
 
         public void meet(Union union) {
-            Extension clone = new Extension();
-            clone.setElements(extension.getElements());
-            this.relocate(this.extension, union.getLeftArg());
-            this.relocate(clone, union.getRightArg());
-            relocate(this.extension);
-            relocate(clone);
+            union.getLeftArg().visit(this);
+            this.extension.setArg(union.getRightArg());
+            union.getRightArg().replaceWith(this.extension);
+            union.getRightArg().visit(this);
         }
 
         public void meet(Difference node) {

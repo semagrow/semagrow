@@ -75,4 +75,9 @@ public final class WktHelpers {
         }
         return l;
     }
+
+    public static final Literal infMBBoxLiteral() {
+        String poly = "POLYGON ((-180 -90, -180 90, 180 90, 180 -90, -180 -90))";
+        return vf.createLiteral(poly, GEO.WKT_LITERAL);
+    }
 }
