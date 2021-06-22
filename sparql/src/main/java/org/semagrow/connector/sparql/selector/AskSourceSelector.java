@@ -1,5 +1,7 @@
 package org.semagrow.connector.sparql.selector;
 
+import org.eclipse.rdf4j.model.vocabulary.GEO;
+import org.eclipse.rdf4j.model.vocabulary.RDF;
 import org.semagrow.selector.Site;
 import org.semagrow.selector.SourceMetadata;
 import org.semagrow.selector.SourceSelector;
@@ -123,6 +125,10 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 			 Callable<SourceMetadata> f = () -> {
 				 if (sources.iterator().next() instanceof SPARQLSite) {
 					 boolean ask = askPattern(pattern, ((SPARQLSite) sources.iterator().next()).getURL(), true);
+					 return ask ? m : null;
+				 }
+				 if (sources.iterator().next().getID().stringValue().startsWith("postgis://")) {
+					 boolean ask = askPatternPostGIS(pattern, (sources.iterator().next()).getID());
 					 return ask ? m : null;
 				 }
 				 else {
@@ -258,6 +264,35 @@ public class AskSourceSelector extends SourceSelectorWrapper implements SourceSe
 
 		 return retv;
 	 }
+
+	private boolean askPatternPostGIS(StatementPattern pattern, Resource source) {
+	 	String dbname = source.toString().substring(source.toString().lastIndexOf("/") + 1);
+
+	 	if (pattern.getPredicateVar().hasValue()) {
+			if (pattern.getPredicateVar().getValue().equals(RDF.TYPE)) {
+				if (pattern.getObjectVar().hasValue()) {
+					String strValue = pattern.getObjectVar().getValue().stringValue();
+					return (strValue.equals("http://rdf.semagrow.org/pgm/" + dbname + "/geometry"));
+				}
+				if (pattern.getSubjectVar().hasValue()) {
+					String strValue = pattern.getSubjectVar().getValue().stringValue();
+					return (strValue.startsWith("http://rdf.semagrow.org/pgm/" + dbname + "/resource/"));
+				}
+				return true;
+			}
+
+			if (pattern.getPredicateVar().getValue().equals(GEO.AS_WKT)) {
+				if (pattern.getSubjectVar().hasValue()) {
+					String strValue = pattern.getSubjectVar().getValue().stringValue();
+					return (strValue.startsWith("http://rdf.semagrow.org/pgm/" + dbname + "/resource/"));
+				}
+				return true;
+			}
+
+			return false;
+		}
+	 	return true;
+	}
 
 }
 
