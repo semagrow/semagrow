@@ -195,9 +195,9 @@ public class PostGISQueryStringUtil {
 					condition = function(nonTopologicalFunction(call), 
 							geomFromText(asText(var1)), geomFromText(asText(var2)));
 				}
-				condition += operator + " " + value;
+				condition += " " + operator + " " + value;
 			}
-			
+
 			allConditions.add(condition);
 		}
 		
@@ -517,11 +517,22 @@ public class PostGISQueryStringUtil {
 	}
 	
 	/**
+	 * First add simple feature functions and then distance operators in SQL query.
 	 * @return empty string or a serialized set.
 	 */
 	protected static String serializeSet(Set<String> set, String separator, String start) {
 		String string = "";
+		Set<String> distances = new HashSet<String>();
 		for (String s : set) {
+			if (s.contains("ST_Distance"))
+				distances.add(s);
+			else {
+				if (!string.equals("")) string += separator;
+				else string += start;
+				string += s;
+			}
+		}
+		for (String s : distances) {
 			if (!string.equals("")) string += separator;
 			else string += start;
 			string += s;
