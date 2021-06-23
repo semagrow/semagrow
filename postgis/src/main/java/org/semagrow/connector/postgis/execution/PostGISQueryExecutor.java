@@ -83,10 +83,13 @@ public class PostGISQueryExecutor implements QueryExecutor {
         }
         else {
             BindingSet template =  bindingList.get(0);
-            distanceOptimizer.optimize(expr, null, template);
+//            distanceOptimizer.optimize(expr, null, template);
+            TupleExpr clone = expr.clone();
+            distanceOptimizer.optimize(clone, null, template);
             List<BindingSet> bindingsListExt = distanceOptimizer.expandBindings(bindingList);
 
-            return evaluateReactorImpl((PostGISSite) site, expr, bindingsListExt);
+            return evaluateReactorImpl((PostGISSite) site, clone, bindingsListExt);
+//            return evaluateReactorImpl((PostGISSite) site, expr, bindingsListExt)
 //                    .map(b -> bindingSetOps.project(template.getBindingNames(), b));
         }
 	}
