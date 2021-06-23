@@ -1,10 +1,9 @@
 package org.semagrow.geospatial.selector;
 
-import org.eclipse.rdf4j.model.IRI;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.SetMultimap;
 import org.eclipse.rdf4j.model.Literal;
 import org.eclipse.rdf4j.model.Resource;
-import org.eclipse.rdf4j.model.ValueFactory;
-import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.model.vocabulary.GEO;
 import org.eclipse.rdf4j.query.BindingSet;
 import org.eclipse.rdf4j.query.Dataset;
@@ -15,7 +14,6 @@ import org.eclipse.rdf4j.query.algebra.helpers.StatementPatternCollector;
 import org.eclipse.rdf4j.query.algebra.helpers.VarNameCollector;
 import org.eclipse.rdf4j.query.impl.EmptyBindingSet;
 import org.eclipse.rdf4j.repository.Repository;
-import org.semagrow.plan.util.BPGCollector;
 import org.semagrow.plan.util.FilterCollector;
 import org.semagrow.selector.QueryAwareSourceSelector;
 import org.semagrow.selector.SourceMetadata;
@@ -25,13 +23,10 @@ import org.semagrow.selector.SourceSelectorWrapper;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class GeospatialSourceSelector extends SourceSelectorWrapper implements QueryAwareSourceSelector  {
+public class GeospatialSourceSelector extends SourceSelectorWrapper implements QueryAwareSourceSelector {
 
-    private ValueFactory vf = SimpleValueFactory.getInstance();
-    private IRI HAS_GEOMETRY = vf.createIRI(GEO.NAMESPACE, "hasGeometry");
-
-    private BoundingBoxBase boundingBoxBase = new BoundingBoxBase();
-    private Map<StatementPattern,Collection<SourceMetadata>> selectorMap = new HashMap<>();
+    private BBoxBase bBoxBase = new BBoxBase();
+    private SetMultimap<StatementPattern,SourceMetadata> selectorMap;
     private boolean processed = false;
 
     public GeospatialSourceSelector(SourceSelector selector) {
@@ -39,7 +34,7 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
     }
 
     public void setMetadataRepository(Repository metadata) {
-        boundingBoxBase.setMetadata(metadata);
+        bBoxBase.setMetadata(metadata);
     }
 
     @Override
@@ -47,10 +42,8 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
         if (getWrappedSelector() instanceof QueryAwareSourceSelector) {
             ((QueryAwareSourceSelector) getWrappedSelector()).processTupleExpr(expr);
         }
-        Collection<TupleExpr> bpgs = BPGCollector.process(expr);
-        for (TupleExpr bpg: bpgs) {
-            processBPG(bpg);
-        }
+        selectorMap = HashMultimap.create();
+        processBPG(expr);
         processed = true;
     }
 
@@ -58,70 +51,125 @@ public class GeospatialSourceSelector extends SourceSelectorWrapper implements Q
 
         Collection<StatementPattern> patterns = StatementPatternCollector.process(expr);
         Collection<ValueExpr> filters = FilterCollector.process(expr);
-        //Map<String,Set<Resource>> hasGeoMap = new HashMap<>();
 
-        for (StatementPattern pattern: patterns) {
-            if (pattern.getPredicateVar().hasValue() && pattern.getPredicateVar().getValue().equals(GEO.AS_WKT)) {
-                /* we found a ?s geo:asWKT ?o */
+        SetMultimap<String, StatementPattern> var_patterns = HashMultimap.create();
+        SetMultimap<StatementPattern, SourceMetadata> pattern_sources = HashMultimap.create();
+        Map<SourceMetadata, Literal> source_bbox = new HashMap<>();
 
-                Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(pattern, null, EmptyBindingSet.getInstance());
-                Set<SourceMetadata> prunedSources = new HashSet<>();
-                Set<Resource> endpoints = candidateSources.stream().map(s -> endpointOfSource(s)).collect(Collectors.toSet());
+        /* initialize maps */
 
-                /* search for corresponding filter */
-                for (ValueExpr filter: filters) {
-                    Set<String> filterVars = VarNameCollector.process(filter);
-                    String varName = pattern.getObjectVar().getName();
+        for (StatementPattern p: patterns) {
 
-                    if (filterVars.contains(varName) && filterVars.size() == 1) {
-                        for (SourceMetadata source: candidateSources) {
-                            Literal boundingBox = boundingBoxBase.getDatasetBoundingBox(endpointOfSource(source));
-                            if (boundingBox != null) {
-                               if (BoundingBoxPruner.prune(filter, varName, boundingBox)) {
-                                   prunedSources.add(source);
-                                   endpoints.remove(endpointOfSource(source));
-                               }
-                            }
+            if (!p.getSubjectVar().hasValue()) {
+                var_patterns.put(p.getSubjectVar().getName(), p);
+            }
+            if (!p.getObjectVar().hasValue()) {
+                var_patterns.put(p.getObjectVar().getName(), p);
+            }
+
+            Collection<SourceMetadata> sp = getWrappedSelector().getSources(p, null, EmptyBindingSet.getInstance());
+            pattern_sources.putAll(p, sp);
+
+            for (SourceMetadata s: sp) {
+                if (!source_bbox.containsKey(s)) {
+                    Literal bbox = bBoxBase.getDatasetBoundingBox(endpointOfSource(s));
+                    source_bbox.put(s, bbox);
+                }
+            }
+        }
+
+        /* prune sources for asWKT patterns according to (geospatial) filters  */
+
+        boolean c;
+
+        do {
+            c = false;
+            for (ValueExpr f : filters) {
+                if (!BBoxSourcePruner.isGeospatialFilter(f)) {
+                    continue;
+                }
+                Collection<String> vars = VarNameCollector.process(f);
+                Iterator<String> iter = vars.iterator();
+
+                if (vars.size() == 1) {
+                    String v = iter.next();
+                    StatementPattern wktPattern = getAsWktPattern(v, var_patterns);
+
+                    Set<SourceMetadata> toremove = new HashSet<>();
+                    for (SourceMetadata s: pattern_sources.get(wktPattern)) {
+                        if (BBoxSourcePruner.emptyResultSet(f, v, source_bbox.get(s))) {
+                            c = true;
+                            toremove.add(s);
                         }
                     }
-                }
-                Set<SourceMetadata> sources = new HashSet<>();
-                sources.addAll(candidateSources);
-                sources.removeAll(prunedSources);
-
-                selectorMap.put(pattern, sources);
-                //hasGeoMap.put(pattern.getSubjectVar().getName(), endpoints);
-            }
-        }
-
-        /* search for corresponding hasGeometry patterns */
-        /*
-        for (StatementPattern pattern: patterns) {
-            if (pattern.getPredicateVar().hasValue() && pattern.getPredicateVar().getValue().equals(HAS_GEOMETRY)) {
-                // we found a ?s geo:hasGeometry ?g
-
-                Collection<SourceMetadata> candidateSources = getWrappedSelector().getSources(pattern, null, EmptyBindingSet.getInstance());
-                Set<SourceMetadata> prunedSources = new HashSet<>();
-
-                for (SourceMetadata source: candidateSources) {
-                    if (hasGeoMap.get(pattern.getObjectVar().getName()).contains(endpointOfSource(source))) {
-                        prunedSources.add(source);
+                    for (SourceMetadata s: toremove) {
+                        pattern_sources.remove(wktPattern, s);
                     }
                 }
-                selectorMap.put(pattern, prunedSources);
+
+                if (vars.size() == 2) {
+                    String v1 = iter.next();
+                    String v2 = iter.next();
+                    StatementPattern wktPattern1 = getAsWktPattern(v1, var_patterns);
+                    StatementPattern wktPattern2 = getAsWktPattern(v2, var_patterns);
+                    Set<SourceMetadata> toRemove;
+
+                    toRemove = new HashSet<>();
+                    for (SourceMetadata s1: pattern_sources.get(wktPattern1)) {
+                        boolean empty = true;
+                        for (SourceMetadata s2: pattern_sources.get(wktPattern2)) {
+                            if (!BBoxSourcePruner.emptyResultSet(f, v1, source_bbox.get(s1), v2, source_bbox.get(s2))) {
+                                empty = false;
+                            }
+                        }
+                        if (empty) {
+                            c = true;
+                            toRemove.add(s1);
+                        }
+                    }
+                    for (SourceMetadata s: toRemove) {
+                        pattern_sources.remove(wktPattern1, s);
+                    }
+
+                   toRemove = new HashSet<>();
+                    for (SourceMetadata s2: pattern_sources.get(wktPattern2)) {
+                        boolean empty = true;
+                        for (SourceMetadata s1: pattern_sources.get(wktPattern1)) {
+                            if (!BBoxSourcePruner.emptyResultSet(f, v1, source_bbox.get(s1), v2, source_bbox.get(s2))) {
+                                empty = false;
+                            }
+                        }
+                        if (empty) {
+                            c = true;
+                            toRemove.add(s2);
+                        }
+                    }
+                    for (SourceMetadata s: toRemove) {
+                        pattern_sources.remove(wktPattern2, s);
+                    }
+                }
             }
-        }
-        */
+        } while (c);
+
+        /* update selector map */
+        selectorMap.putAll(pattern_sources);
     }
 
     private Resource endpointOfSource(SourceMetadata source) {
         return source.getSites().iterator().next().getID();
     }
 
+    private StatementPattern getAsWktPattern(String var, SetMultimap<String, StatementPattern> var_patterns) {
+        StatementPattern wktPattern = var_patterns.get(var).stream()
+                .filter(p -> p.getPredicateVar().hasValue() && p.getPredicateVar().getValue().equals(GEO.AS_WKT))
+                .collect(Collectors.toList()).get(0);
+        return wktPattern;
+    }
+
     @Override
     public Collection<SourceMetadata> getSources(StatementPattern pattern, Dataset dataset, BindingSet bindings)
     {
-        if (processed && selectorMap.containsKey(pattern)) {
+        if (processed) {
             return selectorMap.get(pattern);
         }
         return super.getWrappedSelector().getSources(pattern, dataset, bindings);

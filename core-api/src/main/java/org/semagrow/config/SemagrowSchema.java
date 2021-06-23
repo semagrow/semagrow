@@ -28,6 +28,8 @@ public class SemagrowSchema {
     public static final IRI QUERYTRANSFORMUSER;
     public static final IRI QUERYTRANSFORMPASSWORD;
 
+    public static final IRI SOURCESELECTORS;
+
     // queryLog handler
     // source selection
     // decomposition algorithm
@@ -43,5 +45,6 @@ public class SemagrowSchema {
         QUERYTRANSFORMUSER = vf.createIRI(NAMESPACE, "queryTransformUser");
         QUERYTRANSFORMPASSWORD = vf.createIRI(NAMESPACE, "queryTransformPass");
         SOURCESELECTOR = vf.createIRI(NAMESPACE, "sourceSelector");
+        SOURCESELECTORS = vf.createIRI(NAMESPACE, "sourceSelectors");
     }
 }

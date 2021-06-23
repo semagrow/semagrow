@@ -157,7 +157,7 @@ public class SPARQLQueryStringUtil {
         String queryString = new SPARQLQueryRenderer().render(new ParsedTupleQuery(expr));
         //queryString = updateFunctionCallsSELECT(expr, queryString, computeVars(expr));
 
-        return queryString;
+        return updateLanguageLiterals(queryString);
     }
 
     private static String buildAskSPARQLQuery(TupleExpr expr) throws Exception
@@ -417,6 +417,10 @@ public class SPARQLQueryStringUtil {
             e.printStackTrace();
             return "";
         }
+    }
+
+    private static String updateLanguageLiterals(String query) {
+        return query.replace("@Optional[en]", "@en");
     }
 
     ////////////////////////////////////////////////////////////////////////////////////
