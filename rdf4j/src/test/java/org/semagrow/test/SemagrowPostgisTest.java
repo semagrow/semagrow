@@ -169,7 +169,7 @@ public class SemagrowPostgisTest extends TestCase {
 				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
 				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
 				"PREFIX pgm1: <http://rdf.semagrow.org/pgm/conn1/>" +
-				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/multi/>" +
+				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/conn2/>" +
 				"SELECT * WHERE {\n" +
 				"  ?g1 rdf:type pgm1:geometry .\n" + 
 				"  ?g2 rdf:type pgm2:geometry .\n" + 
@@ -180,6 +180,64 @@ public class SemagrowPostgisTest extends TestCase {
 //				"  FILTER(geof:distance(?w1,?w2,uom:metre) = 10) .\n" +
 				"}";
 		
+		String q13 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX pgm1: <http://rdf.semagrow.org/pgm/conn1/>" +
+				"PREFIX pgm2: <http://rdf.semagrow.org/pgm/multi/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s rdf:type pgm1:geometry .\n" + 
+				"  ?s geo:asWKT ?wkt .\n" + 
+				"  FILTER( geof:sfWithin(?wkt, 'POLYGON((9.53372383 46.37481689,9.53372383 49.01704407,17.16236115 49.01704407,17.16236115 46.37481689,9.53372383 46.37481689))') ). \n" + 
+				"}";
+		
+		String q14 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+//				"PREFIX lucaspg: <http://rdf.semagrow.org/pgm/lucaspg/>" +
+//				"PREFIX gadmpg: <http://rdf.semagrow.org/pgm/gadmpg/>" +
+				"PREFIX pgm: <http://rdf.semagrow.org/pgm/conn1/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s1 rdf:type pgm:geometry .\n" +
+		        "}";
+		
+		String q15 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX conn1: <http://rdf.semagrow.org/pgm/conn1/>" +
+				"PREFIX conn2: <http://rdf.semagrow.org/pgm/conn2/>" +
+				"PREFIX conn3: <http://rdf.semagrow.org/pgm/conn3/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s1 rdf:type conn1:geometry .\n" +
+				"  ?s1 geo:asWKT ?w1 .\n" +
+				"  ?s2 rdf:type conn2:geometry .\n" +
+				"  ?s2 geo:asWKT ?w2 .\n" +
+				"  FILTER (str(?s1) = \"http://rdf.semagrow.org/pgm/conn1/resource/9\") .\n" +
+				"  FILTER (geof:distance(?w1, ?w2, uom:metre) < 10) .\n" +
+		        "}";
+		
+		String q16 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX lucaspg: <http://rdf.semagrow.org/pgm/lucaspg/>" +
+				"PREFIX gadmpg: <http://rdf.semagrow.org/pgm/gadmpg/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s1 rdf:type gadmpg:geometry .\n" +
+		        "  ?s1 geo:asWKT ?w1 .\n" +
+		        "  ?s2 rdf:type lucaspg:geometry .\n" +
+		        "  ?s2 geo:asWKT ?w2 .\n" +
+		        "  FILTER (str(?s1) = \"http://rdf.semagrow.org/pgm/gadmpg/resource/1361\") .\n" +
+		        "  FILTER (geof:distance(?w1, ?w2, uom:metre) < 100000) .\n" +
+		        "}";
+		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
 		Repository repo = new SemagrowSailRepository((SemagrowSail) factory.getSail(config));
@@ -188,7 +246,7 @@ public class SemagrowPostgisTest extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q12);
+		TupleQuery query = conn.prepareTupleQuery(q16);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
