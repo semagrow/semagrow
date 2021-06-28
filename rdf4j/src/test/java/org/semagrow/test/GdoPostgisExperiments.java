@@ -169,6 +169,64 @@ public class GdoPostgisExperiments extends TestCase {
 		        "  FILTER (geof:sfWithin(?w1, 'POLYGON((9.53372383 46.37481689,9.53372383 49.01704407,17.16236115 49.01704407,17.16236115 46.37481689,9.53372383 46.37481689))')) .\n" +
 		        "}";
 		
+///////////////////////////////////////////////////////////////////////////////////////////
+		
+		String luc20 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX lucaspg: <http://rdf.semagrow.org/pgm/lucaspg/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s1 rdf:type lucaspg:geometry .\n" +
+		        "  ?s1 geo:asWKT ?w1 .\n" +
+		        "  FILTER (geof:sfWithin(?w1, 'POLYGON((14.40405747057617 48.11393907683593,14.554916753515624 48.11393907683593,14.554916753515624 47.90493477841797,14.40405747057617 47.90493477841797,14.40405747057617 48.11393907683593))')) .\n" +
+		        "}";
+		
+		String q4luc20 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX lucaspg: <http://rdf.semagrow.org/pgm/lucaspg/>" +
+				"PREFIX invekospg: <http://rdf.semagrow.org/pgm/invekospg/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s1 rdf:type lucaspg:geometry .\n" +
+		        "  ?s1 geo:asWKT ?w1 .\n" +
+		        "  ?s2 rdf:type invekospg:geometry .\n" +
+		        "  ?s2 geo:asWKT ?w2 .\n" +
+		        "  FILTER (geof:sfWithin(?w1, 'POLYGON((14.40405747057617 48.11393907683593,14.554916753515624 48.11393907683593,14.554916753515624 47.90493477841797,14.40405747057617 47.90493477841797,14.40405747057617 48.11393907683593))')) .\n" +
+		        "  FILTER (geof:distance(?w1, ?w2, uom:metre) < 10000) .\n" +
+		        "}";
+		
+		String luc1 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX lucaspg: <http://rdf.semagrow.org/pgm/lucaspg/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s1 rdf:type lucaspg:geometry .\n" +
+		        "  ?s1 geo:asWKT ?w1 .\n" +
+		        "  FILTER (geof:sfWithin(?w1, 'POLYGON((13.320525884628296 47.75932364097497,13.320536613464355 47.75919021101876,13.320837020874023 47.75922266698558,13.3207243680954 47.75931282234265,13.320525884628296 47.75932364097497))')) .\n" +
+		        "}";
+		
+		String q4luc1 = "" +
+				"PREFIX geo: <http://www.opengis.net/ont/geosparql#>" +
+				"PREFIX geof: <http://www.opengis.net/def/function/geosparql/>" +
+				"PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>" +
+				"PREFIX uom: <http://www.opengis.net/def/uom/OGC/1.0/>" +
+				"PREFIX lucaspg: <http://rdf.semagrow.org/pgm/lucaspg/>" +
+				"PREFIX invekospg: <http://rdf.semagrow.org/pgm/invekospg/>" +
+				"SELECT * WHERE {\n" +
+				"  ?s1 rdf:type lucaspg:geometry .\n" +
+		        "  ?s1 geo:asWKT ?w1 .\n" +
+		        "  ?s2 rdf:type invekospg:geometry .\n" +
+		        "  ?s2 geo:asWKT ?w2 .\n" +
+		        "  FILTER (geof:sfWithin(?w1, 'POLYGON((13.320525884628296 47.75932364097497,13.320536613464355 47.75919021101876,13.320837020874023 47.75922266698558,13.3207243680954 47.75931282234265,13.320525884628296 47.75932364097497))')) .\n" +
+		        "  FILTER (geof:distance(?w1, ?w2, uom:metre) < 10) .\n" +
+		        "}";
+		
 		SemagrowSailFactory factory = new SemagrowSailFactory();
 		SemagrowSailConfig config = new SemagrowSailConfig();
 		Repository repo = new SemagrowSailRepository((SemagrowSail) factory.getSail(config));
@@ -177,7 +235,7 @@ public class GdoPostgisExperiments extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q4a);
+		TupleQuery query = conn.prepareTupleQuery(q4luc20);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
