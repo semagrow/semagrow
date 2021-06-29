@@ -29,7 +29,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
         return defaultImpl;
     }
 	
-    public static final BindingSet transform(Record r, String dbname, Map<String,String> extraBindingVars) 
+    public static final BindingSet transform(Record r, String dbname, Map<String,String> extraBindings) 
     		throws SQLException {
 
         ResultSet rs = r.intoResultSet();
@@ -55,7 +55,7 @@ public final class BindingSetOpsImpl implements BindingSetOps {
             }
         }
         
-        for (Map.Entry<String,String> binding : extraBindingVars.entrySet()) {
+        for (Map.Entry<String,String> binding : extraBindings.entrySet()) {
         	result.addBinding(binding.getKey(), vf.createIRI(binding.getValue()));
         }
         return result;

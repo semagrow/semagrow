@@ -117,17 +117,18 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		} 
 		else {
 			final BindingSet relevantBindings = bindingSetOps.project(computeVars(expr), bindings);
-            
+            Collection<String> nonReleventBindingNames = computeNonRelevantBindingNames(bindings, relevantBindings.getBindingNames());
+			
 			List<String> tables = new ArrayList<String>();
-			Map<String,String> extraBindingVars = new HashMap<String, String>();
+			Map<String,String> extraBindings = new HashMap<String, String>();
 			String dbname = site.getDatabaseName();
-			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, relevantBindings, extraBindingVars, dbname);
+			String sqlQuery = PostGISQueryStringUtil.buildSQLQuery(expr, freeVars, tables, bindings, nonReleventBindingNames, extraBindings, dbname);
 
 			if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
 			String username = site.getUsername();
 			String password = site.getPassword();
-			logger.info("Sending SQL query [{}] to {} \n\t\t with {}", sqlQuery, endpoint, relevantBindings);
+			logger.info("Sending SQL query [{}] to {} \n\t\t with {}", sqlQuery, endpoint, bindings);
 			
 //			PostGISClient client = PostGISClient.getInstance(endpoint, username, password);
 //			Stream<Record> rs = client.execute(sqlQuery);
@@ -137,7 +138,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, dbname, extraBindingVars);
+					return BindingSetOpsImpl.transform(r, dbname, extraBindings);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();
@@ -171,6 +172,8 @@ public class PostGISQueryExecutor implements QueryExecutor {
         if (!bindingsList.isEmpty())
         	relevantBindingNames = BindingSetUtil.projectNames(exprVars, bindingsList.get(0));
         
+        Collection<String> nonRelevantBindingNames = computeNonRelevantBindingNames(bindingsList.get(0), relevantBindingNames);
+        
         Set<String> freeVars = computeVars(expr);	// freeVars = exprVars
         freeVars.removeAll(relevantBindingNames);
         
@@ -180,10 +183,10 @@ public class PostGISQueryExecutor implements QueryExecutor {
 		else {
         
 	        List<String> tables = new ArrayList<String>();
-	        Map<String,String> extraBindingVars = new HashMap<String, String>();
+	        Map<String,String> extraBindings = new HashMap<String, String>();
 	        String dbname = site.getDatabaseName();
 	        
-	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindingsList, relevantBindingNames, extraBindingVars, dbname);
+	        String sqlQuery = PostGISQueryStringUtil.buildSQLQueryUnion(expr, freeVars, tables, bindingsList, relevantBindingNames, nonRelevantBindingNames, extraBindings, dbname);
 	        
 	        if (sqlQuery == null) return Flux.empty();
 			String endpoint = site.getEndpoint();
@@ -200,7 +203,7 @@ public class PostGISQueryExecutor implements QueryExecutor {
 			
 			return Flux.fromStream(rs.map(r -> {
 				try {
-					return BindingSetOpsImpl.transform(r, dbname, extraBindingVars);
+					return BindingSetOpsImpl.transform(r, dbname, extraBindings);
 				} catch (SQLException e) {
 					e.printStackTrace();
 					throw new QueryEvaluationException();
@@ -211,6 +214,16 @@ public class PostGISQueryExecutor implements QueryExecutor {
         return result;
 	}
 	
+	protected Collection<String> computeNonRelevantBindingNames(BindingSet bindings, 
+			Collection<String> relevantBindingNames) {
+		Collection<String> nonRelevantBindingNames = new HashSet<String>();
+		Collection<String> bindingNames = bindings.getBindingNames();
+		for (String bindingName: bindingNames) {
+			if (!relevantBindingNames.contains(bindingName))
+				nonRelevantBindingNames.add(bindingName);
+		}
+		return nonRelevantBindingNames;
+	}
 	
 	protected Set<String> computeVars(TupleExpr serviceExpression) {
 		final Set<String> res = new HashSet<String>();

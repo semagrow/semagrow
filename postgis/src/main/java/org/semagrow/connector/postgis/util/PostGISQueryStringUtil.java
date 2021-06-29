@@ -112,10 +112,10 @@ public class PostGISQueryStringUtil {
 	
 	/**
 	 * Replace variables in each triple with their bindings derived from filter clauses. 
-	 * Remove these variables from the bindingVars map.
+	 * Remove these variables from the bindingMap.
 	 */
 	public static void replaceVarsWithFilterBindings(Set<List<String>> allFilters, Set<String> freeVars, 
-			List<String> triples, Map<String,String> bindingVars) {
+			List<String> triples, Map<String,String> bindingMap) {
 		String var1, var2, operator;
 		for (List<String> filterInfo : allFilters) {
 			if (filterInfo.size() == 3 && !filterInfo.get(0).contains("sf")) {
@@ -125,14 +125,14 @@ public class PostGISQueryStringUtil {
 				if ((freeVars.contains(var1) && freeVars.contains(var2)) || freeVars.contains(var2)) {
 					if (operator.equals("="))
 						replacement(triples, var2, var1);
-//					bindingVars.remove(bindingVars.remove(var2));
-					if (!bindingVars.get(var1).isEmpty() && !bindingVars.get(var2).isEmpty()) 
-						logger.debug("what happens if bindingVars contains both variables?");
+//					bindingMap.remove(bindingMap.remove(var2));
+					if (!bindingMap.get(var1).isEmpty() && !bindingMap.get(var2).isEmpty()) 
+						logger.debug("what happens if bindingMap contains both variables?");
 				}
 				else if (freeVars.contains(var1)) {
 					if (operator.equals("="))
 						replacement(triples, var1, var2);
-					bindingVars.remove(bindingVars.remove(var1));
+					bindingMap.remove(bindingMap.remove(var1));
 				}
 				else {
 					logger.debug("what happens if both are constant values?");
@@ -149,9 +149,9 @@ public class PostGISQueryStringUtil {
 		}
 	}
 	
-	public static String keepBinding(Map<String,String> bindingVars, String var) {
-		if (bindingVars.containsKey(var)) {
-			var = bindingVars.get(var);
+	public static String keepBinding(Map<String,String> bindingMap, String var) {
+		if (bindingMap.containsKey(var)) {
+			var = bindingMap.get(var);
 			if (var.contains("^")) var = var.substring(1, var.indexOf("^"));
 		}
 		return var;
@@ -159,10 +159,9 @@ public class PostGISQueryStringUtil {
 	
 	/**
 	 * @return all conditions derived from the filter clauses.
-	 * ((( Probably boolean queryUnion is not needed )))
 	 */
 	public static Set<String> computingFilterClauses(Set<List<String>> allFilters, 
-			Map<String,String> bindingVars, boolean queryUnion) {
+			Map<String,String> bindingMap) {
 		
 		String operator, call, var1, var2, unit, value, condition = "";
 		Set<String> allConditions = new HashSet<String>();
@@ -173,8 +172,8 @@ public class PostGISQueryStringUtil {
 			}
 			else if (filterInfo.size() == 3 && filterInfo.get(0).contains("sf")) {
 				call = filterInfo.get(0);
-				var1 = keepBinding(bindingVars, filterInfo.get(1));
-				var2 = keepBinding(bindingVars, filterInfo.get(2));
+				var1 = keepBinding(bindingMap, filterInfo.get(1));
+				var2 = keepBinding(bindingMap, filterInfo.get(2));
 				
 				condition = function(simpleFeatureFunction(call), 
 						geomFromText(asText(var1)), geomFromText(asText(var2)));
@@ -182,8 +181,8 @@ public class PostGISQueryStringUtil {
 			else if (filterInfo.size() == 6) {
 				operator = filterInfo.get(0);
 				call = filterInfo.get(1);
-				var1 = keepBinding(bindingVars, filterInfo.get(2));
-				var2 = keepBinding(bindingVars, filterInfo.get(3));
+				var1 = keepBinding(bindingMap, filterInfo.get(2));
+				var2 = keepBinding(bindingMap, filterInfo.get(3));
 				unit = filterInfo.get(4);
 				value = filterInfo.get(5);
 
@@ -215,25 +214,25 @@ public class PostGISQueryStringUtil {
 	 * Replace variables in each triple with their bindings. 
 	 * @return a map from variables to their binding.
 	 */
-	private static Map<String, String> replaceVarsWithBindings(BindingSet bindings, 
+	private static Map<String, String> queryBindingSetToMap(BindingSet bindings, 
 			List<String> triples) {
 		
-		Map<String,String> bindingVars = new HashMap<String, String>();
+		Map<String,String> bindingMap = new HashMap<String, String>();
 		
 		Set<String> bindingNames = bindings.getBindingNames();
 		for (String bindingName: bindingNames) {
 			String value = getValueFromLiteralOrIRI(bindings, bindingName);
 			replacement(triples, bindingName, value);
-			bindingVars.put(bindingName, value);
+			bindingMap.put(bindingName, value);
 		}
 		
-		return bindingVars;
+		return bindingMap;
 	}
 	
 	public static String buildUnion(List<BindingSet> bindingsList, Collection<String> relevantBindingNames, 
 			String sqlQuery) {
 		
-		String sqlQueryUnion = "";
+		String sqlUnionQuery = "";
 		
 		String transformingSqlQuery;
 		for (BindingSet bindings: bindingsList) {
@@ -244,16 +243,16 @@ public class PostGISQueryStringUtil {
 					transformingSqlQuery = transformingSqlQuery.replace(relevantBindingName, value);
 				}
 			}
-			sqlQueryUnion += transformingSqlQuery + UNION;
+			sqlUnionQuery += transformingSqlQuery + UNION;
 		}
 		
 		// remove the last "UNION" operator
-		sqlQueryUnion = sqlQueryUnion.substring(0, sqlQueryUnion.length() - 6) + ";";
-		return sqlQueryUnion;
+		sqlUnionQuery = sqlUnionQuery.substring(0, sqlUnionQuery.length() - 6) + ";";
+		return sqlUnionQuery;
 	}
 	
-	public static String buildSimpleSQLQuery(Set<String> freeVars, Map<String,String> bindingVars, 
-			Map<String,String> extraBindingVars, List<String> triples) {
+	public static String buildSimpleSQLQuery(Set<String> freeVars, Map<String,String> bindingMap, 
+			Map<String,String> extraBindings, List<String> triples) {
 
 		Map<String, String> wktMap = new HashMap<String, String>();
 		Map<String, String> typeMap = new HashMap<String, String>();
@@ -268,14 +267,14 @@ public class PostGISQueryStringUtil {
 		for (Entry<String, String> wkts : wktMap.entrySet()) {
 			if (freeVars.contains(wkts.getKey())) {
 				selectSet.add(G + i + INDEX_BINDING_NAME + AS + wkts.getKey());
-				bindingVars.put(wkts.getKey(), G + i + INDEX_BINDING_NAME);
+				bindingMap.put(wkts.getKey(), G + i + INDEX_BINDING_NAME);
 			}
 			else {
 				whereSet.add(G + i + INDEX_BINDING_NAME + " = " + decomposeToId(wkts.getKey()));
 			}
 			if (freeVars.contains(wkts.getValue())) {
 				selectSet.add(asText(G + i + WKT_BINDING_NAME) + AS + wkts.getValue());
-				bindingVars.put(wkts.getValue(), G + i + WKT_BINDING_NAME);
+				bindingMap.put(wkts.getValue(), G + i + WKT_BINDING_NAME);
 			}
 			else {
 				if (!freeVars.contains(wkts.getKey())) selectSet.add(G + i + INDEX_BINDING_NAME);
@@ -291,7 +290,7 @@ public class PostGISQueryStringUtil {
 			else {
 				if (freeVars.contains(types.getKey())) {
 					selectSet.add(G + i + INDEX_BINDING_NAME + AS + types.getKey());
-					bindingVars.put(types.getKey(), G + i + INDEX_BINDING_NAME);
+					bindingMap.put(types.getKey(), G + i + INDEX_BINDING_NAME);
 				}
 				else {
 					selectSet.add(G + i + INDEX_BINDING_NAME);
@@ -301,7 +300,7 @@ public class PostGISQueryStringUtil {
 			}
 			
 			if (freeVars.contains(types.getValue())) {
-				extraBindingVars.put(types.getValue(), TYPE_URI);
+				extraBindings.put(types.getValue(), TYPE_URI);
 			}
 			else {
 				if (types.getValue().equals(TYPE_URI))
@@ -320,7 +319,8 @@ public class PostGISQueryStringUtil {
 	
 	
 	public static String buildSQLQuery(TupleExpr expr, Set<String> freeVars, List<String> tables, 
-			BindingSet bindings, Map<String,String> extraBindingVars, String dbname) {
+			BindingSet bindings, Collection<String> nonReleventBindingNames, 
+			Map<String,String> extraBindings, String dbname) {
 				
 		typeURI(dbname);
 		List<String> triples = computeTriples(expr);
@@ -328,19 +328,19 @@ public class PostGISQueryStringUtil {
 		triplePruning(triples);
 		if (triples.isEmpty()) return null;
 				
-		Map<String,String> bindingVars = replaceVarsWithBindings(bindings, triples);
+		Map<String,String> bindingMap = queryBindingSetToMap(bindings, triples);
 		
 		Set<List<String>> allFilters = computeFilterVars(expr);
-		replaceVarsWithFilterBindings(allFilters, freeVars, triples, bindingVars);
+		replaceVarsWithFilterBindings(allFilters, freeVars, triples, bindingMap);
 		
 //		List<String> bindInfo = computeBindVars(expr);
 		
-		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingVars, extraBindingVars, triples);
+		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingMap, extraBindings, triples);
 		
 		if (sqlQuery.contains(WHERE))
-			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingVars, false), AND_SEP, AND_SEP);
+			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingMap), AND_SEP, AND_SEP);
 		else 
-			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingVars, false), AND_SEP, WHERE);
+			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingMap), AND_SEP, WHERE);
 		
 		return sqlQuery;
 	}
@@ -348,7 +348,8 @@ public class PostGISQueryStringUtil {
 	
 	public static String buildSQLQueryUnion(TupleExpr expr, Set<String> freeVars, 
 		List<String> tables, List<BindingSet> bindings, Collection<String> relevantBindingNames, 
-		Map<String,String> extraBindingVars, String dbname) {
+		Collection<String> nonReleventBindingNames, 
+		Map<String,String> extraBindings, String dbname) {
 				
 		typeURI(dbname);
 		List<String> triples = computeTriples(expr);
@@ -362,17 +363,17 @@ public class PostGISQueryStringUtil {
 		if (triples.isEmpty()) return null;
 		
 		Set<List<String>> allFilters = computeFilterVars(expr);
-		Map<String,String> bindingVars = new HashMap<String, String>();
-		replaceVarsWithFilterBindings(allFilters, freeVars, triples, bindingVars);
+		Map<String,String> bindingMap = new HashMap<String, String>();
+		replaceVarsWithFilterBindings(allFilters, freeVars, triples, bindingMap);
 		
 //		List<String> bindInfo = computeBindVars(expr);
 		
-		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingVars, extraBindingVars, triples);
+		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingMap, extraBindings, triples);
 				
 		if (sqlQuery.contains(WHERE))
-			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingVars, true), AND_SEP, AND_SEP);
+			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingMap), AND_SEP, AND_SEP);
 		else
-			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingVars, true), AND_SEP, WHERE);
+			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingMap), AND_SEP, WHERE);
 
 		return buildUnion(bindings, relevantBindingNames, sqlQuery);
 	}

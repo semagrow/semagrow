@@ -235,7 +235,7 @@ public class GdoPostgisExperiments extends TestCase {
 		        
 		RepositoryConnection conn = repo.getConnection();
 		
-		TupleQuery query = conn.prepareTupleQuery(q4luc20);
+		TupleQuery query = conn.prepareTupleQuery(q4luc1);
 		
 		final int[] count = {0};
 		final FileWriter writer = new FileWriter("/tmp/results.txt", false);
