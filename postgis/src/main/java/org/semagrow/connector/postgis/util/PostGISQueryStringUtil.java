@@ -154,6 +154,24 @@ public class PostGISQueryStringUtil {
 			var = bindingMap.get(var);
 			if (var.contains("^")) var = var.substring(1, var.indexOf("^"));
 		}
+		else if (var.contains("\"")) {
+			var = var.substring(1, var.indexOf("^"));
+		}
+		else if (!var.contains("'")) {
+			var = "_" + var;
+		}
+		return var;
+	}
+	
+	public static String keepValue(Map<String,String> bindingMap, String var) {
+		if (bindingMap.containsKey(var)) {
+			var = bindingMap.get(var);
+			if (!var.contains("'"))
+				var = "'" + decomposeToId(var)  + "'";
+		}
+		else {
+			var = "_" + var;
+		}
 		return var;
 	}
 	
@@ -238,9 +256,11 @@ public class PostGISQueryStringUtil {
 		for (BindingSet bindings: bindingsList) {
 			transformingSqlQuery = sqlQuery;
 			for (String relevantBindingName: relevantBindingNames) {
-				if (sqlQuery.contains(relevantBindingName)) {
+				if (sqlQuery.contains("_" + relevantBindingName)) {
 					String value = getValueFromLiteralOrIRI(bindings, relevantBindingName);
-					transformingSqlQuery = transformingSqlQuery.replace(relevantBindingName, value);
+					if (!value.contains("'"))
+						value = "'" + decomposeToId(value) + "'";
+					transformingSqlQuery = transformingSqlQuery.replace("_" + relevantBindingName, value);
 				}
 			}
 			sqlUnionQuery += transformingSqlQuery + UNION;
@@ -252,7 +272,7 @@ public class PostGISQueryStringUtil {
 	}
 	
 	public static String buildSimpleSQLQuery(Set<String> freeVars, Map<String,String> bindingMap, 
-			Map<String,String> extraBindings, List<String> triples) {
+			Map<String,String> extraBindings, Set<String> bindingNames, List<String> triples) {
 
 		Map<String, String> wktMap = new HashMap<String, String>();
 		Map<String, String> typeMap = new HashMap<String, String>();
@@ -264,6 +284,13 @@ public class PostGISQueryStringUtil {
 		
 		int i = 0;
 		
+		for (String bindingName : bindingNames) {
+			if (!bindingName.contains("BBBox_of_")) { 
+				String var = keepValue(bindingMap, bindingName);
+				selectSet.add(var + AS + bindingName);
+			}
+		}
+				
 		for (Entry<String, String> wkts : wktMap.entrySet()) {
 			if (freeVars.contains(wkts.getKey())) {
 				selectSet.add(G + i + INDEX_BINDING_NAME + AS + wkts.getKey());
@@ -335,7 +362,7 @@ public class PostGISQueryStringUtil {
 		
 //		List<String> bindInfo = computeBindVars(expr);
 		
-		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingMap, extraBindings, triples);
+		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingMap, extraBindings, bindings.getBindingNames(), triples);
 		
 		if (sqlQuery.contains(WHERE))
 			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingMap), AND_SEP, AND_SEP);
@@ -368,14 +395,16 @@ public class PostGISQueryStringUtil {
 		
 //		List<String> bindInfo = computeBindVars(expr);
 		
-		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingMap, extraBindings, triples);
+		String sqlQuery = buildSimpleSQLQuery(freeVars, bindingMap, extraBindings, bindings.get(0).getBindingNames(), triples);
 				
 		if (sqlQuery.contains(WHERE))
 			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingMap), AND_SEP, AND_SEP);
 		else
 			sqlQuery += serializeSet(computingFilterClauses(allFilters, bindingMap), AND_SEP, WHERE);
 
-		return buildUnion(bindings, relevantBindingNames, sqlQuery);
+		Set<String> bindingNames = bindings.get(0).getBindingNames();
+//		return buildUnion(bindings, relevantBindingNames, sqlQuery);
+		return buildUnion(bindings, bindingNames, sqlQuery);
 	}
 	
 	

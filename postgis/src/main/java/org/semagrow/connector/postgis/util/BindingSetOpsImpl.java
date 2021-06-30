@@ -38,13 +38,15 @@ public final class BindingSetOpsImpl implements BindingSetOps {
 
         QueryBindingSet result = new QueryBindingSet();
         for (int i = 0; i < columnsNumber; i++) {
-            if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer")) {
+            if (rsmd.getColumnClassName(i+1).equals("java.lang.Integer") || ((String) r.getValue(i)).matches("\\d+")) {
                 String id = "http://rdf.semagrow.org/pgm/" + dbname + "/resource/" + r.getValue(i);
                 result.addBinding(rsmd.getColumnName(i+1), vf.createIRI(id));
             }
             else if (rsmd.getColumnClassName(i+1).equals("java.lang.String")) {
-            	/* <http://www.opengis.net/ont/geosparql#wktLiteral> */
-            	result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((String) r.getValue(i), GEO.WKT_LITERAL));
+//            	if (((String) r.getValue(i)).contains("http://rdf.semagrow.org/pgm/"))
+//            		result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((String) r.getValue(i)));
+//            	else	/* <http://www.opengis.net/ont/geosparql#wktLiteral> */
+            		result.addBinding(rsmd.getColumnName(i+1), vf.createLiteral((String) r.getValue(i), GEO.WKT_LITERAL));
             }
             else if (rsmd.getColumnClassName(i+1).equals("java.lang.Double")) {
             	/* <http://www.w3.org/2001/XMLSchema#double> */
