@@ -15,19 +15,18 @@ import java.util.List;
 
 
 public class DisjointUnionJoinOptimizer implements QueryOptimizer {
-    private DisjointCheker disjointCheker;
+    private DisjointCheker disjointChecker;
 
     public DisjointUnionJoinOptimizer(DisjointCheker disjointCheker) {
-        this.disjointCheker = disjointCheker;
+        this.disjointChecker = disjointCheker;
     }
 
     @Override
     public void optimize(TupleExpr tupleExpr, Dataset dataset, BindingSet bindingSet) {
+        System.out.println(tupleExpr);
         boolean b = true;
-        int i = 0;
         while (b) {
-            b = BindJoinFinder.process(disjointCheker, tupleExpr);
-            i++;
+            b = BindJoinFinder.process(disjointChecker, tupleExpr);
         }
     }
 
@@ -90,23 +89,29 @@ public class DisjointUnionJoinOptimizer implements QueryOptimizer {
         public void meet(Join node) {
             assert node instanceof BindJoin;
 
-            List<SourceQuery> lSourceQueries = SourceQueryCollector.process(node.getLeftArg());
-            List<SourceQuery> rSourceQueries = SourceQueryCollector.process(node.getRightArg());
+            if (node.getLeftArg() instanceof Plan && ((Plan) node.getLeftArg()).getArg() instanceof BindJoin) {
+                BindJoin left = (BindJoin) ((Plan) node.getLeftArg()).getArg();
 
-            if (canApplyOptimization(disjointChecker, lSourceQueries, rSourceQueries)) {
-                for (SourceQuery sq1: lSourceQueries) {
-                    for (SourceQuery sq2: rSourceQueries) {
-                        if (sq1.getSite().getID().equals(sq2.getSite().getID())) {
-                            Join j = new Join(sq1.getArg(), sq2.getArg());
-                            SourceQuery sq = new SourceQuery(j, sq1.getSite());
-                            sourceQueries.add(sq);
-                        }
-                    }
+                List<SourceQuery> lSourceQueries = SourceQueryCollector.process(left.getRightArg());
+                List<SourceQuery> rSourceQueries = SourceQueryCollector.process(node.getRightArg());
+
+                if (canApplyOptimization(disjointChecker, lSourceQueries, rSourceQueries)) {
+                    groupSourceQueries(lSourceQueries, rSourceQueries);
+                    node.replaceWith(new BindJoin(left.getLeftArg(), unionize(sourceQueries)));
                 }
-                node.replaceWith(unionize(sourceQueries));
+                else {
+                    node.getLeftArg().visit(this);
+                }
             }
             else {
-                node.getLeftArg().visit(this);
+
+                List<SourceQuery> lSourceQueries = SourceQueryCollector.process(node.getLeftArg());
+                List<SourceQuery> rSourceQueries = SourceQueryCollector.process(node.getRightArg());
+
+                if (canApplyOptimization(disjointChecker, lSourceQueries, rSourceQueries)) {
+                    groupSourceQueries(lSourceQueries, rSourceQueries);
+                    node.replaceWith(unionize(sourceQueries));
+                }
             }
         }
 
@@ -133,6 +138,19 @@ public class DisjointUnionJoinOptimizer implements QueryOptimizer {
             }
 
             return true;
+        }
+
+        private void groupSourceQueries(List<SourceQuery> lSourceQueries, List<SourceQuery> rSourceQueries) {
+            sourceQueries.clear();
+            for (SourceQuery sq1 : lSourceQueries) {
+                for (SourceQuery sq2 : rSourceQueries) {
+                    if (sq1.getSite().getID().equals(sq2.getSite().getID())) {
+                        Join j = new Join(sq1.getArg(), sq2.getArg());
+                        SourceQuery sq = new SourceQuery(j, sq1.getSite());
+                        sourceQueries.add(sq);
+                    }
+                }
+            }
         }
 
         private static TupleExpr unionize(List<SourceQuery> exprs) {
