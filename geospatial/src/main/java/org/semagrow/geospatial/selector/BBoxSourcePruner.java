@@ -143,7 +143,7 @@ public final class BBoxSourcePruner {
                         if (arg3 instanceof ValueConstant) {
                             Value unit = ((ValueConstant) arg3).getValue();
 
-                            if (unit.stringValue().equals(UOM.metre)) {
+                            if (unit.stringValue().equals(UOM.metre.stringValue())) {
                                 distance = approxMetersToDegrees(distance);
                             }
 
