@@ -5,7 +5,6 @@ import org.eclipse.rdf4j.query.Dataset;
 import org.eclipse.rdf4j.query.algebra.*;
 import org.eclipse.rdf4j.query.algebra.evaluation.QueryOptimizer;
 import org.eclipse.rdf4j.query.algebra.helpers.AbstractQueryModelVisitor;
-import org.semagrow.estimator.DisjointCheker;
 import org.semagrow.plan.Plan;
 import org.semagrow.plan.operators.BindJoin;
 import org.semagrow.plan.operators.SourceQuery;

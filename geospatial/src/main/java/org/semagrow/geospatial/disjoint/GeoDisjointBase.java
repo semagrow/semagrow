@@ -27,8 +27,6 @@ import org.semagrow.geospatial.selector.BBoxBase;
 import org.semagrow.model.vocabulary.SEVOD;
 import org.semagrow.model.vocabulary.VOID;
 
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
