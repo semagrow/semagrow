@@ -28,7 +28,9 @@ import org.semagrow.model.vocabulary.SEVOD;
 import org.semagrow.model.vocabulary.VOID;
 
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class GeoDisjointBase {
@@ -46,7 +48,23 @@ public class GeoDisjointBase {
         base.setMetadata(metadata);
     }
 
-    public boolean areDisjointSpatial(Resource endpoint1, Resource endpoint2) {
+    public boolean areGeoDisjoint(List<Resource> endpoints) {
+        for (Resource endpoint1: endpoints) {
+            for (Resource endpoint2: endpoints) {
+                if (!endpoint1.stringValue().equals(endpoint2.stringValue())) {
+                    if (!areDisjointSpatial(endpoint1, endpoint2)) {
+                        return false;
+                    }
+                    if (!areDisjointThematic(endpoint1, endpoint2)) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean areDisjointSpatial(Resource endpoint1, Resource endpoint2) {
         Pair<Resource,Resource> pair = Pair.of(endpoint1,endpoint2);
         if (!disjointSpatialMap.containsKey(pair)) {
             boolean b = areDisjointSpatialInternal(endpoint1, endpoint2);
@@ -69,7 +87,7 @@ public class GeoDisjointBase {
         return false;
     }
 
-    public boolean areDisjointThematic(Resource endpoint1, Resource endpoint2) {
+    private boolean areDisjointThematic(Resource endpoint1, Resource endpoint2) {
         Pair<Resource,Resource> pair = Pair.of(endpoint1,endpoint2);
         if (!disjointThematicMap.containsKey(pair)) {
             boolean b = areDisjointThematicInternal(endpoint1, endpoint2);

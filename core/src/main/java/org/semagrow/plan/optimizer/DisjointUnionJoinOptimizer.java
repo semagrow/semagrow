@@ -13,7 +13,7 @@ import org.semagrow.plan.operators.SourceQuery;
 import java.util.ArrayList;
 import java.util.List;
 
-
+@Deprecated
 public class DisjointUnionJoinOptimizer implements QueryOptimizer {
     private DisjointCheker disjointChecker;
 

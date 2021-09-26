@@ -40,17 +40,14 @@ public class SimpleQueryCompiler implements QueryCompiler {
     private CostEstimatorResolver costEstimatorResolver;
     private CardinalityEstimatorResolver cardinalityEstimatorResolver;
     private SourceSelector sourceSelector;
-    private DisjointCheker disjointCheker;
 
     public SimpleQueryCompiler(CostEstimatorResolver costEstimatorResolver,
                                CardinalityEstimatorResolver cardinalityEstimatorResolver,
-                               SourceSelector sourceSelector,
-                               DisjointCheker disjointCheker)
+                               SourceSelector sourceSelector)
     {
         this.costEstimatorResolver = costEstimatorResolver;
         this.cardinalityEstimatorResolver = cardinalityEstimatorResolver;
         this.sourceSelector = sourceSelector;
-        this.disjointCheker = disjointCheker;
     }
 
     @Override
@@ -144,8 +141,7 @@ public class SimpleQueryCompiler implements QueryCompiler {
 
         QueryOptimizer queryOptimizer =  new QueryOptimizerList(
                 new FilterPlanOptimizer(),
-                new BindJoinExtensionOptimizer(),
-                new DisjointUnionJoinOptimizer(disjointCheker)
+                new BindJoinExtensionOptimizer()
         );
 
         queryOptimizer.optimize(expr, dataset, bindings);
