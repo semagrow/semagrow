@@ -94,7 +94,8 @@ public class GeoDisjointCompiler implements QueryCompiler {
         for (StatementPattern p1: patterns) {
             for (StatementPattern p2: patterns) {
                 if (!p1.equals(p2)) {
-                    if (p1.getObjectVar().getName().equals(p2.getObjectVar().getName())) {
+                    if (!p1.getObjectVar().hasValue() && !p2.getObjectVar().hasValue() &&
+                            p1.getObjectVar().getName().equals(p2.getObjectVar().getName())) {
                         return false;
                     }
                 }
