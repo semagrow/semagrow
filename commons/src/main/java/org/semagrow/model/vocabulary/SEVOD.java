@@ -32,6 +32,11 @@ public final class SEVOD {
     public final static IRI BOUNDINGWKT;
     public final static IRI BOUNDINGGML;
 
+    public final static IRI JOIN;
+    public final static IRI JOINS;
+    public final static IRI SELECTIVITY;
+    public final static IRI SELECTIVITYVALUE;
+
     static {
         ValueFactory factory = SimpleValueFactory.getInstance();
         SUBJECTREGEXPATTERN = factory.createIRI(SEVOD.NAMESPACE, "subjectRegexPattern");
@@ -46,5 +51,10 @@ public final class SEVOD {
         TO = factory.createIRI(SEVOD.NAMESPACE, "to");
         BOUNDINGWKT = factory.createIRI(SEVOD.NAMESPACE, "boundingWKT");
         BOUNDINGGML = factory.createIRI(SEVOD.NAMESPACE, "boundingGML");
+        JOIN = factory.createIRI(SEVOD.NAMESPACE, "Join");
+        JOINS = factory.createIRI(SEVOD.NAMESPACE, "joins");
+        SELECTIVITY = factory.createIRI(SEVOD.NAMESPACE, "selectivity");
+        SELECTIVITYVALUE = factory.createIRI(SEVOD.NAMESPACE, "selectivityValue");
+
     }
 }

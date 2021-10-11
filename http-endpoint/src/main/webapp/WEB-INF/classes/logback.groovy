@@ -22,6 +22,7 @@ logger( "org.semagrow.http", INFO, ["PROCFLOW"], false )
 logger( "org.semagrow.query", INFO, ["PROCFLOW"], false )
 logger( "org.semagrow.sail", INFO, ["PROCFLOW"], false )
 logger( "org.semagrow.http.views.TupleQueryResultView", OFF, ["PROCFLOW"], false )
+logger( "org.semagrow.geospatial", INFO, ["PROCFLOW"], false)
 
 logger( "reactor", WARN, ["PROCFLOW"], false )
 

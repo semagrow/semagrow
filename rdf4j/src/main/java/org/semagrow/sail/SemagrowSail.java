@@ -1,5 +1,6 @@
 package org.semagrow.sail;
 
+import org.semagrow.geospatial.disjoint.GeoDisjointCompiler;
 import org.semagrow.plan.QueryCompiler;
 import org.semagrow.plan.QueryDecomposer;
 import org.semagrow.estimator.CardinalityEstimatorResolver;
@@ -7,6 +8,7 @@ import org.semagrow.estimator.SelectivityEstimatorResolver;
 import org.semagrow.estimator.CostEstimatorResolver;
 import org.semagrow.evaluation.file.FileManager;
 import org.semagrow.evaluation.file.MaterializationManager;
+import org.semagrow.plan.SimpleQueryCompiler;
 import org.semagrow.selector.RestrictiveSourceSelector;
 import org.semagrow.selector.SourceSelector;
 import org.semagrow.querylog.api.QueryLogException;
@@ -98,7 +100,9 @@ public class SemagrowSail extends AbstractSail {
         selector = new RestrictiveSourceSelector(selector, includeOnly, exclude);
         CostEstimatorResolver costEstimatorResolver = getCostEstimatorResolver();
         CardinalityEstimatorResolver cardinalityEstimatorResolver = getCardinalityEstimatorResolver();
-        return new org.semagrow.plan.SimpleQueryCompiler(costEstimatorResolver, cardinalityEstimatorResolver, selector);
+        QueryCompiler simpleCompiler = new SimpleQueryCompiler(costEstimatorResolver, cardinalityEstimatorResolver, selector);
+        QueryCompiler geoDisjointCompiler = new GeoDisjointCompiler(simpleCompiler, selector, getMetadataRepository());
+        return geoDisjointCompiler;
     }
 
     public SourceSelector getSourceSelector() { return sourceSelector; }
