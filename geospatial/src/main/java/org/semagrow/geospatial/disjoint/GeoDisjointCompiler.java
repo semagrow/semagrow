@@ -68,6 +68,7 @@ public class GeoDisjointCompiler implements QueryCompiler {
         if (base.areGeoDisjoint(sources) && canOptimize(query)) {
 
             Plan plan = new Plan(unionize(query.getArg(), sources));
+            logger.info("Forward query {} in {}", query.getArg(), sources);
 
             long t3 = System.currentTimeMillis();
 
@@ -81,6 +82,7 @@ public class GeoDisjointCompiler implements QueryCompiler {
             return plan;
         }
         else {
+            logger.info("Fallback to SimpleQueryCompiler");
             return innerQueryCompiler.compile(query, dataset, bindings);
         }
     }
