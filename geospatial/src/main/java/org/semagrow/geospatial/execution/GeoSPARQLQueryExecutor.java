@@ -50,8 +50,7 @@ public class GeoSPARQLQueryExecutor extends SPARQLQueryExecutor {
             distanceOptimizer.optimize(expr, null, bindings);
             BindingSet bindingsExt = distanceOptimizer.expandBindings(bindings);
 
-            return evaluateReactorImpl((SPARQLSite) endpoint, expr, bindingsExt)
-                    .map(b -> bindingSetOps.project(bindings.getBindingNames(), b));
+            return evaluateReactorImpl((SPARQLSite) endpoint, expr, bindingsExt);
         }
     }
 
@@ -67,8 +66,7 @@ public class GeoSPARQLQueryExecutor extends SPARQLQueryExecutor {
             distanceOptimizer.optimize(clone, null, template);
             List<BindingSet> bindingsListExt = distanceOptimizer.expandBindings(bindingsList);
 
-            return evaluateReactorImpl((SPARQLSite) endpoint, clone, bindingsListExt)
-                    .map(b -> bindingSetOps.project(template.getBindingNames(), b));
+            return evaluateReactorImpl((SPARQLSite) endpoint, clone, bindingsListExt);
         }
     }
 }
