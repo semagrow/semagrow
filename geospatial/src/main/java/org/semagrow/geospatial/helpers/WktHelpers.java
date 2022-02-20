@@ -56,10 +56,10 @@ public final class WktHelpers {
     }
 
 
-    public static final Literal createWKTLiteral(Geometry geometry, IRI crs) {
+    public static final Literal createWKTLiteral(Geometry geometry, String crs) {
 
         String wktStr = wktWriter.write(geometry);
-        String crsStr = crs.equals(GEO.DEFAULT_SRID) ? "" : "<" + crs.toString() + "> ";
+        String crsStr = crs.equals(GEO.DEFAULT_SRID) ? "" : "<" + crs + "> ";
         Literal l = vf.createLiteral(crsStr + wktStr, GEO.WKT_LITERAL);
 
         return l;
