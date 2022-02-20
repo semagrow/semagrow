@@ -19,7 +19,7 @@ public class BBoxDistanceOptimizer implements QueryOptimizer {
     /* these variables are to be initialized after calling optimize() */
 
     private Var freeVar;
-    private Var boundVar;
+    private Var boundVar = null;
     private Var buffbboxVar;
     private double distance;
     private IRI uom;
@@ -43,12 +43,17 @@ public class BBoxDistanceOptimizer implements QueryOptimizer {
 
     public BindingSet expandBindings(BindingSet bindingSet) {
 
-        String wkt = bindingSet.getBinding(boundVar.getName()).getValue().stringValue();
-        Value bbox = BBoxBuilder.getBufferedBBox(wkt, distance, uom);
-        QueryBindingSet b = new QueryBindingSet();
-        b.addBinding(buffbboxVar.getName(), bbox);
+        if (boundVar != null) {
+            String wkt = bindingSet.getBinding(boundVar.getName()).getValue().stringValue();
+            Value bbox = BBoxBuilder.getBufferedBBox(wkt, distance, uom);
+            QueryBindingSet b = new QueryBindingSet();
+            b.addBinding(buffbboxVar.getName(), bbox);
 
-        return bindingSetOps.merge(bindingSet, b);
+            return bindingSetOps.merge(bindingSet, b);
+        }
+        else {
+            return bindingSet;
+        }
     }
 
     public List<BindingSet> expandBindings(List<BindingSet> bindingSetList) {
